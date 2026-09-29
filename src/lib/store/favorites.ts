@@ -6,6 +6,7 @@ interface FavoritesStore {
   toggleFavorite: (id: string) => void;
   isFavorite: (id: string) => boolean;
   getCount: () => number;
+  clearFavorites: () => void;
 }
 
 export const useFavoritesStore = create<FavoritesStore>()(
@@ -24,6 +25,7 @@ export const useFavoritesStore = create<FavoritesStore>()(
       },
       isFavorite: (id) => get().favoriteIds.includes(id),
       getCount: () => get().favoriteIds.length,
+      clearFavorites: () => set({ favoriteIds: [] }),
     }),
     {
       name: "sora-favorites-storage",
