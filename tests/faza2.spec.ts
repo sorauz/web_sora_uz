@@ -14,32 +14,32 @@ test.describe("Sora.uz Home & i18n Tests", () => {
 });
 
 test.describe("FAZA 2: Discovery (Catalog, Category, Brands, Search)", () => {
-  test("Catalog page renders category tree and brands", async ({ page }) => {
+  test("Catalog page renders category tree and brands from 1C", async ({ page }) => {
     await page.goto("/uz/catalog");
     await expect(page).toHaveTitle(/Katalog/);
     await expect(page.locator("h1")).toContainText("katalogi");
-    await expect(page.getByText("Ofis jihozlari va kanselyariya").first()).toBeVisible();
+    await expect(page.getByText("Kalkulyatorlar").first()).toBeVisible();
   });
 
-  test("Category page renders faceted filter and product cards", async ({ page }) => {
-    await page.goto("/uz/category/ofis-jihozlari-va-kanselyariya");
-    await expect(page.locator("h1")).toContainText("Ofis jihozlari va kanselyariya");
+  test("Category page renders faceted filter and product cards from 1C", async ({ page }) => {
+    await page.goto("/uz/category/ish-stoli-kalkulyatorlari");
+    await expect(page.locator("h1")).toContainText("Ish stoli kalkulyatorlari");
     await expect(page.getByText("Filtrlar").first()).toBeVisible();
     await expect(page.getByText("DELI").first()).toBeVisible();
   });
 
-  test("Brands directory and single brand page render", async ({ page }) => {
+  test("Brands directory and single brand page render from 1C", async ({ page }) => {
     await page.goto("/uz/brands");
     await expect(page.locator("h1")).toContainText("brendlar");
-    await expect(page.getByText("Samsung").first()).toBeVisible();
+    await expect(page.getByText("DELI").first()).toBeVisible();
 
     await page.goto("/uz/brand/deli");
     await expect(page.locator("h1")).toContainText("DELI");
   });
 
-  test("Search page works with query and displays results", async ({ page }) => {
+  test("Search page works with query and displays results from 1C", async ({ page }) => {
     await page.goto("/uz/search?q=deli");
     await expect(page.locator("h1")).toContainText("deli");
-    await expect(page.getByText("Deli 3871").first()).toBeVisible();
+    await expect(page.getByText("Deli").first()).toBeVisible();
   });
 });

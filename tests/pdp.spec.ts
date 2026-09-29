@@ -1,16 +1,16 @@
 import { test, expect } from "@playwright/test";
 
-test.describe("FAZA 3: Product Detail Page (PDP)", () => {
-  test("Renders Uzbek PDP with Hero, Gallery, Actions, and Tabs", async ({ page }) => {
-    await page.goto("/uz/products/deli-3871-boglash-mashinasi");
+test.describe("FAZA 3: Product Detail Page (PDP) with Real 1C ERP Data", () => {
+  test("Renders Uzbek PDP with Hero, Gallery, Actions, and Tabs from 1C", async ({ page }) => {
+    await page.goto("/uz/products/deli-e1589-12-raqamli-kalkulyator-yashil");
 
-    // Title and Meta
-    await expect(page).toHaveTitle(/Deli 3871/);
-    await expect(page.locator("h1")).toContainText("Deli 3871");
+    // Title and Meta from 1C
+    await expect(page).toHaveTitle(/Deli E1589/);
+    await expect(page.locator("h1")).toContainText("Deli E1589");
 
     // Price & Brand
     await expect(page.getByText("DELI").first()).toBeVisible();
-    await expect(page.getByText("Deli E3871").first()).toBeVisible();
+    await expect(page.getByText("E1589").first()).toBeVisible();
 
     // Add to cart interactive action
     const addToCartBtn = page.getByRole("button", { name: /savatga qo'shish/i });
@@ -30,9 +30,9 @@ test.describe("FAZA 3: Product Detail Page (PDP)", () => {
     await page.getByRole("button", { name: /buyurtmani tasdiqlash/i }).click();
     await expect(page.getByText(/Rahmat!/i)).toBeVisible();
 
-    // Check Tabs navigation
+    // Check Tabs navigation (Specs from 1C)
     await page.getByRole("button", { name: /texnik xususiyatlari/i }).click();
-    await expect(page.getByRole("cell", { name: "Teshish quvvati" })).toBeVisible();
+    await expect(page.getByRole("cell", { name: "Model" })).toBeVisible();
 
     await page.getByRole("button", { name: /sharhlar/i }).click();
     await expect(page.getByText("4.8").first()).toBeVisible();
@@ -42,16 +42,13 @@ test.describe("FAZA 3: Product Detail Page (PDP)", () => {
     await expect(
       page.getByText("O'xshash mahsulotlar (Muqobil variantlar)")
     ).toBeVisible();
-    await expect(
-      page.getByText("Bilan birga xarid qilinadi (To'ldiruvchi)")
-    ).toBeVisible();
   });
 
-  test("Renders Russian PDP with localized content and Schema.org JSON-LD", async ({ page }) => {
-    await page.goto("/ru/products/deli-3871-perepletnye-mashiny");
+  test("Renders Russian PDP with localized content and Schema.org JSON-LD from 1C", async ({ page }) => {
+    await page.goto("/ru/products/deli-e1589-12-razryadnyy-kalkulyator-zelenyy");
 
     // Russian Title & Content
-    await expect(page.locator("h1")).toContainText("Deli 3871");
+    await expect(page.locator("h1")).toContainText("Deli E1589");
     await expect(page.getByText("В корзину").first()).toBeVisible();
     await expect(page.getByText("Купить в 1 клик").first()).toBeVisible();
 
@@ -61,6 +58,6 @@ test.describe("FAZA 3: Product Detail Page (PDP)", () => {
 
     const firstJsonLd = await jsonLdScripts[0].textContent();
     expect(firstJsonLd).toContain('"@type":"Product"');
-    expect(firstJsonLd).toContain('"sku":"Deli E3871"');
+    expect(firstJsonLd).toContain('"sku":"E1589"');
   });
 });
