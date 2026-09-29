@@ -150,12 +150,18 @@ export function ProductCard({
                 {oldPrice.toLocaleString()} {t("currency")}
               </span>
             )}
-            <div className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
-              {price.toLocaleString()}{" "}
-              <span className="text-xs font-normal text-slate-500">
-                {t("currency")}
-              </span>
-            </div>
+            {price > 0 ? (
+              <div className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
+                {price.toLocaleString()}{" "}
+                <span className="text-xs font-normal text-slate-500">
+                  {t("currency")}
+                </span>
+              </div>
+            ) : (
+              <div className="text-xs sm:text-sm font-semibold text-blue-600 dark:text-blue-400">
+                {locale === "uz" ? "Narxi kelishiladi" : "Цена по запросу"}
+              </div>
+            )}
           </div>
 
           <button

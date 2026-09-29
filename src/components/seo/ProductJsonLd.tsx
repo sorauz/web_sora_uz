@@ -9,7 +9,7 @@ interface ProductJsonLdProps {
 export function ProductJsonLd({
   product,
   locale,
-  baseUrl = "https://websorauz.vercel.app",
+  baseUrl = "https://sora.uz",
 }: ProductJsonLdProps) {
   const loc = getProductLocalized(product, locale);
   const priceVal = product.price?.retail_price ?? 1250000;

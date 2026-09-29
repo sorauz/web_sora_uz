@@ -6,6 +6,7 @@ import { PromoNav } from "@/components/layout/PromoNav";
 import { Footer } from "@/components/layout/Footer";
 import { MobileNav } from "@/components/layout/MobileNav";
 import { Breadcrumbs } from "@/components/discovery/Breadcrumbs";
+import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { ProductCard } from "@/components/discovery/ProductCard";
 import { SortSelect } from "@/components/discovery/SortSelect";
 import { Metadata } from "next";
@@ -35,7 +36,20 @@ export async function generateMetadata({
       ? `${brandName} mahsulotlarining to'liq katalogi va arzon narxlari Toshkentda.`
       : `Каталог оригинальной продукции ${brandName} в Ташкенте с гарантией.`,
     alternates: {
-      canonical: `/${locale}/brand/${slug}`,
+      canonical: `https://sora.uz/${locale}/brand/${slug}`,
+      languages: {
+        uz: `https://sora.uz/uz/brand/${slug}`,
+        ru: `https://sora.uz/ru/brand/${slug}`,
+        "x-default": `https://sora.uz/uz/brand/${slug}`,
+      },
+    },
+    openGraph: {
+      title: `${brandName} — Sora.uz`,
+      description: isUz
+        ? `${brandName} mahsulotlarining to'liq katalogi va narxlari.`
+        : `Каталог оригинальной продукции ${brandName} в Ташкенте.`,
+      url: `https://sora.uz/${locale}/brand/${slug}`,
+      type: "website",
     },
   };
 }
@@ -97,6 +111,13 @@ export default async function BrandDetailPage({
       <PromoNav />
 
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full space-y-8">
+        <BreadcrumbJsonLd
+          items={[
+            { name: isUz ? "Brendlar" : "Бренды", href: "/brands" },
+            { name: brandName, href: `/brand/${slug}` },
+          ]}
+          locale={locale}
+        />
         <Breadcrumbs
           items={[
             { name: isUz ? "Brendlar" : "Бренды", href: "/brands" },

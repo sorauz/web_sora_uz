@@ -1,5 +1,5 @@
 import { setRequestLocale } from "next-intl/server";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { Metadata } from "next";
 import { api } from "@/lib/api";
 import { getProductLocalized } from "@/lib/schemas/product";
@@ -34,6 +34,7 @@ export async function generateMetadata({
     };
   }
 
+  const expectedSlug = isUz ? product.uz.slug_uz : product.ru.slug_ru;
   const loc = getProductLocalized(product, isUz ? "uz" : "ru");
   const title = `${loc.title || loc.name} — narxi, xususiyatlari | Sora.uz`;
   const description =
@@ -47,15 +48,17 @@ export async function generateMetadata({
     title,
     description,
     alternates: {
-      canonical: `/${locale}/products/${loc.slug}`,
+      canonical: `https://sora.uz/${locale}/products/${expectedSlug}`,
       languages: {
-        uz: `/uz/products/${product.uz.slug_uz}`,
-        ru: `/ru/products/${product.ru.slug_ru}`,
+        uz: `https://sora.uz/uz/products/${product.uz.slug_uz}`,
+        ru: `https://sora.uz/ru/products/${product.ru.slug_ru}`,
+        "x-default": `https://sora.uz/uz/products/${product.uz.slug_uz}`,
       },
     },
     openGraph: {
       title,
       description,
+      url: `https://sora.uz/${locale}/products/${expectedSlug}`,
       images: [
         {
           url: product.main_picture,
@@ -82,6 +85,12 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
 
   if (!product) {
     notFound();
+  }
+
+  // Canonical localized slug redirect:
+  const expectedSlug = currentLocale === "uz" ? product.uz.slug_uz : product.ru.slug_ru;
+  if (slug !== expectedSlug) {
+    redirect(`/${currentLocale}/products/${expectedSlug}`);
   }
 
   const loc = getProductLocalized(product, currentLocale);

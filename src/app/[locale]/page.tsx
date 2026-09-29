@@ -22,8 +22,49 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 
+import { Metadata } from "next";
+
 interface PageProps {
   params: Promise<{ locale: string }>;
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { locale } = await params;
+  const isUz = locale === "uz";
+
+  const title = isUz
+    ? "Sora.uz — Kanselyariya va ofis mollari internet do'koni | Toshkent"
+    : "Sora.uz — Интернет-магазин канцелярских и офисных товаров | Ташкент";
+
+  const description = isUz
+    ? "Sora.uz — Toshkent va O'zbekiston bo'ylab 10 000+ turdagi ofis jihozlari, maktab qurollari va qog'oz mahsulotlari arzon narxlarda, bepul yetkazib berish bilan."
+    : "Sora.uz — Более 10 000 наименований канцелярских товаров, бумаги и офисной техники с быстрой доставкой по Ташкенту и всему Узбекистану.";
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: `https://sora.uz/${locale}`,
+      languages: {
+        uz: "https://sora.uz/uz",
+        ru: "https://sora.uz/ru",
+        "x-default": "https://sora.uz/uz",
+      },
+    },
+    openGraph: {
+      title,
+      description,
+      url: `https://sora.uz/${locale}`,
+      siteName: "Sora.uz",
+      locale: isUz ? "uz_UZ" : "ru_RU",
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
+  };
 }
 
 export default async function HomePage({ params }: PageProps) {
@@ -34,7 +75,7 @@ export default async function HomePage({ params }: PageProps) {
   const tCommon = await getTranslations("common");
   const isUz = locale === "uz";
 
-  // Fetch real/fixture data from 1C API layer
+  // Fetch real data from 1C API layer (products enriched with prices)
   const [categoriesData, brandsData, productsData] = await Promise.all([
     api.getCategories(),
     api.getBrands(),
@@ -45,9 +86,13 @@ export default async function HomePage({ params }: PageProps) {
   const brands = brandsData.data.brands;
   const products = productsData.products;
 
+  // Prioritize products with real 1C prices
+  const pricedProducts = products.filter((p) => (p.price?.retail_price || 0) > 0);
+  const displayPool = pricedProducts.length >= 8 ? pricedProducts : products;
+
   // Slices for sections
-  const topProducts = products.slice(0, 4);
-  const dealProducts = products.slice(2, 6);
+  const topProducts = displayPool.slice(0, 4);
+  const dealProducts = displayPool.slice(4, 8);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col">

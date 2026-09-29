@@ -6,6 +6,7 @@ import { routing } from "@/i18n/routing";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
+import { OrganizationJsonLd } from "@/components/seo/OrganizationJsonLd";
 import "../globals.css";
 
 export function generateStaticParams() {
@@ -31,13 +32,14 @@ export async function generateMetadata({
       ? "Sora.uz — 1C ERP integratsiyali zamonaviy internet do'koni. Ofis anjomlari, kanselyariya va elektronika mahsulotlari arzon narxlarda."
       : "Sora.uz — современный интернет-магазин с интеграцией 1С ERP. Офисные товары, канцелярия и электроника по доступным ценам.",
     metadataBase: new URL(
-      process.env.NEXT_PUBLIC_SITE_URL || "https://websorauz.vercel.app"
+      process.env.NEXT_PUBLIC_SITE_URL || "https://sora.uz"
     ),
     alternates: {
       canonical: `/${locale}`,
       languages: {
         uz: "/uz",
         ru: "/ru",
+        "x-default": "/uz",
       },
     },
   };
@@ -62,6 +64,7 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} className="h-full">
       <body className="min-h-full flex flex-col antialiased selection:bg-blue-600 selection:text-white">
+        <OrganizationJsonLd />
         <NextIntlClientProvider messages={messages}>
           <NuqsAdapter>{children}</NuqsAdapter>
         </NextIntlClientProvider>

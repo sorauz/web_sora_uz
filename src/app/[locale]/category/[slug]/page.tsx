@@ -1,11 +1,12 @@
 import { setRequestLocale } from "next-intl/server";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { api } from "@/lib/api";
 import { Header } from "@/components/layout/Header";
 import { PromoNav } from "@/components/layout/PromoNav";
 import { Footer } from "@/components/layout/Footer";
 import { MobileNav } from "@/components/layout/MobileNav";
 import { Breadcrumbs } from "@/components/discovery/Breadcrumbs";
+import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { ProductCard } from "@/components/discovery/ProductCard";
 import { FacetedFilter } from "@/components/discovery/FacetedFilter";
 import { SortSelect } from "@/components/discovery/SortSelect";
@@ -28,13 +29,14 @@ export async function generateMetadata({
   const sParams = await searchParams;
   const isUz = locale === "uz";
 
-  const { tree, categories } = await api.getCategories();
+  const { tree } = await api.getCategories();
   const category = findCategoryBySlug(tree, slug, isUz ? "uz" : "ru");
 
   if (!category) {
     return { title: isUz ? "Kategoriya topilmadi" : "Категория не найдена" };
   }
 
+  const canonicalSlug = isUz ? category.group_slug_uz : category.group_slug_ru;
   const name = isUz ? category.group_uz : category.group_ru;
   const hasFilterParams = Object.keys(sParams).some((k) =>
     ["brand", "minPrice", "maxPrice", "inStock", "sort"].includes(k)
@@ -43,10 +45,23 @@ export async function generateMetadata({
   return {
     title: `${name} — Sora.uz internet do'koni`,
     description: isUz
-      ? `${name} bo'yicha sifatli mahsulotlar arzon narxlarda va rasmiy kafolati bilan.`
-      : `Качественные товары в категории ${name} по доступным ценам с гарантией.`,
+      ? `${name} bo'yicha sifatli kanselyariya va ofis mahsulotlari arzon narxlarda va rasmiy kafolat bilan O'zbekistonda.`
+      : `Качественные канцелярские товары в категории ${name} по доступным ценам с гарантией в Ташкенте.`,
     alternates: {
-      canonical: `/${locale}/category/${slug}`,
+      canonical: `https://sora.uz/${locale}/category/${canonicalSlug}`,
+      languages: {
+        uz: `https://sora.uz/uz/category/${category.group_slug_uz}`,
+        ru: `https://sora.uz/ru/category/${category.group_slug_ru}`,
+        "x-default": `https://sora.uz/uz/category/${category.group_slug_uz}`,
+      },
+    },
+    openGraph: {
+      title: `${name} — Sora.uz internet do'koni`,
+      description: isUz
+        ? `${name} mahsulotlari arzon narxlarda Sora.uz do'konida.`
+        : `Товары ${name} по доступным ценам в магазине Sora.uz.`,
+      url: `https://sora.uz/${locale}/category/${canonicalSlug}`,
+      type: "website",
     },
     // Faceted navigation SEO policy: noindex if filtered
     robots: hasFilterParams
@@ -75,6 +90,12 @@ export default async function CategoryPage({
 
   if (!currentCategory) {
     notFound();
+  }
+
+  // Language switch / canonical redirect: ensure URL matches the active locale's slug
+  const canonicalSlug = isUz ? currentCategory.group_slug_uz : currentCategory.group_slug_ru;
+  if (slug !== canonicalSlug) {
+    redirect(`/${locale}/category/${canonicalSlug}`);
   }
 
   const categoryName = isUz ? currentCategory.group_uz : currentCategory.group_ru;
@@ -155,7 +176,8 @@ export default async function CategoryPage({
       <PromoNav />
 
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full space-y-6">
-        {/* Breadcrumb */}
+        {/* Breadcrumb & Structured Data */}
+        <BreadcrumbJsonLd items={breadcrumbList} locale={locale} />
         <Breadcrumbs items={breadcrumbList} />
 
         {/* Category Header */}

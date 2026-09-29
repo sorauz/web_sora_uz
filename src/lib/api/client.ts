@@ -187,13 +187,35 @@ class SoraApiClient {
     options?: FetchOptions
   ): Promise<{ products: Product[]; isFallback: boolean }> {
     const res = await this.request<unknown[]>("/all_product", options);
+    let list: Product[] = FIXTURE_PRODUCTS;
+    let isFallback = true;
+
     if (!res.isFallback && res.data) {
       const parsed = AllProductsResponseSchema.safeParse(res.data);
       if (parsed.success && parsed.data.length > 0) {
-        return { products: parsed.data, isFallback: false };
+        list = parsed.data;
+        isFallback = false;
       }
     }
-    return { products: FIXTURE_PRODUCTS, isFallback: true };
+
+    // Filter out invalid or draft items that lack names and slugs
+    const validProducts = list.filter(
+      (p) =>
+        (Boolean(p.uz?.name_uz?.trim()) || Boolean(p.ru?.name_ru?.trim())) &&
+        (Boolean(p.uz?.slug_uz?.trim()) || Boolean(p.ru?.slug_ru?.trim()))
+    );
+
+    // Fetch live prices and attach to each product
+    const prices = await this.getPrices(options);
+    const enriched = validProducts.map((p) => {
+      const copy = { ...p };
+      if (prices.priceMap[p.id]) {
+        copy.price = prices.priceMap[p.id];
+      }
+      return copy;
+    });
+
+    return { products: enriched, isFallback };
   }
 
   /**
@@ -208,8 +230,8 @@ class SoraApiClient {
       const parsed = ProductSchema.safeParse(res.data);
       if (parsed.success) {
         const product = parsed.data;
-        // Optionally attach latest price
-        const prices = await this.getPrices();
+        // Attach latest price
+        const prices = await this.getPrices(options);
         if (prices.priceMap[product.id]) {
           product.price = prices.priceMap[product.id];
         }
@@ -231,22 +253,30 @@ class SoraApiClient {
 
   /**
    * Helper to find a product by localized slug.
+   * If not found under current locale, gracefully searches across other language slugs.
    */
   async getProductBySlug(
     slug: string,
     locale: "uz" | "ru" = "uz"
   ): Promise<{ product: Product | null; isFallback: boolean }> {
     const all = await this.getAllProducts();
-    const found = all.products.find((p) =>
+
+    // 1. Try matching slug in requested locale
+    let found = all.products.find((p) =>
       locale === "uz" ? p.uz.slug_uz === slug : p.ru.slug_ru === slug
     );
+
+    // 2. If not found, match across any locale slug
+    if (!found) {
+      found = all.products.find(
+        (p) => p.uz.slug_uz === slug || p.ru.slug_ru === slug
+      );
+    }
+
     if (found) {
-      const prices = await this.getPrices();
-      if (prices.priceMap[found.id]) {
-        found.price = prices.priceMap[found.id];
-      }
       return { product: found, isFallback: all.isFallback };
     }
+
     return { product: null, isFallback: all.isFallback };
   }
 }

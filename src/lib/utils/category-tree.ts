@@ -40,6 +40,7 @@ export function findCategoryBySlug(
   slug: string,
   locale: "uz" | "ru" = "uz"
 ): CategoryTreeNode | null {
+  // 1. Try matching the exact requested locale slug
   for (const node of tree) {
     const nodeSlug = locale === "uz" ? node.group_slug_uz : node.group_slug_ru;
     if (nodeSlug === slug) {
@@ -50,6 +51,20 @@ export function findCategoryBySlug(
       return foundInChild;
     }
   }
+
+  // 2. Fallback: match across any locale slug (e.g. after language switcher URL transition)
+  for (const node of tree) {
+    if (node.group_slug_uz === slug || node.group_slug_ru === slug) {
+      return node;
+    }
+    for (const child of node.children) {
+      const foundInAny = findCategoryBySlug([child], slug, locale === "uz" ? "ru" : "uz");
+      if (foundInAny) {
+        return foundInAny;
+      }
+    }
+  }
+
   return null;
 }
 
