@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "@/i18n/routing";
 import Image from "next/image";
 import { useCartStore } from "@/lib/store/cart";
@@ -32,10 +32,11 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
   const common = useTranslations("common");
   const router = useRouter();
 
-  const { items, getTotalPrice, clearCart } = useCartStore();
+  const { items, getTotalPrice } = useCartStore();
 
   const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const hasSubmittedRef = useRef(false);
 
   // Form Fields
   const [fullName, setFullName] = useState("");
@@ -54,19 +55,22 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
   const [companyName, setCompanyName] = useState("");
   const [companyInn, setCompanyInn] = useState("");
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
-  if (!mounted) {
+  useEffect(() => {
+    if (mounted && items.length === 0 && !hasSubmittedRef.current) {
+      router.push("/cart");
+    }
+  }, [mounted, items.length, router]);
+
+  if (!mounted || (items.length === 0 && !hasSubmittedRef.current)) {
     return (
       <div className="py-20 flex justify-center items-center">
         <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
-  }
-
-  if (items.length === 0 && !isSubmitting) {
-    router.push("/cart");
-    return null;
   }
 
   const subtotal = getTotalPrice();
@@ -78,6 +82,7 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
     e.preventDefault();
     if (!phone || phone.trim().length < 9 || !fullName.trim()) return;
 
+    hasSubmittedRef.current = true;
     setIsSubmitting(true);
 
     const orderId = `SORA-${Math.floor(100000 + Math.random() * 900000)}`;
@@ -111,7 +116,6 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
       // Ignore localStorage errors
     }
 
-    clearCart();
     router.push(`/checkout/success?orderId=${orderId}`);
   };
 

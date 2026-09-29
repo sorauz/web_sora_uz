@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
+import { useCartStore } from "@/lib/store/cart";
 import {
   CheckCircle2,
   Package,
@@ -38,6 +39,9 @@ export function OrderSuccessView({ orderIdParam, locale }: OrderSuccessViewProps
   const [order, setOrder] = useState<StoredOrder | null>(null);
 
   useEffect(() => {
+    // Clear cart once order is confirmed and displayed
+    useCartStore.getState().clearCart();
+
     try {
       const saved = localStorage.getItem("sora_last_order");
       if (saved) {
