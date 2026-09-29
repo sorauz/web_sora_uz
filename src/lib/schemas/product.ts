@@ -50,20 +50,21 @@ export const ProductLocalizedRuSchema = z.object({
 
 export const ProductSchema = z.object({
   id: z.string(),
-  product_sku: z.string(),
+  product_sku: z.string().default(""),
   package: z.string().default(""),
   barcode: z.string().default(""),
-  brand: z.string(),
-  manufacturer: z.string(),
-  country: z.string(),
+  brand: z.string().default(""),
+  manufacturer: z.string().default(""),
+  country: z.string().default(""),
   video_url: z.string().optional().default(""),
-  main_picture: z.string(),
+  main_picture: z.string().default(""),
+  gallery: z.array(z.string()).optional(),
   updated_at: z.string().optional().default(""),
   uz: ProductLocalizedUzSchema,
   ru: ProductLocalizedRuSchema,
   attributes: z.array(ProductAttributeSchema).default([]),
-  related_products: z.array(SubProductCardSchema).default([]),
-  recommended_products: z.array(SubProductCardSchema).default([]),
+  related_products: z.array(z.any()).default([]),
+  recommended_products: z.array(z.any()).default([]),
   // Optionally populated from Price API
   price: ProductPriceStockSchema.optional(),
 });
