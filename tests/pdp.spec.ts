@@ -56,8 +56,9 @@ test.describe("FAZA 3: Product Detail Page (PDP) with Real 1C ERP Data", () => {
     const jsonLdScripts = await page.locator('script[type="application/ld+json"]').all();
     expect(jsonLdScripts.length).toBeGreaterThanOrEqual(2);
 
-    const firstJsonLd = await jsonLdScripts[0].textContent();
-    expect(firstJsonLd).toContain('"@type":"Product"');
-    expect(firstJsonLd).toContain('"sku":"E1589"');
+    const allLdTexts = await Promise.all(jsonLdScripts.map((s) => s.textContent()));
+    const productJson = allLdTexts.find((t) => t?.includes('"@type":"Product"'));
+    expect(productJson).toBeTruthy();
+    expect(productJson).toContain('"sku":"E1589"');
   });
 });
