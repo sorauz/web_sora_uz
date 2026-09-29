@@ -72,3 +72,48 @@ export type Product = z.infer<typeof ProductSchema>;
 
 export const AllProductsResponseSchema = z.array(ProductSchema);
 export type AllProductsResponse = z.infer<typeof AllProductsResponseSchema>;
+
+export interface LocalizedProductData {
+  name: string;
+  slug: string;
+  category: string;
+  category_slug: string;
+  alt_picture: string;
+  title: string;
+  meta_description: string;
+  short_description: string;
+  product_description: string;
+  unit: string;
+}
+
+export function getProductLocalized(
+  product: Product,
+  locale: "uz" | "ru" = "uz"
+): LocalizedProductData {
+  if (locale === "uz") {
+    return {
+      name: product.uz.name_uz,
+      slug: product.uz.slug_uz,
+      category: product.uz.category_uz,
+      category_slug: product.uz.category_slug_uz,
+      alt_picture: product.uz.alt_picture_uz,
+      title: product.uz.title_uz,
+      meta_description: product.uz.meta_description_uz,
+      short_description: product.uz.short_description_uz,
+      product_description: product.uz.product_description_uz,
+      unit: product.uz.unit_uz,
+    };
+  }
+  return {
+    name: product.ru.name_ru,
+    slug: product.ru.slug_ru,
+    category: product.ru.category_ru,
+    category_slug: product.ru.category_slug_ru,
+    alt_picture: product.ru.alt_picture_ru,
+    title: product.ru.title_ru,
+    meta_description: product.ru.meta_description_ru,
+    short_description: product.ru.short_description_ru,
+    product_description: product.ru.product_description_ru,
+    unit: product.ru.unit_ru,
+  };
+}

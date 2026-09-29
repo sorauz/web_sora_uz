@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 import "../globals.css";
 
 export function generateStaticParams() {
@@ -62,7 +63,7 @@ export default async function LocaleLayout({
     <html lang={locale} className="h-full">
       <body className="min-h-full flex flex-col antialiased selection:bg-blue-600 selection:text-white">
         <NextIntlClientProvider messages={messages}>
-          {children}
+          <NuqsAdapter>{children}</NuqsAdapter>
         </NextIntlClientProvider>
         <Analytics />
         <SpeedInsights />
