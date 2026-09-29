@@ -1,0 +1,58 @@
+API: O'lchov birliklarini olish (Get Units)
+
+Ushbu endpoint 1C bazasidagi barcha aktiv (o'chirishga belgilanmagan) o'lchov birliklarini ro'yxat shaklida qaytaradi. U frontend (sayt) da mahsulotlarni qanday hisoblash (dona, kg, metr va hk) va ularni ikki tilda (UZ, RU) to'g'ri ko'rsatish uchun mo'ljallangan.
+
+Asosiy ma'lumotlar
+Xususiyat,Qiymat
+URL,/SORA/hs/for_msp/units
+Metod,GET
+Avtorizatsiya,Basic Auth (Login va Parol)
+Content-Type,application/json; charset=utf-8
+
+So'rov parametrlari (Query Parameters)
+Ushbu endpoint uchun hech qanday so'rov parametrlari talab qilinmaydi.
+
+Javob kodlari (Response Status Codes)
+Kod,Holat,Sabab / Qaytariladigan xabar
+200,OK,Muvaffaqiyatli so'rov. O'lchov birliklari JSON obyekt ichidagi massiv ko'rinishida qaytariladi.
+
+Muvaffaqiyatli javob namunasi (200 OK)
+So'rov natijasi units nomli massivni o'z ichiga olgan JSON obyekti sifatida qaytadi.
+``
+{
+  "units": [
+    {
+      "id": "7a8b9c0d-1e2f-3a4b-5c6d-7e8f9a0b1c2d",
+      "name": "Штука",
+      "unit_uz": "dona",
+      "unit_ru": "шт"
+    },
+    {
+      "id": "8b9c0d1e-2f3a-4b5c-6d7e-8f9a0b1c2d3e",
+      "name": "Килограмм",
+      "unit_uz": "kg",
+      "unit_ru": "кг"
+    },
+    {
+      "id": "9c0d1e2f-3a4b-5c6d-7e8f-9a0b1c2d3e4f",
+      "name": "Упаковка",
+      "unit_uz": "o'ram",
+      "unit_ru": "упак"
+    }
+  ]
+}``
+
+Obyektlar tavsifi
+units (Massiv): O'lchov birliklari ro'yxatini jamlovchi obyekt.
+
+id (String): O'lchov birligining 1C dagi unikal identifikatori (UUID).
+
+name (String): O'lchov birligining 1C bazasidagi tizimli/asosiy nomlanishi (odatda rus tilida, masalan: "Штука").
+
+unit_uz (String): Saytning o'zbek tilidagi versiyasi uchun qisqartirilgan o'lchov birligi (masalan: "dona").
+
+unit_ru (String): Saytning rus tilidagi versiyasi uchun qisqartirilgan o'lchov birligi (masalan: "шт").
+
+Eslatma: Kod izohida ("Paket so'rov orqali o'lchov birliklari va qadoq turlarini...") qadoq turlari haqida gapirilgan bo'lsa-da, SQL so'rovda faqat СпрЕдиницы_измерения (O'lchov birliklari) o'qilmoqda. Hozirgi holatda faqat bitta ma'lumotnoma qaytadi. Ammo 1C kodi ВыполнитьПакет() (Paket so'rov) orqali yozilgani kelajakda so'rovga osongina "Qadoq turlari" (Упаковки) so'rovini ham qo'shib olish imkonini beradi.
+
+

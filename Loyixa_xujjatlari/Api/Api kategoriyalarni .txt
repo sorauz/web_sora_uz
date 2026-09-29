@@ -1,0 +1,50 @@
+API: Barcha kategoriyalarni olish (Get All Categories)
+
+Ushbu endpoint 1C bazasidagi barcha aktiv (o'chirishga belgilanmagan) nomenklatura guruhlarini (kategoriyalarni) ro'yxat shaklida qaytaradi. U ko'p tillilikni (UZ va RU) qo'llab-quvvatlaydi hamda kategoriyalar o'rtasidagi iyerarxiyani (ota-bola bog'liqligini) parent_id orqali ta'minlaydi.
+
+URL: http://sora.uz:777/SORA/hs/for_msp/all_product
+Avtorizatsiya:	Basic Auth (Login va Parol)
+Content-Type:	application/json; charset=utf-8
+
+Kod,Holat,Sabab / Qaytariladigan xabar
+200,OK,Muvaffaqiyatli so'rov. Kategoriyalar ro'yxati JSON obyekt ichidagi massiv ko'rinishida qaytariladi.
+
+
+Namuna (json): GET:http://sora.uz:777/SORA/hs/for_msp/categories
+Muvaffaqiyatli javob namunasi (200 OK):
+```
+{
+  "categories": [
+    {
+      "id": "c9b2b5a1-7c3d-11eb-a835-0050569f41b3",
+      "group_uz": "Elektronika",
+      "group_ru": "Электроника",
+      "group_slug_uz": "elektronika",
+      "group_slug_ru": "elektronika",
+      "parent_id": ""
+    },
+    {
+      "id": "e8d3b4a2-7c3d-11eb-a835-0050569f41b4",
+      "group_uz": "Smartfonlar",
+      "group_ru": "Смартфоны",
+      "group_slug_uz": "smartfonlar",
+      "group_slug_ru": "smartfony",
+      "parent_id": "c9b2b5a1-7c3d-11eb-a835-0050569f41b3",
+      "parent_name_uz": "Elektronika",
+      "parent_name_ru": "Электроника"
+    }
+  ]
+}
+```
+Obyektlar tavsifi
+id (String): Kategoriyaning 1C dagi unikal identifikatori (UUID).
+
+group_uz / group_ru (String): Kategoriyaning o'zbek va rus tillaridagi nomlanishi.
+
+group_slug_uz / group_slug_ru (String): Frontend'da URL yaratish uchun ishlatiladigan (masalan, /category/smartfonlar) tozalangan matn formati.
+
+parent_id (String): Agar ushbu kategoriya boshqa asosiy kategoriyaga (ota kategoriyaga) tegishli bo'lsa, o'sha asosiy kategoriyaning UUID qiymatini o'z ichiga oladi. Agar bu kategoriya eng yuqori darajada (asosiy) bo'lsa, maydon bo'sh satr ("") bo'ladi.
+
+parent_name_uz / parent_name_ru (String): (Ixtiyoriy). Agar parent_id mavjud bo'lsa, ota kategoriyaning nomlarini qaytaradi. Asosiy kategoriyalar uchun bu maydonlar JSON'da qatnashmaydi.
+
+Frontend (Next.js) uchun eslatma: Ushbu ma'lumotlar Yassi (Flat) ro'yxat ko'rinishida keladi. Sayt menyusi (Sidebar yoki Dropdown) kabi shajaraviy (Tree) tuzilmani yaratish uchun frontend dasturchi id va parent_id maydonlariga asoslanib rekursiv funksiya yordamida obyektlarni guruhlab chiqishi kerak bo'ladi.

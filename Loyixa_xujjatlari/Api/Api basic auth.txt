@@ -1,0 +1,7 @@
+URL: [http://sora.uz:777/SORA/hs/***/***]
+Metod: GET   Ma'lumot formati: application/json
+Avtorizatsiya: Basic Auth
+Login: web_user
+Parol: 977540910
+
+//loyixa testi uchun boshlanishiga yuqorida korsatilgan sora.uz api'lari uchun shu avtorizatsiya qo'llash mumkin

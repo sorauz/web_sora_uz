@@ -1,0 +1,82 @@
+Umumiy ma'lumotlar:Ushbu hujjat for_msp/price endpointi orqali tovarlar narxlari va qoldiq ma'lumotlarini olish bo'yicha yo'riqnomani taqdim etadi.
+URL: [http://sora.uz:777/SORA/hs/for_msp/price]
+Metod: GET   Ma'lumot formati: application/json
+Avtorizatsiya: Basic Auth
+Login Parol
+
+So'rov parametrlari (Query Parameters) - Yo'q
+
+Javob (Response) parametrlari
+Muvaffaqiyatli so'rov (200 OK) qaytarganda JSON obyekt quyidagi maydonlarni o'z ichiga oladi:
+
+Maydon,Turi,Ta'rif
+updated_at,String,Hujjatning sanasi (Format: YYYY-MM-DDTHH:mm:ss)
+products,Array,Tovar narxlari va qoldiqlari ro'yxati
+products[].id,String,Tovarning 1C dagi unikal identifikatori (UUID)
+products[].stock,String,Omborda mavjudligi holati (Har doim InStock qaytadi)
+products[].quantity_remaining,Number,Qoldiq miqdori (Hozircha statik 100 qaytadi)
+products[].unit_ru,String,O'lchov birligi (Rus tilida)
+products[].unit_uz,String,O'lchov birligi (O'zbek tilida)
+products[].retail_price,Number,Chakana narx (Цена)
+products[].dealer_price,Number,Dilerlik narxi (ЦенаДилер)
+products[].wholesale_price,Number,Ulgurji narx (ЦенаОптовы)
+products[].currency,String,Valyuta (Har doim UZS qaytadi)
+
+
+Muvaffaqiyatli javob (200 OK):
+JSON:
+``{
+  "updated_at": "2026-08-03T12:11:19",
+  "products": [
+    {
+      "id": "f0c200c0-cd7b-11e4-b024-005056c00008",
+      "stock": "InStock",
+      "quantity_remaining": 100,
+      "unit_ru": "пачка",
+      "unit_uz": "qadoq",
+      "retail_price": 40000,
+      "dealer_price": 40000,
+      "wholesale_price": 40000,
+      "currency": "UZS"
+    },
+    {
+      "id": "f43d785c-3730-11e9-9cb6-50b7c370a30f",
+      "stock": "InStock",
+      "quantity_remaining": 100,
+      "unit_ru": "пачка",
+      "unit_uz": "qadoq",
+      "retail_price": 45000,
+      "dealer_price": 41000,
+      "wholesale_price": 42000,
+      "currency": "UZS"
+    },
+    {
+      "id": "590d1881-742d-11ef-b458-5811229bddba",
+      "stock": "InStock",
+      "quantity_remaining": 100,
+      "unit_ru": "пачка",
+      "unit_uz": "qadoq",
+      "retail_price": 36000,
+      "dealer_price": 34500,
+      "wholesale_price": 36000,
+      "currency": "UZS"
+    },
+    {
+      "id": "06bc5c51-e5c9-11ec-974d-00155d01680c",
+      "stock": "InStock",
+      "quantity_remaining": 100,
+      "unit_ru": "пачка",
+      "unit_uz": "qadoq",
+      "retail_price": 60000,
+      "dealer_price": 56000,
+      "wholesale_price": 56000,
+      "currency": "UZS"
+    },..}``
+	
+Xatolik javobi (404 Not Found):
+``
+{
+  "error": "Hujjat topilmadi: 000001234"
+}``
+
+Qo'shimcha ma'lumot: Endpoint brauzerdan ulanishda xatolik bermasligi uchun (Cross-Origin Resource Sharing) CORS sarlavhalarini (Access-Control-Allow-Origin: *) to'liq qo'llab-quvvatlaydi.

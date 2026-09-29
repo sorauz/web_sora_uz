@@ -1,0 +1,69 @@
+API: Katalog filtrlari uchun ma'lumotnomalar (Brands, Manufacturers, Countries)
+
+Ushbu endpoint e-commerce saytining katalog bo'limidagi mahsulotlarni filtrlash (Filter/Facet) uchun kerak bo'ladigan asosiy ma'lumotnomalarni bitta so'rovda qaytaradi. U 1C bazasidagi barcha aktiv brendlar, ishlab chiqaruvchilar va kelib chiqish davlatlarini o'z ichiga oladi.
+
+Xususiyat,Qiymat
+URL,/SORA/hs/for_msp/brands
+Metod,GET
+Avtorizatsiya,Basic Auth (Login va Parol)
+Content-Type,application/json; charset=utf-8
+
+So'rov parametrlari (Query Parameters)
+Ushbu endpoint uchun hech qanday so'rov parametrlari talab qilinmaydi.
+
+Javob kodlari (Response Status Codes)
+Kod,Holat,Sabab / Qaytariladigan xabar
+200,OK,Muvaffaqiyatli so'rov. Ma'lumotlar uchta alohida ro'yxatni o'z ichiga olgan bitta JSON obyekti sifatida qaytariladi.
+
+Muvaffaqiyatli javob namunasi (200 OK)
+So'rov natijasi brands, manufacturers va countries nomli massivlardan iborat asosiy obyektni qaytaradi. Har bir obyekt ichida yozuvning ID raqami va nomlanishi mavjud.
+
+``
+{
+  "brands": [
+    {
+      "id": "5538dd87-1e18-11ed-80c3-00155d016811",
+      "name": "Logitech"
+    },
+    {
+      "id": "3542aa32-b7ce-11ec-81b6-00155d016806",
+      "name": "SIGNUM"
+    },
+    {
+      "id": "3542aa33-b7ce-11ec-81b6-00155d016806",
+      "name": "BETA-STAMM"
+    },
+    {
+      "id": "3542aa39-b7ce-11ec-81b6-00155d016806",
+      "name": "BESHR"
+    },
+    {
+      "id": "681bcedb-9627-11ec-8611-00155d016804",
+      "name": "PMP"
+    },
+    {
+      "id": "0e7f6c7f-99fb-11ec-8611-00155d016804",
+      "name": "ГАММА"
+    },....
+``
+
+Obyektlar tavsifi
+brands (Massiv): Справочник.Бренды dagi yozuvlar.
+
+id (String): Brendning 1C dagi UUID qiymati.
+
+name (String): Brend nomi.
+
+manufacturers (Massiv): Справочник.Производитель dagi yozuvlar. Odatda mahsulotni bevosita yig'uvchi zavodlar.
+
+id (String): Ishlab chiqaruvchining 1C dagi UUID qiymati.
+
+name (String): Ishlab chiqaruvchi nomi.
+
+countries (Massiv): Справочник.СтраныМира dagi yozuvlar. Kelib chiqish mamlakatlari (Odatda rus tilida kiritilgan bo'ladi).
+
+id (String): Davlatning 1C dagi UUID qiymati.
+
+name (String): Davlat nomi.
+
+Texnik Eslatma (Optimization): Ushbu endpoint 1C da Paket So'rov (Пакетный Запрос) orqali optimallashtirilgan. Ma'lumotlar bazasiga bitta chaqiruv orqali (uchta alohida ulanish o'rniga) barcha uchta spravochnikni o'qiydi, bu API ning javob qaytarish tezligini (Performance) sezilarli darajada oshiradi. Next.js da Sidebar Filtr komponentini render qilishda bitta fetch da hamma kerakli ma'lumot kelishi rejalashtirilgan

@@ -1,0 +1,84 @@
+API: barcha mahsulot haqida batafsil ma'lumot olish:
+Ushbu endpoint orqali 1C bazasidan ma'lum bir mahsulotning (nomenklaturaning) barcha ma'lumotlari, jumladan, tarjimalari (UZ/RU), qo'shimcha xususiyatlari, rasmlar galereyasi va aloqador/tavsiya etilgan mahsulotlar ro'yxati olinadi.
+URL: http://sora.uz:777/SORA/hs/for_msp/all_product
+Avtorizatsiya:	Basic Auth (Login va Parol)
+Content-Type:	application/json; charset=utf-8
+
+Kod,Holat,Sabab / Qaytariladigan xabar
+200,OK,Muvaffaqiyatli so'rov. Barcha mahsulotlar JSON massiv (Array) formatida qaytariladi.
+404,Not Found,- 1C bazasida saytga chiqarish uchun ruxsat etilgan birorta ham mahsulot topilmadi.
+
+
+Namuna (json): GET:http://sora.uz:777/SORA/hs/for_msp/product?id=70ee3bb2-cd83-11ea-96bb-50b7c370a30f:
+Muvaffaqiyatli javob namunasi (200 OK):
+```
+[
+  {
+    "id": "123e4567-e89b-12d3-a456-426614174000",
+    "product_sku": "SKU-10025",
+    "package": "Quti",
+    "barcode": "4780000000000",
+    "brand": "Samsung",
+    "manufacturer": "Samsung Electronics",
+    "country": "Vietnam",
+    "video_url": "https://youtube.com/watch?v=...",
+    "main_picture": "https://sora.uz/images/main/sk-10025.jpg",
+    "updated_at": "2026-09-28T14:30:00",
+    "uz": {
+      "unit_uz": "dona",
+      "category_uz": "Smartfonlar",
+      "category_slug_uz": "smartfonlar",
+      "alt_picture_uz": "Samsung smartfoni",
+      "name_uz": "Samsung Galaxy S24",
+      "slug_uz": "samsung-galaxy-s24",
+      "title_uz": "Samsung Galaxy S24 sotib olish",
+      "meta_description_uz": "Eng arzon narxlarda",
+      "short_description_uz": "Yangi avlod flagmani",
+      "product_description_uz": "To'liq tavsif..."
+    },
+    "ru": {
+      "unit_ru": "шт",
+      "category_ru": "Смартфоны",
+      "category_slug_ru": "smartfony",
+      "alt_picture_ru": "Смартфон Samsung",
+      "name_ru": "Samsung Galaxy S24",
+      "slug_ru": "samsung-galaxy-s24",
+      "title_ru": "Купить Samsung Galaxy S24",
+      "meta_description_ru": "По самым низким ценам",
+      "short_description_ru": "Флагман нового поколения",
+      "product_description_ru": "Полное описание..."
+    },
+    "attributes": [
+      {
+        "property_uz": "Xotira",
+        "property_ru": "Память",
+        "value_uz": "256 GB",
+        "value_ru": "256 ГБ"
+      }
+    ],
+    "related_products": [
+      {
+        "slug_uz": "samsung-galaxy-buds-2",
+        "name_uz": "Samsung Galaxy Buds 2",
+        "title_uz": "Simsiz quloqchinlar Samsung Galaxy Buds 2",
+        "short_description_uz": "Aktiv shovqin bekor qiluvchi quloqchin",
+        "alt_picture_uz": "Galaxy Buds 2 oq rangda",
+        "slug_ru": "samsung-galaxy-buds-2",
+        "name_ru": "Samsung Galaxy Buds 2",
+        "title_ru": "Беспроводные наушники Samsung Galaxy Buds 2",
+        "short_description_ru": "Наушники с активным шумоподавлением",
+        "alt_picture_ru": "Galaxy Buds 2 белые",
+        "picture": "https://sora.uz/images/main/buds2.jpg"
+      }
+    ],
+    "recommended_products": []
+  },
+  {
+    "id": "987fcdeb-51a2-43d7-9012-345678901234",
+    "product_sku": "SKU-10026",
+    "package": "Dona",
+    "...": "va hokazo keyingi mahsulot ma'lumotlari..."
+  }
+]
+```
+-uz va ru obyekti: Frontend'dagi ko'p tillilik (i18n) tizimi uchun maxsus ajratilgan obyektlar. Kategoriyalar (sayt bo'limlari), SEO taglari (title, meta_description) va tovarlar matni tillar kesimida beriladi.

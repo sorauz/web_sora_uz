@@ -1,0 +1,41 @@
+E-commerce loyihalarda Related Products va Recommended Products ko'pincha adashtiriladi, lekin ularning sotuvdagi maqsadi (marketing psixologiyasi) va ishlash logikasi butunlay har xil.
+
+Misol uchun mahsulot: Deli E39229, 14-razryadli metallik kalkulyator misolida ularning farqi quyidagicha:
+
+Related Products (O'xshash yoki Muqobil mahsulotlar)
+Bu bo'limning asosiy maqsadi — mijozni saytda ushlab qolish. Agar mijozga hozirgi kalkulyator qandaydir sababga ko'ra (narxi, rangi, o'lchami) yoqmasa, unga shu mahsulotning o'rnini bosa oladigan (substitute) boshqa variantlarni taklif qilasiz. Bu e-commerce'da Up-selling (qimmatrog'ini sotish) yoki Down-selling (arzonrog'ini sotish) deb ataladi.
+
+Algoritm logikasi: Xuddi shu kategoriyaga tegishli, xususiyatlari (razryadi, brendi) o'xshash bo'lgan mahsulotlar ko'rsatiladi.
+
+Kalkulyator uchun misollar:
+Boshqa brendlarning 14-razryadli kalkulyatorlari (masalan: Casio yoki Citizen 14-razryadli).
+Xuddi shu Deli brendining arzonroq (12-razryadli) yoki plastik korpusli modellari.
+Xuddi shu modelning boshqa rangdagisi (masalan: qora yoki oq rangi).
+Ilmiy (muhandislik) kalkulyatorlari.
+
+Recommended Products (Tavsiya etiladigan mahsulotlar)
+Bu bo'limning asosiy maqsadi — o'rtacha chek miqdorini oshirish (AOV - Average Order Value). Mijoz kalkulyatorni sotib olishga qaror qilgan bo'lsa, unga qo'shimcha ravishda yana nimalar kerak bo'lishi mumkinligini taklif qilasiz. Bu Cross-selling (kesishgan sotuv) deb ataladi. Ular asosiy mahsulotning o'rnini bosmaydi, balki uni to'ldiradi.
+
+Algoritm logikasi: "Bilan birga sotib olinadi" (Frequently bought together) tamoyili asosida yoki foydalanuvchilarning xarid tarixi (Collaborative filtering) asosida shakllantiriladi. Boshqa kategoriyadagi mahsulotlar ham bo'lishi mumkin.
+
+Kalkulyator uchun misollar:
+Kalkulyator uchun batareykalar (AA yoki AAA tipidagi).
+Ofis anjomlari: qog'ozlar (A4), bloknotlar, ruchkalar to'plami.
+Stol usti organayzerlari (kalkulyator va ruchkalar turishi uchun).
+Buxgalteriya hisobot blankalari yoki daftarlari (kalkulyatorni ko'pincha buxgalterlar va kassirlar olgani uchun).
+
+Related Products (O'xshash):
+``
+Xususiyat:Asosiy maqsad: Mijoz ehtiyojiga eng mos keladiganini topishiga yordam berish.
+Xususiyat:Munosabat turi :Mijoz ehtiyojiga eng mos keladiganini topishiga yordam berish.
+Xususiyat:Kategoriya:O'rnini bosuvchi (Substitute) - mijoz faqat bittasini tanlaydi.
+Xususiyat:Saytdagi matni:"O'xshash mahsulotlar", "Sizga bu ham yoqishi mumkin", "Muqobil variantlar".
+``
+
+Recommended Products (Tavsiya)
+``
+Xususiyat:Asosiy maqsad: Bitta xaridga qo'shimcha tovarlar qo'shib, savdo hajmini oshirish.
+Xususiyat:Munosabat turi:To'ldiruvchi (Complementary) - mijoz asosiy mahsulot bilan birga sotib oladi.
+Xususiyat:Kategoriya:Turli xil kategoriyalardan bo'lishi mumkin (Kanselyariya, Batareykalar).
+Xususiyat:Saytdagi matni:"Bilan birga sotib olinadi", "Tavsiya etamiz", "Bular ham kerak bo'lishi mumkin".
+``
