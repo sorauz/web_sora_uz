@@ -71,12 +71,22 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Col 3: Customer Service */}
+          {/* Col 3: Customer Service & Company */}
           <div className="space-y-3 text-xs">
             <h4 className="text-sm font-bold text-white uppercase tracking-wider">
-              {isUz ? "Xaridorlarga" : "Покупателям"}
+              {isUz ? "Kompaniya va Xizmatlar" : "Компания и Сервис"}
             </h4>
             <ul className="space-y-2 text-slate-400">
+              <li>
+                <Link href="/about" className="hover:text-white transition-colors">
+                  {isUz ? "Biz haqimizda" : "О компании"}
+                </Link>
+              </li>
+              <li>
+                <Link href="/contact" className="hover:text-white transition-colors">
+                  {isUz ? "Aloqa va manzil" : "Контакты и адрес"}
+                </Link>
+              </li>
               <li>
                 <Link href="/delivery" className="hover:text-white transition-colors">
                   {isUz ? "Yetkazib berish shartlari" : "Условия доставки"}
