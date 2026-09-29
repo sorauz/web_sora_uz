@@ -64,7 +64,7 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
     );
   }
 
-  if (items.length === 0) {
+  if (items.length === 0 && !isSubmitting) {
     router.push("/cart");
     return null;
   }
@@ -111,11 +111,8 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
       // Ignore localStorage errors
     }
 
-    // Clear cart and redirect to success page
-    setTimeout(() => {
-      clearCart();
-      router.push(`/checkout/success?orderId=${orderId}`);
-    }, 600);
+    clearCart();
+    router.push(`/checkout/success?orderId=${orderId}`);
   };
 
   const regionsList = [
