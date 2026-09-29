@@ -1,0 +1,46 @@
+{
+  "common": {
+    "siteName": "Sora.uz",
+    "siteDescription": "O'zbekistondagi zamonaviy e-commerce platformasi",
+    "searchPlaceholder": "Mahsulotlar, kategoriyalar yoki brendlar bo'yicha qidirish...",
+    "cart": "Savatcha",
+    "favorites": "Sevimlilar",
+    "profile": "Profil",
+    "catalog": "Katalog",
+    "loading": "Yuklanmoqda...",
+    "error": "Xatolik yuz berdi",
+    "empty": "Ma'lumot topilmadi",
+    "currency": "so'm",
+    "inStock": "Omborda mavjud",
+    "outOfStock": "Tugagan",
+    "addToCart": "Savatga qo'shish",
+    "buyNow": "Bir klikda sotib olish",
+    "specifications": "Xususiyatlari",
+    "relatedProducts": "O'xshash mahsulotlar",
+    "recommendedProducts": "Bilan birga sotib olinadi",
+    "language": "Til"
+  },
+  "nav": {
+    "home": "Bosh sahifa",
+    "catalog": "Katalog",
+    "deals": "Aksiyalar",
+    "topProducts": "Top mahsulotlar",
+    "brands": "Brendlar",
+    "about": "Biz haqimizda",
+    "delivery": "Yetkazib berish",
+    "contact": "Aloqa"
+  },
+  "faza0": {
+    "badge": "FAZA 0: Poydevor va API integratsiyasi",
+    "title": "Sora.uz — Zamonaviy E-Commerce Platformasi",
+    "subtitle": "1C ERP bilan to'liq integratsiya, ikki tillilik (UZ/RU), Next.js 16 va Tailwind CSS 4 poydevori.",
+    "apiStatus": "1C API Holati",
+    "categoriesTitle": "1C Kategoriyalar Ierarxiyasi (Tree)",
+    "sampleProductTitle": "1C Mahsulot Ko'rinishi (Server-Rendered)",
+    "sku": "SKU",
+    "barcode": "Barkod",
+    "brand": "Brend",
+    "country": "Ishlab chiqarilgan davlat",
+    "switchLang": "Tilni almashtirish"
+  }
+}

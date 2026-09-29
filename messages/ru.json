@@ -1,0 +1,46 @@
+{
+  "common": {
+    "siteName": "Sora.uz",
+    "siteDescription": "Современная платформа электронной коммерции в Узбекистане",
+    "searchPlaceholder": "Поиск товаров, категорий или брендов...",
+    "cart": "Корзина",
+    "favorites": "Избранное",
+    "profile": "Профиль",
+    "catalog": "Каталог",
+    "loading": "Загрузка...",
+    "error": "Произошла ошибка",
+    "empty": "Данные не найдены",
+    "currency": "сум",
+    "inStock": "В наличии",
+    "outOfStock": "Нет в наличии",
+    "addToCart": "В корзину",
+    "buyNow": "Купить в 1 клик",
+    "specifications": "Характеристики",
+    "relatedProducts": "Похожие товары",
+    "recommendedProducts": "С этим товаром покупают",
+    "language": "Язык"
+  },
+  "nav": {
+    "home": "Главная",
+    "catalog": "Каталог",
+    "deals": "Акции",
+    "topProducts": "Топ товары",
+    "brands": "Бренды",
+    "about": "О компании",
+    "delivery": "Доставка",
+    "contact": "Контакты"
+  },
+  "faza0": {
+    "badge": "ФАЗА 0: Фундамент и интеграция с API",
+    "title": "Sora.uz — Современная платформа электронной коммерции",
+    "subtitle": "Полная интеграция с 1C ERP, двуязычие (UZ/RU), база на Next.js 16 и Tailwind CSS 4.",
+    "apiStatus": "Статус 1C API",
+    "categoriesTitle": "Иерархия категорий 1C (Дерево)",
+    "sampleProductTitle": "Карточка товара из 1C (Server-Rendered)",
+    "sku": "Артикул",
+    "barcode": "Штрихкод",
+    "brand": "Бренд",
+    "country": "Страна производства",
+    "switchLang": "Переключить язык"
+  }
+}
