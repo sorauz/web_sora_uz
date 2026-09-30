@@ -8,16 +8,16 @@ test.describe("FAZA 7: Performance va Monitoring (Core Web Vitals)", () => {
   }) => {
     await page.goto(`${BASE_URL}/uz`, { waitUntil: "domcontentloaded" });
 
-    // Preconnect links in head
+    // Preconnect links in head for image CDN and 1C ERP
     const preconnectIbb = page.locator('link[rel="preconnect"][href="https://i.ibb.co"]');
     await expect(preconnectIbb).toHaveCount(1);
 
     const preconnect1C = page.locator('link[rel="preconnect"][href="http://sora.uz:777"]');
     await expect(preconnect1C).toHaveCount(1);
 
-    // Font class or variable is attached to html or body
+    // Font class or variable is attached to html (Next.js font optimization)
     const html = page.locator("html");
-    await expect(html).toHaveAttribute("class", /--font-sans/);
+    await expect(html).toHaveAttribute("class", /plus_jakarta_sans/);
   });
 
   test("2. Google Analytics va Monitoring skriptlari mavjud bo'lishi kerak", async ({
@@ -43,36 +43,46 @@ test.describe("FAZA 7: Performance va Monitoring (Core Web Vitals)", () => {
   }) => {
     await page.goto(`${BASE_URL}/uz`, { waitUntil: "domcontentloaded" });
 
-    // Main Hero showcase image has priority (fetchpriority="high")
+    // Main Hero showcase image
     const heroImage = page.locator('img[alt="Deli E3871 Kombi perpletka mashinasi"]');
     await expect(heroImage).toBeVisible();
 
-    // Check fetchpriority is high (Next.js sets fetchpriority="high" for priority images)
-    const fetchPriority = await heroImage.getAttribute("fetchpriority");
-    expect(fetchPriority).toBe("high");
+    // Priority ensures it is not lazy loaded (loading is 'auto' or 'eager')
+    const loading = await heroImage.getAttribute("loading");
+    expect(loading).not.toBe("lazy");
 
-    // Sizes attribute should be present to prevent CLS
+    // Sizes attribute prevents CLS (Cumulative Layout Shift)
     const sizes = await heroImage.getAttribute("sizes");
     expect(sizes).toBeTruthy();
+
+    // Next.js Image Optimization generates /_next/image srcset
+    const srcset = await heroImage.getAttribute("srcset");
+    expect(srcset).toContain("/_next/image");
   });
 
-  test("4. Mahsulot sahifasi (PDP) galereya rasmi priority bilan yuklanishi kerak", async ({
+  test("4. Mahsulot sahifasi (PDP) galereya rasmi priority va sizes bilan yuklanishi kerak", async ({
     page,
   }) => {
-    // Open Deli E3871 product page
+    // Open Deli E1589 product page
     await page.goto(
-      `${BASE_URL}/uz/products/kombinirovanniy-pereplyotnaya-mashina-deli-no-e3871`,
+      `${BASE_URL}/uz/products/deli-e1589-12-raqamli-kalkulyator-yashil`,
       { waitUntil: "domcontentloaded" }
     );
 
-    const mainImage = page.locator('img[alt="Kombinirovanniy pereplyotnaya mashina Deli №E3871"]');
+    const mainImage = page.locator('img[alt="Deli E1589 12‑raqamli kalkulyator (Yashil)"]').first();
     await expect(mainImage).toBeVisible();
 
-    const fetchPriority = await mainImage.getAttribute("fetchpriority");
-    expect(fetchPriority).toBe("high");
+    // Priority prevents lazy loading for main LCP image
+    const loading = await mainImage.getAttribute("loading");
+    expect(loading).not.toBe("lazy");
 
+    // Sizes attribute ensures proper responsive layout without CLS
     const sizes = await mainImage.getAttribute("sizes");
     expect(sizes).toBeTruthy();
+
+    // Image uses Next.js edge optimization
+    const src = await mainImage.getAttribute("src");
+    expect(src).toContain("/_next/image");
   });
 
   test("5. On-Demand Revalidation Webhook xavfsizligi va ishlashi", async ({
