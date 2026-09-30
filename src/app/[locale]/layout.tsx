@@ -3,11 +3,20 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { OrganizationJsonLd } from "@/components/seo/OrganizationJsonLd";
+import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import "../globals.css";
+
+const fontSans = Plus_Jakarta_Sans({
+  subsets: ["latin", "latin-ext", "cyrillic-ext"],
+  display: "swap",
+  variable: "--font-sans",
+  weight: ["400", "500", "600", "700", "800"],
+});
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -62,9 +71,17 @@ export default async function LocaleLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale} className="h-full">
-      <body className="min-h-full flex flex-col antialiased selection:bg-blue-600 selection:text-white">
+    <html lang={locale} className={`h-full ${fontSans.variable}`}>
+      <head>
+        {/* Preconnect to external image servers and 1C API to reduce LCP */}
+        <link rel="preconnect" href="https://i.ibb.co" />
+        <link rel="dns-prefetch" href="https://i.ibb.co" />
+        <link rel="preconnect" href="http://sora.uz:777" />
+        <link rel="dns-prefetch" href="http://sora.uz:777" />
+      </head>
+      <body className={`min-h-full flex flex-col antialiased selection:bg-blue-600 selection:text-white ${fontSans.className}`}>
         <OrganizationJsonLd />
+        <GoogleAnalytics />
         <NextIntlClientProvider messages={messages}>
           <NuqsAdapter>{children}</NuqsAdapter>
         </NextIntlClientProvider>

@@ -24,8 +24,8 @@ export function CartItemRow({ item }: CartItemRowProps) {
             src={item.picture || "https://i.ibb.co/qLcGdmjh/Deli-E3871.jpg"}
             alt={item.name}
             fill
+            sizes="(max-width: 640px) 64px, 80px"
             className="object-contain p-1"
-            unoptimized
           />
         </div>
 

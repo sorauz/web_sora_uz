@@ -577,8 +577,8 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
                       src={i.picture || "https://i.ibb.co/qLcGdmjh/Deli-E3871.jpg"}
                       alt={i.name}
                       fill
+                      sizes="40px"
                       className="object-contain"
-                      unoptimized
                     />
                   </div>
                   <div className="min-w-0">

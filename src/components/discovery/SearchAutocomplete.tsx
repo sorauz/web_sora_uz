@@ -184,7 +184,6 @@ export function SearchAutocomplete({
                               fill
                               sizes="44px"
                               className="object-contain p-1"
-                              unoptimized
                             />
                           </div>
                           <div className="flex-1 min-w-0">

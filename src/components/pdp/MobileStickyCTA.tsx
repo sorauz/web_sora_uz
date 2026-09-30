@@ -48,8 +48,8 @@ export function MobileStickyCTA({ product, locale }: MobileStickyCTAProps) {
               src={product.main_picture}
               alt={loc.name}
               fill
+              sizes="44px"
               className="object-contain"
-              unoptimized
             />
           </div>
           <div className="min-w-0">

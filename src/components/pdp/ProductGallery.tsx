@@ -56,10 +56,9 @@ export function ProductGallery({
             src={selectedImage}
             alt={altText}
             fill
-            sizes="(max-width: 768px) 100vw, 50vw"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 600px"
             className="object-contain transition-transform duration-300 group-hover:scale-105"
             priority
-            unoptimized
           />
         </div>
       </div>
@@ -80,8 +79,8 @@ export function ProductGallery({
               src={img}
               alt={`${altText} thumbnail ${idx + 1}`}
               fill
+              sizes="72px"
               className="object-contain p-1.5"
-              unoptimized
             />
           </button>
         ))}

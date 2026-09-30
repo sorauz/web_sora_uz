@@ -148,11 +148,11 @@ export default async function HomePage({ params }: PageProps) {
                 <div className="relative w-full h-full">
                   <Image
                     src="https://i.ibb.co/qLcGdmjh/Deli-E3871.jpg"
-                    alt="Hero Product"
+                    alt="Deli E3871 Kombi perpletka mashinasi"
                     fill
+                    sizes="(max-width: 640px) 256px, 320px"
                     className="object-contain p-2 drop-shadow-2xl"
                     priority
-                    unoptimized
                   />
                 </div>
                 <div className="absolute -bottom-3 -left-3 bg-white text-slate-900 rounded-2xl py-2 px-4 shadow-xl border border-slate-100 text-xs font-bold flex items-center gap-2">

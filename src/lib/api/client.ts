@@ -101,7 +101,10 @@ class SoraApiClient {
   }> {
     const res = await this.request<{ categories?: Category[] }>(
       "/categories",
-      options
+      {
+        tags: options?.tags ?? ["categories"],
+        revalidate: options?.revalidate,
+      }
     );
 
     let list: Category[] = FIXTURE_CATEGORIES;
@@ -128,7 +131,10 @@ class SoraApiClient {
   async getUnits(
     options?: FetchOptions
   ): Promise<{ units: Unit[]; isFallback: boolean }> {
-    const res = await this.request<{ units?: Unit[] }>("/units", options);
+    const res = await this.request<{ units?: Unit[] }>("/units", {
+      tags: options?.tags ?? ["units"],
+      revalidate: options?.revalidate,
+    });
     if (!res.isFallback && res.data) {
       const parsed = UnitsResponseSchema.safeParse(res.data);
       if (parsed.success && parsed.data.units.length > 0) {
@@ -144,7 +150,10 @@ class SoraApiClient {
   async getBrands(
     options?: FetchOptions
   ): Promise<{ data: BrandsResponse; isFallback: boolean }> {
-    const res = await this.request<BrandsResponse>("/brands", options);
+    const res = await this.request<BrandsResponse>("/brands", {
+      tags: options?.tags ?? ["brands"],
+      revalidate: options?.revalidate,
+    });
     if (!res.isFallback && res.data) {
       const parsed = BrandsResponseSchema.safeParse(res.data);
       if (parsed.success) {
@@ -165,7 +174,10 @@ class SoraApiClient {
   }> {
     const res = await this.request<{ products?: ProductPriceStock[] }>(
       "/price",
-      options
+      {
+        tags: options?.tags ?? ["prices"],
+        revalidate: options?.revalidate,
+      }
     );
     if (!res.isFallback && res.data) {
       const parsed = PricesResponseSchema.safeParse(res.data);
@@ -186,7 +198,10 @@ class SoraApiClient {
   async getAllProducts(
     options?: FetchOptions
   ): Promise<{ products: Product[]; isFallback: boolean }> {
-    const res = await this.request<unknown[]>("/all_product", options);
+    const res = await this.request<unknown[]>("/all_product", {
+      tags: options?.tags ?? ["products"],
+      revalidate: options?.revalidate,
+    });
     let list: Product[] = FIXTURE_PRODUCTS;
     let isFallback = true;
 
@@ -225,7 +240,10 @@ class SoraApiClient {
     id: string,
     options?: FetchOptions
   ): Promise<{ product: Product | null; isFallback: boolean }> {
-    const res = await this.request<unknown>(`/product?id=${id}`, options);
+    const res = await this.request<unknown>(`/product?id=${id}`, {
+      tags: options?.tags ?? ["products", `product-${id}`],
+      revalidate: options?.revalidate,
+    });
     if (!res.isFallback && res.data) {
       const parsed = ProductSchema.safeParse(res.data);
       if (parsed.success) {
