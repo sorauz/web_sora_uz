@@ -23,7 +23,7 @@ test.describe("FAZA 7: Performance va Monitoring (Core Web Vitals)", () => {
   test("2. Google Analytics va Monitoring skriptlari mavjud bo'lishi kerak", async ({
     page,
   }) => {
-    await page.goto(`${BASE_URL}/uz`, { waitUntil: "domcontentloaded" });
+    await page.goto(`${BASE_URL}/uz`, { waitUntil: "load" });
 
     // Google Tag Manager / Analytics script check
     const gtagScript = page.locator(
