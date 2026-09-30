@@ -12,7 +12,7 @@ test.describe("FAZA 7: Performance va Monitoring (Core Web Vitals)", () => {
     const preconnectIbb = page.locator('link[rel="preconnect"][href="https://i.ibb.co"]');
     await expect(preconnectIbb).toHaveCount(1);
 
-    const preconnect1C = page.locator('link[rel="preconnect"][href="http://sora.uz:777"]');
+    const preconnect1C = page.locator('link[rel="preconnect"][href="http://1cloud.uz:777"]');
     await expect(preconnect1C).toHaveCount(1);
 
     // Font class or variable is attached to html (Next.js font optimization)

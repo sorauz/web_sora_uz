@@ -1,4 +1,4 @@
-URL: [http://sora.uz:777/SORA/hs/***/***]
+URL: [http://1cloud.uz:777/SORA/hs/***/***]
 Metod: GET   Ma'lumot formati: application/json
 Avtorizatsiya: Basic Auth
 Login: web_user

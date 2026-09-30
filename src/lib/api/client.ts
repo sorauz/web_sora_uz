@@ -36,7 +36,7 @@ class SoraApiClient {
 
   constructor() {
     this.baseUrl =
-      process.env.SORA_API_BASE_URL || "http://sora.uz:777/SORA/hs/for_msp";
+      process.env.SORA_API_BASE_URL || "http://1cloud.uz:777/SORA/hs/for_msp";
     const username = process.env.SORA_API_USERNAME || "web_user";
     const password = process.env.SORA_API_PASSWORD || "977540910";
     this.authHeader = `Basic ${Buffer.from(`${username}:${password}`).toString(

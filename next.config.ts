@@ -24,6 +24,14 @@ const nextConfig: NextConfig = {
         protocol: "http",
         hostname: "sora.uz",
       },
+      {
+        protocol: "https",
+        hostname: "1cloud.uz",
+      },
+      {
+        protocol: "http",
+        hostname: "1cloud.uz",
+      },
     ],
   },
 };
