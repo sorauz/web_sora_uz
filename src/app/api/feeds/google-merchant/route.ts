@@ -1,4 +1,5 @@
 import { api } from "@/lib/api";
+import { calculateProductPrice } from "@/lib/utils/price";
 import { NextResponse } from "next/server";
 
 export const revalidate = 3600; // 1 hour
@@ -30,8 +31,8 @@ export async function GET() {
     if (!name || !slug) continue;
 
     const desc = p.uz?.short_description_uz || p.uz?.meta_description_uz || name;
-    const price = p.price?.retail_price || 0;
-    if (price <= 0) continue; // Google Merchant requires valid price > 0
+    const priceInfo = calculateProductPrice(p.price);
+    if (priceInfo.price <= 0) continue; // Google Merchant requires valid price > 0
 
     const inStock = p.price?.stock !== "OutOfStock";
     const picture = p.main_picture.startsWith("http")
@@ -46,7 +47,8 @@ export async function GET() {
       <g:image_link>${escapeXml(picture)}</g:image_link>
       <g:condition>new</g:condition>
       <g:availability>${inStock ? "in_stock" : "out_of_stock"}</g:availability>
-      <g:price>${price} UZS</g:price>
+      <g:price>${priceInfo.oldPrice ?? priceInfo.price} UZS</g:price>
+      ${priceInfo.hasDiscount ? `<g:sale_price>${priceInfo.price} UZS</g:sale_price>` : ""}
       <g:brand>${escapeXml(p.brand || "Sora")}</g:brand>
       <g:identifier_exists>${p.product_sku ? "yes" : "no"}</g:identifier_exists>
       ${p.product_sku ? `<g:mpn>${escapeXml(p.product_sku)}</g:mpn>` : ""}

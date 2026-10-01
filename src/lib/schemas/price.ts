@@ -20,3 +20,6 @@ export const PricesResponseSchema = z.object({
 });
 
 export type PricesResponse = z.infer<typeof PricesResponseSchema>;
+
+export { calculateProductPrice } from "@/lib/utils/price";
+export type { ProductPriceInfo, PriceInput } from "@/lib/utils/price";

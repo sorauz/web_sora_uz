@@ -9,6 +9,7 @@ import Image from "next/image";
 import { Product, getProductLocalized } from "@/lib/schemas/product";
 import { Category } from "@/lib/schemas/category";
 import { Brand } from "@/lib/schemas/brand";
+import { calculateProductPrice } from "@/lib/utils/price";
 
 interface SearchAutocompleteProps {
   products: Product[];
@@ -169,7 +170,7 @@ export function SearchAutocomplete({
                   <div className="space-y-1.5">
                     {matchedProducts.map((p) => {
                       const loc = getProductLocalized(p, locale);
-                      const price = p.price?.retail_price || 0;
+                      const priceInfo = calculateProductPrice(p.price);
                       return (
                         <Link
                           key={p.id}
@@ -190,8 +191,23 @@ export function SearchAutocomplete({
                             <div className="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate">
                               {loc.name}
                             </div>
-                            <div className="text-[11px] text-blue-600 dark:text-blue-400 font-bold mt-0.5">
-                              {price.toLocaleString()} {t("currency")}
+                            <div className="text-[11px] font-bold mt-0.5 flex items-center gap-2">
+                              {priceInfo.price > 0 ? (
+                                <>
+                                  <span className="text-blue-600 dark:text-blue-400">
+                                    {priceInfo.price.toLocaleString()} {t("currency")}
+                                  </span>
+                                  {priceInfo.hasDiscount && priceInfo.oldPrice && (
+                                    <span className="text-[10px] text-slate-400 line-through font-normal">
+                                      {priceInfo.oldPrice.toLocaleString()} {t("currency")}
+                                    </span>
+                                  )}
+                                </>
+                              ) : (
+                                <span className="text-[10px] text-slate-500 dark:text-slate-400 font-normal">
+                                  {locale === "uz" ? "Narxi kelishiladi" : "Цена по запросу"}
+                                </span>
+                              )}
                             </div>
                           </div>
                         </Link>

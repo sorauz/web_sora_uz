@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useCartStore } from "@/lib/store/cart";
 import { Product, getProductLocalized } from "@/lib/schemas/product";
+import { calculateProductPrice } from "@/lib/utils/price";
 
 interface ProductActionsProps {
   product: Product;
@@ -28,10 +29,12 @@ export function ProductActions({ product, locale }: ProductActionsProps) {
   const common = useTranslations("common");
   const loc = getProductLocalized(product, locale);
 
-  const priceVal = product.price?.retail_price ?? 1250000;
-  const oldPriceVal = Math.round(priceVal * 1.15);
-  const stockQty = product.price?.quantity_remaining ?? 10;
+  const priceInfo = calculateProductPrice(product.price);
+  const priceVal = priceInfo.price;
+  const oldPriceVal = priceInfo.oldPrice;
+  const stockQty = product.price?.quantity_remaining ?? (product.price?.stock !== "OutOfStock" ? 10 : 0);
   const inStock = product.price?.stock !== "OutOfStock" && stockQty > 0;
+  const canAddToCart = inStock && priceVal > 0;
   const maxAvailable = inStock ? (stockQty > 0 ? stockQty : 10) : 0;
 
   const [quantity, setQuantity] = useState(1);
@@ -44,7 +47,7 @@ export function ProductActions({ product, locale }: ProductActionsProps) {
   const addItem = useCartStore((state) => state.addItem);
 
   const handleAddToCart = () => {
-    if (!inStock) return;
+    if (!canAddToCart) return;
     addItem(
       {
         id: product.id,
@@ -76,21 +79,29 @@ export function ProductActions({ product, locale }: ProductActionsProps) {
     <div className="space-y-6">
       {/* Price & Stock Badge */}
       <div className="bg-slate-50 dark:bg-slate-900/60 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3">
-        <div className="flex flex-wrap items-baseline gap-3">
-          <span className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight">
-            {priceVal.toLocaleString("ru-RU")} {common("currency")}
-          </span>
-          {oldPriceVal > priceVal && (
-            <span className="text-lg text-slate-400 line-through">
-              {oldPriceVal.toLocaleString("ru-RU")} {common("currency")}
+        {priceVal > 0 ? (
+          <div className="flex flex-wrap items-baseline gap-3">
+            <span className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight">
+              {priceVal.toLocaleString("ru-RU")} {common("currency")}
             </span>
-          )}
-          {oldPriceVal > priceVal && (
-            <span className="px-2 py-0.5 text-xs font-bold text-rose-600 bg-rose-100 dark:bg-rose-950/60 dark:text-rose-400 rounded-lg">
-              -{Math.round(((oldPriceVal - priceVal) / oldPriceVal) * 100)}%
+            {oldPriceVal && oldPriceVal > priceVal && (
+              <span className="text-lg text-slate-400 line-through">
+                {oldPriceVal.toLocaleString("ru-RU")} {common("currency")}
+              </span>
+            )}
+            {priceInfo.hasDiscount && priceInfo.discountPercent > 0 && (
+              <span className="px-2 py-0.5 text-xs font-bold text-rose-600 bg-rose-100 dark:bg-rose-950/60 dark:text-rose-400 rounded-lg">
+                -{priceInfo.discountPercent}%
+              </span>
+            )}
+          </div>
+        ) : (
+          <div className="flex flex-wrap items-baseline gap-3">
+            <span className="text-2xl sm:text-3xl font-bold text-blue-600 dark:text-blue-400 tracking-tight">
+              {locale === "uz" ? "Narxi kelishiladi" : "Цена по запросу"}
             </span>
-          )}
-        </div>
+          </div>
+        )}
 
         <div className="flex items-center gap-2">
           {inStock ? (
@@ -138,7 +149,7 @@ export function ProductActions({ product, locale }: ProductActionsProps) {
           {/* Add to Cart Button */}
           <button
             type="button"
-            disabled={!inStock}
+            disabled={!canAddToCart}
             onClick={handleAddToCart}
             className={`flex-1 flex items-center justify-center gap-2.5 h-12 px-6 rounded-xl font-bold text-base transition-all duration-200 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed ${
               isAdded
@@ -154,7 +165,15 @@ export function ProductActions({ product, locale }: ProductActionsProps) {
             ) : (
               <>
                 <ShoppingCart className="w-5 h-5" />
-                <span>{inStock ? t("addToCart") : common("outOfStock")}</span>
+                <span>
+                  {!inStock
+                    ? common("outOfStock")
+                    : priceVal <= 0
+                    ? locale === "uz"
+                      ? "Narxi kelishiladi"
+                      : "Цена по запросу"
+                    : t("addToCart")}
+                </span>
               </>
             )}
           </button>

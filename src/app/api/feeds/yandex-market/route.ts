@@ -1,4 +1,5 @@
 import { api } from "@/lib/api";
+import { calculateProductPrice } from "@/lib/utils/price";
 import { NextResponse } from "next/server";
 
 export const revalidate = 3600; // 1 hour
@@ -48,8 +49,8 @@ export async function GET() {
     const slug = p.uz?.slug_uz || p.ru?.slug_ru;
     if (!name || !slug) continue;
 
-    const price = p.price?.retail_price || 0;
-    if (price <= 0) continue;
+    const priceInfo = calculateProductPrice(p.price);
+    if (priceInfo.price <= 0) continue;
 
     const available = p.price?.stock !== "OutOfStock";
     const desc = p.uz?.short_description_uz || p.uz?.meta_description_uz || name;
@@ -65,7 +66,8 @@ export async function GET() {
 
     xml += `      <offer id="${escapeXml(p.id)}" available="${available}">
         <url>${baseUrl}/uz/products/${escapeXml(slug)}</url>
-        <price>${price}</price>
+        <price>${priceInfo.price}</price>
+        ${priceInfo.hasDiscount && priceInfo.oldPrice ? `<oldprice>${priceInfo.oldPrice}</oldprice>` : ""}
         <currencyId>UZS</currencyId>
         <categoryId>${escapeXml(catId)}</categoryId>
         <picture>${escapeXml(picture)}</picture>

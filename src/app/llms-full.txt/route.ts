@@ -1,4 +1,5 @@
 import { api } from "@/lib/api";
+import { calculateProductPrice } from "@/lib/utils/price";
 import { NextResponse } from "next/server";
 
 export const revalidate = 3600; // 1 hour cache
@@ -43,8 +44,15 @@ export async function GET() {
   for (const p of productsData.products) {
     const name = p.uz?.name_uz || p.ru?.name_ru;
     const slug = p.uz?.slug_uz || p.ru?.slug_ru;
-    const price = p.price?.retail_price;
-    const priceStr = price && price > 0 ? `${price.toLocaleString()} UZS` : "Kelishilgan holda";
+    const priceInfo = calculateProductPrice(p.price);
+    let priceStr = "Kelishilgan holda";
+    if (priceInfo.price > 0) {
+      if (priceInfo.hasDiscount && priceInfo.oldPrice) {
+        priceStr = `${priceInfo.price.toLocaleString()} UZS (chegirma, asl narxi: ${priceInfo.oldPrice.toLocaleString()} UZS)`;
+      } else {
+        priceStr = `${priceInfo.price.toLocaleString()} UZS`;
+      }
+    }
     const brand = p.brand ? `[Brend: ${p.brand}]` : "";
     const sku = p.product_sku ? `[SKU: ${p.product_sku}]` : "";
     const desc = p.uz?.short_description_uz || p.uz?.meta_description_uz || "";

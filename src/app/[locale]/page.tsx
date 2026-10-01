@@ -1,6 +1,7 @@
 import { setRequestLocale } from "next-intl/server";
 import { getTranslations } from "next-intl/server";
 import { api } from "@/lib/api";
+import { calculateProductPrice } from "@/lib/utils/price";
 import { Header } from "@/components/layout/Header";
 import { PromoNav } from "@/components/layout/PromoNav";
 import { Footer } from "@/components/layout/Footer";
@@ -87,12 +88,13 @@ export default async function HomePage({ params }: PageProps) {
   const products = productsData.products;
 
   // Prioritize products with real 1C prices
-  const pricedProducts = products.filter((p) => (p.price?.retail_price || 0) > 0);
+  const pricedProducts = products.filter((p) => calculateProductPrice(p.price).price > 0);
   const displayPool = pricedProducts.length >= 8 ? pricedProducts : products;
 
   // Slices for sections
   const topProducts = displayPool.slice(0, 4);
-  const dealProducts = displayPool.slice(4, 8);
+  const discountProducts = displayPool.filter((p) => calculateProductPrice(p.price).hasDiscount);
+  const dealProducts = discountProducts.length >= 4 ? discountProducts.slice(0, 4) : displayPool.slice(4, 8);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col">
@@ -239,7 +241,6 @@ export default async function HomePage({ params }: PageProps) {
                 product={p}
                 rating={4.7}
                 reviewCount={19}
-                oldPrice={(p.price?.retail_price || 100000) * 1.15}
                 badge={isUz ? "Aksiya" : "Скидка"}
               />
             ))}

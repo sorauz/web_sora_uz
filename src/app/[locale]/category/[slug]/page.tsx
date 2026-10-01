@@ -12,6 +12,7 @@ import { FacetedFilter } from "@/components/discovery/FacetedFilter";
 import { SortSelect } from "@/components/discovery/SortSelect";
 import { findCategoryBySlug, getCategoryBreadcrumb } from "@/lib/utils/category-tree";
 import { getProductLocalized } from "@/lib/schemas/product";
+import { calculateProductPrice } from "@/lib/utils/price";
 import { Link } from "@/i18n/routing";
 import { Metadata } from "next";
 import { Folder, HelpCircle, BookOpen } from "lucide-react";
@@ -138,14 +139,14 @@ export default async function CategoryPage({
   const minP = typeof query.minPrice === "string" ? Number(query.minPrice) : null;
   if (minP !== null && !isNaN(minP)) {
     filtered = filtered.filter(
-      (p) => (p.price?.retail_price || 0) >= minP
+      (p) => calculateProductPrice(p.price).price >= minP
     );
   }
 
   const maxP = typeof query.maxPrice === "string" ? Number(query.maxPrice) : null;
   if (maxP !== null && !isNaN(maxP)) {
     filtered = filtered.filter(
-      (p) => (p.price?.retail_price || 0) <= maxP
+      (p) => calculateProductPrice(p.price).price <= maxP
     );
   }
 
@@ -157,11 +158,11 @@ export default async function CategoryPage({
   const sort = typeof query.sort === "string" ? query.sort : "popular";
   if (sort === "price_asc") {
     filtered.sort(
-      (a, b) => (a.price?.retail_price || 0) - (b.price?.retail_price || 0)
+      (a, b) => calculateProductPrice(a.price).price - calculateProductPrice(b.price).price
     );
   } else if (sort === "price_desc") {
     filtered.sort(
-      (a, b) => (b.price?.retail_price || 0) - (a.price?.retail_price || 0)
+      (a, b) => calculateProductPrice(b.price).price - calculateProductPrice(a.price).price
     );
   }
 

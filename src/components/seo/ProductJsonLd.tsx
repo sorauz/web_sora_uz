@@ -1,4 +1,5 @@
 import { Product, getProductLocalized } from "@/lib/schemas/product";
+import { calculateProductPrice } from "@/lib/utils/price";
 
 interface ProductJsonLdProps {
   product: Product;
@@ -12,7 +13,8 @@ export function ProductJsonLd({
   baseUrl = "https://sora.uz",
 }: ProductJsonLdProps) {
   const loc = getProductLocalized(product, locale);
-  const priceVal = product.price?.retail_price ?? 1250000;
+  const priceInfo = calculateProductPrice(product.price);
+  const priceVal = priceInfo.price;
   const inStock = product.price?.stock !== "OutOfStock";
   const canonicalUrl = `${baseUrl}/${locale}/products/${loc.slug}`;
 

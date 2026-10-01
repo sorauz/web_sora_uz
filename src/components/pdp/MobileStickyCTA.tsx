@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { ShoppingCart, Check } from "lucide-react";
 import { useCartStore } from "@/lib/store/cart";
 import { Product, getProductLocalized } from "@/lib/schemas/product";
+import { calculateProductPrice } from "@/lib/utils/price";
 
 interface MobileStickyCTAProps {
   product: Product;
@@ -19,11 +20,13 @@ export function MobileStickyCTA({ product, locale }: MobileStickyCTAProps) {
   const addItem = useCartStore((state) => state.addItem);
 
   const [isAdded, setIsAdded] = useState(false);
-  const priceVal = product.price?.retail_price ?? 1250000;
+  const priceInfo = calculateProductPrice(product.price);
+  const priceVal = priceInfo.price;
   const isOutOfStock = product.price?.stock === "OutOfStock";
+  const canAddToCart = !isOutOfStock && priceVal > 0;
 
   const handleAddToCart = () => {
-    if (isOutOfStock) return;
+    if (!canAddToCart) return;
     addItem(
       {
         id: product.id,
@@ -56,15 +59,21 @@ export function MobileStickyCTA({ product, locale }: MobileStickyCTAProps) {
             <h4 className="text-xs font-bold text-slate-900 dark:text-white truncate">
               {loc.name}
             </h4>
-            <div className="text-sm font-extrabold text-blue-600 dark:text-blue-400">
-              {priceVal.toLocaleString("ru-RU")} {common("currency")}
-            </div>
+            {priceVal > 0 ? (
+              <div className="text-sm font-extrabold text-blue-600 dark:text-blue-400">
+                {priceVal.toLocaleString("ru-RU")} {common("currency")}
+              </div>
+            ) : (
+              <div className="text-xs font-semibold text-blue-600 dark:text-blue-400">
+                {locale === "uz" ? "Narxi kelishiladi" : "Цена по запросу"}
+              </div>
+            )}
           </div>
         </div>
 
         <button
           type="button"
-          disabled={isOutOfStock}
+          disabled={!canAddToCart}
           onClick={handleAddToCart}
           className={`flex items-center justify-center gap-1.5 px-5 h-10 rounded-xl font-bold text-xs shrink-0 transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
             isAdded
@@ -80,7 +89,15 @@ export function MobileStickyCTA({ product, locale }: MobileStickyCTAProps) {
           ) : (
             <>
               <ShoppingCart className="w-4 h-4" />
-              <span>{isOutOfStock ? common("outOfStock") : t("addToCart")}</span>
+              <span>
+                {isOutOfStock
+                  ? common("outOfStock")
+                  : priceVal <= 0
+                  ? locale === "uz"
+                    ? "Kelishiladi"
+                    : "По запросу"
+                  : t("addToCart")}
+              </span>
             </>
           )}
         </button>

@@ -1,0 +1,64 @@
+TASHQI OPERATSION BOSQICHLAR (Sayt egasi tomonidan bajariladigan monitoring jarayoni — ⏳)
+Quyidagi bandlar dasturiy kod emas, balki sayt egasi va SEO mutaxassisi tomonidan har haftalik olib boriladigan operatsion jarayon hisoblanadi:
+Google Search Console va Bing Webmaster Tools'ga domenni ulash (§1):
+Sayt serverda (Vercel) va git omborida to‘liq tayyor. Endi websorauz.vercel.app yoki asosiy sora.uz domenini GSC va Bing panellariga qo‘shib, DNS TXT yoki verification tag orqali tasdiqlash kerak.
+Sitemap yuborish (§4):
+GSC panelidagi "Sitemaps" bo‘limiga https://sora.uz/sitemap.xml manzilini kiritish.
+Google Business Profile (Google Xaritalar) ochish (§11):
+Google Xaritalarda "Sora.uz" do‘kon profilini tasdiqlab qo‘yish (saytdagi Store schema bilan moslashadi).
+Muntazam Ko‘rsatkichlarni Tahlil Qilish (§2, §7, §9):
+Sayt indekslangach, GSC orqali haftalik qidiruv so‘rovlari (Search queries), CTR va bosishlar (Impressions/Clicks) tahlil qilinadi va ehtiyojga qarab meta tavsiflar yanada jilolanadi.
+QISMAN AMALGA OSHIRILGAN ISHLAR (QISMAN — ⚠️)
+Mahsulotlarni O‘zaro Taqqoslash (Comparisons) Mexanizmi (§5, §9):
+Holat: PDP da muqobil variantlar (Up-sell / Down-sell) ro‘yxati bor, lekin ikki xil mahsulotni yonma-yon qo‘yib solishtirish (masalan: Deli E3871 vs Deli E3874 taqqoslash jadvali) interaktiv sahifasi alohida qilinmagan.
+QISMAN AMALGA OSHIRILGAN ISHLAR (QISMAN — ⚠️)
+Product Schema Ichiga Yetkazib Berish va Qaytarish Qoidalarini Joylash (§1, §7):
+Holat: Yetkazib berish (/delivery) va Qaytarish (/warranty) sahifalari to‘liq mavjud, biroq ProductJsonLd.tsx ichida Google’ning 2026-yilgi yangi shippingDetails va hasMerchantReturnPolicy schema maydonlari alohida kiritilmagan (kelgusida microdata ichiga qo‘shib boyitish mumkin).
+Product Variants / ProductGroup Schema (§1, §7):
+Holat: Hozirda 1C dagi har bir mahsulot alohida Product sifatida keladi. Bitta modelning ranglari yoki o‘lchamlarini yagona ProductGroup va hasVariant schemasi orqali birlashtirish hali qilinmagan.
+Product.category Maydoni (§1, §7):
+Holat: Kategoriya yo‘nalishi BreadcrumbList orqali to‘liq ko‘rsatilgan, biroq Product schemasining o‘ziga 2026-yilgi Product.category matni to‘g‘ridan-to‘g‘ri qo‘shilmagan.
+Foydalanuvchi Tomonidan Sharh Yozish Formasi (§5):
+Holat: Mavjud sharhlar va reyting ko‘rsatiladi, biroq tashrif buyuruvchi o‘z sharhini saytda yozib qoldirishi uchun ma'lumotlar bazasiga yozuvchi interaktiv forma keyingi bosqichlarda ulanishi ko‘zda tutilgan.
+QISMAN AMALGA OSHIRILGAN ISHLAR (QISMAN — ⚠️)
+Hududiy Mintaqa Kodi (ru-UZ) (§4, §8):
+Holat: Hozirgi kodda til teglari umumiy uz va ru ko‘rinishida o‘rnatilgan. Hujjatda ko‘rsatilgan O‘zbekiston ichidagi rusiyzabon auditoriyani qamrab oluvchi aniq ru-UZ va uz-UZ hududiy ISO kodlari metadata parametriga qo‘shimcha sifatida kiritilsa, regional qidiruv kuchi yanada oshadi.
+Keyword Research (Kalit So‘zlar Tahlili) (§7, §8):
+Holat: Texnik jihatdan shriftlar (Plus_Jakarta_Sans lotin va kirill-ext), qidiruv mexanizmi va meta teglari tayyor. Ammo o‘zbekcha kirillcha (masalan: «калькулятор», «ручка»), xalqona so‘zlar va xatoli qidiruvlar bo‘yicha to‘liq semantik yadroni shakllantirish — doimiy marketing va SEO mutaxassisi vazifasi hisoblanadi.
+Sitemap’dagi lastmod Sanasini To‘liq 1C Yangilanish Sanasiga Bog‘lash (§1):
+Holat: Hozirgi src/app/sitemap.ts da lastModified: now orqali dinamik sana qo‘yilgan. Buni 1C dan kelayotgan mahsulotning haqiqiy updated_at (o‘zgarish) sanasi bilan almashtirish sitemap sifatini yanada oshiradi.
+TASHQI BOSQICHLAR (Sayt egasi tomonidan — ⏳)
+Google Search Console & Bing Webmaster Tools: Texnik jihatdan sitemap, robots, schema va meta teglari to‘liq tayyor. Sayt egasi Google va Bing kabinetlariga kirib, sora.uz/sitemap.xml manzilini yuborishi va domenni tasdiqlashi qolgan.
+QISMAN AMALGA OSHIRILGAN ISHLAR (QISMAN — ⚠️)
+Pagination (Sahifalash) Nazorati (§2, §6):
+Holat: Hozirgi bosqichda mahsulotlar katalog va kategoriyalarda bitta sahifada qulay filtrlar bilan ko‘rsatiladi. Mahsulotlar soni 10 000+ ga yetganda kerak bo‘ladigan sahifalash (?page=2, rel="next" va rel="prev") mexanizmi alohida sahifalash komponenti ko‘rinishida hali joriy etilmagan.
+Kengaytirilgan Cross-sell / Bundle Savatchaga Qo‘shish (§4):
+Holat: PDP da "Bilan birga xarid qilinadi" tovarlar ro‘yxati va havolalari bor, lekin ularni bitta klik bilan to‘plam (bundle) qilib birdaniga savatchaga solish formasi hali ulanmagan (har bir tovar alohida xarid qilinadi).
+TASHQI MA'MURIY QADAMLAR (Sayt egasi tomonidan bajarilishi kerak — ⏳)
+Quyidagi ishlar dasturiy jihatdan (sitemap, meta, feed, robots) 100% tayyor, faqat shaxsiy kabinetlarga kirib domenni tasdiqlash talab etiladi:
+Google Search Console: websorauz.vercel.app yoki sora.uz domenini Google hisobingizga kiritib, DNS TXT yozuvi yoki HTML verification orqali tasdiqlash.
+Bing Webmaster Tools: Bing kabinetiga kirib saytni ulash.
+Google Merchant Center: Tayyor bo‘lgan https://websorauz.vercel.app/api/feeds/google-merchant manzilini GMC hisobiga kiritib, tovarlar tahlilini yoqish.
+QISMAN AMALGA OSHIRILGAN ISHLAR (QISMAN — ⚠️)
+Mahsulot Variantlari — Product Variants (§7):
+Holat: 1C bazasida har bir rang yoki model hozirda alohida mahsulot (SKU) sifatida kelmoqda. Ular alohida sahifa sifatida to‘g‘ri ishlaydi, biroq bitta mahsulot sahifasining ichida turib rangini yoki o‘lchamini o‘zgartiradigan dropdown/tugmalar va schema.org/ProductGroup strukturasi hali to‘liq guruhlanmagan.
+FAQ (Tez-tez beriladigan savollar) va FAQ Schema (§7):
+Holat: Yetkazib berish, to‘lov va kafolat bo‘yicha alohida ishonch sahifalari yaratilgan, lekin aynan mahsulot yoki toifalar ostida ochilib-yopiluvchi FAQ bloklari va FAQPage JSON-LD schemasi hali qo‘shilmagan.
+Pagination (Sahifalash) Nazorati (§7):
+Holat: Hozirgi katalogda mahsulotlar to‘liq ro‘yxat va filtrlar asosida chiqmoqda. 10 000+ mahsulotga yetganda kerak bo‘ladigan sahifalash (?page=2, rel="next/prev") funksionali keyingi bosqichda qo‘shilishi rejalashtirilgan.
+Foydalanuvchi Sharhlari (Reviews) Qoldirish Formasi (§7):
+Holat: PDP da mavjud sharhlar ko‘rinadi va AggregateRating schemasi ishlaydi, ammo tashrif buyuruvchilar saytning o‘zidan yangi sharh va yulduzcha qoldirishi uchun interaktiv backend forma hali ulanmagan.
+HALI AMALGA OSHIRILMAGAN ISHLAR
+IndexNow Protokoli orqali Avtomatik Push (§1):
+YO‘Q: Bing va Yandex'ga yangi mahsulot sahifalarini bir zumda bildirish uchun IndexNow API kalitini kiritish va har gal mahsulot o‘zgarganda IndexNow endpointiga avtomatik ping jo‘natish mexanizmi hali ulanmagan.
+Blog va Maqolalar Bo‘limi — Content Hub (§5, §9, §11):
+YO‘Q: Hujjatdagi Blog / Guides → Comparisons → FAQ → Products zanjirini amalga oshirish uchun alohida /blog yoki /guides bo‘limi (masalan: "Ofis uchun to‘g‘ri qog‘oz qanday tanlanadi?", "2026-yilning eng yaxshi perpletka mashinalari") hali saytda yaratilmagan.
+HALI AMALGA OSHIRILMAGAN ISHLAR (YO‘Q — ❌)
+IndexNow Protokoli Integratsiyasi (§6):
+YO‘Q: Yandex va Bing qidiruv tizimlariga yangi tovar yoki o‘zgargan narxlarni soniyalarda bildirish uchun IndexNow API kaliti va ping yuborish servisi loyihada hali o‘rnatilmagan.
+HALI AMALGA OSHIRILMAGAN ISHLAR (YO‘Q — ❌)
+Blog va Qo‘llanmalar Bo‘limi — Content Hub (§4):
+YO‘Q: Hujjatdagi Blog / Guides → Comparisons → Products zanjirini ta'minlovchi alohida /blog yoki /guides (maqolalar, taqqoslashlar va ekspert maslahatlari) bo‘limi saytda hali mavjud emas.
+HALI AMALGA OSHIRILMAGAN ISHLAR (YO‘Q — ❌)
+IndexNow Protokoli (§7):
+YO‘Q: Yandex va Bing qidiruv tizimlariga yangi qo‘shilgan yoki o‘zgargan mahsulot URL’larini bir soniyada bildirish uchun ishlatiladigan IndexNow API kaliti va avtomatik ping yuborish mexanizmi hozircha loyihaga kiritilmagan.

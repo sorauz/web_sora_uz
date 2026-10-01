@@ -8,6 +8,7 @@ import { Breadcrumbs } from "@/components/discovery/Breadcrumbs";
 import { ProductCard } from "@/components/discovery/ProductCard";
 import { SortSelect } from "@/components/discovery/SortSelect";
 import { getProductLocalized } from "@/lib/schemas/product";
+import { calculateProductPrice } from "@/lib/utils/price";
 import { Metadata } from "next";
 import { Search } from "lucide-react";
 
@@ -72,11 +73,11 @@ export default async function SearchPage({
   const sort = typeof query.sort === "string" ? query.sort : "popular";
   if (sort === "price_asc") {
     results.sort(
-      (a, b) => (a.price?.retail_price || 0) - (b.price?.retail_price || 0)
+      (a, b) => calculateProductPrice(a.price).price - calculateProductPrice(b.price).price
     );
   } else if (sort === "price_desc") {
     results.sort(
-      (a, b) => (b.price?.retail_price || 0) - (a.price?.retail_price || 0)
+      (a, b) => calculateProductPrice(b.price).price - calculateProductPrice(a.price).price
     );
   }
 

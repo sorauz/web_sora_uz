@@ -1,6 +1,7 @@
 "use client";
 
 import { Product, getProductLocalized } from "@/lib/schemas/product";
+import { calculateProductPrice } from "@/lib/utils/price";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import Image from "next/image";
@@ -21,7 +22,7 @@ export function ProductCard({
   product,
   rating,
   reviewCount,
-  oldPrice,
+  oldPrice: propOldPrice,
   badge,
 }: ProductCardProps) {
   const locale = useLocale() as "uz" | "ru";
@@ -36,13 +37,15 @@ export function ProductCard({
   const inCart = hasItem(product.id);
   const isFav = isFavorite(product.id);
 
-  const price = product.price?.retail_price || 0;
+  const priceInfo = calculateProductPrice(product.price);
+  const price = priceInfo.price;
+  const oldPrice = propOldPrice ?? priceInfo.oldPrice;
   const isOutOfStock = product.price?.stock === "OutOfStock";
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (isOutOfStock) return;
+    if (isOutOfStock || price <= 0) return;
 
     addItem({
       id: product.id,
@@ -74,6 +77,11 @@ export function ProductCard({
           {badge && (
             <span className="px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider rounded-md bg-amber-500 text-white shadow-xs">
               {badge}
+            </span>
+          )}
+          {priceInfo.hasDiscount && priceInfo.discountPercent > 0 && (
+            <span className="px-2 py-0.5 text-[11px] font-bold tracking-wider rounded-md bg-rose-500 text-white shadow-xs">
+              -{priceInfo.discountPercent}%
             </span>
           )}
           {isOutOfStock && (
@@ -166,10 +174,10 @@ export function ProductCard({
 
           <button
             onClick={handleAddToCart}
-            disabled={isOutOfStock}
+            disabled={isOutOfStock || price <= 0}
             aria-label={inCart ? t("inCart") : t("addToCart")}
             className={`h-9 px-3 rounded-xl flex items-center justify-center gap-1.5 text-xs font-semibold transition-all duration-200 shadow-xs ${
-              isOutOfStock
+              isOutOfStock || price <= 0
                 ? "bg-slate-100 text-slate-400 cursor-not-allowed dark:bg-slate-800"
                 : inCart || addedAnim
                 ? "bg-emerald-600 hover:bg-emerald-700 text-white"
