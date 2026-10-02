@@ -42,7 +42,7 @@ test.describe("FAZA 5: Technical SEO, Canonical Redirection, and Price Display",
     expect(body).toContain("Sitemap: https://sora.uz/sitemap.xml");
   });
 
-  test("Sitemap.xml contains core URLs, categories, and products", async ({ request }) => {
+  test("Sitemap.xml contains core URLs, categories, products, lastmod from 1C, and regional hreflang", async ({ request }) => {
     const res = await request.get("/sitemap.xml");
     expect(res.status()).toBe(200);
     const xml = await res.text();
@@ -50,20 +50,31 @@ test.describe("FAZA 5: Technical SEO, Canonical Redirection, and Price Display",
     expect(xml).toContain("https://sora.uz/ru");
     expect(xml).toContain("/category/");
     expect(xml).toContain("/products/");
+    expect(xml).toContain("<lastmod>");
+    expect(xml).toContain('hreflang="uz-UZ"');
+    expect(xml).toContain('hreflang="ru-UZ"');
+    expect(xml).toContain('hreflang="x-default"');
   });
 
-  test("Category page contains valid Canonical, Hreflang and Breadcrumb JSON-LD", async ({ page }) => {
+  test("Category page contains valid Canonical, Regional Hreflang and Breadcrumb JSON-LD", async ({ page }) => {
     await page.goto("/uz/category/magnit-va-marker-doskalari");
 
     // Canonical link
     const canonical = await page.locator('link[rel="canonical"]').getAttribute("href");
     expect(canonical).toContain("/uz/category/magnit-va-marker-doskalari");
 
-    // Hreflang links
+    // Hreflang links (including regional uz-UZ, ru-UZ and x-default)
     const hreflangUz = await page.locator('link[hreflang="uz" i]').getAttribute("href");
+    const hreflangUzRegional = await page.locator('link[hreflang="uz-uz" i]').getAttribute("href");
     const hreflangRu = await page.locator('link[hreflang="ru" i]').getAttribute("href");
+    const hreflangRuRegional = await page.locator('link[hreflang="ru-uz" i]').getAttribute("href");
+    const hreflangDefault = await page.locator('link[hreflang="x-default" i]').getAttribute("href");
+
     expect(hreflangUz).toContain("/uz/category/magnit-va-marker-doskalari");
+    expect(hreflangUzRegional).toContain("/uz/category/magnit-va-marker-doskalari");
     expect(hreflangRu).toContain("/ru/category/magnitnye-i-markernye-doski");
+    expect(hreflangRuRegional).toContain("/ru/category/magnitnye-i-markernye-doski");
+    expect(hreflangDefault).toContain("/uz/category/magnit-va-marker-doskalari");
 
     // BreadcrumbList JSON-LD
     const ldJson = await page.locator('script[type="application/ld+json"]').allInnerTexts();

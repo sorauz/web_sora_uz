@@ -20,6 +20,16 @@ export async function generateMetadata({ params }: BrandsPageProps): Promise<Met
     description: isUz
       ? "Sora.uz do'konidagi rasmiy ishlab chiqaruvchilar: DELI, Samsung, Logitech, Canon, HP va boshqalar."
       : "Официальные бренды магазина Sora.uz: DELI, Samsung, Logitech, Canon, HP и другие.",
+    alternates: {
+      canonical: `https://sora.uz/${locale}/brands`,
+      languages: {
+        uz: "https://sora.uz/uz/brands",
+        "uz-UZ": "https://sora.uz/uz/brands",
+        ru: "https://sora.uz/ru/brands",
+        "ru-UZ": "https://sora.uz/ru/brands",
+        "x-default": "https://sora.uz/uz/brands",
+      },
+    },
   };
 }
 

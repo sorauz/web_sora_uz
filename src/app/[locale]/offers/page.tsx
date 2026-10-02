@@ -27,6 +27,13 @@ export async function generateMetadata({ params }: OffersPageProps): Promise<Met
       : "Специальные предложения магазина Sora.uz: Гарантия лучшей цены, акции, хиты продаж и новинки.",
     alternates: {
       canonical: `https://sora.uz/${locale}/offers`,
+      languages: {
+        uz: "https://sora.uz/uz/offers",
+        "uz-UZ": "https://sora.uz/uz/offers",
+        ru: "https://sora.uz/ru/offers",
+        "ru-UZ": "https://sora.uz/ru/offers",
+        "x-default": "https://sora.uz/uz/offers",
+      },
     },
   };
 }

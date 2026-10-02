@@ -40,7 +40,9 @@ export async function generateMetadata({
       canonical: `https://sora.uz/${locale}/brand/${slug}`,
       languages: {
         uz: `https://sora.uz/uz/brand/${slug}`,
+        "uz-UZ": `https://sora.uz/uz/brand/${slug}`,
         ru: `https://sora.uz/ru/brand/${slug}`,
+        "ru-UZ": `https://sora.uz/ru/brand/${slug}`,
         "x-default": `https://sora.uz/uz/brand/${slug}`,
       },
     },

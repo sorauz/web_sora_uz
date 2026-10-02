@@ -48,7 +48,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       canonical: `https://sora.uz/${locale}`,
       languages: {
         uz: "https://sora.uz/uz",
+        "uz-UZ": "https://sora.uz/uz",
         ru: "https://sora.uz/ru",
+        "ru-UZ": "https://sora.uz/ru",
         "x-default": "https://sora.uz/uz",
       },
     },

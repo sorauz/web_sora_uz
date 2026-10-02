@@ -147,7 +147,9 @@ export async function generateMetadata({ params }: StaticOfferPageProps): Promis
       canonical: `https://sora.uz/${locale}/catalog/${canonicalOffer}`,
       languages: {
         uz: `https://sora.uz/uz/catalog/${canonicalOffer}`,
+        "uz-UZ": `https://sora.uz/uz/catalog/${canonicalOffer}`,
         ru: `https://sora.uz/ru/catalog/${canonicalOffer}`,
+        "ru-UZ": `https://sora.uz/ru/catalog/${canonicalOffer}`,
         "x-default": `https://sora.uz/uz/catalog/${canonicalOffer}`,
       },
     },

@@ -52,7 +52,9 @@ export async function generateMetadata({
       canonical: `https://sora.uz/${locale}/category/${canonicalSlug}`,
       languages: {
         uz: `https://sora.uz/uz/category/${category.group_slug_uz}`,
+        "uz-UZ": `https://sora.uz/uz/category/${category.group_slug_uz}`,
         ru: `https://sora.uz/ru/category/${category.group_slug_ru}`,
+        "ru-UZ": `https://sora.uz/ru/category/${category.group_slug_ru}`,
         "x-default": `https://sora.uz/uz/category/${category.group_slug_uz}`,
       },
     },

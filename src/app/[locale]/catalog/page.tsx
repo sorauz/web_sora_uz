@@ -26,6 +26,16 @@ export async function generateMetadata({ params }: CatalogPageProps): Promise<Me
     description: isUz
       ? "Sora.uz barcha toifalar katalogi: Ofis jihozlari, kanselyariya mollari, smartfonlar va kompyuter anjomlari."
       : "Каталог всех категорий Sora.uz: Офисная техника, канцелярия, смартфоны и компьютерные аксессуары.",
+    alternates: {
+      canonical: `https://sora.uz/${locale}/catalog`,
+      languages: {
+        uz: "https://sora.uz/uz/catalog",
+        "uz-UZ": "https://sora.uz/uz/catalog",
+        ru: "https://sora.uz/ru/catalog",
+        "ru-UZ": "https://sora.uz/ru/catalog",
+        "x-default": "https://sora.uz/uz/catalog",
+      },
+    },
   };
 }
 
