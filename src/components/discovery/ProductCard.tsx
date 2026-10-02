@@ -32,6 +32,11 @@ export function ProductCard({
   const { toggleFavorite, isFavorite } = useFavoritesStore();
 
   const [addedAnim, setAddedAnim] = useState(false);
+  const initialImage =
+    product.main_picture && product.main_picture.trim() !== ""
+      ? product.main_picture
+      : "/placeholder-product.svg";
+  const [imageSrc, setImageSrc] = useState(initialImage);
 
   const loc = getProductLocalized(product, locale);
   const inCart = hasItem(product.id);
@@ -52,7 +57,7 @@ export function ProductCard({
       sku: product.product_sku,
       name: loc.name,
       price: price,
-      picture: product.main_picture,
+      picture: imageSrc,
       unit: loc.unit,
     });
 
@@ -107,12 +112,13 @@ export function ProductCard({
         {/* Image with crawlable Link */}
         <Link href={productUrl} className="relative w-full h-full block">
           <Image
-            src={product.main_picture}
+            src={imageSrc}
             alt={loc.alt_picture || loc.name}
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             className="object-contain transition-transform duration-300 group-hover:scale-105"
             loading="lazy"
+            onError={() => setImageSrc("/placeholder-product.svg")}
           />
         </Link>
       </div>

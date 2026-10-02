@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400" fill="none">
+  <rect width="400" height="400" rx="24" fill="#F1F5F9"/>
+  <path d="M200 140C166.863 140 140 166.863 140 200C140 233.137 166.863 260 200 260C233.137 260 260 233.137 260 200C260 166.863 233.137 140 200 140ZM140 280C117.909 280 100 297.909 100 320H300C300 297.909 282.091 280 260 280H140Z" fill="#CBD5E1"/>
+  <path d="M160 180L185 210L205 190L240 230H160V180Z" fill="#94A3B8"/>
+  <circle cx="230" cy="170" r="15" fill="#94A3B8"/>
+  <text x="200" y="340" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#94A3B8">Sora.uz</text>
+</svg>

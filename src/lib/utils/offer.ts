@@ -12,16 +12,28 @@ export function isOfferActive(item: {
 }): boolean {
   const now = new Date();
 
+  const parse1CDate = (dateStr: string): Date | null => {
+    if (!dateStr || typeof dateStr !== "string") return null;
+    const normalized =
+      dateStr.includes("Z") || dateStr.includes("+") || dateStr.includes("-", 11)
+        ? dateStr
+        : `${dateStr}+05:00`;
+    const d = new Date(normalized);
+    return isNaN(d.getTime()) ? null : d;
+  };
+
   if (item.Offer_start_time) {
-    const start = new Date(item.Offer_start_time);
-    if (!isNaN(start.getTime()) && now < start) {
+    const start = parse1CDate(item.Offer_start_time);
+    // Allow 24 hours clock skew / timezone grace period
+    const graceMs = 24 * 60 * 60 * 1000;
+    if (start && now.getTime() + graceMs < start.getTime()) {
       return false;
     }
   }
 
   if (item.Offer_end_time) {
-    const end = new Date(item.Offer_end_time);
-    if (!isNaN(end.getTime()) && now > end) {
+    const end = parse1CDate(item.Offer_end_time);
+    if (end && now > end) {
       return false;
     }
   }

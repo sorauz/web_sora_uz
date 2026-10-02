@@ -11,6 +11,7 @@ import { BrandCard } from "@/components/discovery/BrandCard";
 import { ProductCard } from "@/components/discovery/ProductCard";
 import { Link } from "@/i18n/routing";
 import { Metadata } from "next";
+import { ShieldCheck, Sparkles, Flame, BadgePercent } from "lucide-react";
 
 interface CatalogPageProps {
   params: Promise<{ locale: string }>;
@@ -84,6 +85,50 @@ export default async function CatalogPage({ params, searchParams }: CatalogPageP
               ? "1C ERP ma'lumotlar bazasidagi barcha rasmiy toifalar va brendlar ro'yxati."
               : "Полный список официальных категорий и брендов из базы 1С ERP."}
           </p>
+        </div>
+
+        {/* Special Offer Quick Banners */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+          <Link
+            href="/catalog/low_price_guarantee"
+            className="p-4 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-700 text-white flex flex-col justify-between hover:shadow-lg transition-all hover:-translate-y-0.5"
+          >
+            <ShieldCheck className="w-5 h-5 mb-2 text-white/90" />
+            <div>
+              <div className="text-[11px] uppercase font-semibold text-emerald-100">1C ERP</div>
+              <div className="text-sm font-bold">{isUz ? "Eng arzon narx kafolati" : "Гарантия лучшей цены"}</div>
+            </div>
+          </Link>
+          <Link
+            href="/catalog/new_products"
+            className="p-4 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-700 text-white flex flex-col justify-between hover:shadow-lg transition-all hover:-translate-y-0.5"
+          >
+            <Sparkles className="w-5 h-5 mb-2 text-white/90" />
+            <div>
+              <div className="text-[11px] uppercase font-semibold text-blue-100">1C ERP</div>
+              <div className="text-sm font-bold">{isUz ? "Yangi kelgan tovarlar" : "Новые поступления"}</div>
+            </div>
+          </Link>
+          <Link
+            href="/catalog/popular"
+            className="p-4 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-700 text-white flex flex-col justify-between hover:shadow-lg transition-all hover:-translate-y-0.5"
+          >
+            <Flame className="w-5 h-5 mb-2 text-white/90" />
+            <div>
+              <div className="text-[11px] uppercase font-semibold text-amber-100">1C ERP</div>
+              <div className="text-sm font-bold">{isUz ? "Ommabop xit tovarlar" : "Хиты продаж"}</div>
+            </div>
+          </Link>
+          <Link
+            href="/catalog/promotions"
+            className="p-4 rounded-2xl bg-gradient-to-br from-rose-500 to-pink-700 text-white flex flex-col justify-between hover:shadow-lg transition-all hover:-translate-y-0.5"
+          >
+            <BadgePercent className="w-5 h-5 mb-2 text-white/90" />
+            <div>
+              <div className="text-[11px] uppercase font-semibold text-rose-100">1C ERP</div>
+              <div className="text-sm font-bold">{isUz ? "Aksiyalar va chegirmalar" : "Акции и скидки"}</div>
+            </div>
+          </Link>
         </div>
 
         {/* All Root Categories & Subcategories */}
@@ -160,11 +205,16 @@ export default async function CatalogPage({ params, searchParams }: CatalogPageP
 
         {/* Top Products Grid */}
         <section className="space-y-4 pt-6 border-t border-slate-200 dark:border-slate-800">
-          <h2 className="text-xl sm:text-2xl font-bold">
-            {isUz ? "Tavsiya etiladigan mahsulotlar" : "Рекомендуемые товары"}
-          </h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl sm:text-2xl font-bold">
+              {isUz ? "Katalogdagi mahsulotlar" : "Товары из каталога"}
+            </h2>
+            <span className="text-xs text-slate-500 font-mono">
+              {products.length} {isUz ? "ta tovar" : "товаров"}
+            </span>
+          </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-            {products.slice(0, 4).map((p) => (
+            {products.slice(0, 16).map((p) => (
               <ProductCard
                 key={p.id}
                 product={p}
