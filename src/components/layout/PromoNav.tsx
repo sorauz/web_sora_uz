@@ -16,28 +16,28 @@ export function PromoNav() {
           <span>{t("catalog")}</span>
         </Link>
         <Link
-          href="/catalog?offer=promotions"
+          href="/catalog/promotions"
           className="flex items-center gap-1.5 text-rose-600 dark:text-rose-400 hover:text-rose-700 transition-colors"
         >
           <Percent className="w-3.5 h-3.5" />
           <span>{t("deals")}</span>
         </Link>
         <Link
-          href="/catalog?offer=low-price"
+          href="/catalog/low_price_guarantee"
           className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400 hover:text-blue-700 transition-colors"
         >
           <Tag className="w-3.5 h-3.5" />
           <span>{t("cheap")}</span>
         </Link>
         <Link
-          href="/catalog?offer=popular"
+          href="/catalog/popular"
           className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400 hover:text-amber-700 transition-colors"
         >
           <TrendingUp className="w-3.5 h-3.5" />
           <span>{t("topProducts")}</span>
         </Link>
         <Link
-          href="/catalog?offer=new"
+          href="/catalog/new_products"
           className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 transition-colors"
         >
           <Sparkles className="w-3.5 h-3.5" />

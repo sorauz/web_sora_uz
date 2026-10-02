@@ -1,4 +1,5 @@
 import { setRequestLocale } from "next-intl/server";
+import { redirect } from "next/navigation";
 import { api } from "@/lib/api";
 import { Header } from "@/components/layout/Header";
 import { PromoNav } from "@/components/layout/PromoNav";
@@ -33,40 +34,30 @@ export default async function CatalogPage({ params, searchParams }: CatalogPageP
   setRequestLocale(locale);
   const isUz = locale === "uz";
 
-  const [categoriesData, brandsData, productsData, specialOffers] = await Promise.all([
+  const offerFilter = typeof sParams.offer === "string" ? sParams.offer : (typeof sParams.badge === "string" ? sParams.badge : null);
+
+  // SEO & UX: Redirect query-based offer URLs to permanent clean static routes
+  if (offerFilter) {
+    if (offerFilter === "promotions" || offerFilter === "sale") {
+      redirect(`/${locale}/catalog/promotions`);
+    } else if (offerFilter === "low-price" || offerFilter === "low_price_guarantee") {
+      redirect(`/${locale}/catalog/low_price_guarantee`);
+    } else if (offerFilter === "popular" || offerFilter === "top") {
+      redirect(`/${locale}/catalog/popular`);
+    } else if (offerFilter === "new" || offerFilter === "new_products") {
+      redirect(`/${locale}/catalog/new_products`);
+    }
+  }
+
+  const [categoriesData, brandsData, productsData] = await Promise.all([
     api.getCategories(),
     api.getBrands(),
     api.getAllProducts(),
-    api.getSpecialOffers(),
   ]);
 
   const { tree, categories } = categoriesData;
   const brands = brandsData.data.brands;
   const products = productsData.products;
-
-  const offerFilter = typeof sParams.offer === "string" ? sParams.offer : (typeof sParams.badge === "string" ? sParams.badge : null);
-
-  let activeOfferTitle = "";
-  let offerBadge = "";
-  let filteredOfferProducts: typeof products = [];
-
-  if (offerFilter === "promotions" || offerFilter === "sale") {
-    activeOfferTitle = isUz ? "Aksiyalar va Maxsus Chegirmalar" : "Акции и Скидки";
-    offerBadge = isUz ? "Aksiya" : "Акция";
-    filteredOfferProducts = specialOffers.promotions;
-  } else if (offerFilter === "low-price" || offerFilter === "low_price_guarantee") {
-    activeOfferTitle = isUz ? "Kafolatlangan Eng Arzon Narx" : "Гарантия лучшей цены";
-    offerBadge = isUz ? "Eng arzon narx" : "Лучшая цена";
-    filteredOfferProducts = specialOffers.lowPrice;
-  } else if (offerFilter === "popular" || offerFilter === "top") {
-    activeOfferTitle = isUz ? "Ommabop Mahsulotlar (Xit)" : "Популярные товары (Хиты)";
-    offerBadge = isUz ? "Xit" : "Хит";
-    filteredOfferProducts = specialOffers.popular;
-  } else if (offerFilter === "new" || offerFilter === "new_products") {
-    activeOfferTitle = isUz ? "Yangi Kelgan Mahsulotlar" : "Новые поступления";
-    offerBadge = isUz ? "Yangi" : "Новинка";
-    filteredOfferProducts = specialOffers.newProducts;
-  }
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col">
@@ -94,45 +85,6 @@ export default async function CatalogPage({ params, searchParams }: CatalogPageP
               : "Полный список официальных категорий и брендов из базы 1С ERP."}
           </p>
         </div>
-
-        {/* Active Offer Filter Section */}
-        {filteredOfferProducts.length > 0 ? (
-          <section className="space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-5 rounded-2xl bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-900 dark:to-blue-950/40 border border-blue-100 dark:border-blue-900/50">
-              <div>
-                <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-600 text-white mb-2">
-                  {offerBadge}
-                </span>
-                <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white">
-                  {activeOfferTitle}
-                </h2>
-                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1">
-                  {isUz
-                    ? `1C ERP tizimidagi maxsus taklif: ${filteredOfferProducts.length} ta mahsulot.`
-                    : `Специальное предложение из 1С ERP: ${filteredOfferProducts.length} товаров.`}
-                </p>
-              </div>
-              <Link
-                href="/catalog"
-                className="self-start sm:self-center px-4 py-2 text-xs font-semibold rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 transition"
-              >
-                {isUz ? "Filtrni tozalash (Barcha toifalar)" : "Сбросить фильтр (Все категории)"}
-              </Link>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-              {filteredOfferProducts.map((p) => (
-                <ProductCard
-                  key={p.id}
-                  product={p}
-                  rating={4.8}
-                  reviewCount={18}
-                  badge={offerBadge}
-                />
-              ))}
-            </div>
-          </section>
-        ) : null}
 
         {/* All Root Categories & Subcategories */}
         <section className="space-y-6">

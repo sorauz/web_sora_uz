@@ -215,7 +215,7 @@ export default async function HomePage({ params }: PageProps) {
                 </div>
               </div>
               <Link
-                href="/catalog?offer=promotions"
+                href="/catalog/promotions"
                 className="text-xs font-bold text-rose-600 dark:text-rose-400 hover:underline flex items-center gap-1"
               >
                 <span>{tCommon("viewAll")}</span>
@@ -251,7 +251,7 @@ export default async function HomePage({ params }: PageProps) {
                 </div>
               </div>
               <Link
-                href="/catalog?offer=low-price"
+                href="/catalog/low_price_guarantee"
                 className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
               >
                 <span>{tCommon("viewAll")}</span>
@@ -287,7 +287,7 @@ export default async function HomePage({ params }: PageProps) {
                 </div>
               </div>
               <Link
-                href="/catalog?offer=popular"
+                href="/catalog/popular"
                 className="text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1"
               >
                 <span>{tCommon("viewAll")}</span>
@@ -323,7 +323,7 @@ export default async function HomePage({ params }: PageProps) {
                 </div>
               </div>
               <Link
-                href="/catalog?offer=new"
+                href="/catalog/new_products"
                 className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1"
               >
                 <span>{tCommon("viewAll")}</span>

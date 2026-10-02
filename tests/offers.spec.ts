@@ -56,34 +56,57 @@ test.describe("1C Special Offers Unit Logic", () => {
   });
 });
 
-test.describe("Offers UI & Route Verification", () => {
-  test("Homepage renders offer sections and navigation links", async ({ page }) => {
+test.describe("Offers UI & Static Route Verification", () => {
+  test("Homepage renders offer sections and navigation links to static routes", async ({ page }) => {
     await page.goto("/uz");
 
     // Check PromoNav has offer links
     const promoNav = page.locator("nav");
     await expect(promoNav.first()).toBeVisible();
 
-    // Check that offers links exist in DOM
-    const offersLink = page.locator('a[href*="/offers"], a[href*="offer="]').first();
+    // Check that static offer links exist in DOM
+    const offersLink = page.locator('a[href*="/catalog/new_products"], a[href*="/catalog/promotions"]').first();
     await expect(offersLink).toBeVisible();
   });
 
   test("Offers Hub page (/uz/offers) renders with tab navigation", async ({ page }) => {
     await page.goto("/uz/offers");
 
-    // Header and title
     await expect(page.locator("h1")).toBeVisible();
-
-    // Tabs should be visible
     const tabs = page.locator('a[href*="/offers"]');
     expect(await tabs.count()).toBeGreaterThan(0);
   });
 
-  test("Catalog page handles offer search param (?offer=promotions)", async ({ page }) => {
-    await page.goto("/uz/catalog?offer=promotions");
+  test("All 4 Static Offer Landing Pages render with 200 OK and canonical links", async ({ page }) => {
+    const staticEndpoints = [
+      { path: "/uz/catalog/new_products", titlePart: "Yangi" },
+      { path: "/uz/catalog/low_price_guarantee", titlePart: "Eng Arzon" },
+      { path: "/uz/catalog/popular", titlePart: "Ommabop" },
+      { path: "/uz/catalog/promotions", titlePart: "Aksiyalar" },
+    ];
 
-    // Filter banner or title should be displayed
+    for (const item of staticEndpoints) {
+      const response = await page.goto(item.path);
+      expect(response?.status()).toBe(200);
+
+      // Check h1 text
+      const h1 = page.locator("h1");
+      await expect(h1).toBeVisible();
+      const text = await h1.textContent();
+      expect(text?.toLowerCase()).toContain(item.titlePart.toLowerCase());
+
+      // Check canonical link in head
+      const canonical = page.locator('link[rel="canonical"]');
+      const href = await canonical.getAttribute("href");
+      expect(href).toContain(item.path.replace("/uz", ""));
+    }
+  });
+
+  test("Catalog query param redirect (?offer=new -> /catalog/new_products)", async ({ page }) => {
+    await page.goto("/uz/catalog?offer=new");
+
+    // Must be redirected to static clean URL
+    expect(page.url()).toContain("/catalog/new_products");
     await expect(page.locator("h1")).toBeVisible();
   });
 });
