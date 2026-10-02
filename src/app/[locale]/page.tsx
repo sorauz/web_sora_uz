@@ -77,24 +77,37 @@ export default async function HomePage({ params }: PageProps) {
   const isUz = locale === "uz";
 
   // Fetch real data from 1C API layer (products enriched with prices)
-  const [categoriesData, brandsData, productsData] = await Promise.all([
+  const [categoriesData, brandsData, productsData, specialOffers] = await Promise.all([
     api.getCategories(),
     api.getBrands(),
     api.getAllProducts(),
+    api.getSpecialOffers(),
   ]);
 
   const { tree, categories } = categoriesData;
   const brands = brandsData.data.brands;
   const products = productsData.products;
 
-  // Prioritize products with real 1C prices
-  const pricedProducts = products.filter((p) => calculateProductPrice(p.price).price > 0);
-  const displayPool = pricedProducts.length >= 8 ? pricedProducts : products;
+  // Real 1C Special Offers (promotions, low price guarantee, popular, new products):
+  const promotionProducts =
+    specialOffers.promotions.length > 0
+      ? specialOffers.promotions
+      : products.filter((p) => calculateProductPrice(p.price).hasDiscount).slice(0, 4);
 
-  // Slices for sections
-  const topProducts = displayPool.slice(0, 4);
-  const discountProducts = displayPool.filter((p) => calculateProductPrice(p.price).hasDiscount);
-  const dealProducts = discountProducts.length >= 4 ? discountProducts.slice(0, 4) : displayPool.slice(4, 8);
+  const lowPriceProducts =
+    specialOffers.lowPrice.length > 0
+      ? specialOffers.lowPrice
+      : products.slice(0, 4);
+
+  const popularProducts =
+    specialOffers.popular.length > 0
+      ? specialOffers.popular
+      : products.slice(4, 8);
+
+  const newProductsList =
+    specialOffers.newProducts.length > 0
+      ? specialOffers.newProducts
+      : products.slice(8, 12);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col">
@@ -187,65 +200,149 @@ export default async function HomePage({ params }: PageProps) {
           </div>
         </section>
 
-        {/* 5. Top Mahsulotlar Bloki (E-commerce Web Design §10) */}
-        <section className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-amber-500" />
-              <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
-                {t("topProductsTitle")}
-              </h2>
+        {/* 5. Aksiyalar va Chegirmalar (/promotions) */}
+        {promotionProducts.length > 0 && (
+          <section id="promotions" className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center">
+                  <Percent className="w-5 h-5" />
+                </div>
+                <div>
+                  <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
+                    {t("dealsTitle")}
+                  </h2>
+                </div>
+              </div>
+              <Link
+                href="/catalog?offer=promotions"
+                className="text-xs font-bold text-rose-600 dark:text-rose-400 hover:underline flex items-center gap-1"
+              >
+                <span>{tCommon("viewAll")}</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
             </div>
-            <Link
-              href="/catalog?badge=top"
-              className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
-            >
-              <span>{tCommon("viewAll")}</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-            {topProducts.map((p) => (
-              <ProductCard
-                key={p.id}
-                product={p}
-                rating={4.9}
-                reviewCount={36}
-                badge={isUz ? "Top" : "Топ"}
-              />
-            ))}
-          </div>
-        </section>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+              {promotionProducts.slice(0, 4).map((p) => (
+                <ProductCard
+                  key={p.id}
+                  product={p}
+                  rating={4.8}
+                  reviewCount={22}
+                  badge={isUz ? "Aksiya" : "Скидка"}
+                />
+              ))}
+            </div>
+          </section>
+        )}
 
-        {/* 6. Chegirmalar va Maxsus Takliflar */}
-        <section className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Percent className="w-5 h-5 text-rose-500" />
-              <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
-                {t("dealsTitle")}
-              </h2>
+        {/* 6. Eng Arzon Narx Kafolati (/low_price_guarantee) */}
+        {lowPriceProducts.length > 0 && (
+          <section id="low-price" className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+                  <ShieldCheck className="w-5 h-5" />
+                </div>
+                <div>
+                  <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
+                    {t("lowPriceTitle")}
+                  </h2>
+                </div>
+              </div>
+              <Link
+                href="/catalog?offer=low-price"
+                className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+              >
+                <span>{tCommon("viewAll")}</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
             </div>
-            <Link
-              href="/catalog?badge=sale"
-              className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
-            >
-              <span>{tCommon("viewAll")}</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-            {dealProducts.map((p) => (
-              <ProductCard
-                key={p.id}
-                product={p}
-                rating={4.7}
-                reviewCount={19}
-                badge={isUz ? "Aksiya" : "Скидка"}
-              />
-            ))}
-          </div>
-        </section>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+              {lowPriceProducts.slice(0, 4).map((p) => (
+                <ProductCard
+                  key={p.id}
+                  product={p}
+                  rating={4.9}
+                  reviewCount={31}
+                  badge={isUz ? "Eng arzon narx" : "Лучшая цена"}
+                />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* 7. Ommabop Mahsulotlar - Xit Savdo (/popular) */}
+        {popularProducts.length > 0 && (
+          <section id="popular" className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+                  <TrendingUp className="w-5 h-5" />
+                </div>
+                <div>
+                  <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
+                    {t("topProductsTitle")}
+                  </h2>
+                </div>
+              </div>
+              <Link
+                href="/catalog?offer=popular"
+                className="text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1"
+              >
+                <span>{tCommon("viewAll")}</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+              {popularProducts.slice(0, 4).map((p) => (
+                <ProductCard
+                  key={p.id}
+                  product={p}
+                  rating={4.9}
+                  reviewCount={38}
+                  badge={isUz ? "Xit" : "Хит"}
+                />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* 8. Yangi Mahsulotlar - Novinki (/new_products) */}
+        {newProductsList.length > 0 && (
+          <section id="new-products" className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                  <Sparkles className="w-5 h-5" />
+                </div>
+                <div>
+                  <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
+                    {t("newProductsTitle")}
+                  </h2>
+                </div>
+              </div>
+              <Link
+                href="/catalog?offer=new"
+                className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1"
+              >
+                <span>{tCommon("viewAll")}</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+              {newProductsList.slice(0, 4).map((p) => (
+                <ProductCard
+                  key={p.id}
+                  product={p}
+                  rating={4.7}
+                  reviewCount={15}
+                  badge={isUz ? "Yangi" : "Новинка"}
+                />
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* 7. Rasmiy Brendlar Bloki (E-commerce Web Design §15) */}
         <section className="space-y-4">

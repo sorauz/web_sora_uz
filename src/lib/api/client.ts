@@ -15,13 +15,19 @@ import {
   ProductSchema,
   AllProductsResponseSchema,
 } from "../schemas/product";
+import { OfferItem, OfferListResponseSchema } from "../schemas/offer";
 import { buildCategoryTree } from "../utils/category-tree";
+import { isOfferActive, offerItemToProduct } from "../utils/offer";
 import {
   FIXTURE_CATEGORIES,
   FIXTURE_UNITS,
   FIXTURE_BRANDS,
   FIXTURE_PRICES,
   FIXTURE_PRODUCTS,
+  FIXTURE_LOW_PRICE_GUARANTEE,
+  FIXTURE_NEW_PRODUCTS,
+  FIXTURE_POPULAR,
+  FIXTURE_PROMOTIONS,
 } from "./fixtures";
 
 interface FetchOptions {
@@ -296,6 +302,152 @@ class SoraApiClient {
     }
 
     return { product: null, isFallback: all.isFallback };
+  }
+
+  /**
+   * Fetches "Low price guarantee" products from 1C ERP.
+   */
+  async getLowPriceGuarantee(
+    options?: FetchOptions
+  ): Promise<{ items: OfferItem[]; isFallback: boolean }> {
+    const res = await this.request<OfferItem[]>("/low_price_guarantee", {
+      tags: options?.tags ?? ["offers", "low_price_guarantee"],
+      revalidate: options?.revalidate ?? 3600,
+    });
+    if (!res.isFallback && res.data) {
+      const parsed = OfferListResponseSchema.safeParse(res.data);
+      if (parsed.success && parsed.data.length > 0) {
+        return { items: parsed.data, isFallback: false };
+      }
+    }
+    return { items: FIXTURE_LOW_PRICE_GUARANTEE, isFallback: true };
+  }
+
+  /**
+   * Fetches "New products" from 1C ERP.
+   */
+  async getNewProducts(
+    options?: FetchOptions
+  ): Promise<{ items: OfferItem[]; isFallback: boolean }> {
+    const res = await this.request<OfferItem[]>("/new_products", {
+      tags: options?.tags ?? ["offers", "new_products"],
+      revalidate: options?.revalidate ?? 3600,
+    });
+    if (!res.isFallback && res.data) {
+      const parsed = OfferListResponseSchema.safeParse(res.data);
+      if (parsed.success && parsed.data.length > 0) {
+        return { items: parsed.data, isFallback: false };
+      }
+    }
+    return { items: FIXTURE_NEW_PRODUCTS, isFallback: true };
+  }
+
+  /**
+   * Fetches "Popular" products (hit sales) from 1C ERP.
+   */
+  async getPopular(
+    options?: FetchOptions
+  ): Promise<{ items: OfferItem[]; isFallback: boolean }> {
+    const res = await this.request<OfferItem[]>("/popular", {
+      tags: options?.tags ?? ["offers", "popular"],
+      revalidate: options?.revalidate ?? 3600,
+    });
+    if (!res.isFallback && res.data) {
+      const parsed = OfferListResponseSchema.safeParse(res.data);
+      if (parsed.success && parsed.data.length > 0) {
+        return { items: parsed.data, isFallback: false };
+      }
+    }
+    return { items: FIXTURE_POPULAR, isFallback: true };
+  }
+
+  /**
+   * Fetches "Promotions" (deals / discounts) from 1C ERP.
+   */
+  async getPromotions(
+    options?: FetchOptions
+  ): Promise<{ items: OfferItem[]; isFallback: boolean }> {
+    const res = await this.request<OfferItem[]>("/promotions", {
+      tags: options?.tags ?? ["offers", "promotions"],
+      revalidate: options?.revalidate ?? 3600,
+    });
+    if (!res.isFallback && res.data) {
+      const parsed = OfferListResponseSchema.safeParse(res.data);
+      if (parsed.success && parsed.data.length > 0) {
+        return { items: parsed.data, isFallback: false };
+      }
+    }
+    return { items: FIXTURE_PROMOTIONS, isFallback: true };
+  }
+
+  /**
+   * Aggregator: Fetches all 4 special offers in parallel, enriches each item
+   * with live prices from /price, links full Product details, and verifies active time ranges.
+   */
+  async getSpecialOffers(options?: FetchOptions): Promise<{
+    lowPrice: Product[];
+    newProducts: Product[];
+    popular: Product[];
+    promotions: Product[];
+    rawOffers: {
+      lowPrice: OfferItem[];
+      newProducts: OfferItem[];
+      popular: OfferItem[];
+      promotions: OfferItem[];
+    };
+    isFallback: boolean;
+  }> {
+    const [lowRes, newRes, popRes, promoRes, pricesRes, allProdsRes] =
+      await Promise.all([
+        this.getLowPriceGuarantee(options),
+        this.getNewProducts(options),
+        this.getPopular(options),
+        this.getPromotions(options),
+        this.getPrices(options),
+        this.getAllProducts(options),
+      ]);
+
+    const isFallback =
+      lowRes.isFallback ||
+      newRes.isFallback ||
+      popRes.isFallback ||
+      promoRes.isFallback;
+
+    // Fast product lookup map
+    const productMap = new Map<string, Product>();
+    for (const p of allProdsRes.products) {
+      productMap.set(p.id, p);
+    }
+
+    const enrichItems = (items: OfferItem[]): Product[] => {
+      return items
+        .filter((item) => isOfferActive(item))
+        .map((item) => {
+          const existing = productMap.get(item.id);
+          const price = pricesRes.priceMap[item.id] || existing?.price;
+          if (existing) {
+            return {
+              ...existing,
+              price: price || existing.price,
+            };
+          }
+          return offerItemToProduct(item, price);
+        });
+    };
+
+    return {
+      lowPrice: enrichItems(lowRes.items),
+      newProducts: enrichItems(newRes.items),
+      popular: enrichItems(popRes.items),
+      promotions: enrichItems(promoRes.items),
+      rawOffers: {
+        lowPrice: lowRes.items,
+        newProducts: newRes.items,
+        popular: popRes.items,
+        promotions: promoRes.items,
+      },
+      isFallback,
+    };
   }
 }
 

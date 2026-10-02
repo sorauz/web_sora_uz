@@ -1,0 +1,81 @@
+API'lar Hujjati: Maxsus takliflar (Offers)
+Quyida ushbu 4 ta API uchun birlashtirilgan, qulay va professional API hujjatini taqdim etaman:
+4 xil turdagi maxsus takliflar va mahsulotlar ro'yxatini (Arzon narx kafolati, Yangi mahsulotlar, Ommabop mahsulotlar va Aksiyalar) olish uchun alohida HTTP so'rovlar yozilgan. Barcha so'rovlar bir xil tuzilmadagi JSON ma'lumot qaytaradi, faqat URL manzili va ma'lumotlar toifasi bilan farqlanadi.
+
+Asosiy URL (Base URL): [http://1cloud.uz:777/SORA/hs/for_msp]
+Metod: GET Ma'lumot formati: JSON
+Avtorizatsiya: (Agar 1C da Basic Auth)
+So'rov (Request) Ushbu so'rov uchun qo'shimcha parametrlar (Query params yoki Body) talab etilmaydi.
+Javob (Response) API muvaffaqiyatli ishlaganda 200 OK statusi bilan ob'ektlar massivini (Array of Objects) qaytaradi.
+Headers (Sarlavhalar): Content-Type: application/json; charset=utf-8
+
+API Yo'nalishlari (Endpoints)
+Tizimda 4 xil toifadagi ma'lumotlarni olish uchun alohida URL manzillar mavjud. Kerakli toifaga mos keluvchi manzilga GET so'rov yuboriladi:
+
+Yo'nalish (Endpoint),Vazifasi (Tavsifi),1C dagi Toifa (Enum)
+/Low_price_guarantee,"""Eng arzon narx kafolati"" bo'lgan mahsulotlar ro'yxatini qaytaradi.",Low_price_guarantee
+/new_products,"""Yangi mahsulotlar"" (novinki) ro'yxatini qaytaradi.",New_products
+/popular,"""Ommabop mahsulotlar"" (xity prodaj/top) ro'yxatini qaytaradi.",Popular
+/promotions,"""Aksiyadagi mahsulotlar"" (chegirmalar/aksiyalar) ro'yxatini qaytaradi.",Promotions
+
+
+So'rov (Request)
+Ushbu so'rovlar uchun qo'shimcha parametrlar (Query params yoki Body) talab etilmaydi.
+
+HTTP So'rov misoli ("Yangi mahsulotlar" uchun):
+`
+GET /SORA/hs/for_msp/new_products HTTP/1.1
+Host: 1cloud.uz:777
+Accept: application/json
+`
+HTTP So'rov misoli ("Eng arzon narx kafolati" uchun):
+`
+GET /SORA/hs/for_msp/low_price_guarantee HTTP/1.1
+Host: 1cloud.uz:777
+Accept: application/json
+`
+
+HTTP So'rov misoli ("Ommabop mahsulotlar" uchun):
+`
+GET /SORA/hs/for_msp/popular HTTP/1.1
+Host: 1cloud.uz:777
+Accept: application/json
+`
+
+HTTP So'rov misoli ("Aksiyadagi mahsulotlar" uchun):
+`
+GET /SORA/hs/for_msp/promotions HTTP/1.1
+Host: 1cloud.uz:777
+Accept: application/json
+`
+
+
+Javob (Response)
+Barcha 4 ta yo'nalish (endpoint) bir xil strukturadagi JSON massivini (Array of Objects) qaytaradi.
+Headers (Sarlavhalar):
+Content-Type: application/json; charset=utf-8
+
+Qaytariladigan JSON maydonlari tavsifi:
+
+Maydon nomi,Turi,Tavsifi
+offer_name,String,"Taklif toifasining nomi (masalan: "New_products")."
+Offer_start_time,Date/String,Taklifning boshlanish vaqti (Format: YYYY-MM-DDTHH:mm:ss).
+Offer_end_time,Date/String,Taklifning tugash vaqti (Format: YYYY-MM-DDTHH:mm:ss).
+id,String (UUID),Tovar (nomenklatura) ning 1C dagi noyob identifikatori (GUID).
+slug_uz,String,Tovarning o'zbek tilidagi URL manzili (slug).
+slug_ru,String,Tovarning rus tilidagi URL manzili (slug).
+name_ru,String,Tovarning rus tilidagi nomi.
+name_uz,String,Tovarning o'zbek tilidagi nomi.
+alt_picture_uz,String,O'zbek tili uchun (alt) rasm matini.
+alt_picture_ru,String,Rus tili uchun (alt) rasm matini.
+main_picture,String,Tovarning asosiy rasmi havolasi.
+group_uz,String,Tovar tegishli bo'lgan kategoriyaning o'zbek tilidagi nomi.
+group_ru,String,Tovar tegishli bo'lgan kategoriyaning rus tilidagi nomi.
+group_slug_uz,String,Kategoriyaning o'zbek tilidagi URL manzili (slug).
+group_slug_ru,String,Kategoriyaning rus tilidagi URL manzili (slug).
+brand,String,Tovar tegishli bo'lgan brendning nomi.
+
+⚠️ Xatolik kodlari (Status Codes)
+200 OK — Ma'lumotlar muvaffaqiyatli qaytarildi.
+
+500 Internal Server Error — 1C serveri ichida xatolik yuz bersa (odatda so'rovni bajarishda yoki ma'lumotlarni o'qishda xato bo'lsa standart 1C javobi qaytadi).

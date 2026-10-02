@@ -3,3 +3,4 @@ export * from "./unit";
 export * from "./brand";
 export * from "./price";
 export * from "./product";
+export * from "./offer";
