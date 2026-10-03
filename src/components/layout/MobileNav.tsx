@@ -22,7 +22,7 @@ export function MobileNav() {
     <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 md:hidden py-1.5 px-4 flex items-center justify-around">
       <Link
         href="/"
-        className="flex flex-col items-center gap-1 text-[10px] font-medium text-slate-600 dark:text-slate-400 hover:text-blue-600"
+        className="flex flex-col items-center gap-1 text-[10px] font-medium text-slate-600 dark:text-slate-400 hover:text-sora-600"
       >
         <Home className="w-5 h-5" />
         <span>{t("home")}</span>
@@ -30,7 +30,7 @@ export function MobileNav() {
 
       <Link
         href="/catalog"
-        className="flex flex-col items-center gap-1 text-[10px] font-medium text-slate-600 dark:text-slate-400 hover:text-blue-600"
+        className="flex flex-col items-center gap-1 text-[10px] font-medium text-slate-600 dark:text-slate-400 hover:text-sora-600"
       >
         <Grid className="w-5 h-5" />
         <span>{t("catalog")}</span>
@@ -38,7 +38,7 @@ export function MobileNav() {
 
       <Link
         href="/search"
-        className="flex flex-col items-center gap-1 text-[10px] font-medium text-slate-600 dark:text-slate-400 hover:text-blue-600"
+        className="flex flex-col items-center gap-1 text-[10px] font-medium text-slate-600 dark:text-slate-400 hover:text-sora-600"
       >
         <Search className="w-5 h-5" />
         <span>Qidiruv</span>
@@ -46,7 +46,7 @@ export function MobileNav() {
 
       <Link
         href="/favorites"
-        className="relative flex flex-col items-center gap-1 text-[10px] font-medium text-slate-600 dark:text-slate-400 hover:text-blue-600"
+        className="relative flex flex-col items-center gap-1 text-[10px] font-medium text-slate-600 dark:text-slate-400 hover:text-sora-600"
       >
         <Heart className="w-5 h-5" />
         {favCount > 0 && (
@@ -59,11 +59,11 @@ export function MobileNav() {
 
       <Link
         href="/cart"
-        className="relative flex flex-col items-center gap-1 text-[10px] font-medium text-slate-600 dark:text-slate-400 hover:text-blue-600"
+        className="relative flex flex-col items-center gap-1 text-[10px] font-medium text-slate-600 dark:text-slate-400 hover:text-sora-600"
       >
         <ShoppingBag className="w-5 h-5" />
         {cartCount > 0 && (
-          <span className="absolute -top-1 right-1 w-3.5 h-3.5 bg-blue-600 text-white rounded-full text-[9px] font-bold flex items-center justify-center">
+          <span className="absolute -top-1 right-1 w-3.5 h-3.5 bg-sora-600 text-white rounded-full text-[9px] font-bold flex items-center justify-center">
             {cartCount}
           </span>
         )}

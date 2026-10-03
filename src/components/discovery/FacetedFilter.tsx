@@ -61,13 +61,13 @@ export function FacetedFilter({
     <div className="space-y-6">
       <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
         <h3 className="font-bold text-sm text-slate-900 dark:text-slate-100 flex items-center gap-2">
-          <Filter className="w-4 h-4 text-blue-600" />
+          <Filter className="w-4 h-4 text-sora-600" />
           {t("title")}
         </h3>
         {hasActiveFilters && (
           <button
             onClick={resetAll}
-            className="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 font-medium flex items-center gap-1"
+            className="text-xs text-sora-600 hover:text-sora-700 dark:text-sora-400 font-medium flex items-center gap-1"
           >
             <RotateCcw className="w-3 h-3" />
             {t("title") !== "Фильтры" ? "Tozalash" : "Сбросить"}
@@ -85,7 +85,7 @@ export function FacetedFilter({
             type="checkbox"
             checked={inStock === "1"}
             onChange={(e) => setInStock(e.target.checked ? "1" : null)}
-            className="w-4 h-4 rounded-sm text-blue-600 focus:ring-blue-500 border-slate-300 cursor-pointer"
+            className="w-4 h-4 rounded-sm text-sora-600 focus:ring-sora-500 border-slate-300 cursor-pointer"
           />
           <span>{t("onlyInStock")}</span>
         </label>
@@ -102,14 +102,14 @@ export function FacetedFilter({
             return (
               <label
                 key={brand.id}
-                className="flex items-center justify-between py-1 text-slate-700 dark:text-slate-300 hover:text-blue-600 cursor-pointer select-none"
+                className="flex items-center justify-between py-1 text-slate-700 dark:text-slate-300 hover:text-sora-600 cursor-pointer select-none"
               >
                 <div className="flex items-center gap-2.5">
                   <input
                     type="checkbox"
                     checked={checked}
                     onChange={() => toggleBrand(brand.name)}
-                    className="w-4 h-4 rounded-sm text-blue-600 focus:ring-blue-500 border-slate-300 cursor-pointer"
+                    className="w-4 h-4 rounded-sm text-sora-600 focus:ring-sora-500 border-slate-300 cursor-pointer"
                   />
                   <span>{brand.name}</span>
                 </div>
@@ -130,7 +130,7 @@ export function FacetedFilter({
             placeholder={t("priceFrom")}
             value={minPrice}
             onChange={(e) => setMinPrice(e.target.value || null)}
-            className="w-full h-9 px-3 text-xs rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 focus:outline-hidden focus:border-blue-500"
+            className="w-full h-9 px-3 text-xs rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 focus:outline-hidden focus:border-sora-500"
           />
           <span className="text-slate-400 text-xs">—</span>
           <input
@@ -138,7 +138,7 @@ export function FacetedFilter({
             placeholder={t("priceTo")}
             value={maxPrice}
             onChange={(e) => setMaxPrice(e.target.value || null)}
-            className="w-full h-9 px-3 text-xs rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 focus:outline-hidden focus:border-blue-500"
+            className="w-full h-9 px-3 text-xs rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 focus:outline-hidden focus:border-sora-500"
           />
         </div>
       </div>
@@ -158,10 +158,10 @@ export function FacetedFilter({
           onClick={() => setMobileOpen(true)}
           className="h-10 px-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center gap-2 text-xs font-bold text-slate-800 dark:text-slate-200 shadow-xs"
         >
-          <Filter className="w-4 h-4 text-blue-600" />
+          <Filter className="w-4 h-4 text-sora-600" />
           <span>{t("title")}</span>
           {hasActiveFilters && (
-            <span className="w-2 h-2 rounded-full bg-blue-600" />
+            <span className="w-2 h-2 rounded-full bg-sora-600" />
           )}
         </button>
 
@@ -185,7 +185,7 @@ export function FacetedFilter({
               <div className="pt-6 border-t border-slate-100 dark:border-slate-800 mt-6">
                 <button
                   onClick={() => setMobileOpen(false)}
-                  className="w-full h-11 bg-blue-600 text-white font-bold text-sm rounded-xl"
+                  className="w-full h-11 bg-sora-600 text-white font-bold text-sm rounded-xl"
                 >
                   Ko&apos;rish (Qo&apos;llash)
                 </button>

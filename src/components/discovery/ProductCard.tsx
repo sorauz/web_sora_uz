@@ -74,7 +74,7 @@ export function ProductCard({
   const productUrl = `/products/${loc.slug}`;
 
   return (
-    <article className="group relative bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-3 sm:p-4 flex flex-col justify-between hover:shadow-lg hover:border-blue-300 dark:hover:border-blue-700 transition-all duration-200">
+    <article className="group relative bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-3 sm:p-4 flex flex-col justify-between hover:shadow-lg hover:border-sora-300 dark:hover:border-sora-700 transition-all duration-200">
       {/* Top Media & Badges */}
       <div className="relative w-full aspect-square bg-slate-50 dark:bg-slate-800/60 rounded-xl overflow-hidden mb-3.5 flex items-center justify-center p-3">
         {/* Badges */}
@@ -127,12 +127,12 @@ export function ProductCard({
       <div className="flex-1 flex flex-col justify-between space-y-2">
         <div>
           {/* Brand */}
-          <div className="text-[11px] font-medium text-blue-600 dark:text-blue-400 tracking-wide uppercase mb-1">
+          <div className="text-[11px] font-medium text-sora-600 dark:text-sora-400 tracking-wide uppercase mb-1">
             {product.brand}
           </div>
 
           {/* Product Name (Crawlable Link!) */}
-          <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 leading-snug line-clamp-2 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+          <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 leading-snug line-clamp-2 hover:text-sora-600 dark:hover:text-sora-400 transition-colors">
             <Link href={productUrl} className="focus:outline-hidden">
               {loc.name}
             </Link>
@@ -172,7 +172,7 @@ export function ProductCard({
                 </span>
               </div>
             ) : (
-              <div className="text-xs sm:text-sm font-semibold text-blue-600 dark:text-blue-400">
+              <div className="text-xs sm:text-sm font-semibold text-sora-600 dark:text-sora-400">
                 {locale === "uz" ? "Narxi kelishiladi" : "Цена по запросу"}
               </div>
             )}
@@ -187,7 +187,7 @@ export function ProductCard({
                 ? "bg-slate-100 text-slate-400 cursor-not-allowed dark:bg-slate-800"
                 : inCart || addedAnim
                 ? "bg-emerald-600 hover:bg-emerald-700 text-white"
-                : "bg-blue-600 hover:bg-blue-700 text-white active:scale-95"
+                : "bg-sora-600 hover:bg-sora-700 text-white active:scale-95"
             }`}
           >
             {addedAnim || inCart ? (

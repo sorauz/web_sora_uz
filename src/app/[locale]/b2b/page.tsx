@@ -72,8 +72,8 @@ export default async function B2BPage({ params }: B2BPageProps) {
         <Breadcrumbs items={breadcrumbs} />
 
         {/* Hero */}
-        <div className="rounded-3xl bg-linear-to-r from-slate-900 via-blue-950 to-indigo-950 text-white p-8 sm:p-12 shadow-lg space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/30 text-blue-200 text-xs font-semibold border border-blue-400/30">
+        <div className="rounded-3xl bg-linear-to-r from-slate-900 via-purple-950 to-slate-950 text-white p-8 sm:p-12 shadow-lg space-y-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/30 text-purple-200 text-xs font-semibold border border-purple-400/30">
             <Building2 className="w-4 h-4 text-amber-400" />
             <span>{isUz ? "B2B Korporativ Hamkorlik" : "B2B Корпоративное партнерство"}</span>
           </div>
@@ -82,7 +82,7 @@ export default async function B2BPage({ params }: B2BPageProps) {
               ? "Korxonangizni Sifatli Kanselyariya Bilan Ta'minlaymiz"
               : "Комплексное снабжение вашего офиса канцелярией"}
           </h1>
-          <p className="text-blue-100 max-w-2xl text-sm sm:text-base leading-relaxed">
+          <p className="text-purple-100 max-w-2xl text-sm sm:text-base leading-relaxed">
             {isUz
               ? "Sora.uz banklar, IT-kompaniyalar, ta'lim markazlari va davlat tashkilotlari uchun doimiy ofis ta'minotini kafolatlaydi."
               : "Индивидуальный подход, оптовые скидки, полный пакет закрывающих документов и доставка до склада или офиса."}
@@ -92,7 +92,7 @@ export default async function B2BPage({ params }: B2BPageProps) {
         {/* Advantages */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-3">
-            <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-950 text-blue-600 flex items-center justify-center font-bold">
+            <div className="w-12 h-12 rounded-xl bg-purple-50 dark:bg-purple-950 text-purple-600 flex items-center justify-center font-bold">
               <Percent className="w-6 h-6" />
             </div>
             <h3 className="font-bold text-lg text-slate-900 dark:text-white">
@@ -147,7 +147,7 @@ export default async function B2BPage({ params }: B2BPageProps) {
           <div className="flex flex-col sm:flex-row gap-4 pt-2">
             <a
               href="tel:+998712000000"
-              className="px-6 py-3 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm shadow-xs transition-all flex items-center justify-center gap-2"
+              className="px-6 py-3 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs sm:text-sm shadow-xs transition-all flex items-center justify-center gap-2"
             >
               <Phone className="w-4 h-4" />
               <span>+998 (71) 200-00-00</span>

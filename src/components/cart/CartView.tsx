@@ -18,7 +18,7 @@ export function CartView() {
   if (!mounted) {
     return (
       <div className="py-20 flex justify-center items-center">
-        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-8 h-8 border-4 border-sora-600 border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }

@@ -73,9 +73,9 @@ const OFFER_CONFIGS: Record<ValidOfferKey, OfferConfig> = {
     badgeUz: "Yangi",
     badgeRu: "Новинка",
     icon: Sparkles,
-    gradientClass: "from-blue-700 via-indigo-800 to-slate-900",
-    accentBg: "bg-blue-500",
-    iconBg: "bg-blue-500/20 text-blue-300",
+    gradientClass: "from-emerald-700 via-teal-800 to-slate-900",
+    accentBg: "bg-emerald-600",
+    iconBg: "bg-emerald-500/20 text-emerald-300",
   },
   popular: {
     key: "popular",
@@ -307,7 +307,7 @@ export default async function StaticOfferPage({ params }: StaticOfferPageProps) 
                 href={`/catalog/${item.key}`}
                 className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all ${
                   isActive
-                    ? "bg-blue-600 text-white shadow-md shadow-blue-500/20"
+                    ? "bg-sora-600 text-white shadow-md shadow-sora-500/20"
                     : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800"
                 }`}
               >
@@ -350,7 +350,7 @@ export default async function StaticOfferPage({ params }: StaticOfferPageProps) 
               </p>
               <Link
                 href="/catalog"
-                className="inline-block px-6 py-2.5 rounded-xl bg-blue-600 text-white font-bold text-sm"
+                className="inline-block px-6 py-2.5 rounded-xl bg-sora-600 text-white font-bold text-sm"
               >
                 {isUz ? "Barcha mahsulotlar katalogi" : "Весь каталог товаров"}
               </Link>

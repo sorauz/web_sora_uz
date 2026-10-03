@@ -127,25 +127,25 @@ export default async function HomePage({ params }: PageProps) {
       {/* Main Page Flow */}
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full space-y-12">
         {/* 3. Hero Banner (E-commerce Web Design §8) */}
-        <section className="relative rounded-3xl bg-gradient-to-br from-blue-700 via-blue-800 to-indigo-950 text-white overflow-hidden p-6 sm:p-10 lg:p-12 shadow-lg">
-          <div className="absolute right-0 top-0 w-1/2 h-full bg-radial from-blue-400/20 to-transparent pointer-events-none" />
+        <section className="relative rounded-3xl bg-gradient-to-br from-sora-700 via-sora-800 to-sora-950 text-white overflow-hidden p-6 sm:p-10 lg:p-12 shadow-lg">
+          <div className="absolute right-0 top-0 w-1/2 h-full bg-radial from-sora-400/20 to-transparent pointer-events-none" />
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
             <div className="lg:col-span-7 space-y-4">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/30 border border-blue-400/40 text-blue-200">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-sora-500/30 border border-sora-400/40 text-sora-200">
                 <Sparkles className="w-3.5 h-3.5 text-amber-400" />
                 <span>{t("heroBadge")}</span>
               </div>
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight">
                 {t("heroTitle")}
               </h1>
-              <p className="text-sm sm:text-base text-blue-100 max-w-xl leading-relaxed">
+              <p className="text-sm sm:text-base text-sora-100 max-w-xl leading-relaxed">
                 {t("heroSubtitle")}
               </p>
               <div className="pt-2 flex flex-wrap gap-3">
                 <Link
                   href="/catalog"
-                  className="px-6 py-3 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs sm:text-sm shadow-md transition-all flex items-center gap-2"
+                  className="px-6 py-3 rounded-2xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs sm:text-sm shadow-md transition-all flex items-center gap-2"
                 >
                   <span>{t("heroCta")}</span>
                   <ArrowRight className="w-4 h-4" />
@@ -189,7 +189,7 @@ export default async function HomePage({ params }: PageProps) {
             </h2>
             <Link
               href="/catalog"
-              className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+              className="text-xs font-bold text-sora-600 dark:text-sora-400 hover:underline flex items-center gap-1"
             >
               <span>{tCommon("viewAll")}</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -239,7 +239,7 @@ export default async function HomePage({ params }: PageProps) {
           <section id="low-price" className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+                <div className="w-9 h-9 rounded-xl bg-sora-50 dark:bg-sora-950/60 text-sora-600 dark:text-sora-400 flex items-center justify-center">
                   <ShieldCheck className="w-5 h-5" />
                 </div>
                 <div>
@@ -250,7 +250,7 @@ export default async function HomePage({ params }: PageProps) {
               </div>
               <Link
                 href="/catalog/low_price_guarantee"
-                className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+                className="text-xs font-bold text-sora-600 dark:text-sora-400 hover:underline flex items-center gap-1"
               >
                 <span>{tCommon("viewAll")}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -350,7 +350,7 @@ export default async function HomePage({ params }: PageProps) {
             </h2>
             <Link
               href="/brands"
-              className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+              className="text-xs font-bold text-sora-600 dark:text-sora-400 hover:underline flex items-center gap-1"
             >
               <span>{tCommon("viewAll")}</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -366,7 +366,7 @@ export default async function HomePage({ params }: PageProps) {
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 space-y-2">
-              <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-xl bg-sora-100 dark:bg-sora-950 text-sora-600 dark:text-sora-400 flex items-center justify-center">
                 <Truck className="w-5 h-5" />
               </div>
               <h3 className="font-bold text-sm text-slate-900 dark:text-slate-100">

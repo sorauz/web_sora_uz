@@ -202,9 +202,9 @@ export default async function CategoryPage({
               <Link
                 key={sub.id}
                 href={`/category/${isUz ? sub.group_slug_uz : sub.group_slug_ru}`}
-                className="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:border-blue-500 hover:text-blue-600 transition-colors shadow-2xs flex items-center gap-1.5"
+                className="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:border-sora-500 hover:text-sora-600 transition-colors shadow-2xs flex items-center gap-1.5"
               >
-                <Folder className="w-3.5 h-3.5 text-blue-500" />
+                <Folder className="w-3.5 h-3.5 text-sora-500" />
                 <span>{isUz ? sub.group_uz : sub.group_ru}</span>
               </Link>
             ))}
@@ -251,7 +251,7 @@ export default async function CategoryPage({
 
             {/* Buying Guide Section (Semantic Content & SEO) */}
             <section className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 space-y-4 mt-12">
-              <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
+              <div className="flex items-center gap-2 text-sora-600 dark:text-sora-400">
                 <BookOpen className="w-5 h-5" />
                 <h3 className="text-base sm:text-lg font-bold">
                   {isUz ? `${categoryName} qanday tanlanadi?` : `Как выбрать ${categoryName}?`}

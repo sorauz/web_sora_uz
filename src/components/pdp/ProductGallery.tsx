@@ -71,7 +71,7 @@ export function ProductGallery({
             onClick={() => setSelectedImage(img)}
             className={`relative w-18 h-18 rounded-2xl bg-white dark:bg-slate-900 border p-2 shrink-0 transition-all ${
               selectedImage === img
-                ? "border-blue-600 ring-2 ring-blue-500/20 shadow-xs"
+                ? "border-sora-600 ring-2 ring-sora-500/20 shadow-xs"
                 : "border-slate-200 dark:border-slate-800 opacity-70 hover:opacity-100"
             }`}
           >

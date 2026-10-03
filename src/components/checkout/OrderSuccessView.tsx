@@ -84,10 +84,10 @@ export function OrderSuccessView({ orderIdParam, locale }: OrderSuccessViewProps
               <span className="font-bold text-slate-900 dark:text-white">Qabul qilindi</span>
             </div>
             <div className="space-y-1.5">
-              <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center mx-auto animate-pulse">
+              <div className="w-8 h-8 rounded-full bg-sora-600 text-white flex items-center justify-center mx-auto animate-pulse">
                 <Clock className="w-4 h-4" />
               </div>
-              <span className="font-bold text-blue-600 dark:text-blue-400">Tekshirilmoqda</span>
+              <span className="font-bold text-sora-600 dark:text-sora-400">Tekshirilmoqda</span>
             </div>
             <div className="space-y-1.5">
               <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-400 flex items-center justify-center mx-auto">
@@ -119,7 +119,7 @@ export function OrderSuccessView({ orderIdParam, locale }: OrderSuccessViewProps
           </Link>
           <Link
             href="/catalog"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-500/20 transition-all"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-sora-600 hover:bg-sora-700 text-white font-bold text-xs shadow-md shadow-sora-500/20 transition-all"
           >
             <ShoppingBag className="w-4 h-4" />
             <span>{t("continueShopping")}</span>

@@ -60,11 +60,11 @@ export function MobileStickyCTA({ product, locale }: MobileStickyCTAProps) {
               {loc.name}
             </h4>
             {priceVal > 0 ? (
-              <div className="text-sm font-extrabold text-blue-600 dark:text-blue-400">
+              <div className="text-sm font-extrabold text-sora-600 dark:text-sora-400">
                 {priceVal.toLocaleString("ru-RU")} {common("currency")}
               </div>
             ) : (
-              <div className="text-xs font-semibold text-blue-600 dark:text-blue-400">
+              <div className="text-xs font-semibold text-sora-600 dark:text-sora-400">
                 {locale === "uz" ? "Narxi kelishiladi" : "Цена по запросу"}
               </div>
             )}
@@ -78,7 +78,7 @@ export function MobileStickyCTA({ product, locale }: MobileStickyCTAProps) {
           className={`flex items-center justify-center gap-1.5 px-5 h-10 rounded-xl font-bold text-xs shrink-0 transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
             isAdded
               ? "bg-emerald-600 text-white"
-              : "bg-blue-600 text-white active:scale-95 shadow-md shadow-blue-500/20"
+              : "bg-sora-600 text-white active:scale-95 shadow-md shadow-sora-500/20"
           }`}
         >
           {isAdded ? (

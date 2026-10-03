@@ -72,15 +72,15 @@ export default async function AboutPage({ params }: AboutPageProps) {
         <Breadcrumbs items={breadcrumbs} />
 
         {/* Hero */}
-        <div className="rounded-3xl bg-linear-to-r from-blue-900 via-indigo-900 to-slate-900 text-white p-8 sm:p-12 shadow-lg space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/30 text-blue-200 text-xs font-semibold border border-blue-400/30">
+        <div className="rounded-3xl bg-linear-to-r from-sora-800 via-sora-900 to-slate-950 text-white p-8 sm:p-12 shadow-lg space-y-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sora-500/30 text-sora-200 text-xs font-semibold border border-sora-400/30">
             <Sparkles className="w-4 h-4 text-amber-400" />
             <span>{isUz ? "Zamonaviy E-Commerce Platformasi" : "Современная E-Commerce платформа"}</span>
           </div>
           <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
             {isUz ? "Sora.uz — Ofisingiz va Ta'limingiz Uchun Eng Yaxshisi" : "Sora.uz — Лучшее для вашего офиса и учебы"}
           </h1>
-          <p className="text-blue-100 max-w-2xl text-sm sm:text-base leading-relaxed">
+          <p className="text-sora-100 max-w-2xl text-sm sm:text-base leading-relaxed">
             {isUz
               ? "Bizning maqsadimiz — O'zbekistondagi har bir korxona, maktab va xonadonni eng sifatli kanselyariya, ofis jihozlari va qog'oz mahsulotlari bilan hamyonbop narxlarda ta'minlashdir."
               : "Наша цель — обеспечить каждый офис, образовательное учреждение и дом в Узбекистане качественной канцелярией и офисной техникой по лучшим ценам."}
@@ -90,7 +90,7 @@ export default async function AboutPage({ params }: AboutPageProps) {
         {/* Key Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 text-center shadow-xs">
-            <p className="text-2xl sm:text-3xl font-black text-blue-600 dark:text-blue-400">10 000+</p>
+            <p className="text-2xl sm:text-3xl font-black text-sora-600 dark:text-sora-400">10 000+</p>
             <p className="text-xs text-slate-500 mt-1">{isUz ? "Mahsulotlar soni" : "Товаров в каталоге"}</p>
           </div>
           <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 text-center shadow-xs">
@@ -143,8 +143,8 @@ export default async function AboutPage({ params }: AboutPageProps) {
                 ? "Katta va kichik korxonalar, banklar, ta'lim markazlari uchun qulay shartlar asosida shartnomaviy ta'minot. Maxsus ulgurji narxlar, shaxsiy menejer va kechiktirilgan to'lov imkoniyati."
                 : "Комплексное снабжение офисов, банков и учебных центров канцелярией и бумагой. Оптовые цены, персональный менеджер и отсрочка платежа."}
             </p>
-            <div className="p-4 rounded-2xl bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-900/60">
-              <p className="text-xs font-semibold text-blue-900 dark:text-blue-200">
+            <div className="p-4 rounded-2xl bg-purple-50 dark:bg-purple-950/60 border border-purple-200 dark:border-purple-900/60">
+              <p className="text-xs font-semibold text-purple-900 dark:text-purple-200">
                 {isUz
                   ? "B2B buyurtmalar uchun: +998 (71) 200-00-00 yoki info@sora.uz"
                   : "Отдел корпоративных продаж: +998 (71) 200-00-00 или info@sora.uz"}

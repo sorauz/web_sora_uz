@@ -100,7 +100,7 @@ export function RandomCategories({ categories, locale }: RandomCategoriesProps) 
           <button
             type="button"
             onClick={rotateToNewFour}
-            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-slate-600 dark:text-slate-400 hover:text-sora-600 dark:hover:text-sora-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
             title={isUz ? "Boshqa 4 ta toifani ko'rish" : "Показать другие 4 категории"}
             aria-label={isUz ? "Boshqa toifalar" : "Сменить категории"}
           >

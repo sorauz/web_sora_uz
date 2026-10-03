@@ -114,15 +114,15 @@ export default async function ContactPage({ params }: ContactPageProps) {
         <Breadcrumbs items={breadcrumbs} />
 
         {/* Hero */}
-        <div className="rounded-3xl bg-linear-to-r from-blue-800 to-indigo-950 text-white p-8 sm:p-12 shadow-lg space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/30 text-blue-200 text-xs font-semibold border border-blue-400/30">
+        <div className="rounded-3xl bg-linear-to-r from-sora-800 via-sora-900 to-slate-950 text-white p-8 sm:p-12 shadow-lg space-y-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sora-500/30 text-sora-200 text-xs font-semibold border border-sora-400/30">
             <MapPin className="w-4 h-4" />
             <span>{isUz ? "Do'kon va Ofis" : "Шоурум и Офис"}</span>
           </div>
           <h1 className="text-3xl sm:text-4xl font-black tracking-tight">
             {isUz ? "Biz bilan bog'laning" : "Контакты"}
           </h1>
-          <p className="text-blue-100 max-w-2xl text-sm sm:text-base leading-relaxed">
+          <p className="text-sora-100 max-w-2xl text-sm sm:text-base leading-relaxed">
             {isUz
               ? "Savollaringiz bormi? Buyurtma berish, B2B korporativ hamkorlik yoki mahsulotlar bo'yicha maslahat olish uchun biz bilan bog'laning."
               : "Свяжитесь с нами для оформления оптовых или розничных заказов, консультаций и корпоративного партнерства."}
@@ -132,7 +132,7 @@ export default async function ContactPage({ params }: ContactPageProps) {
         {/* Contact Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-2">
-            <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950 text-blue-600 flex items-center justify-center font-bold">
+            <div className="w-10 h-10 rounded-xl bg-sora-50 dark:bg-sora-950 text-sora-600 flex items-center justify-center font-bold">
               <Phone className="w-5 h-5" />
             </div>
             <p className="text-xs text-slate-400 font-semibold">{isUz ? "Telefon raqam" : "Телефон"}</p>
@@ -225,7 +225,7 @@ export default async function ContactPage({ params }: ContactPageProps) {
           {/* Legal Requisites (Merchant Trust / E-E-A-T) */}
           <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 space-y-4">
             <div className="flex items-center gap-2">
-              <Building2 className="w-5 h-5 text-blue-600" />
+              <Building2 className="w-5 h-5 text-sora-600" />
               <h2 className="text-lg font-bold text-slate-900 dark:text-white">
                 {isUz ? "Yuridik rekvizitlar" : "Юридические реквизиты"}
               </h2>

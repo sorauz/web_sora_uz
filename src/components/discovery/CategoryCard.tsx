@@ -16,17 +16,17 @@ export function CategoryCard({ category, locale }: CategoryCardProps) {
   return (
     <Link
       href={`/category/${slug}`}
-      className="group relative flex flex-col justify-between p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-600 hover:shadow-md transition-all duration-200"
+      className="group relative flex flex-col justify-between p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-sora-400 dark:hover:border-sora-600 hover:shadow-md transition-all duration-200"
     >
       <div className="flex items-start justify-between mb-3">
-        <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+        <div className="w-10 h-10 rounded-xl bg-sora-50 dark:bg-sora-950/60 text-sora-600 dark:text-sora-400 flex items-center justify-center group-hover:scale-110 transition-transform">
           <Folder className="w-5 h-5" />
         </div>
-        <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 group-hover:translate-x-0.5 transition-all" />
+        <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-sora-600 dark:group-hover:text-sora-400 group-hover:translate-x-0.5 transition-all" />
       </div>
 
       <div>
-        <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2">
+        <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-slate-100 group-hover:text-sora-600 dark:group-hover:text-sora-400 transition-colors line-clamp-2">
           {name}
         </h3>
         {subCount > 0 && (

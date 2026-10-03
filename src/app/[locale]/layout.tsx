@@ -94,7 +94,7 @@ export default async function LocaleLayout({
         <link rel="preconnect" href="http://1cloud.uz:777" />
         <link rel="dns-prefetch" href="http://1cloud.uz:777" />
       </head>
-      <body className={`min-h-full flex flex-col antialiased selection:bg-blue-600 selection:text-white ${fontSans.className}`}>
+      <body className={`min-h-full flex flex-col antialiased selection:bg-sora-600 selection:text-white ${fontSans.className}`}>
         <OrganizationJsonLd />
         <GoogleAnalytics />
         <NextIntlClientProvider messages={messages}>

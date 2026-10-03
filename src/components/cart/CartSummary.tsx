@@ -44,10 +44,10 @@ export function CartSummary({ subtotal }: CartSummaryProps) {
       </h2>
 
       {/* Free Delivery Progress Banner */}
-      <div className="p-3.5 rounded-2xl bg-blue-50/70 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/40 space-y-2">
-        <div className="flex items-center justify-between text-xs font-semibold text-blue-700 dark:text-blue-300">
+      <div className="p-3.5 rounded-2xl bg-sora-50/70 dark:bg-sora-950/40 border border-sora-100 dark:border-sora-900/40 space-y-2">
+        <div className="flex items-center justify-between text-xs font-semibold text-sora-700 dark:text-sora-300">
           <span className="flex items-center gap-1.5">
-            <Truck className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+            <Truck className="w-4 h-4 text-sora-600 dark:text-sora-400" />
             {isFreeDelivery ? t("freeDelivery") : t("delivery")}
           </span>
           <span>
@@ -56,9 +56,9 @@ export function CartSummary({ subtotal }: CartSummaryProps) {
               : (500000 - subtotal).toLocaleString("ru-RU") + " " + common("currency") + " qoldi"}
           </span>
         </div>
-        <div className="h-2 bg-blue-200/60 dark:bg-blue-900/60 rounded-full overflow-hidden">
+        <div className="h-2 bg-sora-200/60 dark:bg-sora-900/60 rounded-full overflow-hidden">
           <div
-            className="h-full bg-blue-600 rounded-full transition-all duration-500"
+            className="h-full bg-sora-600 rounded-full transition-all duration-500"
             style={{ width: `${Math.min(100, Math.round((subtotal / 500000) * 100))}%` }}
           />
         </div>
@@ -103,7 +103,7 @@ export function CartSummary({ subtotal }: CartSummaryProps) {
             {t("total")}
           </span>
           <div className="text-right">
-            <span className="text-2xl font-black text-blue-600 dark:text-blue-400 tracking-tight">
+            <span className="text-2xl font-black text-sora-600 dark:text-sora-400 tracking-tight">
               {total.toLocaleString("ru-RU")} {common("currency")}
             </span>
           </div>
@@ -121,7 +121,7 @@ export function CartSummary({ subtotal }: CartSummaryProps) {
               onChange={(e) => setPromoCode(e.target.value)}
               placeholder="SORA10"
               disabled={promoApplied}
-              className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs uppercase font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+              className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs uppercase font-semibold focus:outline-none focus:ring-2 focus:ring-sora-500 disabled:opacity-50"
             />
           </div>
           <button
@@ -147,7 +147,7 @@ export function CartSummary({ subtotal }: CartSummaryProps) {
       {/* Checkout Button */}
       <Link
         href="/checkout"
-        className="w-full flex items-center justify-center gap-2 py-3.5 px-6 rounded-2xl bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white font-bold text-sm shadow-md shadow-blue-500/25 transition-all"
+        className="w-full flex items-center justify-center gap-2 py-3.5 px-6 rounded-2xl bg-sora-600 hover:bg-sora-700 active:scale-[0.98] text-white font-bold text-sm shadow-md shadow-sora-500/25 transition-all"
       >
         <span>{t("proceedToCheckout")}</span>
         <ArrowRight className="w-4 h-4" />

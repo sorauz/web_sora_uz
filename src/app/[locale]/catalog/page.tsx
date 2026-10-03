@@ -111,11 +111,11 @@ export default async function CatalogPage({ params, searchParams }: CatalogPageP
           </Link>
           <Link
             href="/catalog/new_products"
-            className="p-4 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-700 text-white flex flex-col justify-between hover:shadow-lg transition-all hover:-translate-y-0.5"
+            className="p-4 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-700 text-white flex flex-col justify-between hover:shadow-lg transition-all hover:-translate-y-0.5"
           >
             <Sparkles className="w-5 h-5 mb-2 text-white/90" />
             <div>
-              <div className="text-[11px] uppercase font-semibold text-blue-100">1C ERP</div>
+              <div className="text-[11px] uppercase font-semibold text-emerald-100">1C ERP</div>
               <div className="text-sm font-bold">{isUz ? "Yangi kelgan tovarlar" : "Новые поступления"}</div>
             </div>
           </Link>
@@ -156,7 +156,7 @@ export default async function CatalogPage({ params, searchParams }: CatalogPageP
                     <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
                       <Link
                         href={`/category/${slug}`}
-                        className="text-lg font-bold text-slate-900 dark:text-slate-100 hover:text-blue-600 transition-colors"
+                        className="text-lg font-bold text-slate-900 dark:text-slate-100 hover:text-sora-600 transition-colors"
                       >
                         {name}
                       </Link>
@@ -171,7 +171,7 @@ export default async function CatalogPage({ params, searchParams }: CatalogPageP
                         <Link
                           key={sub.id}
                           href={`/category/${isUz ? sub.group_slug_uz : sub.group_slug_ru}`}
-                          className="flex items-center justify-between py-1.5 px-2 rounded-lg text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-blue-600 transition-colors"
+                          className="flex items-center justify-between py-1.5 px-2 rounded-lg text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-sora-600 transition-colors"
                         >
                           <span>↳ {isUz ? sub.group_uz : sub.group_ru}</span>
                         </Link>
@@ -182,7 +182,7 @@ export default async function CatalogPage({ params, searchParams }: CatalogPageP
                   <div className="pt-4 mt-4 border-t border-slate-100 dark:border-slate-800">
                     <Link
                       href={`/category/${slug}`}
-                      className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline"
+                      className="text-xs font-bold text-sora-600 dark:text-sora-400 hover:underline"
                     >
                       {isUz ? "Barcha tovarlarni ko'rish →" : "Смотреть все товары →"}
                     </Link>
@@ -201,7 +201,7 @@ export default async function CatalogPage({ params, searchParams }: CatalogPageP
             </h2>
             <Link
               href="/brands"
-              className="text-xs font-bold text-blue-600 hover:underline"
+              className="text-xs font-bold text-sora-600 hover:underline"
             >
               {isUz ? "Barcha brendlar →" : "Все бренды →"}
             </Link>

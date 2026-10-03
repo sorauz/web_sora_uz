@@ -72,15 +72,15 @@ export default async function DeliveryPage({ params }: DeliveryPageProps) {
         <Breadcrumbs items={breadcrumbs} />
 
         {/* Hero Banner */}
-        <div className="rounded-3xl bg-linear-to-r from-blue-700 to-indigo-900 text-white p-8 sm:p-12 shadow-lg space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/30 text-blue-200 text-xs font-semibold border border-blue-400/30">
+        <div className="rounded-3xl bg-linear-to-r from-sora-800 via-sora-900 to-slate-950 text-white p-8 sm:p-12 shadow-lg space-y-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sora-500/30 text-sora-200 text-xs font-semibold border border-sora-400/30">
             <Truck className="w-4 h-4" />
             <span>{isUz ? "Ishonchli va Tezkor Xizmat" : "Надежная и быстрая доставка"}</span>
           </div>
           <h1 className="text-3xl sm:text-4xl font-black tracking-tight">
             {isUz ? "Yetkazib berish shartlari" : "Условия доставки"}
           </h1>
-          <p className="text-blue-100 max-w-2xl text-sm sm:text-base leading-relaxed">
+          <p className="text-sora-100 max-w-2xl text-sm sm:text-base leading-relaxed">
             {isUz
               ? "Sora.uz orqali xarid qilingan barcha tovarlar xavfsiz qadoqlanadi va belgilangan manzilingizga tezkor yetkazib beriladi."
               : "Все заказы в Sora.uz тщательно упаковываются и доставляются курьером прямо до вашей двери или офиса."}
@@ -90,7 +90,7 @@ export default async function DeliveryPage({ params }: DeliveryPageProps) {
         {/* Delivery Options Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-3">
-            <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold">
+            <div className="w-12 h-12 rounded-xl bg-sora-50 dark:bg-sora-950 text-sora-600 dark:text-sora-400 flex items-center justify-center font-bold">
               <Truck className="w-6 h-6" />
             </div>
             <h3 className="font-bold text-lg text-slate-900 dark:text-white">
@@ -151,7 +151,7 @@ export default async function DeliveryPage({ params }: DeliveryPageProps) {
           </h2>
           <ul className="space-y-3 text-xs sm:text-sm text-slate-600 dark:text-slate-300">
             <li className="flex items-start gap-3">
-              <ShieldCheck className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
+              <ShieldCheck className="w-5 h-5 text-sora-600 shrink-0 mt-0.5" />
               <span>
                 {isUz
                   ? "Kuryer mahsulotni yetkazib berganida, uning butunligi, qadog'i va to'liq jamlanganligini tekshirib oling."
@@ -159,7 +159,7 @@ export default async function DeliveryPage({ params }: DeliveryPageProps) {
               </span>
             </li>
             <li className="flex items-start gap-3">
-              <ShieldCheck className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
+              <ShieldCheck className="w-5 h-5 text-sora-600 shrink-0 mt-0.5" />
               <span>
                 {isUz
                   ? "Barcha tovarlar 1C hisob-faktura yoki kassa cheki bilan birga taqdim etiladi."

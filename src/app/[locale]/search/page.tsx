@@ -96,14 +96,14 @@ export default async function SearchPage({
 
         {/* Search Title */}
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+          <div className="w-12 h-12 rounded-2xl bg-sora-50 dark:bg-sora-950/60 text-sora-600 dark:text-sora-400 flex items-center justify-center">
             <Search className="w-6 h-6" />
           </div>
           <div>
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
               {q ? (
                 <>
-                  &quot;<span className="text-blue-600">{q}</span>&quot;{" "}
+                  &quot;<span className="text-sora-600 dark:text-sora-400">{q}</span>&quot;{" "}
                   {isUz ? "bo'yicha qidiruv natijalari" : "результаты поиска"}
                 </>
               ) : (

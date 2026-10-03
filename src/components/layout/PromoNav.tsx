@@ -10,7 +10,7 @@ export function PromoNav() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center gap-6 whitespace-nowrap">
         <Link
           href="/catalog"
-          className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300 hover:text-blue-600 transition-colors"
+          className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300 hover:text-sora-600 transition-colors"
         >
           <Grid className="w-3.5 h-3.5" />
           <span>{t("catalog")}</span>
@@ -24,7 +24,7 @@ export function PromoNav() {
         </Link>
         <Link
           href="/catalog/low_price_guarantee"
-          className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400 hover:text-blue-700 transition-colors"
+          className="flex items-center gap-1.5 text-sora-600 dark:text-sora-400 hover:text-sora-700 transition-colors"
         >
           <Tag className="w-3.5 h-3.5" />
           <span>{t("cheap")}</span>
@@ -45,13 +45,13 @@ export function PromoNav() {
         </Link>
         <Link
           href="/offers"
-          className="flex items-center gap-1.5 text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 font-bold transition-colors"
+          className="flex items-center gap-1.5 text-purple-600 dark:text-purple-400 hover:text-purple-700 font-bold transition-colors"
         >
           <span>1C Aksiyalar</span>
         </Link>
         <Link
           href="/brands"
-          className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300 hover:text-blue-600 transition-colors"
+          className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300 hover:text-sora-600 transition-colors"
         >
           <Award className="w-3.5 h-3.5" />
           <span>{t("brands")}</span>

@@ -97,7 +97,7 @@ export function ProductActions({ product, locale }: ProductActionsProps) {
           </div>
         ) : (
           <div className="flex flex-wrap items-baseline gap-3">
-            <span className="text-2xl sm:text-3xl font-bold text-blue-600 dark:text-blue-400 tracking-tight">
+            <span className="text-2xl sm:text-3xl font-bold text-sora-600 dark:text-sora-400 tracking-tight">
               {locale === "uz" ? "Narxi kelishiladi" : "Цена по запросу"}
             </span>
           </div>
@@ -154,7 +154,7 @@ export function ProductActions({ product, locale }: ProductActionsProps) {
             className={`flex-1 flex items-center justify-center gap-2.5 h-12 px-6 rounded-xl font-bold text-base transition-all duration-200 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed ${
               isAdded
                 ? "bg-emerald-600 text-white"
-                : "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/25 active:scale-[0.98]"
+                : "bg-sora-600 hover:bg-sora-700 text-white shadow-sora-500/25 active:scale-[0.98]"
             }`}
           >
             {isAdded ? (
@@ -194,7 +194,7 @@ export function ProductActions({ product, locale }: ProductActionsProps) {
       {/* Trust Badges / Guarantees Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-slate-200 dark:border-slate-800">
         <div className="flex items-start gap-3 p-3 rounded-xl bg-slate-50/70 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800/80">
-          <Truck className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
+          <Truck className="w-5 h-5 text-sora-600 shrink-0 mt-0.5" />
           <div>
             <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100">
               {t("deliveryTitle")}
@@ -296,7 +296,7 @@ export function ProductActions({ product, locale }: ProductActionsProps) {
                         value={customerName}
                         onChange={(e) => setCustomerName(e.target.value)}
                         placeholder={locale === "uz" ? "Masalan: Jasur" : "Например: Жасур"}
-                        className="w-full pl-9 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+                        className="w-full pl-9 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sora-500 dark:text-white"
                       />
                     </div>
                   </div>
@@ -313,7 +313,7 @@ export function ProductActions({ product, locale }: ProductActionsProps) {
                         value={customerPhone}
                         onChange={(e) => setCustomerPhone(e.target.value)}
                         placeholder="+998 90 123 45 67"
-                        className="w-full pl-9 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+                        className="w-full pl-9 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sora-500 dark:text-white"
                       />
                     </div>
                   </div>
@@ -327,7 +327,7 @@ export function ProductActions({ product, locale }: ProductActionsProps) {
 
                 <button
                   type="submit"
-                  className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-md transition-colors"
+                  className="w-full py-3 bg-sora-600 hover:bg-sora-700 text-white font-bold rounded-xl shadow-md transition-colors"
                 >
                   {locale === "uz" ? "Buyurtmani tasdiqlash" : "Подтвердить заказ"}
                 </button>

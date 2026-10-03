@@ -10,14 +10,14 @@
   --popover: #ffffff;
   --popover-foreground: #0f172a;
   
-  --primary: #1e40af;
+  --primary: #c92f74;
   --primary-foreground: #ffffff;
-  --primary-hover: #1d4ed8;
+  --primary-hover: #b01f60;
   
   --secondary: #f1f5f9;
   --secondary-foreground: #1e293b;
   
-  --accent: #f97316;
+  --accent: #f59e0b;
   --accent-foreground: #ffffff;
   
   --muted: #f1f5f9;
@@ -31,7 +31,7 @@
   
   --border: #e2e8f0;
   --input: #e2e8f0;
-  --ring: #3b82f6;
+  --ring: #c92f74;
   
   --radius: 0.625rem;
 }
@@ -57,6 +57,20 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+
+  /* Sora Magenta Brand Scale from logo.png */
+  --color-sora-50: #fff1f7;
+  --color-sora-100: #fce7f1;
+  --color-sora-200: #f9cfe3;
+  --color-sora-300: #f4a7cb;
+  --color-sora-400: #ec6ea9;
+  --color-sora-500: #e03c8b;
+  --color-sora-600: #c92f74;
+  --color-sora-700: #b01f60;
+  --color-sora-800: #921c51;
+  --color-sora-900: #7a1b46;
+  --color-sora-950: #4a0927;
+
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -71,12 +85,12 @@
     --card-foreground: #f8fafc;
     --popover: #111827;
     --popover-foreground: #f8fafc;
-    --primary: #3b82f6;
+    --primary: #f45a9d;
     --primary-foreground: #ffffff;
-    --primary-hover: #2563eb;
+    --primary-hover: #ff72ac;
     --secondary: #1f2937;
     --secondary-foreground: #f8fafc;
-    --accent: #fb923c;
+    --accent: #fbbf24;
     --accent-foreground: #090d16;
     --muted: #1e293b;
     --muted-foreground: #94a3b8;
@@ -86,7 +100,7 @@
     --success-foreground: #ffffff;
     --border: #1e293b;
     --input: #1e293b;
-    --ring: #60a5fa;
+    --ring: #f45a9d;
   }
 }
 

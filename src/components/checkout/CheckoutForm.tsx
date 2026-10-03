@@ -68,7 +68,7 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
   if (!mounted || (items.length === 0 && !hasSubmittedRef.current)) {
     return (
       <div className="py-20 flex justify-center items-center">
-        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-8 h-8 border-4 border-sora-600 border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -152,7 +152,7 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
         {/* STEP 1: Customer Details */}
         <section className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-7 border border-slate-200 dark:border-slate-800 shadow-xs space-y-5">
           <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100 dark:border-slate-800">
-            <User className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+            <User className="w-5 h-5 text-sora-600 dark:text-sora-400" />
             <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
               {t("stepCustomer")}
             </h2>
@@ -171,7 +171,7 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder={t("fullNamePlaceholder")}
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sora-500 dark:text-white"
                 />
               </div>
             </div>
@@ -188,7 +188,7 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder={t("phonePlaceholder")}
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sora-500 dark:text-white"
                 />
               </div>
             </div>
@@ -204,7 +204,7 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
                   value={altPhone}
                   onChange={(e) => setAltPhone(e.target.value)}
                   placeholder={t("altPhonePlaceholder")}
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sora-500 dark:text-white"
                 />
               </div>
             </div>
@@ -220,7 +220,7 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder={t("emailPlaceholder")}
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sora-500 dark:text-white"
                 />
               </div>
             </div>
@@ -230,7 +230,7 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
         {/* STEP 2: Delivery Method & Address */}
         <section className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-7 border border-slate-200 dark:border-slate-800 shadow-xs space-y-5">
           <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100 dark:border-slate-800">
-            <Truck className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+            <Truck className="w-5 h-5 text-sora-600 dark:text-sora-400" />
             <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
               {t("stepDelivery")}
             </h2>
@@ -241,7 +241,7 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
             <label
               className={`p-4 rounded-2xl border-2 cursor-pointer transition-all flex items-start gap-3 ${
                 deliveryMethod === "courier"
-                  ? "border-blue-600 bg-blue-50/40 dark:bg-blue-950/20 shadow-xs"
+                  ? "border-sora-600 bg-sora-50/40 dark:bg-sora-950/20 shadow-xs"
                   : "border-slate-200 dark:border-slate-800 hover:border-slate-300"
               }`}
             >
@@ -254,7 +254,7 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
               />
               <div className="space-y-1">
                 <div className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-1.5">
-                  <Truck className="w-4 h-4 text-blue-600" />
+                  <Truck className="w-4 h-4 text-sora-600 dark:text-sora-400" />
                   <span>{t("deliveryCourier")}</span>
                 </div>
                 <div className="text-xs text-slate-500 dark:text-slate-400">
@@ -266,7 +266,7 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
             <label
               className={`p-4 rounded-2xl border-2 cursor-pointer transition-all flex items-start gap-3 ${
                 deliveryMethod === "pickup"
-                  ? "border-blue-600 bg-blue-50/40 dark:bg-blue-950/20 shadow-xs"
+                  ? "border-sora-600 bg-sora-50/40 dark:bg-sora-950/20 shadow-xs"
                   : "border-slate-200 dark:border-slate-800 hover:border-slate-300"
               }`}
             >
@@ -300,7 +300,7 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
                   <select
                     value={region}
                     onChange={(e) => setRegion(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sora-500 dark:text-white"
                   >
                     {regionsList.map((r, idx) => (
                       <option key={idx} value={r}>
@@ -320,7 +320,7 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
                     value={district}
                     onChange={(e) => setDistrict(e.target.value)}
                     placeholder={t("districtPlaceholder")}
-                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sora-500 dark:text-white"
                   />
                 </div>
               </div>
@@ -337,7 +337,7 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
                     placeholder={t("addressPlaceholder")}
-                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sora-500 dark:text-white"
                   />
                 </div>
               </div>
@@ -352,7 +352,7 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
                     value={landmark}
                     onChange={(e) => setLandmark(e.target.value)}
                     placeholder={t("landmarkPlaceholder")}
-                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sora-500 dark:text-white"
                   />
                 </div>
 
@@ -365,7 +365,7 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
                     value={orderComment}
                     onChange={(e) => setOrderComment(e.target.value)}
                     placeholder={t("orderCommentPlaceholder")}
-                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sora-500 dark:text-white"
                   />
                 </div>
               </div>
@@ -387,7 +387,7 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
         {/* STEP 3: Payment Method */}
         <section className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-7 border border-slate-200 dark:border-slate-800 shadow-xs space-y-5">
           <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100 dark:border-slate-800">
-            <CreditCard className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+            <CreditCard className="w-5 h-5 text-sora-600 dark:text-sora-400" />
             <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
               {t("stepPayment")}
             </h2>
@@ -398,7 +398,7 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
             <label
               className={`p-4 rounded-2xl border-2 cursor-pointer transition-all flex items-start gap-3.5 ${
                 paymentMethod === "cash"
-                  ? "border-blue-600 bg-blue-50/40 dark:bg-blue-950/20"
+                  ? "border-sora-600 bg-sora-50/40 dark:bg-sora-950/20"
                   : "border-slate-200 dark:border-slate-800 hover:border-slate-300"
               }`}
             >
@@ -424,7 +424,7 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
             <label
               className={`p-4 rounded-2xl border-2 cursor-pointer transition-all flex items-start gap-3.5 ${
                 paymentMethod === "payme"
-                  ? "border-blue-600 bg-blue-50/40 dark:bg-blue-950/20"
+                  ? "border-sora-600 bg-sora-50/40 dark:bg-sora-950/20"
                   : "border-slate-200 dark:border-slate-800 hover:border-slate-300"
               }`}
             >
@@ -452,7 +452,7 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
             <label
               className={`p-4 rounded-2xl border-2 cursor-pointer transition-all flex items-start gap-3.5 ${
                 paymentMethod === "click"
-                  ? "border-blue-600 bg-blue-50/40 dark:bg-blue-950/20"
+                  ? "border-sora-600 bg-sora-50/40 dark:bg-sora-950/20"
                   : "border-slate-200 dark:border-slate-800 hover:border-slate-300"
               }`}
             >
@@ -478,7 +478,7 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
             <label
               className={`p-4 rounded-2xl border-2 cursor-pointer transition-all flex items-start gap-3.5 ${
                 paymentMethod === "card"
-                  ? "border-blue-600 bg-blue-50/40 dark:bg-blue-950/20"
+                  ? "border-sora-600 bg-sora-50/40 dark:bg-sora-950/20"
                   : "border-slate-200 dark:border-slate-800 hover:border-slate-300"
               }`}
             >
@@ -504,7 +504,7 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
             <label
               className={`p-4 rounded-2xl border-2 cursor-pointer transition-all flex items-start gap-3.5 ${
                 paymentMethod === "b2b"
-                  ? "border-blue-600 bg-blue-50/40 dark:bg-blue-950/20"
+                  ? "border-sora-600 bg-sora-50/40 dark:bg-sora-950/20"
                   : "border-slate-200 dark:border-slate-800 hover:border-slate-300"
               }`}
             >
@@ -621,7 +621,7 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
               <span className="text-sm font-bold text-slate-900 dark:text-white">
                 {cartT("total")}
               </span>
-              <span className="text-2xl font-black text-blue-600 dark:text-blue-400">
+              <span className="text-2xl font-black text-sora-600 dark:text-sora-400">
                 {total.toLocaleString("ru-RU")} {common("currency")}
               </span>
             </div>
@@ -635,7 +635,7 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full flex items-center justify-center gap-2 py-4 px-6 rounded-2xl bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white font-bold text-sm shadow-md shadow-blue-500/25 transition-all disabled:opacity-50"
+            className="w-full flex items-center justify-center gap-2 py-4 px-6 rounded-2xl bg-sora-600 hover:bg-sora-700 active:scale-[0.98] text-white font-bold text-sm shadow-md shadow-sora-500/25 transition-all disabled:opacity-50"
           >
             {isSubmitting ? (
               <span>{t("processing")}</span>

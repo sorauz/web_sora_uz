@@ -43,7 +43,7 @@ export function isOfferActive(item: {
 
 export interface OfferBadgeInfo {
   text: string;
-  variant: "rose" | "blue" | "amber" | "emerald";
+  variant: "rose" | "blue" | "amber" | "emerald" | "sora";
   className: string;
 }
 
@@ -59,8 +59,8 @@ export function getOfferBadge(
   if (lower.includes("low price") || lower.includes("guarantee")) {
     return {
       text: locale === "uz" ? "Eng arzon narx" : "Лучшая цена",
-      variant: "blue",
-      className: "bg-blue-600 text-white shadow-xs",
+      variant: "sora",
+      className: "bg-sora-600 text-white shadow-xs",
     };
   }
 
@@ -90,8 +90,8 @@ export function getOfferBadge(
 
   return {
     text: offerName,
-    variant: "blue",
-    className: "bg-blue-600 text-white shadow-xs",
+    variant: "sora",
+    className: "bg-sora-600 text-white shadow-xs",
   };
 }
 

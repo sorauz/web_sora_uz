@@ -110,16 +110,16 @@ export default async function OffersPage({ params, searchParams }: OffersPagePro
         />
 
         {/* Hero Banner */}
-        <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-700 via-indigo-700 to-purple-800 text-white p-6 sm:p-10 shadow-lg">
+        <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-sora-700 via-sora-800 to-sora-950 text-white p-6 sm:p-10 shadow-lg">
           <div className="max-w-2xl relative z-10 space-y-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md text-xs font-semibold uppercase tracking-wider text-blue-100">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md text-xs font-semibold uppercase tracking-wider text-sora-100">
               <Sparkles className="w-4 h-4 text-amber-300" />
               <span>{isUz ? "1C ERP bilan sinxron takliflar" : "Синхронизировано с 1С ERP"}</span>
             </div>
             <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
               {isUz ? "Maxsus Takliflar & Chegirmalar" : "Специальные Предложения & Скидки"}
             </h1>
-            <p className="text-sm sm:text-base text-blue-100 leading-relaxed">
+            <p className="text-sm sm:text-base text-sora-100 leading-relaxed">
               {isUz
                 ? "Sora.uz rasmiy katalogidagi eng foydali xaridlar: Kafolatlangan eng arzon narxlar, cheklangan aksiyalar va yangi taqdim etilgan tovarlar."
                 : "Самые выгодные предложения в официальном каталоге Sora.uz: Гарантия лучшей цены, ограниченные акции и свежие новинки."}
@@ -141,7 +141,7 @@ export default async function OffersPage({ params, searchParams }: OffersPagePro
                 href={href}
                 className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all ${
                   isActive
-                    ? "bg-blue-600 text-white shadow-md shadow-blue-500/20"
+                    ? "bg-sora-600 text-white shadow-md shadow-sora-500/20"
                     : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800"
                 }`}
               >
@@ -345,7 +345,7 @@ export default async function OffersPage({ params, searchParams }: OffersPagePro
               </p>
               <Link
                 href="/catalog"
-                className="inline-block px-6 py-2.5 rounded-xl bg-blue-600 text-white font-bold text-sm"
+                className="inline-block px-6 py-2.5 rounded-xl bg-sora-600 text-white font-bold text-sm"
               >
                 {isUz ? "Katalogga o'tish" : "Перейти в каталог"}
               </Link>

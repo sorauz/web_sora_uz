@@ -118,7 +118,7 @@ export default async function WarrantyPage({ params }: WarrantyPageProps) {
           </div>
 
           <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-3">
-            <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-950 text-blue-600 flex items-center justify-center font-bold">
+            <div className="w-12 h-12 rounded-xl bg-sora-50 dark:bg-sora-950 text-sora-600 flex items-center justify-center font-bold">
               <FileText className="w-6 h-6" />
             </div>
             <h3 className="font-bold text-lg text-slate-900 dark:text-white">

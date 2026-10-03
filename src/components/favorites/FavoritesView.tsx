@@ -23,7 +23,7 @@ export function FavoritesView({ allProducts }: FavoritesViewProps) {
   if (!mounted) {
     return (
       <div className="py-20 flex justify-center items-center">
-        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-8 h-8 border-4 border-sora-600 border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -50,7 +50,7 @@ export function FavoritesView({ allProducts }: FavoritesViewProps) {
         <div>
           <Link
             href="/catalog"
-            className="inline-flex items-center gap-2 px-8 py-3.5 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold text-sm rounded-2xl shadow-lg shadow-blue-500/20 transition-all"
+            className="inline-flex items-center gap-2 px-8 py-3.5 bg-sora-600 hover:bg-sora-700 active:scale-95 text-white font-bold text-sm rounded-2xl shadow-lg shadow-sora-500/20 transition-all"
           >
             <span>{common("catalog")}</span>
             <ArrowRight className="w-4 h-4" />

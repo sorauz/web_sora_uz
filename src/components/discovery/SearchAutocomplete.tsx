@@ -96,7 +96,7 @@ export function SearchAutocomplete({
           }}
           onFocus={() => setIsOpen(true)}
           placeholder={t("searchPlaceholder")}
-          className="w-full h-11 pl-10 pr-10 text-xs sm:text-sm rounded-2xl bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 focus:bg-white dark:focus:bg-slate-900 focus:outline-hidden focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-slate-900 dark:text-white transition-all shadow-xs"
+          className="w-full h-11 pl-10 pr-10 text-xs sm:text-sm rounded-2xl bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 focus:bg-white dark:focus:bg-slate-900 focus:outline-hidden focus:border-sora-500 focus:ring-2 focus:ring-sora-500/20 text-slate-900 dark:text-white transition-all shadow-xs"
         />
         <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
         {query && (
@@ -130,7 +130,7 @@ export function SearchAutocomplete({
                         key={c.id}
                         href={`/category/${isUz ? c.group_slug_uz : c.group_slug_ru}`}
                         onClick={() => setIsOpen(false)}
-                        className="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600 transition-colors"
+                        className="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-sora-50 dark:hover:bg-sora-950/40 hover:text-sora-600 transition-colors"
                       >
                         <span>📁 {isUz ? c.group_uz : c.group_ru}</span>
                         <ArrowRight className="w-3.5 h-3.5 opacity-60" />
@@ -194,7 +194,7 @@ export function SearchAutocomplete({
                             <div className="text-[11px] font-bold mt-0.5 flex items-center gap-2">
                               {priceInfo.price > 0 ? (
                                 <>
-                                  <span className="text-blue-600 dark:text-blue-400">
+                                  <span className="text-sora-600 dark:text-sora-400">
                                     {priceInfo.price.toLocaleString()} {t("currency")}
                                   </span>
                                   {priceInfo.hasDiscount && priceInfo.oldPrice && (
@@ -221,7 +221,7 @@ export function SearchAutocomplete({
               <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
                 <button
                   onClick={handleSubmit}
-                  className="w-full py-2.5 text-center text-xs font-bold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 rounded-xl transition-colors flex items-center justify-center gap-1.5"
+                  className="w-full py-2.5 text-center text-xs font-bold text-sora-600 dark:text-sora-400 hover:bg-sora-50 dark:hover:bg-sora-950/40 rounded-xl transition-colors flex items-center justify-center gap-1.5"
                 >
                   <span>{t("viewAll")} ({tSearch("forQuery")} &quot;{trimmed}&quot;)</span>
                   <ArrowRight className="w-3.5 h-3.5" />

@@ -120,7 +120,7 @@ export function ProductTabs({ product, locale }: ProductTabsProps) {
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-2 px-5 py-4 text-sm font-semibold border-b-2 transition-all whitespace-nowrap ${
                 isActive
-                  ? "border-blue-600 text-blue-600 dark:text-blue-400 bg-white dark:bg-slate-900"
+                  ? "border-sora-600 text-sora-600 dark:text-sora-400 bg-white dark:bg-slate-900"
                   : "border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
               }`}
             >
@@ -187,7 +187,7 @@ export function ProductTabs({ product, locale }: ProductTabsProps) {
                     <td className="py-3 px-4 font-medium text-slate-500 dark:text-slate-400">
                       {t("brand")}
                     </td>
-                    <td className="py-3 px-4 font-semibold text-blue-600 dark:text-blue-400">
+                    <td className="py-3 px-4 font-semibold text-sora-600 dark:text-sora-400">
                       {product.brand}
                     </td>
                   </tr>
@@ -242,8 +242,8 @@ export function ProductTabs({ product, locale }: ProductTabsProps) {
               {t("deliveryTab")}
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="p-5 rounded-2xl bg-blue-50/50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/40 space-y-3">
-                <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-bold">
+              <div className="p-5 rounded-2xl bg-sora-50/50 dark:bg-sora-950/20 border border-sora-100 dark:border-sora-900/40 space-y-3">
+                <div className="flex items-center gap-2 text-sora-600 dark:text-sora-400 font-bold">
                   <Truck className="w-5 h-5" />
                   <span>{locale === "uz" ? "Yetkazib berish xizmati" : "Служба доставки"}</span>
                 </div>
@@ -318,7 +318,7 @@ export function ProductTabs({ product, locale }: ProductTabsProps) {
                 <button
                   type="button"
                   onClick={() => alert(locale === "uz" ? "Sharh qoldirish uchun xaridni amalga oshirishingiz lozim." : "Для оставления отзыва необходимо совершить покупку.")}
-                  className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs transition-colors whitespace-nowrap"
+                  className="px-5 py-2.5 rounded-xl bg-sora-600 hover:bg-sora-700 text-white font-bold text-xs shadow-xs transition-colors whitespace-nowrap"
                 >
                   {t("writeReview")}
                 </button>
@@ -334,7 +334,7 @@ export function ProductTabs({ product, locale }: ProductTabsProps) {
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-950/80 text-blue-600 dark:text-blue-400 font-bold flex items-center justify-center text-xs">
+                      <div className="w-8 h-8 rounded-full bg-sora-100 dark:bg-sora-950/80 text-sora-600 dark:text-sora-400 font-bold flex items-center justify-center text-xs">
                         {rev.author[0]}
                       </div>
                       <div>
@@ -360,7 +360,7 @@ export function ProductTabs({ product, locale }: ProductTabsProps) {
                     {rev.comment}
                   </p>
                   <div className="flex items-center gap-2 text-xs text-slate-400">
-                    <button className="flex items-center gap-1 hover:text-blue-600 transition-colors">
+                    <button className="flex items-center gap-1 hover:text-sora-600 transition-colors">
                       <ThumbsUp className="w-3.5 h-3.5" />
                       <span>{rev.likes}</span>
                     </button>
@@ -392,7 +392,7 @@ export function ProductTabs({ product, locale }: ProductTabsProps) {
                     <span className="text-sm sm:text-base">{faq.q}</span>
                     <ChevronDown
                       className={`w-5 h-5 text-slate-400 transition-transform duration-200 ${
-                        isOpen ? "rotate-180 text-blue-600" : ""
+                        isOpen ? "rotate-180 text-sora-600" : ""
                       }`}
                     />
                   </button>

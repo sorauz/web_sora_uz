@@ -6,7 +6,7 @@ export default function NotFoundPage() {
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col justify-center items-center px-4 py-16 text-center">
       <div className="max-w-md w-full space-y-6">
         {/* 404 Badge */}
-        <div className="inline-flex items-center justify-center w-24 h-24 rounded-3xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 font-black text-4xl shadow-inner border border-blue-100 dark:border-blue-900/60">
+        <div className="inline-flex items-center justify-center w-24 h-24 rounded-3xl bg-sora-50 dark:bg-sora-950/60 text-sora-600 dark:text-sora-400 font-black text-4xl shadow-inner border border-sora-100 dark:border-sora-900/60">
           404
         </div>
 
@@ -23,14 +23,14 @@ export default function NotFoundPage() {
         <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
           <Link
             href="/"
-            className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm shadow-xs transition-all flex items-center justify-center gap-2"
+            className="px-5 py-2.5 rounded-xl bg-sora-600 hover:bg-sora-700 text-white font-semibold text-sm shadow-xs transition-all flex items-center justify-center gap-2"
           >
             <Home className="w-4 h-4" />
             <span>Bosh sahifaga qaytish</span>
           </Link>
           <Link
             href="/catalog"
-            className="px-5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-blue-500 font-semibold text-sm text-slate-700 dark:text-slate-200 transition-all flex items-center justify-center gap-2"
+            className="px-5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-sora-500 font-semibold text-sm text-slate-700 dark:text-slate-200 transition-all flex items-center justify-center gap-2"
           >
             <ShoppingBag className="w-4 h-4" />
             <span>Katalogga o&apos;tish</span>
@@ -45,19 +45,19 @@ export default function NotFoundPage() {
           <div className="flex flex-wrap gap-2 justify-center">
             <Link
               href="/category/ish-stoli-kalkulyatorlari"
-              className="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-blue-600 hover:border-blue-400 transition-colors"
+              className="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-sora-600 hover:border-sora-400 transition-colors"
             >
               Kalkulyatorlar
             </Link>
             <Link
               href="/category/magnit-va-marker-doskalari"
-              className="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-blue-600 hover:border-blue-400 transition-colors"
+              className="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-sora-600 hover:border-sora-400 transition-colors"
             >
               Namoyish doskalari
             </Link>
             <Link
               href="/brands"
-              className="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-blue-600 hover:border-blue-400 transition-colors"
+              className="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-sora-600 hover:border-sora-400 transition-colors"
             >
               Barcha brendlar
             </Link>

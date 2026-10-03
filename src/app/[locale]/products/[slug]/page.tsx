@@ -185,7 +185,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
                   <div className="flex items-center gap-2">
                     <Link
                       href={`/brand/${encodeURIComponent(product.brand.toLowerCase())}`}
-                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 text-xs font-bold hover:bg-blue-100 transition-colors"
+                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sora-50 dark:bg-sora-950/60 text-sora-600 dark:text-sora-400 text-xs font-bold hover:bg-sora-100 transition-colors"
                     >
                       <Layers className="w-3.5 h-3.5" />
                       <span>{product.brand}</span>
@@ -251,7 +251,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
               </div>
               <Link
                 href={`/category/${loc.category_slug}`}
-                className="text-xs sm:text-sm font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400 hover:underline"
+                className="text-xs sm:text-sm font-bold text-sora-600 hover:text-sora-700 dark:text-sora-400 hover:underline"
               >
                 {currentLocale === "uz" ? "Barchasini ko'rish →" : "Смотреть все →"}
               </Link>
@@ -282,7 +282,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
               </div>
               <Link
                 href="/catalog"
-                className="text-xs sm:text-sm font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400 hover:underline"
+                className="text-xs sm:text-sm font-bold text-sora-600 hover:text-sora-700 dark:text-sora-400 hover:underline"
               >
                 {currentLocale === "uz" ? "Katalogga o'tish →" : "Перейти в каталог →"}
               </Link>

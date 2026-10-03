@@ -13,9 +13,14 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 pb-12 border-b border-slate-800">
           {/* Col 1: Brand */}
           <div className="lg:col-span-2 space-y-4">
-            <span className="text-2xl font-black tracking-tight text-white">
-              SORA<span className="text-amber-500">.UZ</span>
-            </span>
+            <div className="flex flex-col">
+              <span className="text-2xl font-black tracking-tight text-sora-400 leading-none">
+                SORAUZ
+              </span>
+              <span className="text-[9.5px] font-bold tracking-tight text-slate-300 leading-tight mt-0.5">
+                Sizga mos ishonchli tanlov
+              </span>
+            </div>
             <p className="text-xs text-slate-400 max-w-sm leading-relaxed">
               {isUz
                 ? "1C ERP bilan to'liq sinxronlangan zamonaviy internet-do'kon. Ofis jihozlari, kanselyariya mollari va elektronika to'g'ridan-to'g'ri kafolat bilan yetkaziladi."
@@ -23,15 +28,15 @@ export function Footer() {
             </p>
             <div className="space-y-2 text-xs text-slate-400 pt-2">
               <div className="flex items-center gap-2">
-                <Phone className="w-3.5 h-3.5 text-blue-400" />
+                <Phone className="w-3.5 h-3.5 text-sora-400" />
                 <span>+998 (71) 200-00-00</span>
               </div>
               <div className="flex items-center gap-2">
-                <Mail className="w-3.5 h-3.5 text-blue-400" />
+                <Mail className="w-3.5 h-3.5 text-sora-400" />
                 <span>info@sora.uz</span>
               </div>
               <div className="flex items-center gap-2">
-                <MapPin className="w-3.5 h-3.5 text-blue-400" />
+                <MapPin className="w-3.5 h-3.5 text-sora-400" />
                 <span>{isUz ? "Toshkent shahri, O'zbekiston" : "г. Ташкент, Узбекистан"}</span>
               </div>
             </div>

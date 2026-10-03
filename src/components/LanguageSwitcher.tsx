@@ -26,7 +26,7 @@ export function LanguageSwitcher() {
         disabled={isPending}
         className={`px-2.5 py-1 rounded-md transition-all ${
           locale === "uz"
-            ? "bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-xs font-semibold"
+            ? "bg-white dark:bg-slate-900 text-sora-600 dark:text-sora-400 shadow-xs font-semibold"
             : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
         }`}
       >
@@ -37,7 +37,7 @@ export function LanguageSwitcher() {
         disabled={isPending}
         className={`px-2.5 py-1 rounded-md transition-all ${
           locale === "ru"
-            ? "bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-xs font-semibold"
+            ? "bg-white dark:bg-slate-900 text-sora-600 dark:text-sora-400 shadow-xs font-semibold"
             : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
         }`}
       >

@@ -16,7 +16,7 @@ export function SortSelect() {
           value={sort}
           onChange={(e) => setSort(e.target.value)}
           aria-label={t("sortBy")}
-          className="h-10 pl-9 pr-8 text-xs font-semibold rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 focus:outline-hidden focus:border-blue-500 cursor-pointer appearance-none shadow-xs"
+          className="h-10 pl-9 pr-8 text-xs font-semibold rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 focus:outline-hidden focus:border-sora-500 cursor-pointer appearance-none shadow-xs"
         >
           <option value="popular">{t("sortPopular")}</option>
           <option value="price_asc">{t("sortPriceAsc")}</option>
