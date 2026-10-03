@@ -6,9 +6,9 @@ import { Header } from "@/components/layout/Header";
 import { PromoNav } from "@/components/layout/PromoNav";
 import { Footer } from "@/components/layout/Footer";
 import { MobileNav } from "@/components/layout/MobileNav";
-import { CategoryCard } from "@/components/discovery/CategoryCard";
+import { RandomCategories } from "@/components/discovery/RandomCategories";
 import { ProductCard } from "@/components/discovery/ProductCard";
-import { BrandCard } from "@/components/discovery/BrandCard";
+import { BrandMarquee } from "@/components/discovery/BrandMarquee";
 import { Link } from "@/i18n/routing";
 import {
   Sparkles,
@@ -94,22 +94,22 @@ export default async function HomePage({ params }: PageProps) {
   const promotionProducts =
     specialOffers.promotions.length > 0
       ? specialOffers.promotions
-      : products.filter((p) => calculateProductPrice(p.price).hasDiscount).slice(0, 4);
+      : products.filter((p) => calculateProductPrice(p.price).hasDiscount);
 
   const lowPriceProducts =
     specialOffers.lowPrice.length > 0
       ? specialOffers.lowPrice
-      : products.slice(0, 4);
+      : products;
 
   const popularProducts =
     specialOffers.popular.length > 0
       ? specialOffers.popular
-      : products.slice(4, 8);
+      : products;
 
   const newProductsList =
     specialOffers.newProducts.length > 0
       ? specialOffers.newProducts
-      : products.slice(8, 12);
+      : products;
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col">
@@ -181,7 +181,7 @@ export default async function HomePage({ params }: PageProps) {
           </div>
         </section>
 
-        {/* 4. Asosiy Kategoriyalar Bloki (E-commerce Web Design §9) */}
+        {/* 4. Ommabop Kategoriyalar (4 random aylanuvchi toifalar) */}
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
@@ -195,14 +195,10 @@ export default async function HomePage({ params }: PageProps) {
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {tree.map((cat) => (
-              <CategoryCard key={cat.id} category={cat} locale={locale as "uz" | "ru"} />
-            ))}
-          </div>
+          <RandomCategories categories={tree} locale={locale as "uz" | "ru"} />
         </section>
 
-        {/* 5. Aksiyalar va Chegirmalar (/promotions) */}
+        {/* 5. Aksiyalar va Chegirmalar (/promotions) - 5 ustun, 3 qator */}
         {promotionProducts.length > 0 && (
           <section id="promotions" className="space-y-4">
             <div className="flex items-center justify-between">
@@ -224,8 +220,8 @@ export default async function HomePage({ params }: PageProps) {
                 <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-              {promotionProducts.slice(0, 4).map((p) => (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5 sm:gap-4">
+              {promotionProducts.slice(0, 15).map((p) => (
                 <ProductCard
                   key={p.id}
                   product={p}
@@ -238,7 +234,7 @@ export default async function HomePage({ params }: PageProps) {
           </section>
         )}
 
-        {/* 6. Eng Arzon Narx Kafolati (/low_price_guarantee) */}
+        {/* 6. Eng Arzon Narx Kafolati (/low_price_guarantee) - 5 ustun, 3 qator */}
         {lowPriceProducts.length > 0 && (
           <section id="low-price" className="space-y-4">
             <div className="flex items-center justify-between">
@@ -260,8 +256,8 @@ export default async function HomePage({ params }: PageProps) {
                 <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-              {lowPriceProducts.slice(0, 4).map((p) => (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5 sm:gap-4">
+              {lowPriceProducts.slice(0, 15).map((p) => (
                 <ProductCard
                   key={p.id}
                   product={p}
@@ -274,7 +270,7 @@ export default async function HomePage({ params }: PageProps) {
           </section>
         )}
 
-        {/* 7. Ommabop Mahsulotlar - Xit Savdo (/popular) */}
+        {/* 7. Ommabop Mahsulotlar - Xit Savdo (/popular) - 5 ustun, 3 qator */}
         {popularProducts.length > 0 && (
           <section id="popular" className="space-y-4">
             <div className="flex items-center justify-between">
@@ -296,8 +292,8 @@ export default async function HomePage({ params }: PageProps) {
                 <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-              {popularProducts.slice(0, 4).map((p) => (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5 sm:gap-4">
+              {popularProducts.slice(0, 15).map((p) => (
                 <ProductCard
                   key={p.id}
                   product={p}
@@ -310,7 +306,7 @@ export default async function HomePage({ params }: PageProps) {
           </section>
         )}
 
-        {/* 8. Yangi Mahsulotlar - Novinki (/new_products) */}
+        {/* 8. Yangi Mahsulotlar - Novinki (/new_products) - 5 ustun, 3 qator */}
         {newProductsList.length > 0 && (
           <section id="new-products" className="space-y-4">
             <div className="flex items-center justify-between">
@@ -332,8 +328,8 @@ export default async function HomePage({ params }: PageProps) {
                 <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-              {newProductsList.slice(0, 4).map((p) => (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5 sm:gap-4">
+              {newProductsList.slice(0, 15).map((p) => (
                 <ProductCard
                   key={p.id}
                   product={p}
@@ -346,7 +342,7 @@ export default async function HomePage({ params }: PageProps) {
           </section>
         )}
 
-        {/* 7. Rasmiy Brendlar Bloki (E-commerce Web Design §15) */}
+        {/* 9. Rasmiy Brendlar Bloki (3-Row Continuous Marquee) */}
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
@@ -360,11 +356,7 @@ export default async function HomePage({ params }: PageProps) {
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {brands.slice(0, 8).map((b) => (
-              <BrandCard key={b.id} brand={b} />
-            ))}
-          </div>
+          <BrandMarquee brands={brands} />
         </section>
 
         {/* 8. Afzalliklar Bloki (E-commerce Web Design §26) */}
