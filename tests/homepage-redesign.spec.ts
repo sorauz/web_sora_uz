@@ -93,4 +93,20 @@ test.describe("Homepage Redesign & Special Offers Layout", () => {
     await expect(page.locator("text=Qulay to'lov turlari")).toBeVisible();
     await expect(page.locator("text=B2B va B2C yechimlar")).toBeVisible();
   });
+
+  test("5. Title Icon (Favicon) is set to for_web_logo_icon.ico", async ({ page, request }) => {
+    await page.goto("/uz");
+
+    // Check that link tag with for_web_logo_icon.ico exists in head
+    const iconLink = page.locator("link[href*='for_web_logo_icon.ico']").first();
+    await expect(iconLink).toBeAttached();
+
+    // Verify /for_web_logo_icon.ico returns 200 OK
+    const iconRes = await request.get("/for_web_logo_icon.ico");
+    expect(iconRes.status()).toBe(200);
+
+    // Verify /favicon.ico also returns 200 OK
+    const faviconRes = await request.get("/favicon.ico");
+    expect(faviconRes.status()).toBe(200);
+  });
 });

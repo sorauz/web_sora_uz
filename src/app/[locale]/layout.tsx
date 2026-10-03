@@ -53,6 +53,14 @@ export async function generateMetadata({
         "x-default": "/uz",
       },
     },
+    icons: {
+      icon: [
+        { url: "/for_web_logo_icon.ico", sizes: "any" },
+        { url: "/favicon.ico", sizes: "any" },
+      ],
+      shortcut: "/for_web_logo_icon.ico",
+      apple: "/for_web_logo_icon.ico",
+    },
   };
 }
 
@@ -75,6 +83,11 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} className={`h-full ${fontSans.variable}`}>
       <head>
+        {/* Favicon & Title Icon */}
+        <link rel="icon" href="/for_web_logo_icon.ico" sizes="any" />
+        <link rel="shortcut icon" href="/for_web_logo_icon.ico" />
+        <link rel="apple-touch-icon" href="/for_web_logo_icon.ico" />
+
         {/* Preconnect to external image servers and 1C API to reduce LCP */}
         <link rel="preconnect" href="https://i.ibb.co" />
         <link rel="dns-prefetch" href="https://i.ibb.co" />
