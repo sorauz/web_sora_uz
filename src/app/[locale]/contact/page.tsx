@@ -64,15 +64,15 @@ export default async function ContactPage({ params }: ContactPageProps) {
     "@id": "https://sora.uz/#store",
     name: "Sora.uz — Kanselyariya va ofis mollari do'koni",
     url: "https://sora.uz",
-    telephone: "+998-71-200-00-00",
+    telephone: "+998-90-326-47-57",
     image: "https://sora.uz/icon.png",
     priceRange: "$$",
     address: {
       "@type": "PostalAddress",
-      streetAddress: "Shota Rustaveli ko'chasi, 42-uy",
+      streetAddress: "Dilsaroy ko'chasi, 1 uy",
       addressLocality: "Toshkent",
       addressRegion: "Toshkent shahri",
-      postalCode: "100070",
+      postalCode: "100000",
       addressCountry: "UZ",
     },
     geo: {
@@ -135,9 +135,12 @@ export default async function ContactPage({ params }: ContactPageProps) {
             <div className="w-10 h-10 rounded-xl bg-sora-50 dark:bg-sora-950 text-sora-600 flex items-center justify-center font-bold">
               <Phone className="w-5 h-5" />
             </div>
-            <p className="text-xs text-slate-400 font-semibold">{isUz ? "Telefon raqam" : "Телефон"}</p>
-            <p className="text-sm font-bold text-slate-900 dark:text-white">+998 (71) 200-00-00</p>
-            <p className="text-[11px] text-slate-500">+998 (90) 123-45-67</p>
+            <p className="text-xs text-slate-400 font-semibold">{isUz ? "Telefon raqamlar" : "Телефоны"}</p>
+            <div className="space-y-1">
+              <a href="tel:+998903264757" className="block text-sm font-bold text-slate-900 dark:text-white hover:text-sora-600 dark:hover:text-sora-400 transition-colors">+998 (90) 326-47-57</a>
+              <a href="tel:+998909699090" className="block text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-sora-600 dark:hover:text-sora-400 transition-colors">+998 (90) 969-90-90</a>
+              <a href="tel:+998712280578" className="block text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-sora-600 dark:hover:text-sora-400 transition-colors">+998 (71) 228-05-78</a>
+            </div>
           </div>
 
           <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-2">
@@ -164,7 +167,7 @@ export default async function ContactPage({ params }: ContactPageProps) {
             </div>
             <p className="text-xs text-slate-400 font-semibold">{isUz ? "Manzil" : "Адрес"}</p>
             <p className="text-sm font-bold text-slate-900 dark:text-white leading-tight">
-              {isUz ? "Shota Rustaveli, 42-uy" : "ул. Шота Руставели, 42"}
+              {isUz ? "Dilsaroy ko'chasi, 1 uy" : "ул. Дилсарой, дом 1"}
             </p>
             <p className="text-[11px] text-slate-500">{isUz ? "Toshkent shahri" : "г. Ташкент"}</p>
           </div>

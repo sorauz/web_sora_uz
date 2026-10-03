@@ -146,11 +146,11 @@ export default async function B2BPage({ params }: B2BPageProps) {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 pt-2">
             <a
-              href="tel:+998712000000"
+              href="tel:+998903264757"
               className="px-6 py-3 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs sm:text-sm shadow-xs transition-all flex items-center justify-center gap-2"
             >
               <Phone className="w-4 h-4" />
-              <span>+998 (71) 200-00-00</span>
+              <span>+998 (90) 326-47-57</span>
             </a>
             <a
               href="mailto:b2b@sora.uz"

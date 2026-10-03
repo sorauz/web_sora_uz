@@ -146,8 +146,8 @@ export default async function AboutPage({ params }: AboutPageProps) {
             <div className="p-4 rounded-2xl bg-purple-50 dark:bg-purple-950/60 border border-purple-200 dark:border-purple-900/60">
               <p className="text-xs font-semibold text-purple-900 dark:text-purple-200">
                 {isUz
-                  ? "B2B buyurtmalar uchun: +998 (71) 200-00-00 yoki info@sora.uz"
-                  : "Отдел корпоративных продаж: +998 (71) 200-00-00 или info@sora.uz"}
+                  ? "B2B buyurtmalar uchun: +998 (90) 326-47-57 yoki info@sora.uz"
+                  : "Отдел корпоративных продаж: +998 (90) 326-47-57 или info@sora.uz"}
               </p>
             </div>
           </div>

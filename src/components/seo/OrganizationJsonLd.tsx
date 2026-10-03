@@ -12,7 +12,7 @@ export function OrganizationJsonLd() {
           "Sora.uz — O'zbekistondagi eng yirik kanselyariya, maktab qurollari va ofis anjomlari internet do'koni.",
         contactPoint: {
           "@type": "ContactPoint",
-          telephone: "+998-71-200-00-00",
+          telephone: "+998-90-326-47-57",
           contactType: "customer service",
           areaServed: "UZ",
           availableLanguage: ["Uzbek", "Russian"],

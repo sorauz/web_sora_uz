@@ -26,18 +26,34 @@ export function Footer() {
                 ? "1C ERP bilan to'liq sinxronlangan zamonaviy internet-do'kon. Ofis jihozlari, kanselyariya mollari va elektronika to'g'ridan-to'g'ri kafolat bilan yetkaziladi."
                 : "Современный интернет-магазин с синхронизацией 1С ERP. Офисная техника, канцелярия и электроника с официальной гарантией и доставкой."}
             </p>
-            <div className="space-y-2 text-xs text-slate-400 pt-2">
-              <div className="flex items-center gap-2">
-                <Phone className="w-3.5 h-3.5 text-sora-400" />
-                <span>+998 (71) 200-00-00</span>
+            <div className="space-y-2.5 text-xs text-slate-400 pt-2">
+              <div className="flex items-start gap-2">
+                <Phone className="w-3.5 h-3.5 text-sora-400 shrink-0 mt-0.5" />
+                <div className="flex flex-col gap-1">
+                  <a href="tel:+998903264757" className="hover:text-white transition-colors">
+                    +998 (90) 326-47-57
+                  </a>
+                  <a href="tel:+998909699090" className="hover:text-white transition-colors">
+                    +998 (90) 969-90-90
+                  </a>
+                  <a href="tel:+998712280578" className="hover:text-white transition-colors">
+                    +998 (71) 228-05-78
+                  </a>
+                </div>
               </div>
               <div className="flex items-center gap-2">
-                <Mail className="w-3.5 h-3.5 text-sora-400" />
-                <span>info@sora.uz</span>
+                <Mail className="w-3.5 h-3.5 text-sora-400 shrink-0" />
+                <a href="mailto:info@sora.uz" className="hover:text-white transition-colors">
+                  info@sora.uz
+                </a>
               </div>
-              <div className="flex items-center gap-2">
-                <MapPin className="w-3.5 h-3.5 text-sora-400" />
-                <span>{isUz ? "Toshkent shahri, O'zbekiston" : "г. Ташкент, Узбекистан"}</span>
+              <div className="flex items-start gap-2">
+                <MapPin className="w-3.5 h-3.5 text-sora-400 shrink-0 mt-0.5" />
+                <span>
+                  {isUz
+                    ? "Toshkent shahri, Dilsaroy ko'chasi, 1 uy"
+                    : "г. Ташкент, ул. Дилсарой, дом 1"}
+                </span>
               </div>
             </div>
           </div>

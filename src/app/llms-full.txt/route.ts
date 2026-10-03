@@ -19,8 +19,8 @@ export async function GET() {
 
 ## Kompaniya Rekvizitlari
 - Do'kon: Sora.uz
-- Manzil: Toshkent shahri, Yakkasaroy tumani, Shota Rustaveli ko'chasi, 42-uy
-- Telefon: +998 (71) 200-00-00
+- Manzil: Toshkent shahri, Dilsaroy ko'chasi, 1 uy
+- Telefon: +998 (90) 326-47-57 ; +998 (90) 969-90-90 ; +998 (71) 228-05-78
 - Email: info@sora.uz
 - Telegram: https://t.me/sora_uz
 - Ish vaqti: Dushanba – Shanba, 09:00 – 19:00
