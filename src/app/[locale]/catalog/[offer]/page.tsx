@@ -14,14 +14,14 @@ import { ShieldCheck, Sparkles, Flame, BadgePercent, ArrowRight } from "lucide-r
 
 export const revalidate = 3600;
 
-export const VALID_OFFERS = [
+const VALID_OFFERS = [
   "low_price_guarantee",
   "new_products",
   "popular",
   "promotions",
 ] as const;
 
-export type ValidOfferKey = (typeof VALID_OFFERS)[number];
+type ValidOfferKey = (typeof VALID_OFFERS)[number];
 
 const OFFER_ALIASES: Record<string, ValidOfferKey> = {
   "low-price": "low_price_guarantee",

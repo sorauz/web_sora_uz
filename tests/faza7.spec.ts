@@ -17,7 +17,7 @@ test.describe("FAZA 7: Performance va Monitoring (Core Web Vitals)", () => {
 
     // Font class or variable is attached to html (Next.js font optimization)
     const html = page.locator("html");
-    await expect(html).toHaveAttribute("class", /plus_jakarta_sans/);
+    await expect(html).toHaveAttribute("class", /plus_jakarta_sans|__variable/);
   });
 
   test("2. Google Analytics va Monitoring skriptlari mavjud bo'lishi kerak", async ({

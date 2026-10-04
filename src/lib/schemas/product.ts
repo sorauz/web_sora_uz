@@ -2,10 +2,10 @@ import { z } from "zod";
 import { ProductPriceStockSchema } from "./price";
 
 export const ProductAttributeSchema = z.object({
-  property_uz: z.string(),
-  property_ru: z.string(),
-  value_uz: z.string(),
-  value_ru: z.string(),
+  property_uz: z.string().default(""),
+  property_ru: z.string().default(""),
+  value_uz: z.string().default(""),
+  value_ru: z.string().default(""),
 });
 
 export type ProductAttribute = z.infer<typeof ProductAttributeSchema>;
@@ -24,28 +24,28 @@ export type SubProductCard = z.infer<typeof SubProductCardSchema>;
 
 export const ProductLocalizedUzSchema = z.object({
   unit_uz: z.string().default("dona"),
-  category_uz: z.string(),
-  category_slug_uz: z.string(),
+  category_uz: z.string().default(""),
+  category_slug_uz: z.string().default(""),
   alt_picture_uz: z.string().default(""),
-  name_uz: z.string(),
-  slug_uz: z.string(),
-  title_uz: z.string(),
-  meta_description_uz: z.string(),
-  short_description_uz: z.string(),
-  product_description_uz: z.string(),
+  name_uz: z.string().default(""),
+  slug_uz: z.string().default(""),
+  title_uz: z.string().default(""),
+  meta_description_uz: z.string().default(""),
+  short_description_uz: z.string().default(""),
+  product_description_uz: z.string().optional().default(""),
 });
 
 export const ProductLocalizedRuSchema = z.object({
   unit_ru: z.string().default("шт"),
-  category_ru: z.string(),
-  category_slug_ru: z.string(),
+  category_ru: z.string().default(""),
+  category_slug_ru: z.string().default(""),
   alt_picture_ru: z.string().default(""),
-  name_ru: z.string(),
-  slug_ru: z.string(),
-  title_ru: z.string(),
-  meta_description_ru: z.string(),
-  short_description_ru: z.string(),
-  product_description_ru: z.string(),
+  name_ru: z.string().default(""),
+  slug_ru: z.string().default(""),
+  title_ru: z.string().default(""),
+  meta_description_ru: z.string().default(""),
+  short_description_ru: z.string().default(""),
+  product_description_ru: z.string().optional().default(""),
 });
 
 export const ProductSchema = z.object({
@@ -62,9 +62,9 @@ export const ProductSchema = z.object({
   updated_at: z.string().optional().default(""),
   uz: ProductLocalizedUzSchema,
   ru: ProductLocalizedRuSchema,
-  attributes: z.array(ProductAttributeSchema).default([]),
-  related_products: z.array(z.any()).default([]),
-  recommended_products: z.array(z.any()).default([]),
+  attributes: z.array(ProductAttributeSchema).optional().default([]),
+  related_products: z.array(z.any()).optional().default([]),
+  recommended_products: z.array(z.any()).optional().default([]),
   // Optionally populated from Price API
   price: ProductPriceStockSchema.optional(),
 });

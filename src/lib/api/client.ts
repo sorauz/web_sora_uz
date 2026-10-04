@@ -298,6 +298,14 @@ class SoraApiClient {
     }
 
     if (found) {
+      // If the found item came from lightweight all_product without full description or attributes,
+      // seamlessly enrich it with complete details from /product?id={id}
+      if (!found.uz?.product_description_uz || !found.attributes?.length) {
+        const detailed = await this.getProductById(found.id);
+        if (detailed.product) {
+          return { product: detailed.product, isFallback: detailed.isFallback };
+        }
+      }
       return { product: found, isFallback: all.isFallback };
     }
 
