@@ -123,8 +123,25 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
   // 1. Related Products (Up-sell / Down-sell: prefer 1C explicit related_products if present)
   let relatedProducts: typeof allProducts = [];
   if (product.related_products && product.related_products.length > 0) {
-    const relatedIds = new Set(product.related_products.map((r) => r.id));
-    relatedProducts = allProducts.filter((p) => relatedIds.has(p.id));
+    const matchedList: typeof allProducts = [];
+    for (const r of product.related_products) {
+      const targetId = r.related_products_id || r.id;
+      const found = allProducts.find(
+        (p) =>
+          (targetId && p.id === targetId) ||
+          (r.slug_uz && p.uz?.slug_uz === r.slug_uz) ||
+          (r.slug_ru && p.ru?.slug_ru === r.slug_ru) ||
+          (r.name_uz && p.uz?.name_uz === r.name_uz)
+      );
+      if (
+        found &&
+        found.id !== product.id &&
+        !matchedList.some((m) => m.id === found.id)
+      ) {
+        matchedList.push(found);
+      }
+    }
+    relatedProducts = matchedList;
   }
   if (relatedProducts.length === 0) {
     const relatedCandidates = allProducts.filter(
@@ -142,10 +159,26 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
   // 2. Recommended Products (Cross-sell: prefer 1C explicit recommended_products if present)
   let recommendedProducts: typeof allProducts = [];
   if (product.recommended_products && product.recommended_products.length > 0) {
-    const recIds = new Set(product.recommended_products.map((r) => r.id));
-    recommendedProducts = allProducts.filter(
-      (p) => recIds.has(p.id) && !relatedProducts.some((r) => r.id === p.id)
-    );
+    const matchedList: typeof allProducts = [];
+    for (const rec of product.recommended_products) {
+      const targetId = rec.recommended_products_id || rec.id;
+      const found = allProducts.find(
+        (p) =>
+          (targetId && p.id === targetId) ||
+          (rec.slug_uz && p.uz?.slug_uz === rec.slug_uz) ||
+          (rec.slug_ru && p.ru?.slug_ru === rec.slug_ru) ||
+          (rec.name_uz && p.uz?.name_uz === rec.name_uz)
+      );
+      if (
+        found &&
+        found.id !== product.id &&
+        !relatedProducts.some((rel) => rel.id === found.id) &&
+        !matchedList.some((m) => m.id === found.id)
+      ) {
+        matchedList.push(found);
+      }
+    }
+    recommendedProducts = matchedList;
   }
   if (recommendedProducts.length === 0) {
     const recommendedCandidates = allProducts.filter(

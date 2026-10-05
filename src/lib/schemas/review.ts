@@ -9,7 +9,20 @@ export const ReviewSchema = z.object({
   productName: z.string().default(""),
   datePublished: z.string().default(""),
   name_author: z.string().default("Foydalanuvchi"),
-  permission_to_publish: z.boolean().default(true),
+  permission_to_publish: z
+    .union([z.boolean(), z.string()])
+    .transform((val) => {
+      if (typeof val === "boolean") return val;
+      const lower = val.trim().toLowerCase();
+      return (
+        lower === "да" ||
+        lower === "ha" ||
+        lower === "yes" ||
+        lower === "true" ||
+        lower === "1"
+      );
+    })
+    .default(true),
   ratingValue: z.number().int().min(1).max(5).default(5),
   bestRating: z.number().int().default(5),
   reviewBody: z.string().default(""),

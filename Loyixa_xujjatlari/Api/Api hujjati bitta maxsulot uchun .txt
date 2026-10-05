@@ -1,6 +1,6 @@
 API: 1ta mahsulot haqida batafsil ma'lumot olish:
 Ushbu endpoint orqali 1C bazasidan ma'lum bir mahsulotning (nomenklaturaning) barcha ma'lumotlari, jumladan, tarjimalari (UZ/RU), qo'shimcha xususiyatlari, aloqador va  tavsiya etilgan mahsulotlar ro'yxati olinadi.
-URL: http://sora.uz:777/SORA/hs/for_msp/product?id=XXXXXXXXXXXXXXXXXXXXX
+URL: http://1cloud.uz:777/SORA/hs/for_msp/product?id=XXXXXXXXXXXXXXXXXXXXX
 Avtorizatsiya:	Basic Auth (Login va Parol)
 Content-Type:	application/json; charset=utf-8
 So'rov parametrlari (Query Parameters) Majburiy id String (UUID)
@@ -12,43 +12,46 @@ Kod,Holat,Sabab / Qaytariladigan xabar
 404,Not Found,- Mahsulot 1C bazasida topilmadi.- Mahsulot o'chirishga belgilangan (ПометкаУдаления).- Saytda nashr etish ruxsati yo'q (ПубликоватьНаСайте = ЛОЖЬ).
 
 
-Namuna (json): GET:http://sora.uz:777/SORA/hs/for_msp/product?id=70ee3bb2-cd83-11ea-96bb-50b7c370a30f:
+Namuna (json): GET:http://1cloud.uz:777/SORA/hs/for_msp/product?id=f6d951a5-8dfd-11ea-81b6-50b7c370a30f:
 Muvaffaqiyatli javob namunasi (200 OK):
 ```
 {
-  "id": "70ee3bb2-cd83-11ea-96bb-50b7c370a30f",
-  "product_sku": "Deli E3871",
-  "package": "1/4",
-  "barcode": "6921734938718",
+  "id": "f6d951a5-8dfd-11ea-81b6-50b7c370a30f",
+  "product_sku": "DELI 8014",
+  "package": "1/8",
+  "barcode": "6921734980144",
   "brand": "DELI",
   "manufacturer": "Deli Group Co",
-  "country": "China",
+  "country": "Xitoy",
   "video_url": "",
-  "main_picture": "https://i.ibb.co/qLcGdmjh/Deli-E3871.jpg",
-  "updated_at": "2026-09-28T00:00:00",
+  "main_picture": "https://i.ibb.co/GfDNvWqb/DELI-8014.jpg",
+  "updated_at": "2026-10-05T00:00:00",
+  "price": "500000",
+  "priceCurrency": "UZS",
+  "stock": "In stock",
   "uz": {
     "unit_uz": "dona",
-    "category_uz": "Ofis buyumlari",
-    "category_slug_uz": "ofis-buyumlari",
-    "alt_picture_uz": "Deli 3871 Plastik prujinali bog‘lash mashinasi",
-    "name_uz": "Plastik prujinali bog‘lash mashinasi Deli 3871 ",
-    "slug_uz": "mashina-dlya-perepleta-ssh-350l-prob-12l-f-a4-deli-e3871",
-    "title_uz": "Deli 3871 Plastik prujinali bog‘lash mashinasi",
-    "meta_description_uz": "Deli 3871 – 2-in-1 perforator va bog‘lovchi. Qulay dastak, aniq kesish, barqaror korpus. Ofis va uy uchun ishonchli, A4 hujjatlar uchun professional yechim.",
-    "short_description_uz": "Deli 3871 – 2-in-1 perforator va bog‘lovchi qurilma. Qulay dastagi 30% kamroq kuch talab qiladi, mustahkam karbid pichoqlar aniq teshadi, sirpanmaydigan oyoqchalari barqarorlikni taʼminlaydi. Chiqindi idishi ish joyini toza saqlaydi. Kichik va o‘rta ofis hamda uy sharoitida ishonchli foydalanish uch",
-    "product_description_uz": "✨ Dizayn va qulaylik xususiyatlari\n2-in-1 dizayni – qurilma bir vaqtning o‘zida perforator va bog‘lovchi vazifasini bajaradi.\nQulay dastagi – bir tutqichli teshish tizimi ishlatish uchun qulay va 30% kamroq kuch talab qiladi.\nAniq kesish – mustahkam karbid pichoqlar aniq va bir tekis teshilishni taʼminlaydi.\nBarqarorlik – sirpanmaydigan rezina oyoqchalar qurilmaning ish paytida joyidan siljishini oldini oladi.\nQog‘oz chiqindilari uchun idish – teshilgan qog‘oz qoldiqlari maxsus konteynerga to‘planadi, ish joyini iflos qilmaydi.\n\nTAVSIYA ETILADI\n\nDeli 3871 – kichik va o‘rta hajmdagi ofis ishlari, shuningdek, uy sharoitida foydalanish uchun juda mos keladigan, ishonchli, mustahkam va qulay bog‘lash mashinasidir. Uning zanglamaydigan po‘lat korpusi uzoq muddat xizmat qilishni kafolatlaydi, qulay dastagi esa ko‘p sonli hujjatlarni qayta ishlashda ham qo‘lni charchatmaydi. A4 formatdagi loyihalar, hisobotlar va taqdimotlarni professional ko‘rinishda jilovlash uchun ajoyib tanlov.\n\nMaʼlumotlar Deli 3871 texnik pasporti asosida tayyorlandi.  "
+    "category_uz": "Qog'oz kesgich",
+    "category_slug_uz": "qogoz-kesgich",
+    "alt_picture_uz": "A4 qog‘oz kesish mashinasi",
+    "name_uz": "Deli E-8014 – A4 formatli qo‘lda ishlaydigan qog‘oz kesish mashinasi",
+    "slug_uz": "deli-e-8014-a4-formatli-qolda-ishlaydigan-qogoz-kesish-mashinasi",
+    "title_uz": "Deli E-8014 qo‘lda ishlaydigan A4 qog‘oz kesish mashinasi – 300 mm gilotin rezak, A4/A5/B4 formatlari, 12‑15 varaq sig‘imi, White Ash, ofis va maktab uchun",
+    "meta_description_uz": "Deli E-8014 A4 qo‘lda ishlaydigan gilotin qog‘oz kesgich — 300 mm, 12–15 varaq, A4/A5/B4. Toshkent bo‘ylab 24 soatda yetkazib berish. Sora.uz",
+    "short_description_uz": "Deli E-8014 – Xitoyda ishlab chiqarilgan, po‘lat asosli, zanglamaydigan po‘lat pichoq bilan jihozlangan qo‘lda ishlaydigan qog‘oz kesish mashinasi. 300 mm kesish uzunligi, 12 varaq (80 gsm) sig‘imi, A4 formatlaridan kichikgini qo‘llab‑quvvatlaydi, rang – Oq (White), o‘lchamlari 485 × 275 × 73 mm,",
+    "product_description_uz": "Deli E-8014 – ofis va maktab muhitida A4 formatli qog‘ozni tez, aniq va xavfsiz kesish uchun mo‘ljallangan professional qo‘lda ishlaydigan kesish mashinasidir. Qurilmaning po‘lat asosli korpusi barqarorlikni ta’minlaydi, zanglamaydigan po‘lat pichoq esa uzoq muddatli xizmat ko‘rsatadi. Kesish maydoni 300 × 250 mm bo‘lib, maksimal kesish uzunligi 300 mm, bu esa A4 (210 × 297 mm), A5 (148 × 210 mm) va B4 (250 × 353 mm) formatlarini bir vaqtning o‘zida qamrab oladi. Qog‘oz sig‘imi 12‑15 varaq (80 gsm) gacha, bu ofisda kunlik ishlov berish uchun yetarli. Qurilma oq‑kulrang (White Ash) rangda, ergonomik tutqich va slaydli qopqoq bilan jihozlangan, bu esa qo‘l charchashini kamaytiradi va xavfsizlikni oshiradi. Umumiy o‘lchamlari 480 mm × 330 mm × 100 mm, vazni taxminan 1,2 kg, shuning uchun stol ustida joylashishi qulay. EAN‑13 kod 6921734980144, SKU 100003427, brend Deli (Deli Group Co., Ltd.), ishlab chiqarilgan mamlakat – Xitoy (Ningbo, Zhejiang). Qadoqlash turi ma’lum emas, lekin qurilma bir dona paketda yetkaziladi. Bu kesish mashinasi aniq, samarali va uzoq muddatli ishlashni ta'minlaydi, har qanday ofis, maktab yoki uy sharoitida ideal tanlovdir."
   },
   "ru": {
     "unit_ru": "шт",
-    "category_ru": "Офисные принадлежности",
-    "category_slug_ru": "ofisnye-prinadlezhnosti",
-    "alt_picture_ru": "Машина для скрепления пластиковых пружин Deli 3871",
-    "name_ru": "Машина для скрепления пластиковых пружин Deli 3871",
-    "slug_ru": "mashina-dlya-skepleniiya-plastikovix-purjin-deli-3871",
-    "title_ru": "Машина для скрепления пластиковых пружин Deli 3871",
-    "meta_description_ru": "Deli 3871 — устройство «2 в 1»: дырокол и переплетчик. Удобная ручка, точная пробивка, устойчивый корпус. Надежное решение для офиса и дома, профессиональный ин",
-    "short_description_ru": "Deli 3871 — устройство «2 в 1», сочетающее функции дырокола и степлера. Удобная рукоятка позволяет прилагать на 30% меньше усилий, прочные ножи из твердого сплава обеспечивают точность пробивания отверстий, а нескользящие ножки гарантируют устойчивость. Контейнер для сбора отходов помогает поддержив",
-    "product_description_ru": "✨ Дизайн и удобство использования\nКонструкция 2-в-1 – устройство одновременно выполняет функции перфоратора и переплетчика.\nУдобная ручка – система перфорации с одной ручкой проста в использовании и требует на 30% меньше усилий.\nТочная резка – прочные твердосплавные лезвия обеспечивают точную и равномерную перфорацию.\nУстойчивость – нескользящие резиновые ножки предотвращают смещение устройства во время работы.\nКонтейнер для отходов бумаги – перфорированные бумажные отходы собираются в специальный контейнер, предотвращая загрязнение рабочего места.\n\nРЕКОМЕНДУЕТСЯ\n\nDeli 3871 – это надежный, долговечный и удобный переплетчик, идеально подходящий для небольших и средних офисов, а также для домашнего использования. Корпус из нержавеющей стали гарантирует длительный срок службы, а удобная ручка не утомляет руку даже при обработке большого количества документов. Отличный выбор для профессионального оформления проектов, отчетов и презентаций формата А4.\n\nИнформация подготовлена на основе технического паспорта Deli 3871."
+    "category_ru": "Резак для бумаги",
+    "category_slug_ru": "rezak-dlya-bumagi",
+    "alt_picture_ru": "Deli E-8014 ручной гильотинный резак A4",
+    "name_ru": "Deli E-8014 – ручной резак формата A4",
+    "slug_ru": "deli-e-8014-ruchnoj-rezak-formata-a4",
+    "title_ru": "Deli E-8014 ручной гильотинный резак A4 – 300 mm, поддержка форматов A4, A5, B4, вместимость 12‑15 листов, White Ash, для офиса и школы",
+    "meta_description_ru": "Ручной гильотинный резак для бумаги Deli E-8014 формата А4 — 300 мм, 12 листов, форматы А4/А5/Б4. Доставка по Ташкенту в течение 24 часов. Sora.uz",
+    "short_description_ru": "Deli E-8014 – Ручной резак для бумаги, производство Китай, стальное основание, лезвие из нержавеющей стали. Длина резки 300 мм, вместимость 12 листов (80 г/м²), поддерживает форматы меньше A4, цвет – белый, размеры 485 × 275 × 73 мм, фактический вес 2,1–2,3 кг.",
+    "product_description_ru": "Deli E-8014 – профессиональный ручной гильотинный резак, предназначенный для быстрого и точного разрезания бумаги формата A4 в офисных и учебных помещениях. Корпус из прочного стали обеспечивает стабильность, а нож из нержавеющей стали гарантирует длительный срок службы. Рабочая зона реза 300 × 250 мм, максимальная длина реза 300 мм, что позволяет обрабатывать форматы A4 (210 × 297 мм), A5 (148 × 210 мм) и B4 (250 × 353 мм). Вместимость листов – 12 листов (80 gsm), что достаточно для ежедневных задач. Устройство выполнено в цвете White Ash, оснащено эргономичной ручкой и защитным крышкой, уменьшающими усталость рук и повышающими безопасность. Общие размеры 480 mm × 330 mm × 100 mm, вес около 1,2 kg, поэтому легко размещается на столе. Штрих‑код EAN‑13 6921734980144, артикул (SKU) 100003427, бренд Deli (Deli Group Co., Ltd.), страна производства – Китай (Нинбо, провинция Чжэцзян). Тип упаковки неизвестен, но устройство поставляется в единой упаковке. Этот резак обеспечивает точный, эффективный и долговечный процесс резки, идеален для любого офиса, школы или домашнего использования."
   },
   "attributes": [
     {
@@ -58,22 +61,58 @@ Muvaffaqiyatli javob namunasi (200 OK):
       "value_ru": "Deli"
     },
     {
-      "property_uz": "Model",
-      "property_ru": "Модель",
-      "value_uz": "3871 (baʼzan E3871 deb ham yuritiladi)",
-      "value_ru": "3871 (иногда обозначается как E3871)"
+      "property_uz": "Ishlab chiqarilgan mamlakat",
+      "property_ru": "Страна производства",
+      "value_uz": "Xitoy",
+      "value_ru": "Китай"
     },
     {
-      "property_uz": "Rangi",
-      "property_ru": "Цвет",
-      "value_uz": "To‘q kulrang",
-      "value_ru": "Темно-серый"
+      "property_uz": "Model",
+      "property_ru": "Модель",
+      "value_uz": "E-8014",
+      "value_ru": "E-8014"
+    },
+    {
+      "property_uz": "Artikul",
+      "property_ru": "Артикул",
+      "value_uz": "8014",
+      "value_ru": "8014"
+    },
+    {
+      "property_uz": "Shtrix-kod (EAN‑13)",
+      "property_ru": "Штрих‑код (EAN‑13)",
+      "value_uz": "6921734980144",
+      "value_ru": "6921734980144"
     },
     {
       "property_uz": "Ishchi formati",
       "property_ru": "Рабочий формат",
-      "value_uz": "A4 (vertikal)",
-      "value_ru": "Формат А4 (вертикальный)"
+      "value_uz": "A4",
+      "value_ru": "А4"
+    },
+    {
+      "property_uz": "Rangi",
+      "property_ru": "Цвет",
+      "value_uz": "Kumushsimon oq",
+      "value_ru": "Бело-серебристый"
+    },
+    {
+      "property_uz": "Umumiy o'lchamlar (En × Chuq. × Bal.)",
+      "property_ru": "Габаритный размер (Ш × Г × В)",
+      "value_uz": "480 mm × 330 mm × 100 mm",
+      "value_ru": "480 mm × 330 mm × 100 mm"
+    },
+    {
+      "property_uz": "Kesish o'lchami",
+      "property_ru": "Размер для резки",
+      "value_uz": "300 × 250 mm (dyuym:12\" × 10\")",
+      "value_ru": "300 × 250 мм (дюйм: 12\" × 10\")"
+    },
+    {
+      "property_uz": "Kesish imkoniyati",
+      "property_ru": "Возможность резки",
+      "value_uz": "12 varaq (80 g/m²)",
+      "value_ru": "12 листов (80 г/м²)"
     },
     {
       "property_uz": "Korpus materiali",
@@ -82,219 +121,88 @@ Muvaffaqiyatli javob namunasi (200 OK):
       "value_ru": "Сталь"
     },
     {
-      "property_uz": "Umumiy o'lchamlar (En × Chuq. × Bal.)",
-      "property_ru": "Габаритный размер (Ш × Г × В)",
-      "value_uz": "418 × 185 × 295 mm",
-      "value_ru": "418 × 185 × 295 мм"
-    },
-    {
-      "property_uz": "Brutto vazni",
-      "property_ru": "Вес брутто",
-      "value_uz": "3.7 kg",
-      "value_ru": "3,7 кг"
-    },
-    {
-      "property_uz": "Ishlab chiqarilgan mamlakat",
-      "property_ru": "Страна производства",
-      "value_uz": "Xitoy",
-      "value_ru": "Китай"
-    },
-    {
-      "property_uz": "Bog‘lash (jilovlash) usuli",
-      "property_ru": "Метод связывания (уздечки)",
-      "value_uz": "Plastik prujina",
-      "value_ru": "Пластиковая пружина"
-    },
-    {
-      "property_uz": "Maksimal prujina diametri",
-      "property_ru": "Максимальный диаметр пружины",
-      "value_uz": "16 mm",
-      "value_ru": "16 мм"
-    },
-    {
-      "property_uz": "Bir vaqtda bog‘lanadigan varaqlar soni",
-      "property_ru": "Количество листов, которые необходимо переплести за один раз.",
-      "value_uz": "350 tagacha (80 g/m²)",
-      "value_ru": "До 350 (80 г/м²)"
-    },
-    {
-      "property_uz": "Bir vaqtda teshiladigan varaqlar soni",
-      "property_ru": "Количество листов, которые необходимо перфорировать за один раз.",
-      "value_uz": "12 tagacha (80 g/m²)",
-      "value_ru": "До 12 (80 г/м²)"
-    },
-    {
-      "property_uz": "Teshiklar soni",
-      "property_ru": "Количество отверстий",
-      "value_uz": "21 ta standart + 4 ta qo‘shimcha teshik",
-      "value_ru": "21 стандартное отверстие + 4 дополнительных отверстия"
-    },
-    {
-      "property_uz": "Teshik shakli",
-      "property_ru": "Форма отверстия",
-      "value_uz": "Kvadrat",
-      "value_ru": "Квадрат"
-    },
-    {
-      "property_uz": "Perforatsiya turi",
-      "property_ru": "Тип перфорации",
-      "value_uz": "Mexanik (qo‘lda)",
-      "value_ru": "Механический (ручной)"
-    },
-    {
-      "property_uz": "Qadoqlash turi",
-      "property_ru": "Тип упаковки",
-      "value_uz": "Teshilish chuqurligini sozlash imkoniyati",
-      "value_ru": "Возможность регулировки глубины бурения"
+      "property_uz": "Sof og'irlik",
+      "property_ru": "Вес нетто",
+      "value_uz": "~1,2 kg",
+      "value_ru": "~1,2 kg"
     }
   ],
+  "gallery": [],
   "related_products": [
     {
-      "slug_uz": "mashina-dlya-perepleta-ssh-350-listov-f-a4-cerebryanyy-deli-e3870",
-      "name_uz": "Deli 3870 Plastik prujinali bog‘lash mashinasi",
-      "title_uz": "Plastik prujinali bog‘lash mashinasi Deli 3870",
-      "short_description_uz": "Deli 3870 — plastik prujinali bog‘lash uchun mo‘ljallangan mexanik ish stoli mashinasi. Bir vaqtning o‘zida 12 varaqgacha qog‘ozni teshadi va 350 varaqgacha hujjatni bog‘laydi. 21 teshikli prujina tizimi va ergonomik dizayni ofisda tez va qulay ishlashni ta’minlaydi.",
-      "alt_picture_uz": "Deli 3871 plastik prujinali bog‘lash mashinasi — to‘q kulrang korpus, ergonomik tutqich va 21 teshikli prujina mexanizmi bilan.",
-      "slug_ru": "mashina-dlya-skepleniiya-plastikovix-purjin-deli-3870",
-      "name_ru": "Машина для скрепления пластиковых пружин Deli 3871",
-      "title_ru": "Машина для скрепления пластиковых пружин Deli 3871",
-      "short_description_ru": "Машина для переплета, сш 350 листов, ф.А4 (cеребряный) Deli E3870",
-      "alt_picture_ru": "Машина для скрепления пластиковых пружин Deli 3871",
-      "picture": "https://i.ibb.co/Z6G5VSKq/E3870.jpg"
+      "related_products_id": "55fd30b0-593f-11eb-a0e5-c01885f723fa",
+      "slug_uz": "deli-e8013-gilotin-kesgichi-ofis-uchun",
+      "name_uz": "Ofis uchun Kesgichi – DELI E8013",
+      "title_uz": "DELI E8013 qog'oz kesgichi – ofis, maktab, B4 format, 12 varaqgacha, po'lat korpus, oq rang, Xitoy",
+      "short_description_uz": "DELI E8013 – ofis va ta'lim muassasalarida qog'oz, karton va boshqa materiallarni aniq kesish uchun mo'ljallangan, po'lat korpusli, 12 varaqgacha qog'ozni bir marta kesish imkoniyatiga ega, 3.9 kg vazn, oq rang, 380 × 300 mm kesish maydoni, Xitoyda ishlab chiqarilgan. ",
+      "alt_picture_uz": "DELI E8013 qog'oz kesgichi",
+      "slug_ru": "deli-e8013-gilotinnyy-rezak-ofisnyy",
+      "name_ru": "Офисный резак – DELI E8013",
+      "title_ru": "DELI E8013 резак для бумаги – офисный, B4, 12 листов, стальной корпус, белый, производство Китай",
+      "short_description_ru": "DELI E8013 – резак для офисов, школ и небольших типографий, стальной корпус, резка до 12 листов за один проход, вес 3,2 kg, белый, рабочая зона 380 × 300 мм, произведён в Китае.",
+      "alt_picture_ru": "Резак для бумаги, Deli E8013",
+      "picture": "https://i.ibb.co/nHZVCbB/DELI-8013.jpg"
     },
     {
-      "slug_uz": "deli-3874-kombi-perpletka-mashinasi",
-      "name_uz": "Deli 3874 Kombi perpletka mashinasi",
-      "title_uz": "Deli 3874 – Kombi perpletka, 21 teshik, 450 varaq",
-      "short_description_uz": "Deli 3874 – qo‘lda ishlaydigan kombi perpletka mashinasi, po‘lat korpusli, 21 teshik, 14,3 mm masofa, 6‑51 mm prujina diapazoni, 450 varaqgacha biriktirish, 25 varaq teshik (punch), 10,3 kg vazn, 330×450×435 mm o‘lcham, EAN‑13: 6921734938749.",
-      "alt_picture_uz": "deli 3874",
-      "slug_ru": "deli-3874-kombinirovannyi-perepletnyi-apparat",
-      "name_ru": "Deli 3874 Комбинированный переплетный аппарат",
-      "title_ru": "Deli 3874 – комбинированный переплет, 21 отверстие, 450 листов",
-      "short_description_ru": "Deli 3874 – ручной комбинированный переплетный аппарат, стальной корпус, 21 отверстие, расстояние 14,3 мм, диапазон пружины 6‑51 мм, возможность скрепления до 450 листов, пробивка до 25 листов, вес 10,3 kg, размеры 330×450×435 мм, EAN‑13: 6921734938749.",
-      "alt_picture_ru": "deli 3874",
-      "picture": "https://i.ibb.co/ccgJWRB6/DELI-E3874.jpg"
+      "related_products_id": "55fd30af-593f-11eb-a0e5-c01885f723fa",
+      "slug_uz": "deli-e8012-qogoz-kesgichi-a3-oq",
+      "name_uz": "Deli E8012 – Qog'oz Kesgichi (A3, Oq)",
+      "title_uz": "Deli E8012 oq qog'oz kesgichi – A3 (460×380 mm) guillotine, 12 dona A4 bir martada, xavfsiz qulflash klipi, po‘lat korpus, ofis va maktab uchun",
+      "short_description_uz": "Deli E8012 – professional qog'oz kesgichi, 665 × 405 × 75 mm o‘lchamda, po‘lat asosli, oq rangda, A3 (460 × 380 mm) kesish maydoni bilan. 12 dona A4 qog‘ozni bir martada kesish imkoniyati, xavfsiz qulflash klipi, Xitoyda ishlab chiqarilgan, EAN‑13: 6921734980120.",
+      "alt_picture_uz": "Deli E8012 – Qog'oz Kesgichi (A3, Oq)",
+      "slug_ru": "deli-e8012-rezak-dlya-bumagi-a3-belyi",
+      "name_ru": "Deli E8012 – Резак для бумаги (A3, Белый)",
+      "title_ru": "Deli E8012 белый резак для бумаги – формат A3 (460×380 mm) гильотина, 12 листов A4 за один раз, безопасный замок, стальная конструкция, для офиса и школы",
+      "short_description_ru": "Deli E8012 – профессиональный резак для бумаги, размеры 665 × 405 × 75 мм, стальной корпус, белый цвет, рабочая зона A3 (460 × 380 мм). Возможность резки 12 листов A4 за один проход, безопасный замок, произведено в Китае, EAN‑13: 6921734980120.",
+      "alt_picture_ru": "Deli E8012 – Резак для бумаги (A3, Белый)",
+      "picture": "https://i.ibb.co/cSk21wDT/DELI-8012.jpg"
     },
     {
-      "slug_uz": "deli-e3872-a4-split-komb-broshyurovkach-machinesi",
-      "name_uz": "DELI E3872 – A4 сплит‑комб брошюровка машинеси",
-      "title_uz": "DELI E3872 – A4 сплит‑комб брошюровка машинеси",
-      "short_description_uz": "DELI E3872 – professional qo‘lda ishlaydigan brossyurolka mashinasi, A4 formatida bir vaqtning o‘zida 15 varaqni perforatsiya qiladi va 425 varaqni plastik split‑comb prujinasi bilan biriktiradi. 21‑ta 3×8 mm teshik, 14,3 mm masofa, po‘lat korpus, 3,5 kg vazn, kulrang rang.",
-      "alt_picture_uz": "",
-      "slug_ru": "deli-e3872-a4-split-komb-broshyurovochnyy-apparat",
-      "name_ru": "DELI E3872 – A4 сплит‑комб брошюровочный аппарат",
-      "title_ru": "DELI E3872 – A4 сплит‑комб брошюровочный аппарат",
-      "short_description_ru": "DELI E3872 – профессиональный ручной брошюровочный аппарат, одновременно пробивает до 15 листов (70 g/m²) и скрепляет до 425 листов пластиковыми split‑comb пружинами. 21 отверстие 3×8 mm, шаг 14,3 mm, стальной корпус, вес 3,5 kg, серый цвет.",
-      "alt_picture_ru": "",
-      "picture": "https://i.ibb.co/Q3BPqkyk/E3872.jpg"
-    },
-    {
-      "slug_uz": "mashina-dlya-perepleta-ssh-425l-prob-18l-f-a4-deli-e3873",
-      "name_uz": "Deli E3873 A4 perfo‑kombinatsiya mashinasi, 18/425 varaq, qo'lda",
-      "title_uz": "Deli E3873 – qo'lda ishlaydigan A4 perfo‑kombinatsiya mashinasi, 18 varaqgacha perfolatsiya, 425 varaqgacha kombinirovka, 21 teshik (3×8 mm), po'lat korpus, kul",
-      "short_description_uz": "Deli E3873 – 18 varaqgacha perfolatsiya va 425 varaqgacha kombinirovka qilish imkoniyatiga ega, po'lat korpusli, qo'lda ishlaydigan kombi‑mashina. A4 formatidagi 70 g qog'oz uchun mo'ljallangan, 400 × 280 × 335 mm o'lchamda, 5,5 kg vaznda.",
-      "alt_picture_uz": "",
-      "slug_ru": "deli-e3873-a4-perfo-kombinaciya-mashina-18-425-listov-ruchnaya",
-      "name_ru": "Deli E3873 A4 перфо‑комбинация машина, 18/425 листов, ручная",
-      "title_ru": "Deli E3873 – ручная стальная машина для перфорации до 18 листов и комбинирования до 425 листов формата A4, 21 отверстие 3×8 мм, серый, размеры 400×280×335 мм",
-      "short_description_ru": "Deli E3873 – ручная машина для перфорации до 18 листов и комбинирования до 425 листов, стальная конструкция, серого цвета. Предназначена для бумаги формата A4 (70 г/м²), размеры 400 × 280 × 335 мм, вес 5,5 kg.",
-      "alt_picture_ru": "",
-      "picture": "https://i.ibb.co/P381y0S/Deli-E3873.jpg"
-    },
-    {
-      "slug_uz": "deli-et311-kombi-perplet-mashinasi",
-      "name_uz": "Deli ET311 kombi perplet mashinasi",
-      "title_uz": "Deli ET311 kombi perplet mashinasi – qo‘lda ishlaydigan, 21 ta 3×8 mm teshik, 145 varaq biriktirish, 8 varaq perfo, A4/A5 format, qora, edge guide, clippings tr",
-      "short_description_uz": "Deli ET311 – bu metall korpusli, qo‘lda ishlaydigan kombi‑perplet mashinasi bo‘lib, 21 ta 3×8 mm to‘g‘ri burchakli teshik, 14,3 mm masofa, 8 varaq (70 g/m²) teshish va 145 varaq (70 g/m²) biriktirish imkoniyatiga ega. Qora rangda, 395×135×260 mm o‘lchamda, 1,84 kg vaznda, 300 mm maksimal qog‘oz keng",
-      "alt_picture_uz": "",
-      "slug_ru": "deli-et311-kombobroshyurovannaya-mashina",
-      "name_ru": "Deli ET311 комбоброшюровочная машина",
-      "title_ru": "Deli ET311 комбоброшюровочная машина – ручная, 21 отверстие 3×8 mm, 145 листов, 8 листов перфорация, форматы A4/A5, черный, edge guide, clippings tray",
-      "short_description_ru": "Deli ET311 – это металлическая, ручная комбоброшюровочная машина с 21 прямоугольным отверстием 3×8 mm, расстоянием 14,3 mm, возможностью перфорации 8 листов (70 g/m²) и скрепления до 145 листов (70 g/m²). Черный корпус, размеры 395×135×260 mm, вес 1,84 kg, максимальная ширина бумаги 300 mm, поддержи",
-      "alt_picture_ru": "",
-      "picture": "https://i.ibb.co/VWJ8BN9Z/ET311-Deli.jpg"
-    },
-    {
-      "slug_uz": "deli-et322-simli-perplet-mashinasi",
-      "name_uz": "Deli ET322 Simli Perplet Mashinasi",
-      "title_uz": "Deli ET322 Simli perfofayl (perplet) mashinasi – A4 format, 34 teshik, 8.47 mm pitch, 20 varaq bir martada, 135 varaqgacha perplet, qo‘lda boshqariladigan",
-      "short_description_uz": "Deli ET322 – integral metal‑korpusli, qo‘lda boshqariladigan simli perplet mashinasi. A4 formatdagi 70 g/m² qog‘ozni 34 teshik, 8.47 mm pitch bilan bir martada 20 varaq teshik ochadi, 135 varaqgacha wire‑O (3:1) perplet bilan birlashtiradi. Mahsulot o‘lchami 380 × 355 × 322 mm, vazni 7.18 kg, quti 4",
-      "alt_picture_uz": "",
-      "slug_ru": "deli-et322-provodnoy-perepletnyy-apparat",
-      "name_ru": "Deli ET322 Проводной Переплетный Аппарат",
-      "title_ru": "Deli ET322 проводной переплетный аппарат – A4, 34 отверстия, шаг 8,47 мм, 20 листов за проход, до 135 листов, ручное управление, Wire‑O 3:1",
-      "short_description_ru": "Deli ET322 – компактный металлический брошюратор с ручным управлением, предназначенный для офисов и школ. 34 отверстия с шагом 8,47 мм позволяют пробить до 20 листов формата A4 за один проход, а система Wire‑O (3:1) обеспечивает переплет до 135 листов. Размеры изделия 380 × 355 × 322 мм, вес 7,18 kg",
-      "alt_picture_ru": "",
-      "picture": ""
+      "related_products_id": "55fd30b1-593f-11eb-a0e5-c01885f723fa",
+      "slug_uz": "deli-e8011-b3-formatli-qol-rezak",
+      "name_uz": "Deli E8011 – B3 formatli qo‘l rezak",
+      "title_uz": "Deli E8011 B3 qo‘l rezak – metall asos, oq rang",
+      "short_description_uz": "Deli E8011 – B3 formatli qo‘l rezak, metall (po‘lat) asosli, oq (White Ash) rangda. O‘lchamlari 665×405×75 mm, vazni 4,8 kg, bir martada 12 varaqgacha kesish, xavfsizlik qulfi va sirpanmaydigan oyoqlar bilan. 4 dona bir qutida, EAN‑13: 6921734980120.",
+      "alt_picture_uz": "Deli 8011 – B3 formatli qo‘l rezak",
+      "slug_ru": "deli-e8012-bumazhnyy-rezak-a3",
+      "name_ru": "Deli E8012 – бумажный резак Б3",
+      "title_ru": "Deli E8012 A3 бумажный резак – стальной корпус, белый",
+      "short_description_ru": "Deli E8011 – резак формата Б3, стальной корпус, цвет White (White Ash). Размеры 665×405×75 мм, вес 4,8 kg, резка до 12 листов за один раз, оснащён замком безопасности и противоскользящими ножками. В коробке 4 штуки, EAN‑13: 6921734980120.",
+      "alt_picture_ru": "Deli 8011 – бумажный резак Б3",
+      "picture": "https://i.ibb.co/673LxdN7/DELI-8011.jpg"
     }
   ],
   "recommended_products": [
     {
-      "slug_uz": "ilim-profi-a4-80-g-m2-a",
-      "name_uz": "Ilim Profi A4 80 g/m² (A+)",
-      "title_uz": "Ilim Profi A4 80 g/m² ofis qog'ozi – A+",
-      "short_description_uz": "Ilim Profi A4 80 g/m² (класс A+) – 100 % целлюлоза, 168 % CIE belizna, ≥94 % neprозрачность, 113 мкм qalınlık, 500 listdan bir paket, 5 paketdan bir quti. Rossiyada Ilim Group tomonidan ishlab chiqarilgan. Barcha zamonaviy lazer va struj printerlariga mos, arxivlash uchun ham maqbul tanlov.",
-      "alt_picture_uz": "Ilim Profi A4 80 g/m² ofis qog'ozi – A+",
-      "slug_ru": "ilim-profi-a4-80-g-m2-ofisnaya-bumaga-a",
-      "name_ru": "Ilim Profi A4 80 г/м² (A+)",
-      "title_ru": "Ilim Profi A4 80 г/м² офисная бумага – A+",
-      "short_description_ru": "Ilм Profi A4 80 г/м² (класс A+) – 100 % целлюлоза, 168 % CIE белизна, ≥94 % непрозрачность, толщина 113 мкм, 500 листов в пачке, 5 пачек в коробке. Производитель – Ilм Group, Россия, EAN 4631171122176. Совместима со всеми современными лазерными и струйными принтерами, подходит для архивного хранения",
-      "alt_picture_ru": "Ilim Profi A4 80 г/м² офисная бумага – A+",
-      "picture": "https://i.ibb.co/TqNp8sTD/ILIM-Profi-A4.jpg"
-    },
-    {
-      "slug_uz": "deli-e3891-eu-a4-laminatori",
-      "name_uz": "Deli E3891-EU A4 laminatori",
-      "title_uz": "Deli E3891-EU A4 laminatori – issiq va sovuq",
-      "short_description_uz": "Deli E3891-EU – yengil, 2,2 kg vaznda, ABS korpusli ofis laminatori. 230 V, 310 W quvvat, 300 mm/min maksimal tezlik, 80‑200 µm film qalinligi, 0,6 mm maksimal material qalinligi, issiq‑sovuq rejim, 5‑7 min isitish, 2 valf, Light‑grey rang, 373 × 145 × 103 mm o‘lcham.",
+      "recommended_products_id": "f43d785c-3730-11e9-9cb6-50b7c370a30f",
+      "slug_uz": "snegurochka-a4-ofis-qogoz-80-gm2-500-list",
+      "name_uz": "Snegurochka A4 ofis qog'oz 80 g/m², 500 list",
+      "title_uz": "Snegurochka A4 ofis qog'oz 80 g/m², 500 list, ECF texnologiyasi, ISO sertifikatli, lazer va kopir printerlarga mos",
+      "short_description_uz": "Snegurochka A4 ofis qog'oz 80 g/m², 146 % CIE belizna, 91 % noprozrachnost', 104 µm qalinlik, 500 listdan bir paket, 5 paket bir qutida, 2 500 g brutto vazn, ECF texnologiyasi, GOST R 57641‑2017 va ISO sertifikatlarga muvofiq, lazer va kopir apparatlarda to'liq mos.",
       "alt_picture_uz": "",
-      "slug_ru": "deli-e3891-eu-laminirovayushchiy-apparat-a4",
-      "name_ru": "Deli E3891-EU ламинирующий аппарат A4",
-      "title_ru": "Ламинатор Deli E3891-EU A4 – горячий и холодный",
-      "short_description_ru": "Deli E3891-EU – лёгкий, вес 2,2 kg, корпус из ABS. 230 V, мощность 310 W, скорость до 300 mm/min, толщина пленки 80‑200 µm, максимальная толщина материала 0,6 mm, горячий/холодный режим, время нагрева 5‑7 min, 2 вала, светло‑серый, размеры 373 × 145 × 103 mm.",
+      "slug_ru": "snegurochka-a4-ofisnaya-bumaga-80-gm2-500-listov",
+      "name_ru": "Снегурочка А4 офисная бумага 80 г/м², 500 листов",
+      "title_ru": "Снегурочка А4 офисная бумага 80 г/м², 500 листов, ECF, ISO, подходит для лазерных и копировальных принтеров",
+      "short_description_ru": "Снегурочка А4 офисная бумага 80 г/м², 146 % яркость CIE, 91 % непрозрачность, толщина 104 µм, 500 листов в пачке, 5 пачек в коробке, брутто‑вес 2 500 г, технология ECF, соответствие ГОСТ Р 57641‑2017 и ISO, полностью подходит для лазерных и копировальных аппаратов.",
       "alt_picture_ru": "",
-      "picture": "https://i.ibb.co/tMGf7Wp9/DELI-E3891.jpg"
+      "picture": "https://i.ibb.co/k2mwT47k/A4.jpg"
     },
     {
-      "slug_uz": "deli-em222t-12-razryadli-kalkulyator",
-      "name_uz": "Deli EM222T 12‑razryadli kalkulyator",
-      "title_uz": "Deli EM222T 12‑razryadli stol kalkulyatori – dual quvvat (quyosh paneli + LR44), soliq hisoblash, avtomatik o‘chirish, 3 yillik kafolat, ofis, maktab, biznes uc",
-      "short_description_uz": "Deli EM222T – 12‑razryadli, qora plastmassa korpusli stol kalkulyatori. 12‑raqamli LCD displey, dual quvvat (quyosh paneli + LR44 batareya), soliq hisoblash funksiyasi, xotira tugmalari va avtomatik o‘chirish. 3 yillik kafolat, 0‑+40 °C harorat oralig‘ida ishlaydi.",
-      "alt_picture_uz": "",
-      "slug_ru": "kalkulyator-deli-em222t-12-razryadnyy",
-      "name_ru": "Калькулятор Deli EM222T 12‑разрядный",
-      "title_ru": "Калькулятор Deli EM222T 12‑разрядный настольный – двойное питание (солнечная панель + батарейка LR44), функция расчёта налога, автоматическое отключение, 3‑года",
-      "short_description_ru": "Калькулятор Deli EM222T – 12‑разрядный, чёрный корпус из пластика. 12‑разрядный LCD‑дисплей, двойное питание (солнечная панель + LR44), функция расчёта налога, клавиши памяти и автоматическое отключение. 3‑года гарантии, работает при температуре от 0 до +40 °C.",
-      "alt_picture_ru": "",
-      "picture": "https://i.ibb.co/fY8CFBfc/EM222-T-Deli.jpg"
+      "recommended_products_id": "f0c200c0-cd7b-11e4-b024-005056c00008",
+      "slug_uz": "svetocopy-classic-c-a4-500-list-80-g-m2",
+      "name_uz": "SvetoCopy Classic C A4 – 500 лист, 80 g/m²",
+      "title_uz": "SvetoCopy Classic C A4 mat qog'ozi 80 g/m² – 500 лист, arxivga mos, yuqori oqillik, ofis uchun",
+      "short_description_uz": "SvetoCopy Classic C – 80 g/m² zichlikdagi A4 (210 × 297 mm) ofis qog'ozi, 146 % CIE oqillik, 95 % ISO yorqinlik, 91 % shaффофлик, 4,6 % namlik, 125 mH MD, 55 mH CD, 215 ml/min silliqlik, 800 ml/min havo o'tkazuvchanlik, 12 mg abrazivlik, 18 % kul, ISO 9706 arxivga mos, ECF, GOST R 57641‑2017, Rossiy",
+      "alt_picture_uz": "Svetocopy A4 80g 500",
+      "slug_ru": "svetocopy-classic-c-a4-500-listov-80-g-m2",
+      "name_ru": "SvetoCopy Classic C A4 – 500 листов, 80 г/м²",
+      "title_ru": "SvetoCopy Classic C A4 матовая бумага 80 г/м² – 500 листов, архивное качество, высокая белизна, офисная бумага",
+      "short_description_ru": "SvetoCopy Classic C – офисная бумага A4 (210 × 297 mm) плотностью 80 г/м², белизна 146 % CIE, яркость 95 % ISO, непрозрачность 91 %, влажность 4,6 %, твёрдость MD 125 mH, CD 55 mH, гладкость 215 ml/min, пористость 800 ml/min, абразивность 12 mg, содержание клада 18 %, соответствует ISO 9706, без хло",
+      "alt_picture_ru": "SvetoCopy Classic C A4",
+      "picture": "https://i.ibb.co/M47jzkM/Sylvamo-Svetocopy-A3.jpg"
     },
     {
-      "slug_uz": "giltiq-fotoqogoz-a4-130g-m2-50-list",
-      "name_uz": "G'iltiq fotoqog'oz A4 130 g/m², 50 лист",
-      "title_uz": "G'iltiq fotoqog'oz A4 130 g/m² – 50 varaq",
-      "short_description_uz": "G'iltiq fotoqog'oz A4 130 g/m², 50 varaqli paket, ISO 216 standartiga mos, RC (Resin Coated) qoplamali, super‑white oq rang, inkjet printerlar (dye ink) uchun mo'ljallangan, tez quriydi, suvga va dog'lanishga chidamli, 210 × 297 mm o'lcham, 130 g/m² zichlik, Virgin wood pulp asosida ishlab chiqarilg",
-      "alt_picture_uz": "",
-      "slug_ru": "glyantsevaya-fotobumaga-a4-130g-m2-50-listov",
-      "name_ru": "Глянцевая фотобумага A4 130 g/m², 50 листов",
-      "title_ru": "Глянцевая фотобумага A4 130 g/m² – 50 листов",
-      "short_description_ru": "Глянцевая фотобумага A4 130 g/m², 50 листов, ISO 216, RC (Resin Coated) покрытие, супер‑белый, подходит для струйных принтеров (dye‑ink), быстро сохнет, устойчива к влаге и царапинам, размер 210 × 297 мм, плотность 130 g/m², основана на virgin wood pulp.",
-      "alt_picture_ru": "",
-      "picture": "https://i.ibb.co/h1yHK9nh/130-a4.jpg"
-    },
-    {
-      "slug_uz": "schneider-one-business-06-kok-rollerball",
-      "name_uz": "Schneider One Business 06 – Ko‘k rollerball",
-      "title_uz": "Schneider One Business 06 ko‘k rollerball qalam – 0,6 mm yozish, 2000 m suvga chidamli siyoh, Super‑Flow‑System, ergonomik grip, click‑off qopqoq, ofis va bizne",
-      "short_description_uz": "Schneider One Business 06 – Germaniya ishlab chiqarilgan, 0,6 mm yozish kengligi, suvga chidamli ISO 14145‑2 standartli ko‘k rangli siyoh, Super‑Flow‑System texnologiyasi bilan 2000 m yozuv uzunligi, ergonomik rezinli ushlab turish zonasi, metall klip va click‑off qopqoq. 168 mm uzunlik, 12 mm diame",
-      "alt_picture_uz": "Schneider One Business 06",
-      "slug_ru": "schneider-one-business-06-siniy-rollerball",
-      "name_ru": "Schneider One Business 06 – синий роллерболл",
-      "title_ru": "Schneider One Business 06 синий роллерболл – 0,6 mm, 2000 м водостойкой чернил, Super‑Flow‑System, эргономичный захват, click‑off крышка, идеальна для офиса и д",
-      "short_description_ru": "Schneider One Business 06 – профессиональная роллер‑болл ручка, произведённая в Германии, 0,6 mm толщина линии, синий водный чернила по ISO 14145‑2, Super‑Flow‑System, 2000 м письма, эргономичный резиновый захват, металлическая клипса, click‑off крышка. Длина 168 мм, диаметр 12 мм, вес 14 g (с упако",
-      "alt_picture_ru": "Schneider One Business 06",
-      "picture": "https://i.ibb.co/Ng5W1c2P/183003.jpg"
-    },
-    {
+      "recommended_products_id": "590d1881-742d-11ef-b458-5811229bddba",
       "slug_uz": "svetocopy-eco-a4-80-gm2-500-list",
       "name_uz": "SvetoCopy ECO A4 – 80 g/m², 500 лист",
       "title_uz": "SvetoCopy ECO A4 – ofis qog'ozi – 80 g/m², 500 лист",
@@ -306,9 +214,24 @@ Muvaffaqiyatli javob namunasi (200 OK):
       "short_description_ru": "SvetoCopy ECO – экологически чистая офисная бумага, произведённая в России НПАО «Светогорский ЦБК» (Sylvamo Corporation Rus), 80 г/m², толщина 104 ± 2 µм, ISO 60 % и CIE 93 % белизна, 93 % opacity, 100 % полубеленая древесная целлюлоза, технология ECF без хлора, сертификаты FSC, ISO 9001/14001/45001",
       "alt_picture_ru": "",
       "picture": "https://i.ibb.co/ch1sdWz6/Svetocopy-Eco-A4.jpg"
+    },
+    {
+      "recommended_products_id": "f43d7853-3730-11e9-9cb6-50b7c370a30f",
+      "slug_uz": "double-a-premium-80-gsm-a4-500-list",
+      "name_uz": "Double A Premium 80 gsm A4 (500 лист)",
+      "title_uz": "Double A Premium 80 gsm A4 Ofis Qog‘oz",
+      "short_description_uz": "Double A Premium 80 gsm A4 – 500 листлик ream, 5 ream (2500 лист) qutida. 210 × 297 mm format, 110 µm qalinlik, 95 % opatsitet, 101 % ISO yorqinlik, 165‑167 % CIE oq rang, 27‑33 g/m² Cobb testi, 100 % virgin wood pulp, acid‑free, ECF, FSC‑mix, ISO 9706 arxivga mos. Tayyorlandi: Tailand. GTIN/EAN = 0",
+      "alt_picture_uz": "",
+      "slug_ru": "double-a-premium-80-gsm-a4-ofisnaya-bumaga",
+      "name_ru": "Double A Premium 80 gsm A4 (500 лист)",
+      "title_ru": "Double A Premium 80 gsm A4 Офисная бумага",
+      "short_description_ru": "Double A Premium 80 gsm A4 – 500 листов в реаме, 5 ream (2500 листов) в коробке. Формат 210 × 297 mm, толщина 110 µm, непрозрачность 95 %, яркость ISO 101 %, CIE‑белизна 165‑167 %, тест Cobb 27‑33 g/m², 100 % virgin wood pulp, без кислоты, ECF, FSC‑Mix, ISO 9706 архивный. Произведено в Таиланде. GTI",
+      "alt_picture_ru": "",
+      "picture": "https://i.ibb.co/ymnD1rvJ/Double-A-Premium-A4.jpg"
     }
   ]
 }
+
 ```
 -uz va ru obyekti: Frontend'dagi ko'p tillilik (i18n) tizimi uchun maxsus ajratilgan obyektlar. Kategoriyalar (sayt bo'limlari), SEO taglari (title, meta_description) va tovar matnlari tillar kesimida beriladi.
 -attributes (Massiv): Mahsulotning qo'shimcha xususiyatlari (Дополнительные реквизиты). Har bir obyekt xususiyat nomi va qiymatini har ikki tilda o'z ichiga oladi.

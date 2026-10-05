@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ProductPriceStockSchema } from "./price";
+import { ProductPriceStockSchema, ProductPriceStock } from "./price";
 
 export const ProductAttributeSchema = z.object({
   property_uz: z.string().default(""),
@@ -12,11 +12,23 @@ export type ProductAttribute = z.infer<typeof ProductAttributeSchema>;
 
 export const SubProductCardSchema = z.object({
   id: z.string().optional(),
+  related_products_id: z.string().optional(),
+  recommended_products_id: z.string().optional(),
   slug: z.string().optional(),
+  slug_uz: z.string().optional(),
+  slug_ru: z.string().optional(),
   name: z.string().optional(),
+  name_uz: z.string().optional(),
+  name_ru: z.string().optional(),
   title: z.string().optional(),
+  title_uz: z.string().optional(),
+  title_ru: z.string().optional(),
   short_description: z.string().optional(),
+  short_description_uz: z.string().optional(),
+  short_description_ru: z.string().optional(),
   alt_picture: z.string().optional(),
+  alt_picture_uz: z.string().optional(),
+  alt_picture_ru: z.string().optional(),
   picture: z.string().optional(),
 });
 
@@ -63,10 +75,18 @@ export const ProductSchema = z.object({
   uz: ProductLocalizedUzSchema,
   ru: ProductLocalizedRuSchema,
   attributes: z.array(ProductAttributeSchema).optional().default([]),
-  related_products: z.array(z.any()).optional().default([]),
-  recommended_products: z.array(z.any()).optional().default([]),
-  // Optionally populated from Price API
-  price: ProductPriceStockSchema.optional(),
+  related_products: z.array(SubProductCardSchema).optional().default([]),
+  recommended_products: z.array(SubProductCardSchema).optional().default([]),
+  // Optionally populated from Price API or raw product endpoint
+  price: z
+    .union([ProductPriceStockSchema, z.string(), z.number()])
+    .optional()
+    .transform((val) => {
+      if (val && typeof val === "object" && "retail_price" in val) {
+        return val as ProductPriceStock;
+      }
+      return undefined;
+    }),
 });
 
 export type Product = z.infer<typeof ProductSchema>;
