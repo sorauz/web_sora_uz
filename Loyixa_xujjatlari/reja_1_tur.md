@@ -20,15 +20,15 @@
   - `layout.tsx`, `products/[slug]/page.tsx` va `category/[slug]/page.tsx` dagi `alternates.languages` ga `"ru-UZ"` va `"uz-UZ"` mintaqaviy aniqlik teglari kiritiladi.
   - O'zbekiston hududidagi rusiyzabon va o'zbekzabon qidiruv so'rovlarida saytning regional SEO kuchi oshadi.
 
-### 1.3. Google 2026 Standartidagi `Product` JSON-LD Schemasini Boyitish
-- **Hozirgi holat:** `ProductJsonLd.tsx` da asosiy parametrlar bor, lekin 2026-yilgi yangi maydonlar to'liq kiritilmagan.
+### 1.3. Google 2026 Standartidagi `Product` JSON-LD Schemasini Boyitish — [BAJARILDI ✅]
+- **Holat:** To'liq amalga oshirildi va ishlab chiqarishga chiqarildi (`ProductJsonLd.tsx`).
 - **Mavjud ma'lumot:**
-  - Mahsulot toifasi: `loc.category` mavjud.
-  - Shtrix-kod (GTIN/Barcode): 1C dan `product.barcode` ("6921734938718") keladi.
-  - Yetkazib berish va qaytarish qoidalari: `/uz/delivery` va `/uz/warranty` sahifalari tayyor.
-- **Amalga oshiriladigan ish:**
-  - `ProductJsonLd.tsx` ichiga `category: loc.category`, `gtin: product.barcode` maydonlarini kiritish.
-  - `shippingDetails` va `hasMerchantReturnPolicy` schema nestinglarini qo'shish (yetkazib berish narxlari va 14 kunlik qaytarish siyosatini Google Rich Result uchun bog'lash).
+  - Mahsulot toifasi: `loc.category` ulandi.
+  - Shtrix-kod (GTIN/Barcode): 1C dan `product.barcode` kelganda `gtin` va `gtin13` avtomatik qo'shiladi.
+  - Yetkazib berish va qaytarish qoidalari: Google Rich Result uchun `shippingDetails` va `hasMerchantReturnPolicy` nestinglari to'liq integratsiya qilindi.
+- **Amalga oshirilgan ishlar:**
+  - `ProductJsonLd.tsx` ichiga `category`, `gtin`, `gtin13`, `seller`, `shippingDetails` (`OfferShippingDetails`), va `hasMerchantReturnPolicy` (`MerchantReturnPolicy`) kiritildi.
+  - Playwright testlari bilan qamrab olindi (`tests/pdp.spec.ts`).
 
 ### 1.4. FAQPage JSON-LD Schemasini O'rnatish
 - **Hozirgi holat:** Mahsulot sahifasida (PDP) va Kategoriya sahifalarida FAQ savol-javoblari vizual tarzda mavjud, biroq ularning Schema.org JSON-LD tegi yo'q.
@@ -91,7 +91,7 @@
 |---|---|:---:|:---:|---|
 | 1 | **Sitemap lastmod + 1C updated_at** | SEO | Oson | Sitemap sifatini oshirish va indeksatsiyani tezlashtirish |
 | 2 | **Hududiy mintaqa teglari (ru-UZ, uz-UZ)** | SEO | Oson | Mahalliy SEO va regional qidiruv aniqligi |
-| 3 | **Product JSON-LD boyitish (GTIN, Category, Policies)** | SEO | O'rta | Google Rich Snippets va Merchant reytingi |
+| 3 | **Product JSON-LD boyitish (GTIN, Category, Policies)** | SEO | O'rta | Bajarildi ✅ (Google Rich Snippets va Merchant reytingi) |
 | 4 | **FAQPage JSON-LD Schemasi** | SEO | O'rta | Qidiruvda ochiluvchi FAQ rich snippets |
 | 5 | **IndexNow protokoli integratsiyasi** | SEO | O'rta | Yandex va Bing'da o'zgarishlarni bir soniyada indekslash |
 | 6 | **Katalog sahifalash (Pagination ?page=2)** | UX / Tech | O'rta | Katta tovarlar ro'yxatida tezlik va qulaylik |
