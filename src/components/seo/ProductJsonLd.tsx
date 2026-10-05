@@ -41,6 +41,13 @@ export function ProductJsonLd({
     description: loc.meta_description || loc.short_description,
     sku: product.product_sku,
     mpn: product.product_sku,
+    category: loc.category,
+    ...(product.barcode
+      ? {
+          gtin: product.barcode,
+          ...(product.barcode.length === 13 ? { gtin13: product.barcode } : {}),
+        }
+      : {}),
     brand: {
       "@type": "Brand",
       name: product.brand,
@@ -55,6 +62,47 @@ export function ProductJsonLd({
         ? "https://schema.org/InStock"
         : "https://schema.org/OutOfStock",
       itemCondition: "https://schema.org/NewCondition",
+      seller: {
+        "@type": "Organization",
+        name: "Sora.uz",
+        url: baseUrl,
+      },
+      shippingDetails: {
+        "@type": "OfferShippingDetails",
+        shippingRate: {
+          "@type": "MonetaryAmount",
+          value: "0",
+          currency: "UZS",
+        },
+        shippingDestination: {
+          "@type": "DefinedRegion",
+          addressCountry: "UZ",
+        },
+        deliveryTime: {
+          "@type": "ShippingDeliveryTime",
+          handlingTime: {
+            "@type": "QuantitativeValue",
+            minValue: 0,
+            maxValue: 1,
+            unitCode: "DAY",
+          },
+          transitTime: {
+            "@type": "QuantitativeValue",
+            minValue: 1,
+            maxValue: 3,
+            unitCode: "DAY",
+          },
+        },
+      },
+      hasMerchantReturnPolicy: {
+        "@type": "MerchantReturnPolicy",
+        applicableCountry: "UZ",
+        returnPolicyCategory:
+          "https://schema.org/MerchantReturnFiniteReturnWindow",
+        merchantReturnDays: 14,
+        returnMethod: "https://schema.org/ReturnByMail",
+        returnFees: "https://schema.org/FreeReturn",
+      },
     },
     aggregateRating: {
       "@type": "AggregateRating",

@@ -60,5 +60,8 @@ test.describe("FAZA 3: Product Detail Page (PDP) with Real 1C ERP Data", () => {
     const productJson = allLdTexts.find((t) => t?.includes('"@type":"Product"'));
     expect(productJson).toBeTruthy();
     expect(productJson).toContain('"sku":"E1589"');
+    expect(productJson).toContain('"category":');
+    expect(productJson).toContain('"shippingDetails"');
+    expect(productJson).toContain('"hasMerchantReturnPolicy"');
   });
 });
