@@ -1,6 +1,53 @@
 import { revalidateTag, revalidatePath } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 
+function performRevalidation(tag?: string, path?: string) {
+  if (tag) {
+    if (tag === "all") {
+      const allTags = [
+        "products",
+        "prices",
+        "categories",
+        "brands",
+        "offers",
+        "reviews",
+        "units",
+      ];
+      for (const t of allTags) {
+        revalidateTag(t, { expire: 0 });
+      }
+      revalidatePath("/", "layout");
+    } else {
+      revalidateTag(tag, { expire: 0 });
+
+      // If products, prices, or individual product is revalidated,
+      // flush the product page and discovery routes as well
+      if (
+        tag === "products" ||
+        tag === "prices" ||
+        tag.startsWith("product-")
+      ) {
+        revalidatePath("/[locale]/products/[slug]", "page");
+        revalidatePath("/[locale]/catalog", "page");
+        revalidatePath("/[locale]/category/[slug]", "page");
+        revalidatePath("/[locale]", "layout");
+      }
+      if (tag === "categories") {
+        revalidatePath("/[locale]/catalog", "page");
+        revalidatePath("/[locale]/category/[slug]", "page");
+        revalidatePath("/[locale]", "layout");
+      }
+      if (tag === "reviews" || tag.startsWith("reviews-")) {
+        revalidatePath("/[locale]/products/[slug]", "page");
+      }
+    }
+  }
+
+  if (path) {
+    revalidatePath(path);
+  }
+}
+
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const secret = searchParams.get("secret");
@@ -28,12 +75,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    if (tag) {
-      revalidateTag(tag, { expire: 0 });
-    }
-    if (path) {
-      revalidatePath(path);
-    }
+    performRevalidation(tag || undefined, path || undefined);
 
     return NextResponse.json({
       revalidated: true,
@@ -86,12 +128,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    if (body.tag) {
-      revalidateTag(body.tag, { expire: 0 });
-    }
-    if (body.path) {
-      revalidatePath(body.path);
-    }
+    performRevalidation(body.tag || undefined, body.path || undefined);
 
     return NextResponse.json({
       revalidated: true,

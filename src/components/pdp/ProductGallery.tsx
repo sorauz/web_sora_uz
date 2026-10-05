@@ -7,6 +7,7 @@ import { useFavoritesStore } from "@/lib/store/favorites";
 
 interface ProductGalleryProps {
   mainPicture: string;
+  gallery?: string[];
   altText: string;
   badge?: string;
   productId: string;
@@ -14,6 +15,7 @@ interface ProductGalleryProps {
 
 export function ProductGallery({
   mainPicture,
+  gallery,
   altText,
   badge,
   productId,
@@ -22,8 +24,10 @@ export function ProductGallery({
   const { toggleFavorite, isFavorite } = useFavoritesStore();
   const isFav = isFavorite(productId);
 
-  // Gallery thumbnails list (using main picture and variations)
-  const images = [mainPicture, mainPicture];
+  // Gallery thumbnails list (using main picture and live 1C gallery)
+  const images = Array.from(
+    new Set([mainPicture, ...(gallery || [])].filter(Boolean))
+  );
 
   return (
     <div className="space-y-4">
@@ -64,27 +68,29 @@ export function ProductGallery({
       </div>
 
       {/* Thumbnails */}
-      <div className="flex items-center gap-3 overflow-x-auto pb-1">
-        {images.map((img, idx) => (
-          <button
-            key={idx}
-            onClick={() => setSelectedImage(img)}
-            className={`relative w-18 h-18 rounded-2xl bg-white dark:bg-slate-900 border p-2 shrink-0 transition-all ${
-              selectedImage === img
-                ? "border-sora-600 ring-2 ring-sora-500/20 shadow-xs"
-                : "border-slate-200 dark:border-slate-800 opacity-70 hover:opacity-100"
-            }`}
-          >
-            <Image
-              src={img}
-              alt={`${altText} thumbnail ${idx + 1}`}
-              fill
-              sizes="72px"
-              className="object-contain p-1.5"
-            />
-          </button>
-        ))}
-      </div>
+      {images.length > 1 && (
+        <div className="flex items-center gap-3 overflow-x-auto pb-1">
+          {images.map((img, idx) => (
+            <button
+              key={idx}
+              onClick={() => setSelectedImage(img)}
+              className={`relative w-18 h-18 rounded-2xl bg-white dark:bg-slate-900 border p-2 shrink-0 transition-all ${
+                selectedImage === img
+                  ? "border-sora-600 ring-2 ring-sora-500/20 shadow-xs"
+                  : "border-slate-200 dark:border-slate-800 opacity-70 hover:opacity-100"
+              }`}
+            >
+              <Image
+                src={img}
+                alt={`${altText} thumbnail ${idx + 1}`}
+                fill
+                sizes="72px"
+                className="object-contain p-1.5"
+              />
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

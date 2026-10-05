@@ -21,6 +21,18 @@ interface ProductPageProps {
   params: Promise<{ locale: string; slug: string }>;
 }
 
+export async function generateStaticParams() {
+  const { products } = await api.getAllProducts();
+  const params: { locale: string; slug: string }[] = [];
+  for (const p of products.slice(0, 20)) {
+    if (p.uz?.slug_uz) params.push({ locale: "uz", slug: p.uz.slug_uz });
+    if (p.ru?.slug_ru) params.push({ locale: "ru", slug: p.ru.slug_ru });
+  }
+  return params;
+}
+
+export const dynamicParams = true;
+
 export async function generateMetadata({
   params,
 }: ProductPageProps): Promise<Metadata> {
@@ -108,29 +120,45 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
   const allProducts = allProdsRes.products;
   const { reviews, stats } = reviewsRes;
 
-  // 1. Related Products (Up-sell / Down-sell: Same category or brand, excluding current)
-  const relatedCandidates = allProducts.filter(
-    (p) =>
-      p.id !== product.id &&
-      (p.uz.category_slug_uz === product.uz.category_slug_uz ||
-        p.brand.toLowerCase() === product.brand.toLowerCase())
-  );
-  const relatedProducts =
-    relatedCandidates.length > 0
-      ? relatedCandidates.slice(0, 4)
-      : allProducts.filter((p) => p.id !== product.id).slice(0, 4);
+  // 1. Related Products (Up-sell / Down-sell: prefer 1C explicit related_products if present)
+  let relatedProducts: typeof allProducts = [];
+  if (product.related_products && product.related_products.length > 0) {
+    const relatedIds = new Set(product.related_products.map((r) => r.id));
+    relatedProducts = allProducts.filter((p) => relatedIds.has(p.id));
+  }
+  if (relatedProducts.length === 0) {
+    const relatedCandidates = allProducts.filter(
+      (p) =>
+        p.id !== product.id &&
+        (p.uz.category_slug_uz === product.uz.category_slug_uz ||
+          p.brand.toLowerCase() === product.brand.toLowerCase())
+    );
+    relatedProducts =
+      relatedCandidates.length > 0
+        ? relatedCandidates.slice(0, 4)
+        : allProducts.filter((p) => p.id !== product.id).slice(0, 4);
+  }
 
-  // 2. Recommended Products (Cross-sell: Complementary goods / different categories)
-  const recommendedCandidates = allProducts.filter(
-    (p) =>
-      p.id !== product.id &&
-      p.uz.category_slug_uz !== product.uz.category_slug_uz &&
-      !relatedProducts.some((r) => r.id === p.id)
-  );
-  const recommendedProducts =
-    recommendedCandidates.length > 0
-      ? recommendedCandidates.slice(0, 4)
-      : allProducts.filter((p) => p.id !== product.id && !relatedProducts.some((r) => r.id === p.id)).slice(0, 4);
+  // 2. Recommended Products (Cross-sell: prefer 1C explicit recommended_products if present)
+  let recommendedProducts: typeof allProducts = [];
+  if (product.recommended_products && product.recommended_products.length > 0) {
+    const recIds = new Set(product.recommended_products.map((r) => r.id));
+    recommendedProducts = allProducts.filter(
+      (p) => recIds.has(p.id) && !relatedProducts.some((r) => r.id === p.id)
+    );
+  }
+  if (recommendedProducts.length === 0) {
+    const recommendedCandidates = allProducts.filter(
+      (p) =>
+        p.id !== product.id &&
+        p.uz.category_slug_uz !== product.uz.category_slug_uz &&
+        !relatedProducts.some((r) => r.id === p.id)
+    );
+    recommendedProducts =
+      recommendedCandidates.length > 0
+        ? recommendedCandidates.slice(0, 4)
+        : allProducts.filter((p) => p.id !== product.id && !relatedProducts.some((r) => r.id === p.id)).slice(0, 4);
+  }
 
   const breadcrumbItems = [
     {
@@ -173,6 +201,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
             <div className="lg:col-span-5">
               <ProductGallery
                 mainPicture={product.main_picture}
+                gallery={product.gallery}
                 altText={loc.alt_picture || loc.name}
                 badge={
                   product.brand
