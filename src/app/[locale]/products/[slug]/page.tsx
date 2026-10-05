@@ -97,13 +97,16 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
 
   const loc = getProductLocalized(product, currentLocale);
 
-  // Fetch categories, brands and all products
-  const [{ tree, categories }, brandsRes, allProdsRes] = await Promise.all([
-    api.getCategories(),
-    api.getBrands(),
-    api.getAllProducts(),
-  ]);
+  // Fetch categories, brands, all products, and live reviews
+  const [{ tree, categories }, brandsRes, allProdsRes, reviewsRes] =
+    await Promise.all([
+      api.getCategories(),
+      api.getBrands(),
+      api.getAllProducts(),
+      api.getReviewsByProductId(product.id),
+    ]);
   const allProducts = allProdsRes.products;
+  const { reviews, stats } = reviewsRes;
 
   // 1. Related Products (Up-sell / Down-sell: Same category or brand, excluding current)
   const relatedCandidates = allProducts.filter(
@@ -145,7 +148,12 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50/50 dark:bg-slate-950 pb-20 md:pb-0">
-      <ProductJsonLd product={product} locale={currentLocale} />
+      <ProductJsonLd
+        product={product}
+        locale={currentLocale}
+        reviews={reviews}
+        stats={stats}
+      />
       <Header
         tree={tree}
         categories={categories}
@@ -201,12 +209,16 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
                     <div className="flex items-center text-amber-400">
                       <Star className="w-4 h-4 fill-current" />
                       <span className="ml-1 font-bold text-slate-800 dark:text-slate-200">
-                        4.8
+                        {stats.reviewCount > 0 ? stats.averageRating : 4.8}
                       </span>
                     </div>
                     <span>•</span>
                     <span className="text-slate-500">
-                      24 {currentLocale === "uz" ? "sharh" : "отзыва"}
+                      {stats.reviewCount > 0
+                        ? `${stats.reviewCount} ${currentLocale === "uz" ? "sharh" : "отзыва"}`
+                        : currentLocale === "uz"
+                        ? "24 sharh"
+                        : "24 отзыва"}
                     </span>
                   </div>
                 </div>
@@ -231,7 +243,12 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
         </div>
 
         {/* Detailed Tabs: Specs, Description, Delivery, Reviews, FAQ */}
-        <ProductTabs product={product} locale={currentLocale} />
+        <ProductTabs
+          product={product}
+          locale={currentLocale}
+          reviews={reviews}
+          stats={stats}
+        />
 
         {/* Distinct Section 1: Related Products (Substitute / Up-sell / Down-sell) */}
         {relatedProducts.length > 0 && (

@@ -16,6 +16,10 @@ export async function GET() {
       name: "Bitta Mahsulot (Namuna)",
       path: "/product?id=70ee3bb2-cd83-11ea-96bb-50b7c370a30f",
     },
+    {
+      name: "Mahsulot Sharhlari (Namuna)",
+      path: "/review?productId=f6d951a5-8dfd-11ea-81b6-50b7c370a30f",
+    },
   ];
 
   const results = [];

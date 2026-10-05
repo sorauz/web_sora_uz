@@ -1,0 +1,71 @@
+Asosiy ma'lumotlar
+URL (Base): [http://1cloud.uz:777](http://1cloud.uz:777)
+
+Endpoint: /SORA/hs/for_msp/review
+
+Metod: GET
+
+Avtorizatsiya: Talab qilinadi (Basic Auth).
+
+So'rov parametrlari (Request Parameters)
+Ushbu so'rov manzil qatorida (Query Parameter) bitta majburiy parametrni talab qiladi.
+
+Parametr nomi,Ma'lumot turi,Majburiymi?,Tavsif
+productId,String (GUID),Ha,Sharhlari olinayotgan mahsulotning tizimdagi unikal ID raqami (Ssilka/УИД).
+
+
+So'rov namunasi (Request Example):
+GET http://1cloud.uz:777/SORA/hs/for_msp/review?productId=9b3c4a21-7f8e-11ec-9a3b-005056914567
+Accept: application/json
+
+Javoblar (Responses)
+✅ Muvaffaqiyatli javob: 200 OK
+Agar so'rov to'g'ri yuborilsa va mahsulot ID'si to'g'ri bo'lsa, tizim ushbu mahsulotga tegishli sharhlar ro'yxatini qaytaradi (hatto sharhlar yo'q bo'lsa ham bo'sh massiv [] qaytadi).
+
+Javob tanasi (Response Body):
+JSON:
+[
+  {
+    "time_of_comment": "2026-10-02T00:00:00",
+    "productId": "f6d951a5-8dfd-11ea-81b6-50b7c370a30f",
+    "productName": "Ручной инструмент для резки ф.А4, Deli 8014",
+    "datePublished": "2026-10-03T00:00:00",
+    "name_author": "Azizbek R.",
+    "permission_to_publish": true,
+    "ratingValue": 5,
+    "bestRating": 4,
+    "reviewBody": "Mahsulot juda yaxshi, faqat yetkazib berish vaqti kechga surildi, ammo kuryer ogohlantirdi.",
+     "pic_url": ""
+  }
+]
+-[pic_url]- xardoim xam mavjud bo'lmaydi.
+
+Javob maydonlari (Data Dictionary):
+Maydon nomi,Ma'lumot turi,Tavsif
+time_of_comment,String (Date),Sharh qoldirilgan tizim vaqti (Format: YYYY-MM-DDThh:mm:ss).
+productId,String (GUID),Mahsulotning tizimdagi unikal ID raqami (so'rovda yuborilgan ID).
+productName,String,Mahsulotning nomi.
+datePublished,String (Date),Sharh nashr qilingan (tasdiqlangan) vaqt.
+name_author,String,Sharh qoldirgan muallifning ism-sharifi.
+permission_to_publish,Boolean,Sharhni barchaga ko'rsatishga ruxsat berilganligi (true/false).
+ratingValue,Integer,Muallif tomonidan berilgan baho.
+bestRating,Integer,Mumkin bo'lgan eng maksimal baho qiymati (odatda 5).
+reviewBody,String,Sharhning to'liq matni (Maksimal uzunlik: 160 belgi).
+pic_url,String,rasm linki (Maksimal uzunlik: 120 belgi).
+Xatoliklar (Errors): 400 Bad Request
+API mijoz (front-end/mobile) tomonidan yuborilgan noto'g'ri so'rovlar uchun quyidagi xatoliklarni qaytarishi mumkin.
+
+1-holat: Parametr umuman yuborilmagan yoki bo'sh qoldirilgan
+So'rov: GET /SORA/hs/for_msp/review yoki GET /SORA/hs/for_msp/review?productId=
+
+JSON
+{
+  "error": "'productId' parametri majburiy!"
+}
+2-holat: Yuborilgan parametr formati GUID ga to'g'ri kelmaydi (noto'g'ri matn)
+So'rov: GET /SORA/hs/for_msp/review?productId=123-abc
+
+JSON
+{
+  "error": "'productId' formati noto'g'ri! GUID kutilmoqda."
+}

@@ -16,8 +16,14 @@ import {
   AllProductsResponseSchema,
 } from "../schemas/product";
 import { OfferItem, OfferListResponseSchema } from "../schemas/offer";
+import {
+  Review,
+  ReviewListResponseSchema,
+  ReviewStats,
+} from "../schemas/review";
 import { buildCategoryTree } from "../utils/category-tree";
 import { isOfferActive, offerItemToProduct } from "../utils/offer";
+import { calculateReviewStats } from "../utils/review";
 import {
   FIXTURE_CATEGORIES,
   FIXTURE_UNITS,
@@ -455,6 +461,54 @@ class SoraApiClient {
         promotions: promoRes.items,
       },
       isFallback,
+    };
+  }
+
+  /**
+   * Fetches product reviews by GUID from 1C ERP.
+   */
+  async getReviewsByProductId(
+    productId: string,
+    options?: FetchOptions
+  ): Promise<{ reviews: Review[]; stats: ReviewStats; isFallback: boolean }> {
+    // Validate GUID format to avoid sending malformed IDs (which trigger 400 Bad Request)
+    const guidRegex =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!productId || !guidRegex.test(productId)) {
+      return {
+        reviews: [],
+        stats: calculateReviewStats([]),
+        isFallback: false,
+      };
+    }
+
+    const res = await this.request<unknown[]>(`/review?productId=${productId}`, {
+      tags: options?.tags ?? [
+        "reviews",
+        `reviews-${productId}`,
+        `product-${productId}`,
+      ],
+      revalidate: options?.revalidate ?? 3600,
+    });
+
+    if (!res.isFallback && res.data && Array.isArray(res.data)) {
+      const parsed = ReviewListResponseSchema.safeParse(res.data);
+      if (parsed.success) {
+        const approved = parsed.data.filter(
+          (r) => r.permission_to_publish !== false
+        );
+        return {
+          reviews: approved,
+          stats: calculateReviewStats(approved),
+          isFallback: false,
+        };
+      }
+    }
+
+    return {
+      reviews: [],
+      stats: calculateReviewStats([]),
+      isFallback: res.isFallback,
     };
   }
 }
