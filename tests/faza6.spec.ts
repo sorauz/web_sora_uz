@@ -9,6 +9,8 @@ test.describe("FAZA 6: Marketing, Feeds, Local SEO, and llms.txt", () => {
     expect(text).toContain("https://sora.uz/uz/catalog");
     expect(text).toContain("https://sora.uz/uz/delivery");
     expect(text).toContain("https://sora.uz/uz/contact");
+    expect(text).toContain("https://sora.uz/uz/b2b");
+    expect(text).toContain("https://sora.uz/uz/offers");
     expect(text).toContain("https://sora.uz/llms-full.txt");
   });
 
@@ -19,6 +21,9 @@ test.describe("FAZA 6: Marketing, Feeds, Local SEO, and llms.txt", () => {
     expect(text).toContain("Sora.uz — To'liq Katalog");
     expect(text).toContain("Deli");
     expect(text).toContain("Kategoriyalar");
+    expect(text).toContain("https://sora.uz/uz/b2b");
+    expect(text).toContain("https://sora.uz/uz/offers");
+    expect(text).toContain("https://sora.uz/uz/catalog/low_price_guarantee");
   });
 
   test("Google Merchant Center XML feed is valid and contains required product attributes", async ({

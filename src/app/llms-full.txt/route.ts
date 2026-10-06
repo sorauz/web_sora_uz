@@ -15,7 +15,7 @@ export async function GET() {
 
   let md = `# Sora.uz — To'liq Katalog va Mahsulotlar (LLMs Full Data)
 
-> O'zbekistondagi 1C ERP integratsiyalangan kanselyariya va ofis anjomlari internet-do'koni.
+> O'zbekistondagi 1C ERP integratsiyalangan yetakchi kanselyariya, maktab qurollari va ofis anjomlari internet-do'koni.
 
 ## Kompaniya Rekvizitlari
 - Do'kon: Sora.uz
@@ -24,6 +24,19 @@ export async function GET() {
 - Email: info@sora.uz
 - Telegram: https://t.me/sora_uz
 - Ish vaqti: Dushanba – Shanba, 09:00 – 19:00
+
+## Xizmatlar va Korporativ Hamkorlik
+- [B2B Korporativ xizmat](${baseUrl}/uz/b2b): Yuridik shaxslar uchun to'g'ridan-to'g'ri shartnoma, elektron hisob-faktura (Didox) va korporativ to'lov.
+- [Yetkazib berish shartlari](${baseUrl}/uz/delivery): Toshkent shahri bo'yicha 24 soat ichida (500 000 so'mdan yuqori xaridlar uchun bepul) va viloyatlarga yetkazib berish.
+- [To'lov usullari](${baseUrl}/uz/payment): Naqd pul, Payme, Click, Uzcard, Humo va korporativ bank o'tkazmalari.
+- [Kafolat va qaytarish](${baseUrl}/uz/warranty): 14 kunlik rasmiy kafolat va almashtirish xizmati.
+
+## Maxsus Takliflar va Aksiyalar
+- [Aksiyalar markazi](${baseUrl}/uz/offers): Do'kondagi barcha amaldagi aksiyalar va maxsus takliflar.
+- [Kafolatlangan eng arzon narx](${baseUrl}/uz/catalog/low_price_guarantee): Bozorning eng maqbul narxlari kafolatlangan tovarlar.
+- [Yangi kelgan mahsulotlar](${baseUrl}/uz/catalog/new_products): Do'konga yangi keltirilgan tovarlar.
+- [Top mahsulotlar](${baseUrl}/uz/catalog/popular): Eng ommabop va ko'p sotilgan ofis/maktab mollari.
+- [Chegirmali mahsulotlar](${baseUrl}/uz/catalog/discounted): Aksiya va maxsus chegirmadagi tovarlar.
 
 ## Kategoriyalar
 `;
@@ -42,9 +55,12 @@ export async function GET() {
 
   md += `\n## Mahsulotlar Assortimenti\n\n`;
   for (const p of productsData.products) {
-    const name = p.uz?.name_uz || p.ru?.name_ru;
-    const slug = p.uz?.slug_uz || p.ru?.slug_ru;
+    const nameUz = p.uz?.name_uz || p.ru?.name_ru;
+    const nameRu = p.ru?.name_ru || p.uz?.name_uz;
+    const slugUz = p.uz?.slug_uz || p.ru?.slug_ru;
+    const slugRu = p.ru?.slug_ru || p.uz?.slug_uz;
     const priceInfo = calculateProductPrice(p.price);
+    
     let priceStr = "Kelishilgan holda";
     if (priceInfo.price > 0) {
       if (priceInfo.hasDiscount && priceInfo.oldPrice) {
@@ -55,10 +71,13 @@ export async function GET() {
     }
     const brand = p.brand ? `[Brend: ${p.brand}]` : "";
     const sku = p.product_sku ? `[SKU: ${p.product_sku}]` : "";
-    const desc = p.uz?.short_description_uz || p.uz?.meta_description_uz || "";
+    const desc = p.uz?.short_description_uz || p.uz?.meta_description_uz || p.ru?.short_description_ru || "";
 
-    md += `### ${name}\n`;
-    md += `- URL: ${baseUrl}/uz/products/${slug}\n`;
+    md += `### ${nameUz}\n`;
+    md += `- URL (UZ): ${baseUrl}/uz/products/${slugUz}\n`;
+    if (slugRu && slugRu !== slugUz) {
+      md += `- URL (RU): ${baseUrl}/ru/products/${slugRu}\n`;
+    }
     md += `- Narxi: ${priceStr}\n`;
     if (brand || sku) md += `- Xususiyatlar: ${brand} ${sku}\n`;
     if (desc) md += `- Tavsif: ${desc}\n`;

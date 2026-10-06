@@ -2,32 +2,43 @@
 
 > O'zbekistonning yetakchi kanselyariya, maktab qurollari va ofis anjomlari internet-do'koni (1C ERP integratsiyalangan).
 
-Sora.uz — jismoniy va yuridik shaxslar (B2B va B2C) uchun sifatli ofis anjomlari, yozuv qurollari, namoyish doskalari, nusxa ko'chirish qog'ozlari va hisoblash texnikalarini tezkor yetkazib berish xizmati bilan taqdim etuvchi zamonaviy elektron tijorat platformasi.
+Sora.uz — jismoniy shaxslar (B2C) va korporativ mijozlar (B2B) uchun sifatli ofis anjomlari, yozuv qurollari, namoyish doskalari, qog'oz mahsulotlari, hisoblash va ofis texnikalarini tezkor yetkazib berish xizmati bilan taqdim etuvchi zamonaviy elektron tijorat platformasi. Barcha mahsulotlar va narxlar 1C ERP tizimi orqali real vaqt rejimida sinxronlanadi.
 
 ## Asosiy Bo'limlar
-- [Bosh sahifa](https://sora.uz/uz): Yangi mahsulotlar, chegirmalar va ommabop toifalar.
-- [Katalog](https://sora.uz/uz/catalog): 1C ERP bilan sinxronlangan barcha kategoriyalar daraxti.
-- [Brendlar](https://sora.uz/uz/brands): Deli, Linc, Comix va boshqa xalqaro rasmiy brendlar katalogi.
-- [Yetkazib berish](https://sora.uz/uz/delivery): Toshkent shahri va butun O'zbekiston viloyatlari bo'yicha yetkazib berish shartlari.
-- [To'lov usullari](https://sora.uz/uz/payment): Naqd pul, Payme, Click, Uzcard/Humo va korporativ B2B hisob-faktura.
-- [Kafolat va qaytarish](https://sora.uz/uz/warranty): 14 kunlik qaytarish/almashtirish kafolati va servis xizmati.
-- [Aloqa va Rekvizitlar](https://sora.uz/uz/contact): Telefon (+998 90 326-47-57 ; +998 90 969-90-90 ; +998 71 228-05-78), jismoniy manzil (Toshkent shahri, Dilsaroy ko'chasi, 1 uy), ish vaqti va yuridik rekvizitlar.
+- [Bosh sahifa](https://sora.uz/uz): Yangi mahsulotlar, ommabop toifalar, chegirmalar va rasmiy brendlar vitrinasi.
+- [Katalog](https://sora.uz/uz/catalog): 1C ERP bilan sinxronlangan to'liq kategoriyalar ierarxiyasi va filtrlari.
+- [Brendlar](https://sora.uz/uz/brands): Deli, Linc, Comix, Uni-ball va boshqa xalqaro rasmiy brendlar katalogi.
+- [B2B Korporativ xizmat](https://sora.uz/uz/b2b): Yuridik shaxslar uchun shartnoma, elektron hisob-faktura (Didox) va STIR (INN) orqali to'lov bilan to'liq xizmat ko'rsatish.
+- [Yetkazib berish](https://sora.uz/uz/delivery): Toshkent shahri bo'ylab 24 soat ichida hamda butun O'zbekiston viloyatlari bo'yicha yetkazib berish shartlari.
+- [To'lov usullari](https://sora.uz/uz/payment): Naqd pul, Payme, Click, Uzcard/Humo va korporativ B2B to'lov.
+- [Kafolat va qaytarish](https://sora.uz/uz/warranty): 14 kunlik qaytarish va almashtirish kafolati, servis xizmati.
+- [Aloqa va Rekvizitlar](https://sora.uz/uz/contact): Telefon (+998 90 326-47-57 ; +998 90 969-90-90 ; +998 71 228-05-78), manzil (Toshkent shahri, Dilsaroy ko'chasi, 1 uy), ish vaqti (Dush-Shan 09:00-19:00).
+
+## Maxsus Takliflar va Aksiyalar
+- [Aksiyalar markazi](https://sora.uz/uz/offers): Barcha chegirmalar, aksiyalar va maxsus marketing takliflari.
+- [Kafolatlangan eng arzon narx](https://sora.uz/uz/catalog/low_price_guarantee): Bozorning eng hamyonbop narxlari kafolatlangan tovarlar.
+- [Yangi kelgan mahsulotlar](https://sora.uz/uz/catalog/new_products): Eng so'nggi keltirilgan yangi tovarlar to'plami.
+- [Top mahsulotlar](https://sora.uz/uz/catalog/popular): Eng ko'p xarid qilinayotgan xaridorgir tovarlar.
+- [Chegirmali mahsulotlar](https://sora.uz/uz/catalog/discounted): Ulgurji va chakana chegirmadagi mahsulotlar.
 
 ## Asosiy Mahsulot Toifalari
-- [Kalkulyatorlar](https://sora.uz/uz/category/ish-stoli-kalkulyatorlari): Ish stoli, buxgalteriya, ilmiy va cho'ntak kalkulyatorlari (Deli E1589 va boshqalar).
-- [Namoyish doskalari](https://sora.uz/uz/category/magnit-va-marker-doskalari): Magnitli marker doskalari, flipchartlar, bo'r doskalari va aksessuarlar.
-- [Ofis texnikasi](https://sora.uz/uz/category/ofis-jihozlari-va-kanselyariya): Qog'oz unchitish (shredder) mashinalari, perpletka apparatlari, laminatorlar.
-- [Yozuv qurollari](https://sora.uz/uz/category/ruchkalar-va-qalamlar): Sharikli va gelli ruchkalar, matn belgilagichlar (highlighter), avtomatik qalamlar.
-- [Qog'oz mahsulotlari](https://sora.uz/uz/category/qogoz-mahsulotlari): A4 formatdagi yuqori sifatli ofis qog'ozlari, daftarlar, stikerlar va bloknotlar.
+- [Qogʻoz mahsulotlari](https://sora.uz/uz/category/qogoz-mahsulotlari): A4 formatdagi nusxa ko'chirish qog'ozlari, daftarlar, bloknotlar, stikerlar va kassa lentalari.
+- [Ofis buyumlari](https://sora.uz/uz/category/ofis-buyumlari): Steplerlar, teshkichlar, skrepkalar, qaychilar, korrektorlar va kantselyariya pichoqlari.
+- [Yozuv qurollari](https://sora.uz/uz/category/yozuv-qurollari): Sharikli, gelli va siyohli ruchkalar, matn belgilagichlar (highlighters), avtomatik va oddiy qalamlar.
+- [Kalkulyatorlar](https://sora.uz/uz/category/kalkulyatorlar): Ish stoli, buxgalteriya, ilmiy va cho'ntak kalkulyatorlari (Deli va boshqalar).
+- [Namoyish doskalari](https://sora.uz/uz/category/namoyish-doskalari): Magnitli marker doskalari, flipchartlar, bo'r doskalari va aksessuarlar.
+- [Papkalar va fayllar](https://sora.uz/uz/category/papkalar-va-fayllar): Registrator papkalar, fayllar, konvertlar va arxiv qutilari.
+- [Maktab va oʻqish uchun](https://sora.uz/uz/category/maktab-va-oqish-uchun): Maktab anjomlari, chizmachilik to'plamlari, qalamdonlar va rasm daftarlari.
 
-## Xarid va Yetkazib Berish Siyosati
+## Xarid va Buyurtma Siyosati
 - Valyuta: O'zbekiston so'mi (UZS).
-- Bepul yetkazib berish: 500 000 so'm va undan yuqori xaridlar uchun Toshkent shahri bo'ylab bepul.
-- B2B xizmati: Korxonalar uchun STIR (INN) orqali elektron hisob-faktura va to'lov bilan to'liq hujjatlar to'plami.
-- Mijozlarni qo'llab-quvvatlash: Dushanba – Shanba, 09:00 dan 19:00 gacha.
+- Bepul yetkazib berish: 500 000 so'm va undan yuqori buyurtmalar uchun Toshkent shahri bo'ylab bepul.
+- Mijozlar turlari: Jismoniy shaxslar (B2C) va Yuridik shaxslar / korxonalar (B2B).
+- Tizimga kirish va ro'yxatdan o'tish: Tezkor telefon raqam va parol bilan ro'yxatdan o'tish; buyurtma paytida B2C yoki B2B rejimini tanlash imkoniyati.
+- Tillarni qo'llab-quvvatlash: O'zbek tili (/uz) va Rus tili (/ru).
 
 ## Qidiruv va Ma'lumotlar Oqimi (Feeds)
 - [XML Sitemap](https://sora.uz/sitemap.xml): Qidiruv tizimlari va AI agentlari uchun to'liq URL indeksi.
 - [Google Merchant Feed](https://sora.uz/api/feeds/google-merchant): Google Shopping va Merchant Center mahsulotlar oqimi.
-- [Yandex Market YML Feed](https://sora.uz/api/feeds/yandex-market): Yandex qidiruv va savdo maydonchasi uchun YML formati.
-- [To'liq LLM ma'lumotlar](https://sora.uz/llms-full.txt): Kengaytirilgan katalog va mahsulotlar spetsifikatsiyasi.
+- [Yandex Market YML Feed](https://sora.uz/api/feeds/yandex-market): Yandex qidiruv va savdo maydonchasi uchun YML oqimi.
+- [To'liq LLM ma'lumotlar](https://sora.uz/llms-full.txt): 1C ERP dagi barcha tovarlar narxlari, parametrlari va tavsiflari bilan to'liq spetsifikatsiya.
