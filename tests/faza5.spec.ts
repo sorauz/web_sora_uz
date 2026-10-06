@@ -39,6 +39,9 @@ test.describe("FAZA 5: Technical SEO, Canonical Redirection, and Price Display",
     expect(body).toContain("User-Agent: *");
     expect(body).toContain("/uz/cart");
     expect(body).toContain("/uz/checkout");
+    expect(body).toContain("/uz/favorites");
+    expect(body).toContain("/uz/search");
+    expect(body).toContain("/api/feeds/");
     expect(body).toContain("Sitemap: https://sora.uz/sitemap.xml");
   });
 
@@ -50,6 +53,8 @@ test.describe("FAZA 5: Technical SEO, Canonical Redirection, and Price Display",
     expect(xml).toContain("https://sora.uz/ru");
     expect(xml).toContain("/category/");
     expect(xml).toContain("/products/");
+    expect(xml).toContain("/b2b");
+    expect(xml).toContain("/offers");
     expect(xml).toContain("<lastmod>");
     expect(xml).toContain('hreflang="uz-UZ"');
     expect(xml).toContain('hreflang="ru-UZ"');

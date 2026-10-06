@@ -5,12 +5,16 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: "*",
-        allow: "/",
+        allow: ["/", "/api/feeds/"],
         disallow: [
           "/uz/cart",
           "/ru/cart",
           "/uz/checkout",
           "/ru/checkout",
+          "/uz/favorites",
+          "/ru/favorites",
+          "/uz/search",
+          "/ru/search",
           "/api/",
           "/*?*brand=",
           "/*?*sort=",

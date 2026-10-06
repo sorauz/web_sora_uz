@@ -19,7 +19,7 @@ Sora.uz — jismoniy shaxslar (B2C) va korporativ mijozlar (B2B) uchun sifatli o
 - [Kafolatlangan eng arzon narx](https://sora.uz/uz/catalog/low_price_guarantee): Bozorning eng hamyonbop narxlari kafolatlangan tovarlar.
 - [Yangi kelgan mahsulotlar](https://sora.uz/uz/catalog/new_products): Eng so'nggi keltirilgan yangi tovarlar to'plami.
 - [Top mahsulotlar](https://sora.uz/uz/catalog/popular): Eng ko'p xarid qilinayotgan xaridorgir tovarlar.
-- [Chegirmali mahsulotlar](https://sora.uz/uz/catalog/discounted): Ulgurji va chakana chegirmadagi mahsulotlar.
+- [Aksiya va chegirmalar](https://sora.uz/uz/catalog/promotions): Ulgurji va chakana chegirmadagi mahsulotlar.
 
 ## Asosiy Mahsulot Toifalari
 - [Qogʻoz mahsulotlari](https://sora.uz/uz/category/qogoz-mahsulotlari): A4 formatdagi nusxa ko'chirish qog'ozlari, daftarlar, bloknotlar, stikerlar va kassa lentalari.

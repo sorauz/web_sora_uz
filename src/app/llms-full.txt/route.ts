@@ -36,7 +36,7 @@ export async function GET() {
 - [Kafolatlangan eng arzon narx](${baseUrl}/uz/catalog/low_price_guarantee): Bozorning eng maqbul narxlari kafolatlangan tovarlar.
 - [Yangi kelgan mahsulotlar](${baseUrl}/uz/catalog/new_products): Do'konga yangi keltirilgan tovarlar.
 - [Top mahsulotlar](${baseUrl}/uz/catalog/popular): Eng ommabop va ko'p sotilgan ofis/maktab mollari.
-- [Chegirmali mahsulotlar](${baseUrl}/uz/catalog/discounted): Aksiya va maxsus chegirmadagi tovarlar.
+- [Aksiya va chegirmalar](${baseUrl}/uz/catalog/promotions): Aksiya va maxsus chegirmadagi tovarlar.
 
 ## Kategoriyalar
 `;

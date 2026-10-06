@@ -28,6 +28,7 @@ const OFFER_ALIASES: Record<string, ValidOfferKey> = {
   "new": "new_products",
   "sale": "promotions",
   "top": "popular",
+  "discounted": "promotions",
 };
 
 interface OfferConfig {
