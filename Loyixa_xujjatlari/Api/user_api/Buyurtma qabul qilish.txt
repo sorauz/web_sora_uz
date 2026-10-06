@@ -1,0 +1,72 @@
+API Dokumentatsiyasi: Buyurtma qabul qilish (Create Order)
+URL (Base): [http://1cloud.uz:777](http://1cloud.uz:777)
+Endpoint: /SORA/hs/for_msp/order
+Metod: POST
+Content-Type: application/json; charset=utf-8
+
+So'rov tanasi (Request Body)
+Maydon nomi,Turi,Majburiymi?,Tavsif
+type,String,Ha,"""B2C"" yoki ""B2B"" bo'lishi shart."
+contact_id,String,Ha,Foydalanuvchining (КонтактныйЛицо) 1C dagi GUID raqami. Register API dan olingan bo'lishi kerak.
+client_id,String,B2B da Ha,B2B bo'lsa korxona (Контрагенты) GUID raqami. B2C bo'lsa bu maydon qatnashmasligi mumkin.
+without_delivery,Boolean,Ha,"true - Yetkazib berishsiz (Olib ketish), false - Yetkazib berish bilan."
+geolocation,String,Yo'q,"Google Maps havolasi (Maks 150 belgi). Agar without_delivery true bo'lsa, bu havola avtomatik tozalanadi."
+comment,String,Yo'q,Buyurtma uchun izoh (Maks 350 belgi).
+products,Array,Ha,Xarid qilinayotgan tovarlar ro'yxati (savatcha).
+
+Products (Mahsulotlar massivi) tarkibi:
+
+Maydon nomi,Turi,Tavsif
+product_id,String,Mahsulotning 1C dagi GUID raqami.
+quantity,Number,Sotib olinayotgan miqdor (Masalan: 2).
+price,Number,Mahsulotning donasi uchun narx. Summa 1C da avtomatik ko'paytirib olinadi.
+
+So'rov namunasi (B2C mijoz - yetkazib berish bilan):
+
+JSON
+{
+  "type": "B2C",
+  "contact_id": "79d1f6cb-3178-11e8-812c-d43d7e011714",
+  "without_delivery": false,
+  "geolocation": "https://maps.google.com/maps?q=41.220278,69.201541&ll=41.220278,69.201541&z=16",
+  "comment": "Iltimos, soat 18:00 dan keyin olib keling.",
+  "products": [
+    {
+      "product_id": "12345678-abcd-11e8-812c-d43d7e011714",
+      "quantity": 2,
+      "price": 50000
+    },
+    {
+      "product_id": "87654321-dcba-11e8-812c-d43d7e011714",
+      "quantity": 1,
+      "price": 120000
+    }
+  ]
+}
+
+Javoblar (Responses)
+✅ 1. Muvaffaqiyatli saqlandi va o'tkazildi (201 Created):
+1C da hujjat to'liq yaratiladi, statusi Заказ = Истина hamda Проведен = Истина bo'ladi.
+
+JSON
+{
+  "message": "Buyurtma muvaffaqiyatli qabul qilindi",
+  "order_number": "РТ-0000125",
+  "order_id": "e44c21a0-318a-11e8-812c-d43d7e011714"
+}
+❌ 2. Xatoliklar (400 Bad Request):
+
+{"error": "Savatcha bo'sh! 'products' massivi yuborilmadi."}
+
+{"error": "'contact_id' parametri majburiy!"}
+
+{"error": "Mahsulot ID xato: 1234..."}
+
+❌ 3. Server/Baza xatoligi (500 Internal Server Error):
+Agar tovar omborda yetarli bo'lmagani yoki 1C tekshiruvlari sababli hujjatni O'tkazib (Проведение) bo'lmasa:
+
+{"error": "Hujjatni o'tkazishda xatolik: ...omborda tovar qoldig'i yetarli emas..."}
+
+
+
+

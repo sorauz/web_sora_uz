@@ -1,0 +1,52 @@
+API Dokumentatsiyasi: Buyurtma holatini ko'rish (Get Order Status)
+URL (Base): [http://1cloud.uz:777](http://1cloud.uz:777)
+Endpoint: /SORA/hs/for_msp/order
+Metod: GET
+Content-Type: application/json; charset=utf-8
+
+So'rov parametrlari (Query Parameters)
+
+Parametr nomi,Ma'lumot turi,Majburiymi?,Tavsif
+order_id,String (GUID),Ha,Buyurtma yaratilganda (POST so'rovida) qaytgan 1C hujjatining unikal identifikatori.
+
+GET http://1cloud.uz:777/SORA/hs/for_msp/order?order_id=e44c21a0-318a-11e8-812c-d43d7e011714
+
+Javoblar (Responses)
+✅ 1. Muvaffaqiyatli topildi: 200 OK
+Buyurtma ma'lumotlari qaytariladi. Front-end shu orqali foydalanuvchi kabinetida "Sizning buyurtmangiz tasdiqlandi" kabi statuslarni ko'rsata oladi.
+
+JSON
+{
+  "order_id": "e44c21a0-318a-11e8-812c-d43d7e011714",
+  "order_number": "РТ-0000125",
+  "order_date": "2023-10-26T14:30:00",
+  "status": "Tasdiqlangan",
+  "without_delivery": false,
+  "total_amount": 170000
+}
+Javob maydonlari (Data Dictionary):
+
+status: 3 xil holatda bo'lishi mumkin:
+
+"Tasdiqlangan" — 1C da hujjat "Проведен" qilingan. (Mijozga yetkazib berilyapti yoki to'lov qabul qilingan).
+
+"Bekor qilingan" — 1C da hujjat o'chirilgan ("Пометка удаления" qo'yilgan).
+
+"Jarayonda" — Hujjat bazada bor, lekin hali "Проведен" bo'lmagan (Menejer ko'rib chiqmoqda yoki xatosi bor).
+
+total_amount: "Продажа" jadvalidagi barcha tovarlar summasi (jami to'lanadigan summa).
+
+without_delivery: Yetkazib berish holati (true = olib ketish, false = yetkazib berish).
+
+❌ 2. Xatoliklar (Errors)
+
+400 Bad Request - Parametr berilmagan yoki UUID formati xato bo'lsa:
+
+JSON
+{ "error": "Yuborilgan 'order_id' formati noto'g'ri! GUID kutilmoqda." }
+404 Not Found - Bunday ID ga ega buyurtma 1C da topilmasa:
+
+JSON
+{ "error": "Ushbu ID ga ega buyurtma topilmadi!" }
+
+

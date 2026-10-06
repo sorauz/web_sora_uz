@@ -21,6 +21,10 @@ import {
   ReviewListResponseSchema,
   ReviewStats,
 } from "../schemas/review";
+import {
+  OneCUserResponse,
+  OneCUserResponseSchema,
+} from "../schemas/auth";
 import { buildCategoryTree } from "../utils/category-tree";
 import { isOfferActive, offerItemToProduct } from "../utils/offer";
 import { calculateReviewStats } from "../utils/review";
@@ -508,6 +512,167 @@ class SoraApiClient {
       stats: calculateReviewStats([]),
       isFallback: res.isFallback,
     };
+  }
+
+  /**
+   * Authorize existing customer in 1C ERP via GET /register
+   * - B2C: type=B2C&phone=+998...&password=...
+   * - B2B: type=B2B&inn=...&password=...
+   */
+  async loginUser(params: {
+    type: "B2C" | "B2B";
+    identifier: string;
+    password: string;
+  }): Promise<{
+    success: boolean;
+    user?: OneCUserResponse;
+    error?: string;
+    statusCode: number;
+  }> {
+    const isB2C = params.type === "B2C";
+    const queryParam = isB2C
+      ? `phone=${encodeURIComponent(params.identifier)}`
+      : `inn=${encodeURIComponent(params.identifier)}`;
+    const url = `${this.baseUrl}/register?type=${params.type}&${queryParam}&password=${encodeURIComponent(
+      params.password
+    )}`;
+
+    try {
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          Authorization: this.authHeader,
+          Accept: "application/json",
+          "Content-Type": "application/json; charset=utf-8",
+        },
+        cache: "no-store",
+      });
+
+      const text = await response.text();
+      let data: Record<string, unknown> = {};
+      try {
+        data = JSON.parse(text);
+      } catch {
+        data = { error: text };
+      }
+
+      if (response.ok) {
+        const parsed = OneCUserResponseSchema.safeParse(data);
+        if (parsed.success) {
+          return {
+            success: true,
+            user: parsed.data,
+            statusCode: 200,
+          };
+        }
+        return {
+          success: true,
+          user: {
+            id: String(data.id || ""),
+            name: String(data.name || ""),
+            type: params.type,
+          },
+          statusCode: 200,
+        };
+      }
+
+      const errorMessage =
+        (typeof data.error === "string" && data.error) ||
+        (response.status === 401
+          ? "Noto'g'ri parol!"
+          : response.status === 404
+          ? "Foydalanuvchi topilmadi!"
+          : "Avtorizatsiyada xatolik yuz berdi");
+
+      return {
+        success: false,
+        error: errorMessage,
+        statusCode: response.status,
+      };
+    } catch (err) {
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : "Tarmoq xatosi",
+        statusCode: 500,
+      };
+    }
+  }
+
+  /**
+   * Register new customer in 1C ERP via POST /register
+   * - B2C: { type: "B2C", name, phone1, phone2, password }
+   * - B2B: { type: "B2B", name, inn, password }
+   */
+  async registerUser(payload: {
+    type: "B2C" | "B2B";
+    name: string;
+    phone1?: string;
+    phone2?: string;
+    inn?: string;
+    password: string;
+  }): Promise<{
+    success: boolean;
+    id?: string;
+    error?: string;
+    statusCode: number;
+    isConflict?: boolean;
+  }> {
+    const url = `${this.baseUrl}/register`;
+
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          Authorization: this.authHeader,
+          Accept: "application/json",
+          "Content-Type": "application/json; charset=utf-8",
+        },
+        body: JSON.stringify(payload),
+        cache: "no-store",
+      });
+
+      const text = await response.text();
+      let data: Record<string, unknown> = {};
+      try {
+        data = JSON.parse(text);
+      } catch {
+        data = { error: text };
+      }
+
+      if (response.status === 201 || response.ok) {
+        return {
+          success: true,
+          id: String(data.id || ""),
+          statusCode: 201,
+        };
+      }
+
+      if (response.status === 409) {
+        return {
+          success: false,
+          id: String(data.id || ""),
+          error:
+            (typeof data.error === "string" && data.error) ||
+            "Ushbu ma'lumotlar bilan foydalanuvchi allaqachon mavjud!",
+          statusCode: 409,
+          isConflict: true,
+        };
+      }
+
+      return {
+        success: false,
+        error:
+          (typeof data.error === "string" && data.error) ||
+          "Ro'yxatdan o'tishda xatolik yuz berdi",
+        statusCode: response.status,
+      };
+    } catch (err) {
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : "Tarmoq xatosi",
+        statusCode: 500,
+      };
+    }
   }
 }
 

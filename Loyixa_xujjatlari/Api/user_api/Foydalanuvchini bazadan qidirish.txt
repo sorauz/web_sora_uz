@@ -1,0 +1,43 @@
+API Dokumentatsiyasi: Foydalanuvchini bazadan qidirish (Avtorizatsiya)
+
+Ushbu API usuli veb-saytda ro'yxatdan o'tgan mijoz tizimga kirmoqchi bo'lganida (avtorizatsiya paytida), uning 1C bazasidagi mavjud yoki mavjud emasligini tekshirish va unga tegishli unikal ID (UUID) ni olish uchun ishlatiladi.
+
+1. Asosiy ma'lumotlar
+URL (Base): [http://1cloud.uz:777](http://1cloud.uz:777)
+
+Endpoint: /SORA/hs/for_msp/register
+
+Metod: GET
+
+Content-Type: application/json; charset=utf-8
+
+2. So'rov parametrlari (Query Parameters)
+So'rov manzil qatorida URL parametrlari orqali yuboriladi. Parametrlar mijoz turiga (type) qarab farq qiladi.
+
+Parametr nomi,Ma'lumot turi,Majburiymi?,Tavsif
+type,String,Ha,Mijoz turi. Ruxsat etilgan qiymatlar: B2C (Jismoniy shaxs) yoki B2B (Yuridik shaxs).
+phone,String,Shartli,Faqat type=B2C bo'lganda majburiy. Mijozning telefon raqami (bazadagi Тел1 yoki Тел2 bo'yicha qidiriladi). Format: +998... yoki 998... (bazada qanday saqlanganiga qarab).
+inn,String/Number,Shartli,Faqat type=B2B bo'lganda majburiy. Yuridik shaxsning 9 xonali STIR (ИНН) raqami.
+
+3. Javoblar (Responses)
+✅ Muvaffaqiyatli javob: 200 OK
+Foydalanuvchi bazadan muvaffaqiyatli topilganda, tizim uning ma'lumotlarini JSON ob'ekt ko'rinishida qaytaradi.
+
+1-holat: B2C (Jismoniy shaxs) uchun so'rov va javob
+So'rov: GET /SORA/hs/for_msp/register?type=B2C&phone=+998903265458
+
+JSON{
+  "id": "79d1f6cb-3178-11e8-812c-d43d7e011714",
+  "name": "Tohir Arislonov",
+  "type": "B2C"
+}
+2-holat: B2B (Yuridik shaxs) uchun so'rov va javobSo'rov: GET /SORA/hs/for_msp/register?type=B2B&inn=204393073JSON{
+  "id": "03671895-6f67-11ef-b458-5811229bddba",
+  "name": "\"NAVRUZ INTERNATIONAL CORP\" MCHJ",
+  "type": "B2B"
+}
+Javob maydonlari (Data Dictionary):Maydon nomiMa'lumot turiTavsifidString (UUID)Foydalanuvchining 1C bazasidagi unikal identifikatori. Keyingi buyurtmalar (Заказ) uchun shu ID yuborilishi kerak.nameStringFoydalanuvchining yoki tashkilotning to'liq nomi.typeStringFoydalanuvchining toifasi (B2C yoki B2B).❌ Xatoliklar (Errors)So'rov noto'g'ri shakllantirilgan yoki ma'lumot topilmagan hollarda quyidagi status kodlar va JSON qaytariladi.1. Noto'g'ri so'rov: 400 Bad RequestParametrlar xato yoki to'liq yuborilmaganda:{"error": "URL da 'type=B2C' yoki 'type=B2B' ko'rsatilishi shart!"} (type ko'rsatilmaganda){"error": "B2C qidiruv uchun 'phone' parametri kerak!"} (B2C so'ralib, phone tashlab ketilganda){"error": "B2B qidiruv uchun 'inn' parametri kerak!"} (B2B so'ralib, inn tashlab ketilganda)2. Topilmadi: 404 Not FoundKo'rsatilgan telefon raqam yoki INN bo'yicha 1C bazasida umuman ma'lumot yo'q bo'lsa:JSON{
+  "error": "Foydalanuvchi topilmadi!"
+}
+
+

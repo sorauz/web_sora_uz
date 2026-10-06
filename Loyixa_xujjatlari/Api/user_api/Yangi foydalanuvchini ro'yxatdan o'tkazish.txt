@@ -1,0 +1,94 @@
+API Dokumentatsiyasi: Yangi foydalanuvchini ro'yxatdan o'tkazish (Register)
+Ushbu API usuli veb-sayt orqali yangi mijozlarni (Jismoniy va Yuridik shaxslarni) 1C tizimida ro'yxatdan o'tkazish uchun xizmat qiladi. So'rovda yuborilgan telefon raqami yoki INN bazada oldindan mavjud bo'lsa, tizim yangi mijoz yaratmaydi va mavjud mijozning ID raqamini qaytaradi.
+
+1. Asosiy ma'lumotlar
+URL (Base): [http://1cloud.uz:777](http://1cloud.uz:777)
+
+Endpoint: /SORA/hs/for_msp/register
+
+Metod: POST
+
+Content-Type: application/json; charset=utf-8
+
+2. So'rov tanasi (Request Body)
+So'rov JSON formatida yuborilishi kerak. Yuboriladigan ma'lumotlar mijoz toifasiga (type) qarab ikki xil bo'lishi mumkin.
+
+1-holat: Jismoniy shaxslar uchun (B2C)
+Maydon nomi,Ma'lumot turi,Majburiymi?,Tavsif
+type,String,Ha,"Mijoz turi, jismoniy shaxslar uchun ""B2C"" bo'lishi shart."
+name,String,Ha,Mijozning ism-sharifi.
+phone1,String,Ha,Asosiy telefon raqami. Dublikatni tekshirish xuddi shu raqam asosida amalga oshiriladi.
+phone2,String,Yo'q,Qo'shimcha telefon raqami.
+
+So'rov namunasi (B2C):
+``
+{
+  "type": "B2C",
+  "name": "Tohir Arislonov",
+  "phone1": "+998903265458",
+  "phone2": "+998991234567"
+}
+``
+2-holat: Yuridik shaxslar uchun (B2B)
+``
+Maydon nomi,Ma'lumot turi,Majburiymi?,Tavsif
+type,String,Ha,"Mijoz turi, yuridik shaxslar uchun ""B2B"" bo'lishi shart."
+name,String,Ha,Tashkilotning to'liq nomi.
+inn,String/Number,Ha,Tashkilotning 9 xonali STIR (ИНН) raqami. Dublikatni tekshirish ushbu raqam orqali bajariladi.
+``
+3. Javoblar (Responses)
+✅ 1. Muvaffaqiyatli yaratildi: 201 Created
+Tizimda foydalanuvchi muvaffaqiyatli ro'yxatdan o'tkazilganda qaytadigan javob.
+
+Javob namunasi:
+``
+{
+  "message": "Muvaffaqiyatli ro'yxatdan o'tdi",
+  "id": "79d1f6cb-3178-11e8-812c-d43d7e011714"
+}
+``
+
+⚠️ 2. Mijoz allaqachon mavjud: 409 Conflict
+Yuborilgan telefon raqami (B2C) yoki INN (B2B) bazada oldindan bor bo'lsa, tizim yangi ma'lumot yaratmaydi. Ammo frontend ulanishi uchun mavjud mijozning ID (UUID) sini qaytarib beradi. Frontend bu vaziyatda foydalanuvchini avtomatik tizimga kiritib yuborishi (login) mumkin.
+
+B2C dublikat bo'lganda:
+
+JSON
+{
+  "error": "Bu raqam bazada mavjud!",
+  "id": "79d1f6cb-3178-11e8-812c-d43d7e011714"
+}
+B2B dublikat bo'lganda:
+
+JSON
+{
+  "error": "Bu INN bazada mavjud!",
+  "id": "03671895-6f67-11ef-b458-5811229bddba"
+}
+❌ 3. Xatoliklar (Errors): 400 Bad Request
+So'rov formati noto'g'ri bo'lgan hollarda qaytadi.
+
+JSON formati buzilgan yoki noto'g'ri bo'lsa:
+
+JSON
+{
+  "error": "JSON formatida xatolik!"
+}
+Body umuman yuborilmagan bo'lsa:
+
+JSON
+{
+  "error": "Bo'sh so'rov yuborildi!"
+}
+type parametri xato bo'lsa (B2C yoki B2B dan farqli bo'lsa):
+
+JSON
+{
+  "error": "'type' parametri 'B2C' yoki 'B2B' bo'lishi kerak!"
+}
+Frontend dasturchi uchun qo'shimcha eslatma (Backend mantig'i):
+type="B2C" yuborilganda foydalanuvchi 1C bazasida КонтактныйЛицо sifatida yaratilib, umumiy ОДНОРАЗОВЫЕ_КЛИЕНТЫ kontragentiga biriktiriladi.
+
+type="B2B" yuborilganda foydalanuvchi 1C bazasida asosiy Контрагент sifatida (Maxsus 000000003 papkasi ichiga) yaratiladi.
+
+Ikkala holatda ham qaytgan id kelajakda buyurtma (Заказ) yaratish so'rovlarida mijoz identifikatori sifatida yuborilishi kerak.

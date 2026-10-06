@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { useRouter } from "@/i18n/routing";
 import Image from "next/image";
 import { useCartStore } from "@/lib/store/cart";
+import { useAuthStore } from "@/lib/store/auth";
 import { useTranslations } from "next-intl";
 import {
   User,
@@ -52,12 +53,27 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
   const [orderComment, setOrderComment] = useState("");
 
   const [paymentMethod, setPaymentMethod] = useState<"cash" | "payme" | "click" | "card" | "b2b">("cash");
+  const [orderType, setOrderType] = useState<"B2C" | "B2B">("B2C");
   const [companyName, setCompanyName] = useState("");
   const [companyInn, setCompanyInn] = useState("");
+
+  const { user, openModal } = useAuthStore();
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (user) {
+      if (user.name && !fullName) setFullName(user.name);
+      if (user.phone && phone === "+998 ") setPhone(user.phone);
+      if (user.type === "B2B") {
+        setOrderType("B2B");
+        if (user.inn && !companyInn) setCompanyInn(user.inn);
+        if (user.name && !companyName) setCompanyName(user.name);
+      }
+    }
+  }, [user]);
 
   useEffect(() => {
     if (mounted && items.length === 0 && !hasSubmittedRef.current) {
@@ -151,12 +167,107 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
 
         {/* STEP 1: Customer Details */}
         <section className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-7 border border-slate-200 dark:border-slate-800 shadow-xs space-y-5">
-          <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100 dark:border-slate-800">
-            <User className="w-5 h-5 text-sora-600 dark:text-sora-400" />
-            <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
-              {t("stepCustomer")}
-            </h2>
+          <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+            <div className="flex items-center gap-2.5">
+              <User className="w-5 h-5 text-sora-600 dark:text-sora-400" />
+              <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+                {t("stepCustomer")}
+              </h2>
+            </div>
+            {user && (
+              <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 flex items-center gap-1">
+                <CheckCircle className="w-3 h-3" />
+                <span>{user.name.split(" ")[0]} ({user.type})</span>
+              </span>
+            )}
           </div>
+
+          {!user && (
+            <div className="flex items-center justify-between p-3.5 rounded-2xl bg-sora-50/70 dark:bg-sora-950/30 border border-sora-200/60 dark:border-sora-800/60 text-xs">
+              <div className="text-slate-700 dark:text-slate-300">
+                <span className="font-bold">{locale === "uz" ? "Doimiy xaridormisiz?" : "Постоянный покупатель?"}</span>{" "}
+                <span className="text-slate-500 hidden sm:inline">
+                  {locale === "uz" ? "Tezroq buyurtma berish uchun tizimga kiring." : "Войдите для быстрого оформления."}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => openModal({ tab: "login" })}
+                className="px-3.5 py-1.5 rounded-xl bg-sora-600 text-white font-bold text-xs hover:bg-sora-700 transition-colors cursor-pointer shrink-0"
+              >
+                {locale === "uz" ? "Kirish" : "Войти"}
+              </button>
+            </div>
+          )}
+
+          {/* B2C vs B2B Switcher */}
+          <div className="flex gap-2.5">
+            <button
+              type="button"
+              onClick={() => setOrderType("B2C")}
+              className={`flex-1 py-2 px-3 rounded-xl text-xs font-semibold border flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                orderType === "B2C"
+                  ? "border-sora-500 bg-sora-50/70 dark:bg-sora-950/40 text-sora-700 dark:text-sora-300 font-bold"
+                  : "border-slate-200 dark:border-slate-700 text-slate-500 hover:bg-slate-50"
+              }`}
+            >
+              <User className="w-3.5 h-3.5" />
+              <span>{locale === "uz" ? "Jismoniy shaxs (B2C)" : "Физическое лицо (B2C)"}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setOrderType("B2B");
+                setPaymentMethod("b2b");
+              }}
+              className={`flex-1 py-2 px-3 rounded-xl text-xs font-semibold border flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                orderType === "B2B"
+                  ? "border-amber-500 bg-amber-50/70 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 font-bold"
+                  : "border-slate-200 dark:border-slate-700 text-slate-500 hover:bg-slate-50"
+              }`}
+            >
+              <Building2 className="w-3.5 h-3.5" />
+              <span>{locale === "uz" ? "Tashkilot nomidan (B2B)" : "От имени организации (B2B)"}</span>
+            </button>
+          </div>
+
+          {orderType === "B2B" && (
+            <div className="p-4 rounded-2xl bg-amber-50/60 dark:bg-amber-950/30 border border-amber-200/70 dark:border-amber-900/40 space-y-3">
+              <div className="text-xs font-bold text-amber-900 dark:text-amber-200 flex items-center gap-1.5">
+                <Building2 className="w-4 h-4 text-amber-600" />
+                <span>{locale === "uz" ? "Tashkilot rekvizitlari" : "Реквизиты организации"}</span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                    {locale === "uz" ? "Tashkilot nomi" : "Название компании"} *
+                  </label>
+                  <input
+                    type="text"
+                    required={orderType === "B2B"}
+                    value={companyName}
+                    onChange={(e) => setCompanyName(e.target.value)}
+                    placeholder={locale === "uz" ? "«Navruz International» MCHJ" : "ООО «Навруз»"}
+                    className="w-full px-3.5 py-2 bg-white dark:bg-slate-800 border border-amber-200 dark:border-slate-700 rounded-xl text-sm dark:text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                    {locale === "uz" ? "STIR (INN, 9 xonali)" : "ИНН (9 цифр)"} *
+                  </label>
+                  <input
+                    type="text"
+                    maxLength={9}
+                    required={orderType === "B2B"}
+                    value={companyInn}
+                    onChange={(e) => setCompanyInn(e.target.value)}
+                    placeholder="204393073"
+                    className="w-full px-3.5 py-2 bg-white dark:bg-slate-800 border border-amber-200 dark:border-slate-700 rounded-xl text-sm font-mono dark:text-white"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
