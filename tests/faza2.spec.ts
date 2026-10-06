@@ -38,8 +38,21 @@ test.describe("FAZA 2: Discovery (Catalog, Category, Brands, Search)", () => {
   });
 
   test("Search page works with query and displays results from 1C", async ({ page }) => {
+    // 1. Basic Latin query
     await page.goto("/uz/search?q=deli");
     await expect(page.locator("h1")).toContainText("deli");
     await expect(page.getByText("Deli").first()).toBeVisible();
+
+    // 2. Cyrillic transliteration search (Кириллица -> Латиница)
+    await page.goto("/uz/search?q=%D0%B4%D0%B5%D0%BB%D0%B8"); // "дели"
+    await expect(page.getByText("Deli").first()).toBeVisible();
+
+    // 3. Typo-tolerant fuzzy search ("kalkulyatr" -> "kalkulyator")
+    await page.goto("/uz/search?q=kalkulyatr");
+    await expect(page.getByText(/kalkulyator/i).first()).toBeVisible();
+
+    // 4. Multi-word search ("deli kalkulyator")
+    await page.goto("/uz/search?q=deli%20kalkulyator");
+    await expect(page.getByText(/kalkulyator/i).first()).toBeVisible();
   });
 });

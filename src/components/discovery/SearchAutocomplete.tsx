@@ -10,6 +10,11 @@ import { Product, getProductLocalized } from "@/lib/schemas/product";
 import { Category } from "@/lib/schemas/category";
 import { Brand } from "@/lib/schemas/brand";
 import { calculateProductPrice } from "@/lib/utils/price";
+import {
+  searchProducts,
+  searchCategories,
+  searchBrands,
+} from "@/lib/utils/search";
 
 interface SearchAutocompleteProps {
   products: Product[];
@@ -45,32 +50,18 @@ export function SearchAutocomplete({
 
   const trimmed = query.trim().toLowerCase();
 
-  const matchedProducts = trimmed.length > 1
-    ? products
-        .filter((p) => {
-          const loc = getProductLocalized(p, locale);
-          const name = loc.name.toLowerCase();
-          const sku = p.product_sku.toLowerCase();
-          const brand = p.brand.toLowerCase();
-          return name.includes(trimmed) || sku.includes(trimmed) || brand.includes(trimmed);
-        })
-        .slice(0, 4)
-    : [];
+  const matchedProducts =
+    trimmed.length > 1
+      ? searchProducts(products, trimmed, locale).slice(0, 4)
+      : [];
 
-  const matchedCategories = trimmed.length > 1
-    ? categories
-        .filter((c) => {
-          const name = (isUz ? c.group_uz : c.group_ru).toLowerCase();
-          return name.includes(trimmed);
-        })
-        .slice(0, 3)
-    : [];
+  const matchedCategories =
+    trimmed.length > 1
+      ? searchCategories(categories, trimmed, locale).slice(0, 3)
+      : [];
 
-  const matchedBrands = trimmed.length > 1
-    ? brands
-        .filter((b) => b.name.toLowerCase().includes(trimmed))
-        .slice(0, 3)
-    : [];
+  const matchedBrands =
+    trimmed.length > 1 ? searchBrands(brands, trimmed).slice(0, 3) : [];
 
   const hasResults =
     matchedProducts.length > 0 ||

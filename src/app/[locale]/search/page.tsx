@@ -9,6 +9,7 @@ import { ProductCard } from "@/components/discovery/ProductCard";
 import { SortSelect } from "@/components/discovery/SortSelect";
 import { getProductLocalized } from "@/lib/schemas/product";
 import { calculateProductPrice } from "@/lib/utils/price";
+import { searchProducts } from "@/lib/utils/search";
 import { Metadata } from "next";
 import { Search } from "lucide-react";
 
@@ -60,14 +61,9 @@ export default async function SearchPage({
   const brands = brandsData.data.brands;
   const products = productsData.products;
 
-  let results = products.filter((p) => {
-    if (!q) return true;
-    const loc = getProductLocalized(p, isUz ? "uz" : "ru");
-    const name = loc.name.toLowerCase();
-    const sku = p.product_sku.toLowerCase();
-    const brand = p.brand.toLowerCase();
-    return name.includes(q) || sku.includes(q) || brand.includes(q);
-  });
+  let results = q
+    ? searchProducts(products, q, isUz ? "uz" : "ru")
+    : products;
 
   // Sorting
   const sort = typeof query.sort === "string" ? query.sort : "popular";
