@@ -9,7 +9,7 @@ import { OrderSuccessView } from "@/components/checkout/OrderSuccessView";
 
 interface SuccessPageProps {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ orderId?: string }>;
+  searchParams: Promise<{ orderId?: string; orderNumber?: string }>;
 }
 
 export async function generateMetadata({
@@ -34,7 +34,7 @@ export default async function CheckoutSuccessPage({
   searchParams,
 }: SuccessPageProps) {
   const { locale } = await params;
-  const { orderId } = await searchParams;
+  const { orderId, orderNumber } = await searchParams;
   const currentLocale = (locale === "ru" ? "ru" : "uz") as "uz" | "ru";
   setRequestLocale(currentLocale);
 
@@ -55,7 +55,11 @@ export default async function CheckoutSuccessPage({
       <PromoNav />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <OrderSuccessView orderIdParam={orderId} locale={currentLocale} />
+        <OrderSuccessView
+          orderIdParam={orderId}
+          orderNumberParam={orderNumber}
+          locale={currentLocale}
+        />
       </main>
 
       <Footer />

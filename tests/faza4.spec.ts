@@ -49,7 +49,7 @@ test.describe("FAZA 4: Cart and Checkout Flow", () => {
     // 4. Order Success page
     await page.waitForURL("**/uz/checkout/success**");
     await expect(page.getByRole("heading", { name: /muvaffaqiyatli qabul qilindi/i })).toBeVisible();
-    await expect(page.getByText(/SORA-/i).first()).toBeVisible();
+    await expect(page.getByText(/(РТ-|SORA-)/i).first()).toBeVisible();
     await expect(page.getByText(/Tekshirilmoqda/i).first()).toBeVisible();
   });
 

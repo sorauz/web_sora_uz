@@ -7,11 +7,12 @@ import { Link } from "@/i18n/routing";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { MegaMenu } from "@/components/discovery/MegaMenu";
 import { SearchAutocomplete } from "@/components/discovery/SearchAutocomplete";
-import { Heart, ShoppingBag, User, LogOut } from "lucide-react";
+import { Heart, ShoppingBag, User, LogOut, Package } from "lucide-react";
 import { useCartStore } from "@/lib/store/cart";
 import { useFavoritesStore } from "@/lib/store/favorites";
 import { useAuthStore } from "@/lib/store/auth";
 import { AuthModal } from "@/components/auth/AuthModal";
+import { OrderTrackerModal } from "@/components/checkout/OrderTrackerModal";
 import { useEffect, useState, useRef } from "react";
 import { useTranslations } from "next-intl";
 
@@ -30,6 +31,7 @@ export function Header({ tree, categories, brands, products }: HeaderProps) {
 
   const [mounted, setMounted] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [trackerOpen, setTrackerOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -153,7 +155,17 @@ export function Header({ tree, categories, brands, products }: HeaderProps) {
                   </div>
                 </div>
 
-                <div className="pt-1">
+                <div className="pt-1 border-t border-slate-100 dark:border-slate-800 space-y-1">
+                  <button
+                    onClick={() => {
+                      setUserMenuOpen(false);
+                      setTrackerOpen(true);
+                    }}
+                    className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                  >
+                    <Package className="w-3.5 h-3.5 text-sora-600 dark:text-sora-400" />
+                    <span>Buyurtma holati</span>
+                  </button>
                   <button
                     onClick={() => {
                       setUserMenuOpen(false);
@@ -185,6 +197,12 @@ export function Header({ tree, categories, brands, products }: HeaderProps) {
 
       {/* Auth Modal */}
       <AuthModal />
+
+      {/* Order Tracker Modal */}
+      <OrderTrackerModal
+        isOpen={trackerOpen}
+        onClose={() => setTrackerOpen(false)}
+      />
     </header>
   );
 }

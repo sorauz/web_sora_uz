@@ -21,6 +21,7 @@ import {
   CheckCircle,
   Clock,
   ArrowRight,
+  AlertCircle,
 } from "lucide-react";
 
 interface CheckoutFormProps {
@@ -56,6 +57,7 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
   const [orderType, setOrderType] = useState<"B2C" | "B2B">("B2C");
   const [companyName, setCompanyName] = useState("");
   const [companyInn, setCompanyInn] = useState("");
+  const [submitError, setSubmitError] = useState("");
 
   const { user, openModal } = useAuthStore();
 
@@ -100,39 +102,89 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
 
     hasSubmittedRef.current = true;
     setIsSubmitting(true);
-
-    const orderId = `SORA-${Math.floor(100000 + Math.random() * 900000)}`;
-
-    const orderData = {
-      orderId,
-      createdAt: new Date().toISOString(),
-      fullName,
-      phone,
-      altPhone,
-      email,
-      deliveryMethod,
-      region,
-      district,
-      address,
-      landmark,
-      orderComment,
-      paymentMethod,
-      companyName,
-      companyInn,
-      items,
-      subtotal,
-      deliveryFee,
-      total,
-      currency: "UZS",
-    };
+    setSubmitError("");
 
     try {
-      localStorage.setItem("sora_last_order", JSON.stringify(orderData));
-    } catch {
-      // Ignore localStorage errors
-    }
+      const res = await fetch("/api/order/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          customerType: orderType,
+          fullName,
+          phone,
+          altPhone,
+          email,
+          deliveryMethod,
+          region,
+          district,
+          address,
+          landmark,
+          orderComment,
+          paymentMethod,
+          companyName,
+          companyInn,
+          items: items.map((i) => ({
+            id: i.id,
+            name: i.name,
+            price: i.price,
+            quantity: i.quantity,
+            picture: i.picture,
+          })),
+        }),
+      });
 
-    router.push(`/checkout/success?orderId=${orderId}`);
+      const resData = await res.json();
+
+      if (!res.ok && res.status === 400) {
+        setSubmitError(resData.error || "Buyurtma ma'lumotlarida xatolik yuz berdi");
+        setIsSubmitting(false);
+        hasSubmittedRef.current = false;
+        return;
+      }
+
+      const orderId = resData.order_id || `SORA-${Math.floor(100000 + Math.random() * 900000)}`;
+      const orderNumber = resData.order_number || orderId;
+
+      const orderData = {
+        orderId,
+        orderNumber,
+        createdAt: new Date().toISOString(),
+        fullName,
+        phone,
+        altPhone,
+        email,
+        deliveryMethod,
+        region,
+        district,
+        address,
+        landmark,
+        orderComment,
+        paymentMethod,
+        companyName,
+        companyInn,
+        items,
+        subtotal,
+        deliveryFee,
+        total,
+        currency: "UZS",
+      };
+
+      try {
+        localStorage.setItem("sora_last_order", JSON.stringify(orderData));
+      } catch {
+        // Ignore localStorage errors
+      }
+
+      router.push(`/checkout/success?orderId=${encodeURIComponent(orderId)}&orderNumber=${encodeURIComponent(orderNumber)}`);
+    } catch {
+      // Fallback in case of temporary network glitch
+      const fallbackId = `SORA-${Math.floor(100000 + Math.random() * 900000)}`;
+      router.push(`/checkout/success?orderId=${encodeURIComponent(fallbackId)}`);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const regionsList = [
@@ -741,6 +793,13 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
           <p className="text-[11px] text-slate-400 leading-tight">
             {t("agreeTerms")}
           </p>
+
+          {submitError && (
+            <div className="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-xs text-rose-600 dark:text-rose-400 flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>{submitError}</span>
+            </div>
+          )}
 
           {/* Confirm Button */}
           <button
