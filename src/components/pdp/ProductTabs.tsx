@@ -166,20 +166,97 @@ export function ProductTabs({
             <h3 className="text-xl font-bold text-slate-900 dark:text-white">
               {loc.title || loc.name}
             </h3>
-            <div className="prose dark:prose-invert max-w-none text-slate-700 dark:text-slate-300 leading-relaxed text-sm sm:text-base space-y-4">
-              <p>
-                {loc.product_description || loc.short_description || (
-                  locale === "uz"
-                    ? "Ushbu mahsulot yuqori sifatli xomashyolardan tayyorlangan bo'lib, xalqaro sifat standartlariga to'liq javob beradi. Zamonaviy dizayn va mustahkam konstruksiya uzoq yillik ishonchli xizmatni ta'minlaydi."
-                    : "Данный товар изготовлен из высококачественных материалов и полностью соответствует международным стандартам качества. Надежная конструкция гарантирует долгий срок службы."
-                )}
-              </p>
-              {loc.short_description && loc.product_description && (
-                <p className="text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/40 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
-                  {loc.short_description}
+
+            {loc.product_description ? (
+              // 1. Agar 1C dan to'liq tavsif (product_description) mavjud bo'lsa:
+              // Faqat to'liq tavsif ko'rsatiladi, short_description bu yerda takrorlanmaydi!
+              <div className="prose dark:prose-invert max-w-none text-slate-700 dark:text-slate-300 leading-relaxed text-sm sm:text-base space-y-4">
+                <p className="whitespace-pre-line">{loc.product_description}</p>
+              </div>
+            ) : (
+              // 2. Agar to'liq tavsif kelmasa:
+              // short_description ni pastda takrorlash o'rniga tovar atributlari asosida boyitilgan matn va parametrlar bloki
+              <div className="space-y-5 text-sm sm:text-base text-slate-700 dark:text-slate-300 leading-relaxed">
+                <p>
+                  {locale === "uz" ? (
+                    <>
+                      <strong className="text-slate-900 dark:text-white">{loc.name}</strong>
+                      {product.brand ? ` — ${product.brand} brendining rasmiy sifat standartlariga javob beruvchi ` : " — yuqori sifatli "}
+                      {loc.category ? `${loc.category.toLowerCase()} toifasidagi ` : ""}
+                      ishonchli mahsuloti hisoblanadi. Kundalik ofis ishlari, o‘quv jarayoni va biznes ehtiyojlari uchun qulay hamda uzoq muddat xizmat qilishga mo‘ljallangan.
+                    </>
+                  ) : (
+                    <>
+                      <strong className="text-slate-900 dark:text-white">{loc.name}</strong>
+                      {product.brand ? ` — оригинальная продукция от бренда ${product.brand}` : " — качественный товар"}
+                      {loc.category ? ` в категории «${loc.category}»` : ""},
+                      полностью соответствующий стандартам надежности и долговечности для офиса, учебы и бизнеса.
+                    </>
+                  )}
                 </p>
-              )}
-            </div>
+
+                {/* Tovar asosiy atributlari xulosasi */}
+                <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 space-y-3">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    {locale === "uz" ? "Asosiy parametrlar va ma'lumotlar" : "Основные параметры и данные"}
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs sm:text-sm">
+                    {product.brand && (
+                      <div className="flex items-center justify-between py-1 border-b border-slate-200/60 dark:border-slate-700/60">
+                        <span className="text-slate-500">{locale === "uz" ? "Brend" : "Бренд"}:</span>
+                        <span className="font-semibold text-slate-900 dark:text-white">{product.brand}</span>
+                      </div>
+                    )}
+                    {product.product_sku && (
+                      <div className="flex items-center justify-between py-1 border-b border-slate-200/60 dark:border-slate-700/60">
+                        <span className="text-slate-500">{t("sku")}:</span>
+                        <span className="font-mono font-semibold text-slate-900 dark:text-white">{product.product_sku}</span>
+                      </div>
+                    )}
+                    {product.country && (
+                      <div className="flex items-center justify-between py-1 border-b border-slate-200/60 dark:border-slate-700/60">
+                        <span className="text-slate-500">{locale === "uz" ? "Mamlakat" : "Страна"}:</span>
+                        <span className="font-medium text-slate-900 dark:text-white">{product.country}</span>
+                      </div>
+                    )}
+                    {product.manufacturer && (
+                      <div className="flex items-center justify-between py-1 border-b border-slate-200/60 dark:border-slate-700/60">
+                        <span className="text-slate-500">{locale === "uz" ? "Ishlab chiqaruvchi" : "Производитель"}:</span>
+                        <span className="font-medium text-slate-900 dark:text-white">{product.manufacturer}</span>
+                      </div>
+                    )}
+                    {product.package && (
+                      <div className="flex items-center justify-between py-1 border-b border-slate-200/60 dark:border-slate-700/60">
+                        <span className="text-slate-500">{locale === "uz" ? "Qadoq" : "Упаковка"}:</span>
+                        <span className="font-medium text-slate-900 dark:text-white">{product.package}</span>
+                      </div>
+                    )}
+                    {loc.unit && (
+                      <div className="flex items-center justify-between py-1 border-b border-slate-200/60 dark:border-slate-700/60">
+                        <span className="text-slate-500">{locale === "uz" ? "O'lchov birligi" : "Ед. измерения"}:</span>
+                        <span className="font-medium text-slate-900 dark:text-white">{loc.unit}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* «Xususiyatlar» tabiga o'tish tugmasi */}
+                <div className="pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab("specs")}
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-sora-50 dark:bg-sora-950/60 text-sora-600 dark:text-sora-400 font-semibold text-xs sm:text-sm hover:bg-sora-100 dark:hover:bg-sora-900/60 border border-sora-200 dark:border-sora-800 transition-colors cursor-pointer"
+                  >
+                    <Sliders className="w-4 h-4" />
+                    <span>
+                      {locale === "uz"
+                        ? "Barcha texnik parametrlar bilan tanishish →"
+                        : "Смотреть все технические параметры →"}
+                    </span>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
