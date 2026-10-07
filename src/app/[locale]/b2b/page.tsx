@@ -144,7 +144,7 @@ export default async function B2BPage({ params }: B2BPageProps) {
               ? "Tashkilotingiz uchun tijoriy taklif (KP) olishni istaysizmi? Bizning korporativ menejerlarimizga qo'ng'iroq qiling yoki rekvizitlaringizni yuboring:"
               : "Хотите получить коммерческое предложение для вашей компании? Свяжитесь с нашими специалистами:"}
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 pt-2">
+          <div className="flex flex-col sm:flex-row gap-3 pt-2">
             <a
               href="tel:+998903264757"
               className="px-6 py-3 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs sm:text-sm shadow-xs transition-all flex items-center justify-center gap-2"
@@ -158,6 +158,14 @@ export default async function B2BPage({ params }: B2BPageProps) {
             >
               <Mail className="w-4 h-4" />
               <span>b2b@sora.uz</span>
+            </a>
+            <a
+              href="https://t.me/sora_uz"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-6 py-3 rounded-2xl bg-sky-50 dark:bg-sky-950/60 hover:bg-sky-100 dark:hover:bg-sky-900 border border-sky-200 dark:border-sky-800 text-sky-700 dark:text-sky-300 font-semibold text-xs sm:text-sm transition-all flex items-center justify-center gap-2"
+            >
+              <span>Telegram: @sora_uz</span>
             </a>
           </div>
         </div>

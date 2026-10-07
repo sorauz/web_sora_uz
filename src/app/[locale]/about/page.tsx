@@ -121,11 +121,23 @@ export default async function AboutPage({ params }: AboutPageProps) {
             <ul className="space-y-2 text-xs sm:text-sm text-slate-600 dark:text-slate-300 pt-2">
               <li className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                <span>{isUz ? "Rasmiy xalqaro brendlar (Deli, Linc, Comix)" : "Официальные бренды (Deli, Linc, Comix)"}</span>
+                <span>
+                  {isUz
+                    ? "Deli rasmiy hamkori hamda yetakchi brendlar (Svetocopy, Linc, Maped, Berlingo, Schneider, COLOP, TRODAT)"
+                    : "Официальный партнер Deli и ведущих брендов (Svetocopy, Linc, Maped, Berlingo, Schneider, COLOP, TRODAT)"}
+                </span>
               </li>
               <li className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                <span>{isUz ? "Yuridik shaxslar uchun elektron hisob-faktura" : "Электронные счет-фактуры для юрлиц (ЭСФ)"}</span>
+                <span>
+                  {isUz
+                    ? "2018-yildan buyon bozorda ishonchli faoliyat va 10 000+ mahsulot"
+                    : "С 2018 года на рынке и более 10 000 наименований товаров"}
+                </span>
+              </li>
+              <li className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                <span>{isUz ? "Yuridik shaxslar uchun elektron hisob-faktura (ESF)" : "Электронные счет-фактуры для юрлиц (ЭСФ)"}</span>
               </li>
               <li className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
@@ -146,8 +158,8 @@ export default async function AboutPage({ params }: AboutPageProps) {
             <div className="p-4 rounded-2xl bg-purple-50 dark:bg-purple-950/60 border border-purple-200 dark:border-purple-900/60">
               <p className="text-xs font-semibold text-purple-900 dark:text-purple-200">
                 {isUz
-                  ? "B2B buyurtmalar uchun: +998 (90) 326-47-57 yoki info@sora.uz"
-                  : "Отдел корпоративных продаж: +998 (90) 326-47-57 или info@sora.uz"}
+                  ? "B2B buyurtmalar va tijorat taklifi: +998 (90) 326-47-57 | b2b@sora.uz | @sora_uz"
+                  : "Корпоративный отдел и КП: +998 (90) 326-47-57 | b2b@sora.uz | @sora_uz"}
               </p>
             </div>
           </div>

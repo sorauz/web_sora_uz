@@ -69,7 +69,7 @@ export default async function ContactPage({ params }: ContactPageProps) {
     priceRange: "$$",
     address: {
       "@type": "PostalAddress",
-      streetAddress: "Dilsaroy ko'chasi, 1 uy",
+      streetAddress: "Olmazor tumani, Dilsaroy ko'chasi, 1 uy",
       addressLocality: "Toshkent",
       addressRegion: "Toshkent shahri",
       postalCode: "100000",
@@ -89,8 +89,9 @@ export default async function ContactPage({ params }: ContactPageProps) {
       },
     ],
     sameAs: [
+      "https://t.me/sorauz",
       "https://t.me/sora_uz",
-      "https://instagram.com/sora_uz",
+      "https://www.instagram.com/sorauz/",
     ],
   };
 
@@ -148,8 +149,8 @@ export default async function ContactPage({ params }: ContactPageProps) {
               <Mail className="w-5 h-5" />
             </div>
             <p className="text-xs text-slate-400 font-semibold">{isUz ? "Elektron pochta" : "Email"}</p>
-            <p className="text-sm font-bold text-slate-900 dark:text-white">info@sora.uz</p>
-            <p className="text-[11px] text-slate-500">support@sora.uz</p>
+            <a href="mailto:info@sora.uz" className="block text-sm font-bold text-slate-900 dark:text-white hover:text-sora-600">info@sora.uz</a>
+            <a href="mailto:b2b@sora.uz" className="block text-[11px] text-slate-500 hover:text-sora-600">b2b@sora.uz ({isUz ? "B2B Bo'lim" : "Корпоративный"})</a>
           </div>
 
           <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-2">
@@ -158,7 +159,7 @@ export default async function ContactPage({ params }: ContactPageProps) {
             </div>
             <p className="text-xs text-slate-400 font-semibold">{isUz ? "Ish vaqti" : "График работы"}</p>
             <p className="text-sm font-bold text-slate-900 dark:text-white">09:00 — 19:00</p>
-            <p className="text-[11px] text-slate-500">{isUz ? "Dushanba – Shanba" : "Понедельник – Суббота"}</p>
+            <p className="text-[11px] text-slate-500">{isUz ? "Dushanba – Shanba (Yak: dam)" : "Понедельник – Суббота (Вс: вых)"}</p>
           </div>
 
           <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-2">
@@ -167,7 +168,7 @@ export default async function ContactPage({ params }: ContactPageProps) {
             </div>
             <p className="text-xs text-slate-400 font-semibold">{isUz ? "Manzil" : "Адрес"}</p>
             <p className="text-sm font-bold text-slate-900 dark:text-white leading-tight">
-              {isUz ? "Dilsaroy ko'chasi, 1 uy" : "ул. Дилсарой, дом 1"}
+              {isUz ? "Olmazor tumani, Dilsaroy ko'chasi, 1-uy" : "Алмазарский р-н, ул. Дилсарой, д. 1"}
             </p>
             <p className="text-[11px] text-slate-500">{isUz ? "Toshkent shahri" : "г. Ташкент"}</p>
           </div>
@@ -182,7 +183,7 @@ export default async function ContactPage({ params }: ContactPageProps) {
             </h2>
             <div className="space-y-3">
               <a
-                href="https://t.me/sora_uz"
+                href="https://t.me/sorauz"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-between p-3.5 rounded-2xl bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-900/60 hover:bg-blue-100 dark:hover:bg-blue-900/80 transition-colors"
@@ -192,8 +193,8 @@ export default async function ContactPage({ params }: ContactPageProps) {
                     <Send className="w-5 h-5" />
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-slate-900 dark:text-white">Telegram Kanal va Bot</p>
-                    <p className="text-xs text-slate-500">@sora_uz</p>
+                    <p className="text-sm font-bold text-slate-900 dark:text-white">Telegram Rasmiy Kanal</p>
+                    <p className="text-xs text-slate-500">@sorauz</p>
                   </div>
                 </div>
                 <span className="text-xs font-semibold text-blue-600 dark:text-blue-400">
@@ -202,7 +203,27 @@ export default async function ContactPage({ params }: ContactPageProps) {
               </a>
 
               <a
-                href="https://instagram.com/sora_uz"
+                href="https://t.me/sora_uz"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-between p-3.5 rounded-2xl bg-sky-50 dark:bg-sky-950/60 border border-sky-200 dark:border-sky-900/60 hover:bg-sky-100 dark:hover:bg-sky-900/80 transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-sky-500 text-white flex items-center justify-center">
+                    <Send className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-slate-900 dark:text-white">Telegram Menejer</p>
+                    <p className="text-xs text-slate-500">@sora_uz</p>
+                  </div>
+                </div>
+                <span className="text-xs font-semibold text-sky-600 dark:text-sky-400">
+                  {isUz ? "Bog'lanish" : "Написать"} →
+                </span>
+              </a>
+
+              <a
+                href="https://www.instagram.com/sorauz/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-between p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-900/60 hover:bg-rose-100 dark:hover:bg-rose-900/80 transition-colors"
@@ -215,7 +236,7 @@ export default async function ContactPage({ params }: ContactPageProps) {
                   </div>
                   <div>
                     <p className="text-sm font-bold text-slate-900 dark:text-white">Instagram Sahifamiz</p>
-                    <p className="text-xs text-slate-500">@sora_uz</p>
+                    <p className="text-xs text-slate-500">@sorauz</p>
                   </div>
                 </div>
                 <span className="text-xs font-semibold text-rose-600 dark:text-rose-400">
@@ -235,19 +256,19 @@ export default async function ContactPage({ params }: ContactPageProps) {
             </div>
             <div className="space-y-2 text-xs sm:text-sm text-slate-600 dark:text-slate-300">
               <p>
-                <strong className="text-slate-900 dark:text-white">Tashkilot:</strong> &quot;Sora Digital Group&quot; MCHJ
+                <strong className="text-slate-900 dark:text-white">{isUz ? "Tashkilot:" : "Организация:"}</strong> &quot;SORAUZ&quot; MCHJ
               </p>
               <p>
-                <strong className="text-slate-900 dark:text-white">STIR (INN):</strong> 309876543
+                <strong className="text-slate-900 dark:text-white">STIR (INN):</strong> 306286447
               </p>
               <p>
-                <strong className="text-slate-900 dark:text-white">Hisob-raqam:</strong> 20208000900123456001
+                <strong className="text-slate-900 dark:text-white">{isUz ? "Hisob-raqam:" : "Расчетный счет:"}</strong> 20208000905524274001
               </p>
               <p>
-                <strong className="text-slate-900 dark:text-white">Bank:</strong> AT &quot;Aloqabank&quot; Toshkent BHM
+                <strong className="text-slate-900 dark:text-white">{isUz ? "Bank:" : "Банк:"}</strong> AIKB &quot;IPAK YO&apos;LI BANK&quot; Sag&apos;bon filiali, Toshkent shahar
               </p>
               <p>
-                <strong className="text-slate-900 dark:text-white">MFO:</strong> 00401
+                <strong className="text-slate-900 dark:text-white">MFO:</strong> 01036
               </p>
               <p className="pt-2 text-[11px] text-slate-400">
                 {isUz

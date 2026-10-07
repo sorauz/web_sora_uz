@@ -145,6 +145,23 @@ export default async function PaymentPage({ params }: PaymentPageProps) {
             </p>
           </div>
         </div>
+
+        {/* Notice: No Credit / Nasiya */}
+        <div className="p-4 sm:p-5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 flex items-start gap-3">
+          <div className="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-900/60 text-amber-700 dark:text-amber-400 flex items-center justify-center shrink-0 mt-0.5">
+            <ShieldCheck className="w-4 h-4" />
+          </div>
+          <div className="space-y-1">
+            <h4 className="text-sm font-bold text-amber-900 dark:text-amber-200">
+              {isUz ? "Muhim eslatma: Kredit va muddatli to'lov (nasiya)" : "Важное примечание: Кредит и рассрочка"}
+            </h4>
+            <p className="text-xs text-amber-800 dark:text-amber-300/90 leading-relaxed">
+              {isUz
+                ? "Sora.uz do'konida kredit va muddatli to'lov (nasiya savdo) xizmatlari mavjud emas. Barcha hisob-kitoblar to'liq to'lov asosida amalga oshiriladi."
+                : "В интернет-магазине Sora.uz кредиты и покупки в рассрочку не предоставляются. Все расчеты производятся по 100% оплате выбранным способом."}
+            </p>
+          </div>
+        </div>
       </main>
 
       <Footer />
