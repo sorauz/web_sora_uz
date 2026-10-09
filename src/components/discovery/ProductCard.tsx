@@ -5,9 +5,10 @@ import { calculateProductPrice } from "@/lib/utils/price";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import Image from "next/image";
-import { Heart, ShoppingCart, Check, Star } from "lucide-react";
+import { Heart, ShoppingCart, Check, Star, Scale } from "lucide-react";
 import { useCartStore } from "@/lib/store/cart";
 import { useFavoritesStore } from "@/lib/store/favorites";
+import { useCompareStore } from "@/lib/store/compare";
 import { useState } from "react";
 
 interface ProductCardProps {
@@ -30,6 +31,7 @@ export function ProductCard({
 
   const { addItem, hasItem } = useCartStore();
   const { toggleFavorite, isFavorite } = useFavoritesStore();
+  const { toggleCompare, isInCompare } = useCompareStore();
 
   const [addedAnim, setAddedAnim] = useState(false);
   const initialImage =
@@ -41,6 +43,7 @@ export function ProductCard({
   const loc = getProductLocalized(product, locale);
   const inCart = hasItem(product.id);
   const isFav = isFavorite(product.id);
+  const inCompare = isInCompare(product.id);
 
   const priceInfo = calculateProductPrice(product.price);
   const price = priceInfo.price;
@@ -69,6 +72,12 @@ export function ProductCard({
     e.preventDefault();
     e.stopPropagation();
     toggleFavorite(product.id);
+  };
+
+  const handleCompare = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleCompare(product.id);
   };
 
   const productUrl = `/products/${loc.slug}`;
@@ -107,6 +116,20 @@ export function ProductCard({
           }`}
         >
           <Heart className={`w-4 h-4 ${isFav ? "fill-current" : ""}`} />
+        </button>
+
+        {/* Compare Button */}
+        <button
+          onClick={handleCompare}
+          aria-label={t("compare")}
+          className={`absolute top-11.5 right-2.5 z-10 w-8 h-8 rounded-full flex items-center justify-center transition-colors shadow-xs ${
+            inCompare
+              ? "bg-sora-50 text-sora-600 dark:bg-sora-950/60 dark:text-sora-400"
+              : "bg-white/80 dark:bg-slate-900/80 text-slate-400 hover:text-sora-600 dark:hover:text-sora-400"
+          }`}
+          title={t("compare")}
+        >
+          <Scale className="w-4 h-4" />
         </button>
 
         {/* Image with crawlable Link */}

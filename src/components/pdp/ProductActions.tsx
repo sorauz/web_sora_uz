@@ -14,8 +14,12 @@ import {
   Phone,
   User,
   CheckCircle2,
+  Heart,
+  Scale,
 } from "lucide-react";
 import { useCartStore } from "@/lib/store/cart";
+import { useFavoritesStore } from "@/lib/store/favorites";
+import { useCompareStore } from "@/lib/store/compare";
 import { Product, getProductLocalized } from "@/lib/schemas/product";
 import { calculateProductPrice } from "@/lib/utils/price";
 
@@ -45,6 +49,11 @@ export function ProductActions({ product, locale }: ProductActionsProps) {
   const [customerPhone, setCustomerPhone] = useState("+998 ");
 
   const addItem = useCartStore((state) => state.addItem);
+  const { toggleFavorite, isFavorite } = useFavoritesStore();
+  const { toggleCompare, isInCompare } = useCompareStore();
+
+  const isFav = isFavorite(product.id);
+  const inCompare = isInCompare(product.id);
 
   const handleAddToCart = () => {
     if (!canAddToCart) return;
@@ -189,6 +198,36 @@ export function ProductActions({ product, locale }: ProductActionsProps) {
           <Zap className="w-5 h-5 fill-current" />
           <span>{t("buyNow")}</span>
         </button>
+
+        {/* Wishlist & Compare Quick Actions */}
+        <div className="grid grid-cols-2 gap-2.5 pt-1">
+          <button
+            type="button"
+            onClick={() => toggleFavorite(product.id)}
+            className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border text-xs font-semibold transition-colors cursor-pointer ${
+              isFav
+                ? "bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-900 text-rose-600 dark:text-rose-400"
+                : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
+            }`}
+          >
+            <Heart className={`w-4 h-4 ${isFav ? "fill-current text-rose-500" : ""}`} />
+            <span>{common("favorites")}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => toggleCompare(product.id)}
+            aria-label="Taqqoslashga qo'shish"
+            className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border text-xs font-semibold transition-colors cursor-pointer ${
+              inCompare
+                ? "bg-sora-50 dark:bg-sora-950/40 border-sora-200 dark:border-sora-900 text-sora-600 dark:text-sora-400"
+                : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
+            }`}
+          >
+            <Scale className="w-4 h-4" />
+            <span>{common("compare")}</span>
+          </button>
+        </div>
       </div>
 
       {/* Trust Badges / Guarantees Grid */}

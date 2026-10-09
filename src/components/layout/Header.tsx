@@ -7,9 +7,10 @@ import { Link } from "@/i18n/routing";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { MegaMenu } from "@/components/discovery/MegaMenu";
 import { SearchAutocomplete } from "@/components/discovery/SearchAutocomplete";
-import { Heart, ShoppingBag, User, LogOut, Package } from "lucide-react";
+import { Heart, ShoppingBag, User, LogOut, Package, Scale } from "lucide-react";
 import { useCartStore } from "@/lib/store/cart";
 import { useFavoritesStore } from "@/lib/store/favorites";
+import { useCompareStore } from "@/lib/store/compare";
 import { useAuthStore } from "@/lib/store/auth";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { OrderTrackerModal } from "@/components/checkout/OrderTrackerModal";
@@ -27,6 +28,7 @@ export function Header({ tree, categories, brands, products }: HeaderProps) {
   const t = useTranslations("common");
   const { getTotalItems } = useCartStore();
   const { getCount } = useFavoritesStore();
+  const { getCount: getCompareCount } = useCompareStore();
   const { user, openModal, logout, checkAuth } = useAuthStore();
 
   const [mounted, setMounted] = useState(false);
@@ -52,6 +54,7 @@ export function Header({ tree, categories, brands, products }: HeaderProps) {
 
   const cartCount = mounted ? getTotalItems() : 0;
   const favCount = mounted ? getCount() : 0;
+  const compareCount = mounted ? getCompareCount() : 0;
 
   return (
     <header className="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
@@ -80,8 +83,22 @@ export function Header({ tree, categories, brands, products }: HeaderProps) {
           />
         </div>
 
-        {/* Actions (Favorites, Cart, User, Language) */}
+        {/* Actions (Favorites, Compare, Cart, User, Language) */}
         <div className="flex items-center gap-2 sm:gap-3">
+          {/* Compare */}
+          <Link
+            href="/compare"
+            aria-label={t("compare")}
+            className="relative p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors"
+          >
+            <Scale className="w-5 h-5" />
+            {compareCount > 0 && (
+              <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-sora-600 text-white text-[10px] font-bold flex items-center justify-center">
+                {compareCount}
+              </span>
+            )}
+          </Link>
+
           {/* Favorites */}
           <Link
             href="/favorites"
