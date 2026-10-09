@@ -49,7 +49,7 @@
   - URL sinxronizatsiyasi: `nuqs` yoki Next.js `useSearchParams` orqali filtrlar bilan birga saqlanadi.
   - SEO uchun `rel="next"` va `rel="prev"` teglari metadata qismiga kiritiladi.
 
-### 2.2. Mahsulotlarni O'zaro Taqqoslash (Product Comparison) Tizimi
+### 2.2. Mahsulotlarni O'zaro Taqqoslash (Product Comparison) Tizimi — [BAJARILDI ✅]
 - **Hozirgi holat:** PDP da o'xshash tovarlar ro'yxati bor, lekin ularni yonma-yon solishtirib bo'lmaydi.
 - **Mavjud ma'lumot:** 1C dan keluvchi barcha texnik xususiyatlar (paket, brend, o'lcham, model, narx, ishlab chiqarilgan mamlakat) tayyor.
 - **Amalga oshiriladigan ish:**
@@ -95,6 +95,6 @@
 | 4 | **FAQPage JSON-LD Schemasi** | SEO | O'rta | Qidiruvda ochiluvchi FAQ rich snippets |
 | 5 | **IndexNow protokoli integratsiyasi** | SEO | O'rta | Yandex va Bing'da o'zgarishlarni bir soniyada indekslash |
 | 6 | **Katalog sahifalash (Pagination ?page=2)** | UX / Tech | O'rta | Katta tovarlar ro'yxatida tezlik va qulaylik |
-| 7 | **Mahsulotlarni Taqqoslash (Comparison Page)** | UX / E-com | O'rta | Konversiya oshishi, xaridorga to'g'ri tanlov berish |
+| 7 | **Mahsulotlarni Taqqoslash (Comparison Page)** | UX / E-com | O'rta | Bajarildi ✅ (Konversiya oshishi, xaridorga to'g'ri tanlov berish) |
 | 8 | **1-klikda to'plam xarid qilish (Bundle Cross-sell)** | E-com | O'rta | O'rtacha chek miqdorini (AOV) oshirish |
 | 9 | **Blog va Qo'llanmalar (Content Hub)** | Kontent | Murakkab | Organik qidiruv trafigi va topical authority |
