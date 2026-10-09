@@ -15,6 +15,7 @@ import {
   PackageX,
   CheckCircle2,
   XCircle,
+  Loader2,
 } from "lucide-react";
 import { Product, getProductLocalized } from "@/lib/schemas/product";
 import { useCompareStore } from "@/lib/store/compare";
@@ -26,6 +27,40 @@ interface CompareViewProps {
   locale: "uz" | "ru";
 }
 
+// Base parameters that are already shown in "Asosiy ma'lumotlar" section
+// Avoid showing duplicate rows in dynamic "Texnik parametrlar" section
+const BASE_PROPERTY_NAMES = new Set([
+  "brend",
+  "бренд",
+  "brand",
+  "ishlab chiqarilgan mamlakat",
+  "страна производства",
+  "страна",
+  "mamlakat",
+  "ishlab chiqaruvchi",
+  "производитель",
+  "artikul",
+  "артикул",
+  "sku",
+  "shtrix-kod",
+  "штрих-код",
+  "штрихкод",
+  "barcode",
+  "qadoq",
+  "упаковка",
+  "o'lchov birligi",
+  "oʻlchov birligi",
+  "единица измерения",
+]);
+
+interface AttributeDef {
+  key: string;
+  uz: string;
+  ru: string;
+}
+
+const normalizeProp = (str: string) => (str || "").trim().toLowerCase();
+
 export function CompareView({ products, locale }: CompareViewProps) {
   const t = useTranslations("compare");
   const common = useTranslations("common");
@@ -35,10 +70,56 @@ export function CompareView({ products, locale }: CompareViewProps) {
   const [onlyDifferences, setOnlyDifferences] = useState(false);
   const [addedIds, setAddedIds] = useState<Record<string, boolean>>({});
   const [mounted, setMounted] = useState(false);
+  const [detailedProductsMap, setDetailedProductsMap] = useState<Record<string, Product>>({});
+  const [isLoadingDetails, setIsLoadingDetails] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Fetch full 1C product details (including all technical 1C attributes) for compared items
+  useEffect(() => {
+    if (!mounted || compareIds.length === 0) return;
+
+    const missingIds = compareIds.filter((id) => {
+      const current = detailedProductsMap[id] || products.find((p) => p.id === id);
+      return !current || !current.attributes || current.attributes.length === 0;
+    });
+
+    if (missingIds.length === 0) return;
+
+    let isSubscribed = true;
+    setIsLoadingDetails(true);
+
+    fetch(`/api/products/compare?ids=${encodeURIComponent(missingIds.join(","))}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (!isSubscribed) return;
+        if (data.products && Array.isArray(data.products)) {
+          setDetailedProductsMap((prev) => {
+            const next = { ...prev };
+            data.products.forEach((p: Product) => {
+              if (p && p.id) {
+                next[p.id] = p;
+              }
+            });
+            return next;
+          });
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to load detailed compare products", err);
+      })
+      .finally(() => {
+        if (isSubscribed) {
+          setIsLoadingDetails(false);
+        }
+      });
+
+    return () => {
+      isSubscribed = false;
+    };
+  }, [mounted, compareIds, products, detailedProductsMap]);
 
   if (!mounted) {
     return (
@@ -48,8 +129,10 @@ export function CompareView({ products, locale }: CompareViewProps) {
     );
   }
 
-  // Filter products that user added to comparison
-  const selectedProducts = products.filter((p) => compareIds.includes(p.id));
+  // Selected products with 1C details merged in
+  const selectedProducts = compareIds
+    .map((id) => detailedProductsMap[id] || products.find((p) => p.id === id))
+    .filter((p): p is Product => Boolean(p));
 
   const handleAddToCart = (product: Product) => {
     const loc = getProductLocalized(product, locale);
@@ -101,23 +184,61 @@ export function CompareView({ products, locale }: CompareViewProps) {
   }
 
   // Collect all unique technical attributes across selected products
-  const attributeNamesMap = new Map<string, { uz: string; ru: string }>();
+  const attributeDefs: AttributeDef[] = [];
+
   selectedProducts.forEach((p) => {
     (p.attributes || []).forEach((attr) => {
-      const key = (attr.property_uz || attr.property_ru || "").trim().toLowerCase();
-      if (key && !attributeNamesMap.has(key)) {
-        attributeNamesMap.set(key, {
-          uz: attr.property_uz || attr.property_ru,
-          ru: attr.property_ru || attr.property_uz,
+      const uz = (attr.property_uz || "").trim();
+      const ru = (attr.property_ru || "").trim();
+      const normUz = normalizeProp(uz);
+      const normRu = normalizeProp(ru);
+
+      // Skip attributes that already exist in base rows
+      if (BASE_PROPERTY_NAMES.has(normUz) || BASE_PROPERTY_NAMES.has(normRu)) {
+        return;
+      }
+
+      // Check if already registered
+      const existing = attributeDefs.find((def) => {
+        const defNormUz = normalizeProp(def.uz);
+        const defNormRu = normalizeProp(def.ru);
+        return (
+          (normRu && defNormRu && normRu === defNormRu) ||
+          (normUz && defNormUz && normUz === defNormUz)
+        );
+      });
+
+      if (!existing && (uz || ru)) {
+        attributeDefs.push({
+          key: normRu || normUz,
+          uz: uz || ru,
+          ru: ru || uz,
         });
+      } else if (existing) {
+        if (!existing.uz && uz) existing.uz = uz;
+        if (!existing.ru && ru) existing.ru = ru;
       }
     });
   });
 
-  const allAttributes = Array.from(attributeNamesMap.entries()).map(([key, names]) => ({
-    key,
-    label: locale === "uz" ? names.uz : names.ru,
-  }));
+  // Helper to extract a product's value for a given attribute definition
+  const getProductAttributeValue = (p: Product, def: AttributeDef) => {
+    const normUz = normalizeProp(def.uz);
+    const normRu = normalizeProp(def.ru);
+
+    const found = (p.attributes || []).find((a) => {
+      const aUz = normalizeProp(a.property_uz || "");
+      const aRu = normalizeProp(a.property_ru || "");
+      return (
+        (normRu && aRu && aRu === normRu) ||
+        (normUz && aUz && aUz === normUz)
+      );
+    });
+
+    if (!found) return "—";
+    const val = locale === "uz" ? found.value_uz || found.value_ru : found.value_ru || found.value_uz;
+    return val?.trim() || "—";
+  };
 
   // Helper: check if values differ across products
   const isValuesDifferent = (values: unknown[]) => {
@@ -205,21 +326,19 @@ export function CompareView({ products, locale }: CompareViewProps) {
     ? baseRows.filter((row) => isValuesDifferent(row.rawValues))
     : baseRows;
 
-  const visibleAttributeRows = allAttributes
-    .map((attr) => {
-      const rawValues = selectedProducts.map((p) => {
-        const found = (p.attributes || []).find(
-          (a) => (a.property_uz || a.property_ru || "").trim().toLowerCase() === attr.key
-        );
-        return found ? (locale === "uz" ? found.value_uz : found.value_ru) : "—";
-      });
+  const visibleAttributeRows = attributeDefs
+    .map((def) => {
+      const label = locale === "uz" ? def.uz : def.ru;
+      const rawValues = selectedProducts.map((p) => getProductAttributeValue(p, def));
       return {
-        ...attr,
+        key: def.key,
+        label,
+        def,
         rawValues,
         isDifferent: isValuesDifferent(rawValues),
       };
     })
-    .filter((attr) => !onlyDifferences || attr.isDifferent);
+    .filter((row) => !onlyDifferences || row.isDifferent);
 
   return (
     <div className="space-y-6">
@@ -319,17 +438,17 @@ export function CompareView({ products, locale }: CompareViewProps) {
                           </span>
                           <Link
                             href={`/products/${loc.slug}`}
-                            className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white line-clamp-2 hover:text-sora-600 dark:hover:text-sora-400 transition-colors mt-0.5 leading-snug"
+                            className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white line-clamp-2 hover:text-sora-600 dark:hover:text-sora-400 transition-colors"
                           >
                             {loc.name}
                           </Link>
                         </div>
 
                         {/* Price */}
-                        <div className="space-y-0.5">
+                        <div>
                           {priceInfo.price > 0 ? (
-                            <div className="flex items-baseline gap-2">
-                              <span className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
+                            <div className="flex items-baseline gap-1.5 flex-wrap">
+                              <span className="font-extrabold text-base sm:text-lg text-slate-900 dark:text-white">
                                 {priceInfo.price.toLocaleString("ru-RU")} {common("currency")}
                               </span>
                               {priceInfo.oldPrice && priceInfo.oldPrice > priceInfo.price && (
@@ -340,7 +459,7 @@ export function CompareView({ products, locale }: CompareViewProps) {
                             </div>
                           ) : (
                             <span className="text-xs font-semibold text-slate-500">
-                              {locale === "uz" ? "Narxi so'rov bo'yicha" : "По запросу"}
+                              {locale === "uz" ? "Narxi kelishiladi" : "Цена по запросу"}
                             </span>
                           )}
                         </div>
@@ -348,22 +467,27 @@ export function CompareView({ products, locale }: CompareViewProps) {
                         {/* Add to Cart Button */}
                         <button
                           type="button"
-                          disabled={isOutOfStock || priceInfo.price <= 0}
                           onClick={() => handleAddToCart(product)}
-                          className={`w-full flex items-center justify-center gap-2 h-10 px-3 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
+                          disabled={isOutOfStock || priceInfo.price <= 0}
+                          className={`w-full py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-xs disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer ${
                             isAdded
                               ? "bg-emerald-600 text-white"
-                              : "bg-sora-600 hover:bg-sora-700 text-white active:scale-95"
+                              : "bg-sora-600 hover:bg-sora-700 active:scale-[0.98] text-white"
                           }`}
                         >
                           {isAdded ? (
                             <>
-                              <Check className="w-4 h-4" />
-                              <span>{locale === "uz" ? "Savatga qo'shildi" : "В корзине"}</span>
+                              <Check className="w-3.5 h-3.5" />
+                              <span>{t("addToCart")}</span>
+                            </>
+                          ) : isOutOfStock ? (
+                            <>
+                              <PackageX className="w-3.5 h-3.5" />
+                              <span>{common("outOfStock")}</span>
                             </>
                           ) : (
                             <>
-                              <ShoppingCart className="w-4 h-4" />
+                              <ShoppingCart className="w-3.5 h-3.5" />
                               <span>{t("addToCart")}</span>
                             </>
                           )}
@@ -375,8 +499,8 @@ export function CompareView({ products, locale }: CompareViewProps) {
               </tr>
             </thead>
 
-            {/* Parameter Rows Body */}
-            <tbody className="divide-y divide-slate-200 dark:divide-slate-800 text-xs sm:text-sm">
+            {/* Matrix Comparison Rows */}
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs sm:text-sm">
               {/* Section Header: Base Parameters */}
               {visibleBaseRows.length > 0 && (
                 <tr className="bg-slate-100/70 dark:bg-slate-800/60 font-bold text-xs uppercase tracking-wider text-slate-600 dark:text-slate-300">
@@ -412,7 +536,12 @@ export function CompareView({ products, locale }: CompareViewProps) {
                     colSpan={selectedProducts.length + 1}
                     className="p-3.5 px-4 sm:px-6 text-purple-700 dark:text-purple-300"
                   >
-                    {t("specsParams")}
+                    <div className="flex items-center gap-2">
+                      <span>{t("specsParams")}</span>
+                      {isLoadingDetails && (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin text-purple-600" />
+                      )}
+                    </div>
                   </td>
                 </tr>
               )}
@@ -433,14 +562,7 @@ export function CompareView({ products, locale }: CompareViewProps) {
                     </div>
                   </td>
                   {selectedProducts.map((p) => {
-                    const found = (p.attributes || []).find(
-                      (a) => (a.property_uz || a.property_ru || "").trim().toLowerCase() === attr.key
-                    );
-                    const val = found
-                      ? locale === "uz"
-                        ? found.value_uz
-                        : found.value_ru
-                      : "—";
+                    const val = getProductAttributeValue(p, attr.def);
                     return (
                       <td
                         key={p.id}

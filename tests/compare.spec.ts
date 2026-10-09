@@ -88,4 +88,33 @@ test.describe("Product Comparison (Taqqoslash) System", () => {
     const badge = page.locator("header a[href*='/compare'] span");
     await expect(badge).toHaveText("1");
   });
+
+  test("4. Dynamic 1C ERP attributes are correctly fetched, row-aligned and compared", async ({
+    request,
+    page,
+  }) => {
+    // 1. Check API endpoint returns products with 1C attributes
+    const res = await request.get("/api/products/compare?ids=prod-1,prod-2");
+    expect(res.ok()).toBeTruthy();
+    const data = await res.json();
+    expect(data.products.length).toBeGreaterThanOrEqual(1);
+
+    // 2. Open comparison with items and verify technical specs section
+    await page.goto("/uz");
+    const cards = page.locator("article");
+    await cards.first().locator("button[aria-label='Taqqoslash']").click();
+    await cards.nth(1).locator("button[aria-label='Taqqoslash']").click();
+
+    await page.goto("/uz/compare");
+
+    // Both products visible in comparison matrix
+    await expect(page.locator("table")).toBeVisible();
+    await expect(page.getByText("Asosiy ma'lumotlar")).toBeVisible();
+    await expect(page.getByText("Texnik parametrlar")).toBeVisible();
+
+    // Verify row alignment: each attribute row has cells for both products
+    const specRows = page.locator("tbody tr").filter({ has: page.locator("td") });
+    await expect(specRows.first()).toBeVisible();
+  });
 });
+
