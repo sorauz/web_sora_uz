@@ -106,36 +106,36 @@ export function Footer() {
             <h4 className="text-sm font-bold text-white uppercase tracking-wider">
               {isUz ? "Katalog" : "Каталог"}
             </h4>
-            <ul className="space-y-2 text-slate-400">
+            <ul className="space-y-1 text-slate-300">
               <li>
-                <Link href="/catalog" className="hover:text-white transition-colors">
+                <Link href="/catalog" className="inline-block py-1 hover:text-white transition-colors">
                   {isUz ? "Barcha toifalar" : "Все категории"}
                 </Link>
               </li>
               <li>
-                <Link href="/catalog/promotions" className="hover:text-white transition-colors flex items-center gap-1.5">
+                <Link href="/catalog/promotions" className="inline-flex items-center gap-1.5 py-1 hover:text-white transition-colors">
                   <span className="w-1.5 h-1.5 rounded-full bg-red-400"></span>
                   {isUz ? "Aksiya va chegirmalar" : "Акции и скидки"}
                 </Link>
               </li>
               <li>
-                <Link href="/catalog/low_price_guarantee" className="hover:text-white transition-colors flex items-center gap-1.5">
+                <Link href="/catalog/low_price_guarantee" className="inline-flex items-center gap-1.5 py-1 hover:text-white transition-colors">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
                   {isUz ? "Eng arzon narx kafolati" : "Гарантия низкой цены"}
                 </Link>
               </li>
               <li>
-                <Link href="/catalog/new_products" className="hover:text-white transition-colors">
+                <Link href="/catalog/new_products" className="inline-block py-1 hover:text-white transition-colors">
                   {isUz ? "Yangi tovarlar" : "Новые товары"}
                 </Link>
               </li>
               <li>
-                <Link href="/catalog/popular" className="hover:text-white transition-colors">
+                <Link href="/catalog/popular" className="inline-block py-1 hover:text-white transition-colors">
                   {isUz ? "Top mahsulotlar" : "Популярные товары"}
                 </Link>
               </li>
               <li>
-                <Link href="/brands" className="hover:text-white transition-colors">
+                <Link href="/brands" className="inline-block py-1 hover:text-white transition-colors">
                   {isUz ? "Rasmiy brendlar" : "Официальные бренды"}
                 </Link>
               </li>
@@ -147,34 +147,34 @@ export function Footer() {
             <h4 className="text-sm font-bold text-white uppercase tracking-wider">
               {isUz ? "Kompaniya va Xizmatlar" : "Компания и Сервис"}
             </h4>
-            <ul className="space-y-2 text-slate-400">
+            <ul className="space-y-1 text-slate-300">
               <li>
-                <Link href="/about" className="hover:text-white transition-colors">
+                <Link href="/about" className="inline-block py-1 hover:text-white transition-colors">
                   {isUz ? "Biz haqimizda" : "О компании"}
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="hover:text-white transition-colors">
+                <Link href="/contact" className="inline-block py-1 hover:text-white transition-colors">
                   {isUz ? "Aloqa va manzil" : "Контакты и адрес"}
                 </Link>
               </li>
               <li>
-                <Link href="/delivery" className="hover:text-white transition-colors">
+                <Link href="/delivery" className="inline-block py-1 hover:text-white transition-colors">
                   {isUz ? "Yetkazib berish shartlari" : "Условия доставки"}
                 </Link>
               </li>
               <li>
-                <Link href="/payment" className="hover:text-white transition-colors">
+                <Link href="/payment" className="inline-block py-1 hover:text-white transition-colors">
                   {isUz ? "To'lov usullari" : "Способы оплаты"}
                 </Link>
               </li>
               <li>
-                <Link href="/warranty" className="hover:text-white transition-colors">
+                <Link href="/warranty" className="inline-block py-1 hover:text-white transition-colors">
                   {isUz ? "Kafolat va qaytarish (14 kun)" : "Гарантия и возврат (14 дней)"}
                 </Link>
               </li>
               <li>
-                <Link href="/b2b" className="hover:text-white transition-colors text-purple-400 hover:text-purple-300 font-semibold flex items-center gap-1.5">
+                <Link href="/b2b" className="inline-flex items-center gap-1.5 py-1 hover:text-white text-purple-400 hover:text-purple-300 font-semibold transition-colors">
                   <Building2 className="w-3.5 h-3.5" />
                   {isUz ? "B2B Korporativ xizmat (ESF)" : "B2B Корпоративным клиентам (ЭСФ)"}
                 </Link>

@@ -83,9 +83,9 @@ export function ProductCard({
   const productUrl = `/products/${loc.slug}`;
 
   return (
-    <article className="group relative bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-3 sm:p-4 flex flex-col justify-between hover:shadow-lg hover:border-sora-300 dark:hover:border-sora-700 transition-all duration-200">
+    <article className="group relative bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-3 sm:p-3.5 flex flex-col justify-between hover:shadow-md hover:border-sora-300 dark:hover:border-sora-700 transition-all duration-200">
       {/* Top Media & Badges */}
-      <div className="relative w-full aspect-square bg-slate-50 dark:bg-slate-800/60 rounded-xl overflow-hidden mb-3.5 flex items-center justify-center p-3">
+      <div className="relative w-full aspect-square bg-slate-50/60 dark:bg-slate-800/40 rounded-xl overflow-hidden mb-3 flex items-center justify-center p-2.5 transition-colors group-hover:bg-slate-100/50 dark:group-hover:bg-slate-800/60">
         {/* Badges */}
         <div className="absolute top-2.5 left-2.5 z-10 flex flex-col gap-1.5 items-start">
           {badge && (

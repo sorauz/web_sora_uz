@@ -149,3 +149,36 @@ body {
   animation-play-state: paused !important;
 }
 
+/* Custom Minimalist Scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(201, 47, 116, 0.4) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.45);
+  border-radius: 9999px;
+  transition: background-color 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #c92f74;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.5);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #ec6ea9;
+}
+

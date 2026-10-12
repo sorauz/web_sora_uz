@@ -9,6 +9,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { OrganizationJsonLd } from "@/components/seo/OrganizationJsonLd";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
+import NextTopLoader from "nextjs-toploader";
 import "../globals.css";
 
 const fontSans = Plus_Jakarta_Sans({
@@ -95,6 +96,17 @@ export default async function LocaleLayout({
         <link rel="dns-prefetch" href="http://1cloud.uz:777" />
       </head>
       <body className={`min-h-full flex flex-col antialiased selection:bg-sora-600 selection:text-white ${fontSans.className}`}>
+        <NextTopLoader
+          color="#c92f74"
+          initialPosition={0.08}
+          crawlSpeed={200}
+          height={3}
+          crawl={true}
+          showSpinner={false}
+          easing="ease"
+          speed={200}
+          shadow="0 0 10px #c92f74,0 0 5px #c92f74"
+        />
         <OrganizationJsonLd />
         <GoogleAnalytics />
         <NextIntlClientProvider messages={messages}>

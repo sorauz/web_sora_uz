@@ -54,8 +54,8 @@ test.describe("Product Comparison (Taqqoslash) System", () => {
 
     // Verify base parameters row exists
     await expect(page.getByText("Asosiy ma'lumotlar")).toBeVisible();
-    await expect(page.getByText("Narxi").first()).toBeVisible();
-    await expect(page.getByText("Brend").first()).toBeVisible();
+    await expect(table.getByText("Narxi")).toBeVisible();
+    await expect(table.getByText("Brend")).toBeVisible();
 
     // Toggle "Faqat farqlarni ko'rsatish"
     const diffToggle = page.getByRole("button", { name: /Faqat farqlarni ko'rsatish/i });

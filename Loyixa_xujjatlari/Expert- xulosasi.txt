@@ -1,0 +1,133 @@
+Holat loyixa : https://sora.uz/
+
+Nextjs da qilinga loyixa bo'yicha test qilib quydagilarni malumo qilishdi:
+
+1)Mobile iphone navigationda button bosish qiynalyapman siri chiqib ketyapti.
+
+2)scrollbar custom qilish kerak yoki umuman ko'rsatmagan maqul.
+
+3)theme toggle ham qoshing.
+
+4)textlar ham juda kichkina manimcha 14px chiqsa kk 16 qilish kerek minimum
+
+5)Search katalog-ga o'tomadim, sevimlilarga zo'rga otdim
+
+6)icon, bo'lim monospace font.
+
+7)Mobileda qidiruv button bosganimda nima bo'lishi kerak hech qanday o'zgarish o'zgarmayabdi.
+
+8)Product card ichida picni yana card ichiga solingan, filter kengmas shadcn componentlaridan ishlatsez bo'larkan.
+
+9)Filter search ham yoq.
+
+10)Footer text linklar ham juda kichkina, 16px standard yoki undanam kotta qilganiz ko'zga yaxshi ko'rinadi hamda foydalanuvchiga yoqadi.
+
+Expertga vazifa: 
+
+-saytda kiring va etirozlar qanchik o'rinli yoki o'zrinsizligini tekshirib chiqing.
+
+-etirozlarga nisbata o'z fiktingizni bildiring 
+
+Expert tavsiyasi va xulosasi:
+
+Sora.uz sayti UI/UX, moslashuvchanlik (responsive), komponentlar tuzilishi va foydalanish qulayligi bo'yicha sinchiklab tekshirib chiqildi.
+
+Foydalanuvchi tomonidan bildirilgan 10 ta e'tiroz bo'yicha xolis tahlil va mutaxassis xulosasi:
+
+1. Mobile iPhone navigatsiyasida tugma bosish qiyinligi / Siri chiqib ketishi
+Holat: Qisman o'rinli
+
+Saytdagi holat: Mobilda pastki qotirilgan menyu (sticky bottom navigation) mavjud (position: fixed; bottom: 0). Zamonaviy iPhonelarda ekranning pastki qismida tizimning "Home indicator" (uyga qaytish chizig'i) va imo-ishoralar (gestures) maydoni joylashgan.
+
+Fikr va tavsiya: Agar pastki navigatsiya barida iOS xavfsiz hududi hisobga olinmagan bo'lsa (env(safe-area-inset-bottom) yetarli bo'lmasa), foydalanuvchi burchakdagi yoki pastki tugmalarni bosganda barmog'i tasodifan ekran chetiga tegib, tizim imo-ishoralari yoki Siri faollashishi mumkin.
+
+Yechim: Pastki menyuga padding-bottom: max(env(safe-area-inset-bottom), 12px) qo'shish, tugmalarning bosilish maydonini (hitbox) biroz yuqoriga surish va teginish kechikishini bartaraf qilish uchun CSS touch-action: manipulation berish kerak.
+
+2. Scrollbarni custom qilish yoki umuman ko'rsatmaslik
+Holat: O'rinli
+
+Saytdagi holat: Saytda hozirda brauzerning standart, qalin kulrang scrollbari ishlamoqda.
+
+Fikr va tavsiya: Zamonaviy Next.js / Tailwind interfeyslarida standart brauzer scrollbari umumiy estetikani biroz eskirgandek ko'rsatadi.
+
+Yechim: Butunlay yashirib qo'yish (hidden) tavsiya etilmaydi — bu foydalanuvchida sahifaning qayerida ekanligini his qilishni yo'qotadi. Eng to'g'ri yo'l — scrollbar-width: thin va ::-webkit-scrollbar orqali yupqa (4–6px), burchaklari yumaloqlangan va brend ranglariga mos (och kulrang/pushti) minimalist scrollbar qilish.
+
+3. Tungi/kunduzgi rejim (Theme toggle) qo'shish
+Holat: O'rinsiz (yoki past ustuvorlikdagi talab)
+
+Saytdagi holat: Saytda hozirda faqat yorug' (light) mavzu mavjud.
+
+Fikr va tavsiya: Sora.uz — kantselyariya, qog'oz va ofis mollari e-tijorat (B2C/B2B) platformasi. Uzum, Amazon, Wildberries yoki AliExpress kabi deyarli barcha yetakchi marketpleyslar doimiy yorug' mavzuda ishlaydi. Sababi: tovarlarning aksariyati (ayniqsa oq qog'oz, daftarlar va ofis jihozlari) oq fonda suratga olingan. Qorong'i mavzuda tovar kartochkalari atrofida xunuk oq to'rtburchaklar paydo bo'ladi va kontrast buziladi. Shuning uchun hozirgi bosqichda bu muhim emas.
+
+4. Matnlar juda kichkina (14px o'rniga minimum 16px qilish kerak)
+Holat: Qisman o'rinli (me'yor bilan yondashish zarur)
+
+Saytdagi holat: Tovar nomlari va asosiy matnlar 13px–14px, narxlar 16px–18px, sarlavhalar esa 20px–32px oralig'ida belgilangan.
+
+Fikr va tavsiya: E-tijorat kataloglarida "information density" (ma'lumot zichligi) qoidasi mavjud. Agar barcha matnlar 16px ga ko'tarilsa:
+
+Tovar kartochkalari haddan tashqari kattalashib ketadi;
+
+Bir ekranda ko'rinadigan tovarlar soni kamayadi;
+
+Mobilda tovar nomlari bir nechta qatorga sinib, vizual tartibsizlik yuzaga keladi.
+
+Yechim: Hamma matnni 16px qilish noto'g'ri. Biroq ba'zi 12px li yordamchi matnlar va xiralashgan izohlar kontrastini oshirish hamda tovar nomlarini 14px–15px oralig'ida aniq shrift qalinligi (font-medium / font-semibold) bilan ushlab turish maqsadga muvofiq.
+
+5. "Search katalog-ga o'tolmadim, sevimlilarga zo'rga o'tdim"
+Holat: O'rinli (UX kechikish va vizual javob muammosi)
+
+Saytdagi holat: Funksional jihatdan Katalog mega-menyusi ochiladi, /uz/favorites sahifasi ham mavjud. Biroq mobilda yoki sekinroq internetda tugma bosilganda foydalanuvchiga hech qanday vizual javob (loading indicator yoki ripple effect) berilmaydi.
+
+Fikr va tavsiya: Next.js da sahifalar o'rtasida o'tishda (client-side routing) sahifa yuklangunga qadar qotib qolgandek taassurot paydo bo'ladi. Foydalanuvchi tugma ishlamadi deb o'ylab, qayta-qayta bosadi.
+
+Yechim: Yuqori qismga o'tish jarayonini ko'rsatuvchi yuklanish chizig'i (masalan, nextjs-toploader) qo'shish va barcha interaktiv tugmalarga active:scale-95 kabi tezkor mikro-animatsiyalar berish kerak.
+
+6. Icon va bo'limlarda monospace shrift ishlatilganligi
+Holat: O'rinsiz (Asossiz)
+
+Saytdagi holat: Sayt kodi va uslublari tekshirilganda, butun interfeysda toza zamonaviy sans-serif shriftlar (Inter, system-ui, -apple-system) va SVG vektor ikonkalar qo'llanilgan.
+
+Fikr va tavsiya: Hech qayerda Monospace (Courier, JetBrains Mono va h.k.) shrifti mavjud emas. Ehtimol, foydalanuvchi ba'zi raqamli bloklar (narxlar yoki qat'iy kenglikdagi jadval elementlari) ko'rinishini monospace deb yanglish baholagan. Bu e'tiroz o'rinsiz.
+
+7. Mobilda qidiruv tugmasi bosilganda hech narsa o'zgarmasligi
+Holat: O'rinli
+
+Saytdagi holat: Headerdagi qidiruv maydoni desktopda yaxshi ishlaydi, biroq mobilda foydalanuvchi qidiruv maydoniga matn kiritmasdan faqat qidiruv belgisini/tugmasini bossa, hech qanday reaksiya yoki maxsus oyna ochilmaydi.
+
+Fikr va tavsiya: Mobil versiyada qidiruv tugmasi bosilganda qulay to'liq ekranli (full-screen overlay) qidiruv oynasi ochilishi, klaviatura avtomatik chiqishi (autoFocus) va oxirgi qidiruvlar yoki ommabop bo'limlar tavsiya sifatida ko'rsatilishi kerak.
+
+8. Tovar rasmi card ichida yana card qilinganligi, filtr torligi (shadcn ishlatish)
+Holat: Qisman o'rinli
+
+Tovar rasmining foni bo'yicha: Kartochka ichidagi rasm kulrang kvadrat blok ichiga olingani xato emas. Bu oq fondagi kantselyariya mollarini (oq qog'oz, oq korrektor) kartochkaning oq fonidan ajratib turish uchun qilingan standart usul. Ammo chegaralar (border) va ichki fonga yengilroq ishlov berilsa, vizual og'irlik kamayadi.
+
+Filtrlar bo'yicha (O'rinli): Chap tomondagi filtr paneli (~240px) biroz tor va ichki komponentlar oddiy HTML elementlariga o'xshaydi. Shadcn UI (Accordion, Slider, zamonaviy Checkbox) komponentlariga o'tilsa, filtrlar ancha zamonaviy, yig'iladigan (collapsible) va ixcham ko'rinishga keladi.
+
+9. Filtr ichida qidiruv yo'qligi (Filter search)
+Holat: To'liq o'rinli
+
+Saytdagi holat: Kategoriya sahifalaridagi filtr blokida brendlar ("BRENDLAR") ro'yxati uzun bo'lishiga qaramay, brendlar ichidan qidirish qatori yo'q; faqat vertikal skroll mavjud.
+
+Fikr va tavsiya: Foydalanuvchi 20-30 ta brend ichidan o'ziga keraklisini (masalan, Deli, SvetoCopy, ErichKrause) tez topishi uchun brendlar ro'yxati tepasiga kichik qidiruv inputi (quick filter search) qo'shish — eng muhim UX qoidalaridan biri.
+
+10. Footer havolalari 16px yoki undan katta bo'lishi kerakligi
+Holat: O'rinsiz (Dizayn qoidalari bo'yicha)
+
+Saytdagi holat: Footer havolalari 13px–14px o'lchamda, qora fonda oq va och kulrang rangda yuqori kontrast bilan terilgan.
+
+Fikr va tavsiya: Veb-dizayn standartlarida (Material Design, Tailwind UI) footer havolalari odatda 12px–14px (text-sm) bo'ladi. Footer — ikkinchi darajali navigatsiya zonasi. Agar matnlar 16px yoki undan katta qilinsa:
+
+Footer haddan tashqari ulkan bo'lib ketadi;
+
+Asosiy kontentdan diqqatni chalg'itadi;
+
+Vizual ierarxiya buziladi.
+Hozirgi o'lcham to'g'ri tanlangan, faqat mobil qurilmalarda havolalar orasidagi masofani (tap padding) barmog'i oson tegishi uchun biroz kengaytirish kifoya.
+
+Xulosa va ustuvor ishlar (Prioritetlar):
+
+Ustuvorlik,Ishlar ro'yxati,E'tiroz raqami
+Yuqori (Tezda to'g'rilash kerak),1. Filtrlar ichiga brend qidiruvi inputini qo'shish.2. Mobilda iPhone xavfsiz hududini (safe-area-inset-bottom) kengaytirish.3. Mobilda qidiruv tugmasi uchun to'liq ekranli search modalini joriy qilish.4. Sahifalararo o'tishda yuklanish indikatorini (top loader) ulash.,"1, 5, 7, 9"
+O'rta (Yaxshilash tavsiya etiladi),1. Custom yupqa scrollbar qo'shish.2. Filtr blokini Shadcn komponentlari yordamida yanada qulay va yig'iluvchan qilish.,"2, 8"
+Past / Qoldirish kerak,1. Barcha matnlarni 16px ga ko'tarish shart emas.2. Footer havolalarini kattalashtirish shart emas.3. Dark mode hozirgi bosqichda e-tijorat uchun zarur emas.4. Monospace e'tirozi asossiz.,"3, 4, 6, 10"

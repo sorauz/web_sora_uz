@@ -7,13 +7,15 @@ import { Link } from "@/i18n/routing";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { MegaMenu } from "@/components/discovery/MegaMenu";
 import { SearchAutocomplete } from "@/components/discovery/SearchAutocomplete";
-import { Heart, ShoppingBag, User, LogOut, Package, Scale } from "lucide-react";
+import { Heart, ShoppingBag, User, LogOut, Package, Scale, Search } from "lucide-react";
 import { useCartStore } from "@/lib/store/cart";
 import { useFavoritesStore } from "@/lib/store/favorites";
 import { useCompareStore } from "@/lib/store/compare";
 import { useAuthStore } from "@/lib/store/auth";
+import { useMobileSearchStore } from "@/lib/store/mobileSearch";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { OrderTrackerModal } from "@/components/checkout/OrderTrackerModal";
+import { MobileSearchModal } from "@/components/discovery/MobileSearchModal";
 import { useEffect, useState, useRef } from "react";
 import { useTranslations } from "next-intl";
 
@@ -30,6 +32,7 @@ export function Header({ tree, categories, brands, products }: HeaderProps) {
   const { getCount } = useFavoritesStore();
   const { getCount: getCompareCount } = useCompareStore();
   const { user, openModal, logout, checkAuth } = useAuthStore();
+  const { openSearch } = useMobileSearchStore();
 
   const [mounted, setMounted] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -203,13 +206,17 @@ export function Header({ tree, categories, brands, products }: HeaderProps) {
         </div>
       </div>
 
-      {/* Mobile Search Bar Row */}
+      {/* Mobile Search Bar Row (Triggers Full-screen Mobile Search Modal) */}
       <div className="sm:hidden px-4 pb-3">
-        <SearchAutocomplete
-          products={products}
-          categories={categories}
-          brands={brands}
-        />
+        <button
+          type="button"
+          onClick={openSearch}
+          aria-label="Qidiruv oynasini ochish"
+          className="w-full h-10 px-3.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 text-xs font-normal flex items-center gap-2.5 border border-slate-200 dark:border-slate-700/60 active:scale-[0.99] transition-transform text-left cursor-pointer"
+        >
+          <Search className="w-4 h-4 text-slate-400 shrink-0" />
+          <span className="truncate">Tovar, brend yoki kategoriya...</span>
+        </button>
       </div>
 
       {/* Auth Modal */}
@@ -219,6 +226,13 @@ export function Header({ tree, categories, brands, products }: HeaderProps) {
       <OrderTrackerModal
         isOpen={trackerOpen}
         onClose={() => setTrackerOpen(false)}
+      />
+
+      {/* Mobile Fullscreen Search Modal */}
+      <MobileSearchModal
+        products={products}
+        categories={categories}
+        brands={brands}
       />
     </header>
   );
