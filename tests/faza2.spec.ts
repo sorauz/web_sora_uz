@@ -7,6 +7,7 @@ test.describe("Sora.uz Home & i18n Tests", () => {
     await expect(page.locator("h1")).toContainText("Ofis jihozlari va elektronika");
 
     // Check language switch
+    await page.getByTestId("language-switcher-trigger").click();
     await page.click("text=Русский");
     await page.waitForURL("**/ru");
     await expect(page.locator("h1")).toContainText("Офисная техника и электроника");

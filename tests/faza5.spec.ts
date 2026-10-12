@@ -23,6 +23,7 @@ test.describe("FAZA 5: Technical SEO, Canonical Redirection, and Price Display",
     await expect(page.locator("h1")).toContainText(/Magnit va marker/i);
 
     // 2. Click 'Русский' in Language Switcher
+    await page.getByTestId("language-switcher-trigger").click();
     const ruBtn = page.getByRole("button", { name: "Русский" });
     await expect(ruBtn).toBeVisible();
     await ruBtn.click();
