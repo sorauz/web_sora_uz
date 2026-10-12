@@ -125,7 +125,7 @@ export default async function HomePage({ params }: PageProps) {
       <PromoNav />
 
       {/* Main Page Flow */}
-      <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full space-y-12">
+      <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 space-y-12">
         {/* 3. Hero Banner (E-commerce Web Design §8) */}
         <section className="relative rounded-3xl bg-gradient-to-br from-sora-700 via-sora-800 to-sora-950 text-white overflow-hidden p-6 sm:p-10 lg:p-12 shadow-lg">
           <div className="absolute right-0 top-0 w-1/2 h-full bg-radial from-sora-400/20 to-transparent pointer-events-none" />

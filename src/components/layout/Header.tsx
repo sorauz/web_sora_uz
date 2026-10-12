@@ -87,133 +87,121 @@ export function Header({ tree, categories, brands, products }: HeaderProps) {
         </div>
 
         {/* Actions (Favorites, Compare, Cart, User, Language) */}
-        <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
-          {/* Compare */}
-          <Link
-            href="/compare"
-            aria-label={t("compare")}
-            className="hidden md:flex relative p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors"
-          >
-            <Scale className="w-5 h-5" />
-            {compareCount > 0 && (
-              <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-sora-600 text-white text-[10px] font-bold flex items-center justify-center">
-                {compareCount}
-              </span>
-            )}
-          </Link>
-
-          {/* Favorites */}
-          <Link
-            href="/favorites"
-            aria-label={t("favorites")}
-            className="hidden md:flex relative p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors"
-          >
-            <Heart className="w-5 h-5" />
-            {favCount > 0 && (
-              <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center">
-                {favCount}
-              </span>
-            )}
-          </Link>
-
-          {/* Cart */}
-          <Link
-            href="/cart"
-            aria-label={t("cart")}
-            className="hidden md:flex relative p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors"
-          >
-            <ShoppingBag className="w-5 h-5" />
-            {cartCount > 0 && (
-              <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-sora-600 text-white text-[10px] font-bold flex items-center justify-center animate-pulse">
-                {cartCount}
-              </span>
-            )}
-          </Link>
-
-          {/* User Account / Login */}
-          <div className="relative" ref={userMenuRef}>
-            {user ? (
-              <button
-                type="button"
-                onClick={() => setUserMenuOpen(!userMenuOpen)}
-                className="flex items-center gap-2 p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors cursor-pointer border border-slate-200 dark:border-slate-800"
-                title={user.name}
-              >
-                <div className="w-6 h-6 rounded-lg bg-sora-100 dark:bg-sora-950/60 text-sora-600 dark:text-sora-400 font-bold text-xs flex items-center justify-center">
-                  {user.name.charAt(0).toUpperCase()}
-                </div>
-                <span className="hidden lg:inline text-xs font-bold max-w-28 truncate">
-                  {user.name.split(" ")[0]}
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          {/* Desktop 4 icons: Compare, Favorites, Cart, User */}
+          <div className="hidden md:flex items-center gap-2 sm:gap-3">
+            {/* Compare */}
+            <Link
+              href="/compare"
+              aria-label={t("compare")}
+              className="relative p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors"
+            >
+              <Scale className="w-5 h-5" />
+              {compareCount > 0 && (
+                <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-sora-600 text-white text-[10px] font-bold flex items-center justify-center">
+                  {compareCount}
                 </span>
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() => openModal({ tab: "login" })}
-                className="p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors cursor-pointer"
-                title="Kirish / Ro'yxatdan o'tish"
-                aria-label="Kirish"
-              >
-                <User className="w-5 h-5" />
-              </button>
-            )}
+              )}
+            </Link>
 
-            {/* User Dropdown */}
-            {user && userMenuOpen && (
-              <div className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl p-2 z-50 animate-in fade-in zoom-in-95 duration-100">
-                <div className="p-3 border-b border-slate-100 dark:border-slate-800">
-                  <div className="text-xs font-bold text-slate-900 dark:text-white truncate">
-                    {user.name}
-                  </div>
-                  <div className="text-[11px] text-slate-500 mt-0.5">
-                    {user.type === "B2B" ? `INN: ${user.inn}` : user.phone}
-                  </div>
-                  <div className="mt-1">
-                    <span className="inline-block px-2 py-0.5 rounded-md text-[10px] font-bold bg-sora-50 dark:bg-sora-950/60 text-sora-600 dark:text-sora-400 border border-sora-200 dark:border-sora-800">
-                      {user.type === "B2B" ? "Yuridik shaxs (B2B)" : "Jismoniy shaxs (B2C)"}
-                    </span>
-                  </div>
-                </div>
+            {/* Favorites */}
+            <Link
+              href="/favorites"
+              aria-label={t("favorites")}
+              className="relative p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors"
+            >
+              <Heart className="w-5 h-5" />
+              {favCount > 0 && (
+                <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center">
+                  {favCount}
+                </span>
+              )}
+            </Link>
 
-                <div className="pt-1 border-t border-slate-100 dark:border-slate-800 space-y-1">
-                  <button
-                    onClick={() => {
-                      setUserMenuOpen(false);
-                      setTrackerOpen(true);
-                    }}
-                    className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-                  >
-                    <Package className="w-3.5 h-3.5 text-sora-600 dark:text-sora-400" />
-                    <span>Buyurtma holati</span>
-                  </button>
-                  <Link
-                    href="/compare"
-                    onClick={() => setUserMenuOpen(false)}
-                    className="md:hidden w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-                  >
-                    <div className="flex items-center gap-2">
-                      <Scale className="w-3.5 h-3.5 text-sora-600 dark:text-sora-400" />
-                      <span>{t("compare")}</span>
+            {/* Cart */}
+            <Link
+              href="/cart"
+              aria-label={t("cart")}
+              className="relative p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors"
+            >
+              <ShoppingBag className="w-5 h-5" />
+              {cartCount > 0 && (
+                <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-sora-600 text-white text-[10px] font-bold flex items-center justify-center animate-pulse">
+                  {cartCount}
+                </span>
+              )}
+            </Link>
+
+            {/* User Account / Login */}
+            <div className="relative" ref={userMenuRef}>
+              {user ? (
+                <button
+                  type="button"
+                  onClick={() => setUserMenuOpen(!userMenuOpen)}
+                  className="flex items-center gap-2 p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors cursor-pointer border border-slate-200 dark:border-slate-800"
+                  title={user.name}
+                >
+                  <div className="w-6 h-6 rounded-lg bg-sora-100 dark:bg-sora-950/60 text-sora-600 dark:text-sora-400 font-bold text-xs flex items-center justify-center">
+                    {user.name.charAt(0).toUpperCase()}
+                  </div>
+                  <span className="hidden lg:inline text-xs font-bold max-w-28 truncate">
+                    {user.name.split(" ")[0]}
+                  </span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => openModal({ tab: "login" })}
+                  className="p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors cursor-pointer"
+                  title="Kirish / Ro'yxatdan o'tish"
+                  aria-label="Kirish"
+                >
+                  <User className="w-5 h-5" />
+                </button>
+              )}
+
+              {/* User Dropdown */}
+              {user && userMenuOpen && (
+                <div className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl p-2 z-50 animate-in fade-in zoom-in-95 duration-100">
+                  <div className="p-3 border-b border-slate-100 dark:border-slate-800">
+                    <div className="text-xs font-bold text-slate-900 dark:text-white truncate">
+                      {user.name}
                     </div>
-                    {compareCount > 0 && (
-                      <span className="px-1.5 py-0.5 rounded-full bg-sora-600 text-white text-[10px] font-bold">
-                        {compareCount}
+                    <div className="text-[11px] text-slate-500 mt-0.5">
+                      {user.type === "B2B" ? `INN: ${user.inn}` : user.phone}
+                    </div>
+                    <div className="mt-1">
+                      <span className="inline-block px-2 py-0.5 rounded-md text-[10px] font-bold bg-sora-50 dark:bg-sora-950/60 text-sora-600 dark:text-sora-400 border border-sora-200 dark:border-sora-800">
+                        {user.type === "B2B" ? "Yuridik shaxs (B2B)" : "Jismoniy shaxs (B2C)"}
                       </span>
-                    )}
-                  </Link>
-                  <button
-                    onClick={() => {
-                      setUserMenuOpen(false);
-                      logout();
-                    }}
-                    className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
-                  >
-                    <LogOut className="w-3.5 h-3.5" />
-                    <span>Chiqish</span>
-                  </button>
+                    </div>
+                  </div>
+
+                  <div className="pt-1 border-t border-slate-100 dark:border-slate-800 space-y-1">
+                    <button
+                      onClick={() => {
+                        setUserMenuOpen(false);
+                        setTrackerOpen(true);
+                      }}
+                      className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                    >
+                      <Package className="w-3.5 h-3.5 text-sora-600 dark:text-sora-400" />
+                      <span>Buyurtma holati</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        setUserMenuOpen(false);
+                        logout();
+                      }}
+                      className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
+                    >
+                      <LogOut className="w-3.5 h-3.5" />
+                      <span>Chiqish</span>
+                    </button>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
 
           {/* Language Switcher */}
@@ -222,7 +210,7 @@ export function Header({ tree, categories, brands, products }: HeaderProps) {
       </div>
 
       {/* Mobile Search Bar Row (Triggers Full-screen Mobile Search Modal) */}
-      <div className="sm:hidden px-4 pb-3">
+      <div className="sm:hidden w-full px-4 pb-3">
         <button
           type="button"
           onClick={openSearch}
