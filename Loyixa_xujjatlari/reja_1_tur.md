@@ -6,19 +6,21 @@
 
 ## 1. Texnik SEO va Strukturaviy Ma'lumotlarni Boyitish (Data & Schemas)
 
-### 1.1. Sitemap `lastmod` Sanasini 1C `updated_at` Bilan To'liq Bog'lash
-- **Hozirgi holat:** `src/app/sitemap.ts` da barcha mahsulotlar uchun `lastModified: now` dinamik berilgan.
-- **Mavjud ma'lumot:** 1C ERP dan kelayotgan har bir mahsulot ob'ektida `product.updated_at` (masalan, `"2026-09-28T00:00:00"`) maydoni mavjud.
-- **Amalga oshiriladigan ish:**
-  - `sitemap.ts` da mahsulotlarning `lastModified` sanasini `product.updated_at ? new Date(product.updated_at) : now` ga o'tkazish.
-  - Bu orqali Google va Bing botlariga soxta sana emas, faqat 1C da narx yoki parametr o'zgargandagina yangilangan haqiqiy sana uzatiladi.
+### 1.1. Sitemap `lastmod` Sanasini 1C `updated_at` Bilan To'liq Bog'lash — [BAJARILDI ✅]
+- **Holat:** To'liq amalga oshirildi va ishlab chiqarishga chiqarildi (`src/app/sitemap.ts`).
+- **Mavjud ma'lumot:** 1C ERP dan kelayotgan har bir mahsulot ob'ektida `product.updated_at` maydoni mavjud.
+- **Amalga oshirilgan ishlar:**
+  - `src/app/sitemap.ts` da mahsulotlarning `lastModified` sanasi `product.updated_at ? new Date(product.updated_at) : now` orqali ulandi.
+  - Google, Yandex va Bing botlariga soxta sana emas, 1C da narx yoki parametr o'zgargandagi haqiqiy sana uzatiladi.
+  - Playwright testlari bilan to'liq qamrab olindi (`tests/faza5.spec.ts`).
 
-### 1.2. Hududiy Mintaqa Kodlarini (`ru-UZ`, `uz-UZ`) Hreflang va Metadataga Qo'shish
-- **Hozirgi holat:** Hozircha til teglari umumiy `uz` va `ru` ko'rinishida berilgan.
+### 1.2. Hududiy Mintaqa Kodlarini (`ru-UZ`, `uz-UZ`) Hreflang va Metadataga Qo'shish — [BAJARILDI ✅]
+- **Holat:** To'liq amalga oshirildi va ishlab chiqarishga chiqarildi.
 - **Mavjud texnik imkoniyat:** Next.js `alternates.languages` mexanizmi har qanday ISO 639-1 / ISO 3166-1 kodlarini qabul qiladi.
-- **Amalga oshiriladigan ish:**
-  - `layout.tsx`, `products/[slug]/page.tsx` va `category/[slug]/page.tsx` dagi `alternates.languages` ga `"ru-UZ"` va `"uz-UZ"` mintaqaviy aniqlik teglari kiritiladi.
-  - O'zbekiston hududidagi rusiyzabon va o'zbekzabon qidiruv so'rovlarida saytning regional SEO kuchi oshadi.
+- **Amalga oshirilgan ishlar:**
+  - `layout.tsx`, `page.tsx`, `products/[slug]/page.tsx`, `category/[slug]/page.tsx`, `brand/[slug]/page.tsx`, `catalog/page.tsx`, `catalog/[offer]/page.tsx`, `offers/page.tsx`, `brands/page.tsx` hamda `sitemap.ts` dagi `alternates.languages` ga `"ru-UZ"` va `"uz-UZ"` mintaqaviy aniqlik teglari to'liq kiritildi.
+  - O'zbekiston hududidagi rusiyzabon va o'zbekzabon qidiruv so'rovlarida saytning regional SEO kuchi oshirildi.
+  - Playwright testlari bilan to'liq qamrab olindi (`tests/faza5.spec.ts`).
 
 ### 1.3. Google 2026 Standartidagi `Product` JSON-LD Schemasini Boyitish — [BAJARILDI ✅]
 - **Holat:** To'liq amalga oshirildi va ishlab chiqarishga chiqarildi (`ProductJsonLd.tsx`).
@@ -89,8 +91,8 @@
 
 | № | Vazifa nomi | Yo'nalish | Qiyinlik darajasi | Kutilayotgan natija |
 |---|---|:---:|:---:|---|
-| 1 | **Sitemap lastmod + 1C updated_at** | SEO | Oson | Sitemap sifatini oshirish va indeksatsiyani tezlashtirish |
-| 2 | **Hududiy mintaqa teglari (ru-UZ, uz-UZ)** | SEO | Oson | Mahalliy SEO va regional qidiruv aniqligi |
+| 1 | **Sitemap lastmod + 1C updated_at** | SEO | Oson | Bajarildi ✅ (1C updated_at sitemap.ts ga to'liq ulandi) |
+| 2 | **Hududiy mintaqa teglari (ru-UZ, uz-UZ)** | SEO | Oson | Bajarildi ✅ (Barcha sahifalar va sitemap alternates ga kiritildi) |
 | 3 | **Product JSON-LD boyitish (GTIN, Category, Policies)** | SEO | O'rta | Bajarildi ✅ (Google Rich Snippets va Merchant reytingi) |
 | 4 | **FAQPage JSON-LD Schemasi** | SEO | O'rta | Qidiruvda ochiluvchi FAQ rich snippets |
 | 5 | **IndexNow protokoli integratsiyasi** | SEO | O'rta | Yandex va Bing'da o'zgarishlarni bir soniyada indekslash |
