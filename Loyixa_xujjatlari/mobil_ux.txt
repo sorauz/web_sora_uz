@@ -1,0 +1,260 @@
+Loyihamizning mobil versiyasi (Mobile UX) bo‘yicha amalga oshirilgan tahlil natijalari quyidagicha. Ushbu tahlil xalqaro e-commerce standartlari (Apple Human Interface Guidelines, Google Material Design va Nielsen Norman Group) hamda O‘zbekiston bozoridagi yetakchi ilovalar (Uzum, Ozon) tajribasiga tayangan holda tayyorlandi.
+
+1. Foydalanuvchi uchun QULAY bo‘lgan tomonlari (Yutuqlar)
+Bosh barmoq zonasi (Thumb Zone Ergonomics):
+Ekranning eng pastki qismida joylashgan MobileNav (pastki panel) — mobil foydalanuvchi bir qo‘l bilan smartfonni ushlab turganda barmog‘i eng oson yetadigan qulay zonada turibdi. Bosh sahifa, Katalog, Qidiruv, Sevimlilar va Savatchaga o‘tish juda oson.
+Yuqori panel (Header)ning tozaligi va erkinligi:
+Yuqori qismdan takroriy Sevimlilar va Savatchaning olib tashlangani va Taqqoslashning faqat tovar tanlangandagina chiqishi headerdagi tiqilinchlikni yo‘qotdi. Til almashtirgich chetga surilib ketmaydi, sahifa yorilmaydi.
+To‘liq ekranli qidiruv modali (MobileSearchModal):
+Qidiruv maydoni bosilganda kichik noqulay ochiluvchi ro‘yxat emas, balki to‘liq ekranli qidiruv oynasi ochiladi. Ommabop qidiruvlar ("Deli", "A4 qog'oz", "Stepler") va real vaqtda natijalar chiqishi tezkor xarid uchun juda qulay.
+2 ustunli tovarlar seti (grid-cols-2):
+Mahsulot kartochkalari mobil ekranga to‘liq 2 qator qilib joylashtirilgan. Tovar rasmi, nomi (2 qator bilan cheklangan line-clamp-2) va narxlari o‘qilishi oson.
+Tezkor Checkout (Bir sahifali xarid):
+Savatcha va buyurtma berish jarayonida majburiy murakkab ro‘yxatdan o‘tish talab qilinmaydi (Guest Checkout). Ism, telefon va manzilni kiritib 1 ta tugma bilan buyurtma berish konversiyani oshiradi.
+2. Foydalanuvchi uchun NOQULAY bo‘lgan nuqtalar (Kamchiliklar va Xatarlar)
+🔴 1-muammo: Mahsulot sahifasida (PDP) 2 ta panelning ustma-ust tushishi (Kritik noqulaylik)
+Mahsulot sahifasida pastda doimiy MobileStickyCTA ("Savatga qo‘shish" paneli) bor va uning ostida MobileNav (pastki menyu) ham bor.
+Ikkalasi ham ekranning pastki qismida (fixed bottom-0) turgani sababli, ular bir-birining ustiga minib qoladi:
+Yo "Savatga qo‘shish" tugmasi pastki menyuni yopib qo‘yadi;
+Yoki pastki menyu "Savatga qo‘shish" tugmasini to‘sib, foydalanuvchini xarid qilishiga xalaqit beradi.
+Yechim: Mahsulot sahifasiga kirilganda pastki MobileNav vaqtincha yashirilishi yoki "Savatga qo‘shish" paneli navigatsiyaning tepasiga (bottom-[60px]) ko‘tarilishi kerak.
+🟡 2-muammo: Tovar kartasidagi Taqqoslash va Sevimli tugmalarining kichikligi (Touch Target)
+Mahsulot kartasining yuqori burchagidagi Yurak (❤️) va Tarozi (⚖) tugmalari o‘lchami 32x32px.
+Mobil standartlar bo‘yicha odam barmog‘i bexato bosishi uchun teginish maydoni (touch target) kamida 44x44px bo‘lishi shart.
+32px bo‘lgani sababli foydalanuvchi yurakchani bosmoqchi bo‘lib, adashib mahsulotning o‘zini (rasmini) ochib yuborish ehtimoli yuqori.
+🟡 3-muammo: Qidiruv panelining duplikatsiyasi
+Qidiruv tugmasi ekranning eng yuqorisida ham (Header ostida katta qator qilib), ekranning eng pastida ham (MobileNav ichida) turibdi.
+Mobil ekranda har bir vertikal piksel qadrli. Ikkala joyda ham qidiruv turishi ekranning asosiy kontent ko‘rinadigan qismini 40–50px ga qisqartiradi.
+🟡 4-muammo: Filtrlar draweridagi narx kiritish (Input UX)
+Kategoriya sahifasida filtrlar pastdan drawer bo‘lib ochiladi. Narx kiritish (masalan: 50 000 dan 500 000 gacha) uchun oddiy matn inputi ishlatilgan.
+Mobilda bu maydonga bosilganda katta klaviatura chiqib, butun filtr oynasini yopib qo‘yadi. Buni o‘rniga tezkor narx oraliqlari (chiplar: 50 minggacha, 50-200 ming, 200 mingdan yuqori) yoki qulay narx slayderi bo‘lishi ancha osonroq.
+3. Umumiy Xulosa va Baho
+Yo‘nalish	Baho (5 ballik)	Holat
+Ergonomika va Bosh barmoq qulayligi	4.2 / 5	Yaxshi, pastki bar barcha asosiy bo‘limlarga tezkor yo‘l beradi.
+Vizual tozalik (Header & Layout)	4.8 / 5	Alo, ortiqcha tiqilinchlik yo‘qoldi, oq bo‘shliqlar yo‘q.
+Mahsulot xarid qilish qulayligi (PDP)	3.5 / 5	O‘rtacha, PDP da pastki 2 ta panel to‘qnashuvini tuzatish kerak.
+Qidiruv va Navigatsiya tezligi	4.6 / 5	Juda qulay, to‘liq ekranli modal a’lo darajada ishlaydi.
+
+Xulosa: Hozirgi holatda mobil interfeys avvalgisiga qaraganda ancha yengil, toza va chiroyli. Lekin mahsulot sahifasidagi (PDP) "Savatga qo‘shish" paneli bilan "Pastki navigatsiya" o‘rtasidagi to‘qnashuvni to‘g‘rilash mobil konversiyani sezilarli darajada oshiradi.
+
+Mobile Ux - yanada chuqurroq taxlil qiling!
+
+Sora.uz platformasining Mobil UX (Foydalanuvchi Tajribasi va Ergonomikasi) bo‘yicha chuqurlashtirilgan tahlili.
+
+Tahlil xalqaro e-commerce standartlari (Nielsen Norman Group, Apple Human Interface Guidelines, Google Material Design) va xaridorning saytga kirgandan to xaridni yakunlashigacha bo‘lgan barcha bosqichlari (User Journey) asosida tayyorlandi.
+
+1. Bosh barmoq zonasi (Thumb Zone) va Ekranning birinchi ko‘rinishi (Above-the-Fold)
+        Mobil Ekran Zonalari:
+  ┌──────────────────────────────────┐
+  │ [Header: Logo + Til + Profil]    │ ➔ 🔴 Yetish qiyin (Hard to reach)
+  │ [Mobil Qidiruv paneli]           │ 
+  │ [PromoNav: Toifalar chiplari]    │
+  ├──────────────────────────────────┤
+  │                                  │
+  │   Binafsharang Katta Banner      │ ➔ 🟡 O'rtacha (Natural stretch)
+  │   va Mahsulotlar vitrinasi       │
+  │                                  │
+  ├──────────────────────────────────┤
+  │ [Pastki Bar: Bosh, Katalog, ...] │ ➔ 🟢 ENG QULAY (Easy Thumb Zone)
+  └──────────────────────────────────┘
+✅ Qulay jihatlari:
+Eng asosiy amallar pastda: Xaridor telefonni bitta qo‘lda ushlaganida uning bosh barmog‘i eng oson yetadigan joy — ekranning pastki 30% qismidir. MobileNav aynan shu yerda joylashgani tufayli bo‘limlararo o‘tish juda oson.
+Header yengilligi: Ortiqcha narsalarning yo‘qligi sababli ko‘z chalg‘imaydi.
+❌ Noqulayliklar va Xatarlar:
+Yuqori panellar to‘plami (Sticky Stack) balandligi:
+Header (~64px) + Qidiruv paneli (~52px) + PromoNav chiziqlari (~38px) = jami ~154px faqat boshqaruv bloklariga ketadi.
+Standart smartfonda (balandligi 667px – 844px) brauzer panellarini hisobga olsak, ekranning 25%–30% qismi faqat fiksirlangan panellar bilan band.
+Tovarlarning pastda qolib ketishi:
+Katta binafsharang banner birinchi ekranni to‘liq egallab oladi. Natijada xaridor saytga kirgan dastlabki 3 soniyada hech qanday mahsulotni ko‘rmaydi, tovarlarni ko‘rish uchun majburan 2-3 marta pastga skroll qilishi kerak bo‘ladi.
+2. Tovarlarni qidirish va Filtrlash (Discovery & Filters UX)
+✅ Qulay jihatlari:
+To‘liq ekranli qidiruv modali: Qidiruv tugmasi bosilganda ochiladigan MobileSearchModal ekranning 100% maydonini egallaydi. Xaridor harflarni kiritayotganda fon chalg‘itmaydi.
+Filtrlar draweri: Kategoriya sahifasida filtrlar yon paneldan emas, ekran tubidan chiroyli modal (bottom sheet) bo‘lib chiqadi.
+Brendlar bo‘yicha tezkor qidiruv: Yuzlab brendlar orasidan keraklisini 2 soniyada topish uchun filtr ichida brandSearch maydoni bor.
+❌ Noqulayliklar va Xatarlar:
+Filtr ichidagi narx kiritish (Input vs Slider):
+Minimal va maksimal narxni kiritish uchun oddiy matn inputi ishlatilgan. Unga bosilganda telefonning raqamli klaviaturasi ochilib, ekranning 40% qismini yopib qo‘yadi.
+Yaxshiroq yechim: Tayyor tezkor narx chiplari ("50 000 gacha", "50 000 – 200 000", "200 000 dan yuqori").
+Bitta qatordagi saralash (Sort) va Filtr:
+Kategoriya sahifasida saralash (Arzonroq, Qimmatroq) va Filtr tugmalari alohida qatorlarda tursa joy ko‘p ketadi, ularni bitta ixcham qatorda 50/50 qilib turishi mobilda qulayroq.
+3. Mahsulot kartochkasi (Product Card) va Teginish zonalari (Touch Targets)
+✅ Qulay jihatlari:
+2 ustunli to‘r (grid-cols-2): Telefonlarda eng qulay format. Rasmlar yetarlicha katta ko‘rinadi, bir ekranda birdaniga 4 ta tovar sig‘adi.
+Katta "Savatga qo‘shish" tugmasi: Kartaning pastki o‘ng burchagidagi savat tugmasi yaqqol ko‘zga tashlanadi va bosganda yashil Check animatsiyasi bilan xaridorga fikr-mulohaza (feedback) beradi.
+❌ Noqulayliklar va Xatarlar:
+Juda kichik yurakcha va tarozi tugmalari (32x32px):
+Apple va Google qoidalariga ko‘ra, inson barmog‘i xatosiz bosa olishi uchun tugma teginish maydoni kamida 44x44px bo‘lishi lozim.
+Hozirgi 32px li kichik doirachalar tovar rasmining ustida turgani sababli, xaridor sevimlilarga qo‘shmoqchi bo‘lib, tasodifan tovar sahifasiga kirib ketishi mumkin.
+4. Mahsulot sahifasi (PDP - Eng nozik va xarid hal bo‘ladigan joy)
+✅ Qulay jihatlari:
+1C ERP atributlari aniq ko‘rinishi: Tovar o‘lchami, brendi, zichligi va ishlab chiqarilgan davlati ixcham mobil jadvalda chiqadi.
+Ulgurji narxlar (Wholesale tiers): Xaridor ko‘proq olsa narx qanchaga tushishi PDP da aniq foizlar bilan ko‘rsatilgan.
+❌ Kritik Noqulayliklar:
+🔴 Ikkita panel to‘qnashuvi (Bottom Collision):
+PDP sahifasida pastda doimiy MobileStickyCTA ("Savatga qo‘shish" tugmasi) va uning tagida MobileNav (pastki bar) mavjud.
+Ikkalasi ham fixed bottom-0 bo‘lgani uchun bir-birining ustiga tushib qoladi. Xaridor yoki tovar sotib olish tugmasini bosolmaydi, yoki menyuga o‘tolmaydi.
+Rasm galereyasida "Swipe" (surish) yo‘qligi:
+1C dan kelgan bir nechta rasmlar pastda kichik kvadratlar shaklida turadi. Xaridor keyingi rasmga o‘tish uchun unga bosishi kerak.
+Zamonaviy smartfon foydalanuvchilarining 90% qismi rasmni barmog‘i bilan chapga-o‘ngga surishga (Touch Swipe/Carousel) o‘rgangan.
+Gorizontal skrollanadigan tablar:
+Tavsif, Xususiyatlar, Yetkazib berish, Sharhlar, FAQ gorizontal chiziqda turibdi. Foydalanuvchi ko‘pincha uning o‘ng tomonida yana bo‘limlar borligini sezmaydi (Affordance kamchiligi). Mobilda bularni ochilib-yopiluvchi Akkordeon (Accordion) ko‘rinishida qilish ancha tushunarli.
+5. Savatcha va Buyurtma berish (Cart & Checkout Funnel)
+✅ Qulay jihatlari:
+Majburiy ro‘yxatdan o‘tishsiz xarid: Login/Parol so‘ramasdan darhol buyurtma olish imkoni — mobil foydalanuvchilar uchun eng katta yutuq.
+Kuryer va Olib ketish (Pickup) ajratilgani: Xaridor 1 ta bosish bilan yetkazib berish turini tanlay oladi.
+❌ Noqulayliklar:
+Savatchadagi miqdor tugmalari (+ / -):
+Sonni oshirish yoki kamaytirish tugmalari kichik bo‘lsa, yo‘lda ketayotgan yoki shoshilayotgan xaridorga noqulaylik tug‘diradi.
+Klaviatura turi (inputMode):
+Telefon raqami kiritiladigan maydonda inputMode="tel" bo‘lmasa, to‘liq harfli klaviatura chiqib kelishi xaridorni ortiqcha harakatga majburlaydi.
+Xulosa: Konversiyani oshiruvchi TOP-4 Amaliy Yechim (Tavsiyalar)
+#	Muammo	Yechim	Kutilayotgan Natija
+1	PDP dagi 2 ta panel to‘qnashuvi	PDP sahifasida pastki MobileNavni yashirib, faqat to‘liq kenglikdagi MobileStickyCTA ("Savatga qo‘shish") qoldirish.	Xarid jarayonidagi to‘siq yo‘qoladi, to‘g‘ridan-to‘g‘ri konversiya oshadi.
+2	Touch Target o‘lchamlari	Kartochkadagi ❤️ va ⚖ tugmalarini kamida 44x44px maydonga keltirish.	Tasodifiy noto‘g‘ri bosilishlar 80% ga kamayadi.
+3	PDP rasm galereyasi	Bosh barmoq bilan gorizontal suriluvchi karusel (Swipeable Gallery) joriy etish.	Tovarni ko‘rish qulayligi va qiziqish ortadi.
+4	Bosh sahifa birinchi ekrani	Banner balandligini mobilda ixchamlashtirish va ommabop tovarlarni yuqoriroqqa ko‘tarish.	Saytga kirgan zahoti tovarlar ko‘rinadi, qaytib chiqib ketish (Bounce Rate) kamayadi.
+
+Sora.uz saytining mobil ko'rinishi (Mobile Viewport) bo'yicha dizayn, ergonomika, navigatsiya va xarid qilish qulayligi (UX) yuzasidan to'liq audit natijalari:
+
+1. Umumiy taassurot (Executive Summary)
+Sayt zamonaviy e-tijorat standartlari asosida ishlab chiqilgan. Mobil foydalanuvchilar uchun eng muhim bo'lgan "Thumb Zone" (bosh barmoq bilan bir qo'lda boshqarish) tamoyili, tezkor vizual aloqa (micro-interactions) va xarid savatchasidagi konversiya elementlari puxta o'ylangan. Biroq, ekranning vertikal maydonidan foydalanish va ayrim mobil komponentlar formatida yaxshilanishi kerak bo'lgan jihatlar mavjud.
+
+2. Dizayn va Vizual Ierarxiya (UI & Layout)
+Ranglar va brend uslubi: Asosiy oq/och kulrang fon ustida brendning pushti-binafsharang aksentlari (#e11d48 / #be185d), yorqin to'q sariq aksiya nishonlari hamda yashil tasdiq belgilari aniq muvozanatda ishlatilgan. Ranglar ko'zni toliqtirmaydi va muhim tugmalarni darhol ajratib ko'rsatadi.
+
+Tovar kartochkalari (Product Grid):
+
+2 ustunli tarmoq (2-column grid): Mobil ekran uchun eng optimal yechim. Mahsulotlar to'g'ri proporsiyada joylashgan.
+
+Narxlar iyerarxiyasi: Chegirmali yangi narx to'q va yirik shriftda (63,000 so'm), eski narx esa ustidan chizilgan och kulrangda (80,000 so'm) ko'rsatilgan. Bu chegirma samarasini yaxshi his qildiradi.
+
+Suratlar: Oq fondagi tovar rasmlari cheti biroz yumaloqlangan bloklarga joylangan, rasmlar xiralashmagan.
+
+3. Mobil Qulaylik va Foydalanish Tajribasi (UX & Usability)
+a) Navigatsiya va "Thumb Zone"
+Pastki qotirilgan menyu (Bottom Navigation): Eng ko'p ishlatiladigan 5 ta bo'lim (Bosh sahifa, Katalog, Qidiruv, Sevimlilar, Savatcha) ekranning pastki qismiga o'rnatilgan. Foydalanuvchi telefonni bir qo'lda ushlagan holda ekranning yuqorisiga cho'zilmasdan barcha asosiy bo'limlarga yetib borishi mumkin.
+
+Katalog oqimi: Pastki menyudan Katalogga o'tilganda toifalar kartochka va ularning ichki kichik toifalari ro'yxati tarzida qulay guruhlangan.
+
+b) Mikro-animatsiyalar va Tezkor Aks-sado (Micro-interactions)
+Savatga qo'shish jarayoni: Tovar kartochkasidagi "Savatga" tugmasi bosilganda sahifa qayta yuklanmaydi, tugma rangi darhol yashilga aylanib, "Savatda" deb o'zgaradi va pastki navigatsiyadagi savatcha belgisida sonli indikator (1, 2) jonli chiqadi. Bu foydalanuvchida ishonch va qulaylik uyg'otadi.
+
+c) Qidiruv tizimi (Search UX)
+Qidiruv paneliga bosilganda to'liq qidiruv modali ochiladi.
+
+Harf kiritilishi bilan natijalar uchta aniq blokga bo'lib ko'rsatiladi:
+
+Kategoriyalar
+
+Brendlar (brend logotipi bilan)
+
+Mahsulotlar (rasmi, nomi va narxi bilan).
+
+Qidiruv ostida "Ommabop qidiruvlar" teglari joylashtirilgani foydalanuvchiga yozishdan ko'ra bosish orqali tezroq tovar topish imkonini beradi.
+
+d) Savatcha va Xarid qilish oqimi (Cart & Checkout UX)
+Bepul yetkazib berish progress-bari: Savatcha ichida "Yetkazib berish: 388,000 so'm qoldi" kabi dinamik shkala mavjud. Bu foydalanuvchini bepul yetkazib berish chegarasiga yetish uchun ko'proq mahsulot qo'shishga undaydi (o'rtacha chekni oshirish — AOV uchun ajoyib usul).
+
+Tovar sonini o'zgartirish (-, +) tugmalari barmoq bilan bemalol bosiladigan kenglikda.
+
+4. Aniqlangan Kamchiliklar va Noqulayliklar
+Yuqori sarlavha (Header)ning vertikal zichligi:
+
+Mobilda yuqori qismda bir vaqtning o'zida: Logotip, til tanlash, qidiruv inputi hamda gorizontal toifalar tugmachalari joylashgan.
+
+Ular birgalikda mobil ekranning vertikal foydali maydonidan deyarli 25–30% qismini egallab oladi. Sahifa pastga skroll qilinganda ushbu header qisqarmaydi yoki yashirinmaydi, natijada tovarlarni ko'rish maydoni torayib qoladi.
+
+Filtrlar formati (Side Drawer):
+
+Filtr tugmasi bosilganda filtr paneli ekranning chap tomonidan (Side Drawer) ochiladi. Mobil qurilmalarda bir qo'l bilan ishlash uchun chapdan ochiluvchi tortmadan ko'ra pastdan tepaga ko'tariluvchi Bottom Sheet formati ancha qulay hisoblanadi.
+
+Filtr qo'llashdagi dinamik hisoblagich yo'qligi:
+
+Filtr tanlanganda pastdagi "Ko'rish" tugmasi shunchaki statik turadi. Agar unda qancha tovar qolgani ko'rsatilsa (masalan: "8 ta tovarni ko'rish"), foydalanuvchi filtr natijasini oldindan bilib harakat qiladi.
+
+Til o'zgartirish joylashuvi:
+
+Yuqori o'ng burchakdagi til tanlash tugmasi ekranning eng chekkasida joylashgani sababli, kichikroq ekranlarda uning bosilishi ba'zan noqulay.
+
+5. Xulosa va Yaxshilash bo'yicha Tavsiyalar
+
+[Sora.uz](https://sora.uz/uz) saytining mobil ko'rinishi (Mobile Viewport) bo'yicha dizayn, ergonomika, navigatsiya va xarid qilish qulayligi (UX) yuzasidan to'liq audit natijalari:
+
+---
+
+### 1. Umumiy taassurot (Executive Summary)
+
+Sayt zamonaviy e-tijorat standartlari asosida ishlab chiqilgan. Mobil foydalanuvchilar uchun eng muhim bo'lgan **"Thumb Zone"** (bosh barmoq bilan bir qo'lda boshqarish) tamoyili, tezkor vizual aloqa (micro-interactions) va xarid savatchasidagi konversiya elementlari puxta o'ylangan. Biroq, ekranning vertikal maydonidan foydalanish va ayrim mobil komponentlar formatida yaxshilanishi kerak bo'lgan jihatlar mavjud.
+
+---
+
+### 2. Dizayn va Vizual Ierarxiya (UI & Layout)
+
+* **Ranglar va brend uslubi:** Asosiy oq/och kulrang fon ustida brendning pushti-binafsharang aksentlari (`#e11d48` / `#be185d`), yorqin to'q sariq aksiya nishonlari hamda yashil tasdiq belgilari aniq muvozanatda ishlatilgan. Ranglar ko'zni toliqtirmaydi va muhim tugmalarni darhol ajratib ko'rsatadi.
+* **Tovar kartochkalari (Product Grid):**
+* **2 ustunli tarmoq (2-column grid):** Mobil ekran uchun eng optimal yechim. Mahsulotlar to'g'ri proporsiyada joylashgan.
+* **Narxlar iyerarxiyasi:** Chegirmali yangi narx to'q va yirik shriftda (`63,000 so'm`), eski narx esa ustidan chizilgan och kulrangda (`80,000 so'm`) ko'rsatilgan. Bu chegirma samarasini yaxshi his qildiradi.
+* **Suratlar:** Oq fondagi tovar rasmlari cheti biroz yumaloqlangan bloklarga joylangan, rasmlar xiralashmagan.
+
+
+
+---
+
+### 3. Mobil Qulaylik va Foydalanish Tajribasi (UX & Usability)
+
+#### a) Navigatsiya va "Thumb Zone"
+
+* **Pastki qotirilgan menyu (Bottom Navigation):** Eng ko'p ishlatiladigan 5 ta bo'lim (*Bosh sahifa, Katalog, Qidiruv, Sevimlilar, Savatcha*) ekranning pastki qismiga o'rnatilgan. Foydalanuvchi telefonni bir qo'lda ushlagan holda ekranning yuqorisiga cho'zilmasdan barcha asosiy bo'limlarga yetib borishi mumkin.
+* **Katalog oqimi:** Pastki menyudan Katalogga o'tilganda toifalar kartochka va ularning ichki kichik toifalari ro'yxati tarzida qulay guruhlangan.
+
+#### b) Mikro-animatsiyalar va Tezkor Aks-sado (Micro-interactions)
+
+* **Savatga qo'shish jarayoni:** Tovar kartochkasidagi *"Savatga"* tugmasi bosilganda sahifa qayta yuklanmaydi, tugma rangi darhol yashilga aylanib, *"Savatda"* deb o'zgaradi va pastki navigatsiyadagi savatcha belgisida sonli indikator (`1`, `2`) jonli chiqadi. Bu foydalanuvchida ishonch va qulaylik uyg'otadi.
+
+#### c) Qidiruv tizimi (Search UX)
+
+* Qidiruv paneliga bosilganda to'liq qidiruv modali ochiladi.
+* Harf kiritilishi bilan natijalar uchta aniq blokga bo'lib ko'rsatiladi:
+1. *Kategoriyalar*
+2. *Brendlar* (brend logotipi bilan)
+3. *Mahsulotlar* (rasmi, nomi va narxi bilan).
+
+
+* Qidiruv ostida *"Ommabop qidiruvlar"* teglari joylashtirilgani foydalanuvchiga yozishdan ko'ra bosish orqali tezroq tovar topish imkonini beradi.
+
+#### d) Savatcha va Xarid qilish oqimi (Cart & Checkout UX)
+
+* **Bepul yetkazib berish progress-bari:** Savatcha ichida *"Yetkazib berish: 388,000 so'm qoldi"* kabi dinamik shkala mavjud. Bu foydalanuvchini bepul yetkazib berish chegarasiga yetish uchun ko'proq mahsulot qo'shishga undaydi (o'rtacha chekni oshirish — AOV uchun ajoyib usul).
+* Tovar sonini o'zgartirish (`-`, `+`) tugmalari barmoq bilan bemalol bosiladigan kenglikda.
+
+---
+
+### 4. Aniqlangan Kamchiliklar va Noqulayliklar
+
+1. **Yuqori sarlavha (Header)ning vertikal zichligi:**
+* Mobilda yuqori qismda bir vaqtning o'zida: Logotip, til tanlash, qidiruv inputi hamda gorizontal toifalar tugmachalari joylashgan.
+* Ular birgalikda mobil ekranning vertikal foydali maydonidan deyarli **25–30%** qismini egallab oladi. Sahifa pastga skroll qilinganda ushbu header qisqarmaydi yoki yashirinmaydi, natijada tovarlarni ko'rish maydoni torayib qoladi.
+
+
+2. **Filtrlar formati (Side Drawer):**
+* Filtr tugmasi bosilganda filtr paneli ekranning chap tomonidan (Side Drawer) ochiladi. Mobil qurilmalarda bir qo'l bilan ishlash uchun chapdan ochiluvchi tortmadan ko'ra pastdan tepaga ko'tariluvchi **Bottom Sheet** formati ancha qulay hisoblanadi.
+
+
+3. **Filtr qo'llashdagi dinamik hisoblagich yo'qligi:**
+* Filtr tanlanganda pastdagi *"Ko'rish"* tugmasi shunchaki statik turadi. Agar unda qancha tovar qolgani ko'rsatilsa (masalan: *"8 ta tovarni ko'rish"*), foydalanuvchi filtr natijasini oldindan bilib harakat qiladi.
+
+
+4. **Til o'zgartirish joylashuvi:**
+* Yuqori o'ng burchakdagi til tanlash tugmasi ekranning eng chekkasida joylashgani sababli, kichikroq ekranlarda uning bosilishi ba'zan noqulay.
+
+
+
+---
+
+### 5. Xulosa va Yaxshilash bo'yicha Tavsiyalar
+
+| Bosqich | Tavsiya qilinadigan o'zgarish | UX / Biznes samarasi |
+| --- | --- | --- |
+| **1-darajali (Tezkor)** | **Scroll-down paytida headerni qisqartirish:** Foydalanuvchi sahifani pastga surganida qidiruv maydoni yoki toifalar yashirinib, faqat ixcham satr qolsin; yuqoriga qaytganda yana to'liq ochilsin. | Tovarlarni ko'rish uchun ekranda +20% ko'proq joy ochiladi. |
+| **2-darajali** | **Filtrni Bottom Sheet formatiga o'tkazish:** Chap tortma o'rniga pastdan chiqadigan modal qo'llash va tugmaga dinamik tovar sonini (`"N ta tovar"`) yozish. | Bir qo'lda filtrlash osonlashadi, filtrdan foydalanish ko'rsatkichi oshadi. |
+| **3-darajali** | **Katalog sahifasiga tezkor filtrlash:** Asosiy `/catalog` sahifasida toifalar ichiga kirishdan oldin eng xaridorgir tovarlar bloklarini ixcham karuselda saqlash. | Foydalanuvchi tovar kartochkasiga kamroq bosish (clicks) bilan yetib boradi. |

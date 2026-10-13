@@ -43,10 +43,13 @@ export function MobileStickyCTA({ product, locale }: MobileStickyCTAProps) {
   };
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 p-3 shadow-lg">
+    <div
+      data-testid="mobile-sticky-cta"
+      className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 pt-3 px-4 pb-[max(env(safe-area-inset-bottom),12px)] shadow-[0_-4px_20px_rgba(0,0,0,0.08)]"
+    >
       <div className="flex items-center justify-between gap-3 max-w-lg mx-auto">
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="relative w-11 h-11 rounded-lg bg-slate-100 dark:bg-slate-800 p-1 shrink-0 overflow-hidden">
+          <div className="relative w-11 h-11 rounded-xl bg-slate-100 dark:bg-slate-800 p-1 shrink-0 overflow-hidden border border-slate-200/60 dark:border-slate-700/60">
             <Image
               src={product.main_picture}
               alt={loc.name}
@@ -75,7 +78,7 @@ export function MobileStickyCTA({ product, locale }: MobileStickyCTAProps) {
           type="button"
           disabled={!canAddToCart}
           onClick={handleAddToCart}
-          className={`flex items-center justify-center gap-1.5 px-5 h-10 rounded-xl font-bold text-xs shrink-0 transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+          className={`flex items-center justify-center gap-2 px-5 min-h-[44px] rounded-xl font-bold text-xs shrink-0 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
             isAdded
               ? "bg-emerald-600 text-white"
               : "bg-sora-600 text-white active:scale-95 shadow-md shadow-sora-500/20"

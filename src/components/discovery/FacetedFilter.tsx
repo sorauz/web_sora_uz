@@ -3,19 +3,22 @@
 import { useQueryState } from "nuqs";
 import { useTranslations, useLocale } from "next-intl";
 import { Brand } from "@/lib/schemas/brand";
-import { Filter, X, RotateCcw, Search, ChevronDown, Check } from "lucide-react";
+import { Filter, X, RotateCcw, Search, ChevronDown } from "lucide-react";
 import { useState, useMemo } from "react";
+import { SortSelect } from "./SortSelect";
 
 interface FacetedFilterProps {
   brands: Brand[];
   minPossiblePrice?: number;
   maxPossiblePrice?: number;
+  totalMatchedCount?: number;
 }
 
 export function FacetedFilter({
   brands,
   minPossiblePrice = 0,
   maxPossiblePrice = 20000000,
+  totalMatchedCount,
 }: FacetedFilterProps) {
   const t = useTranslations("filter");
   const common = useTranslations("common");
@@ -73,6 +76,44 @@ export function FacetedFilter({
   const hasActiveFilters =
     activeBrands.length > 0 || !!minPrice || !!maxPrice || !!inStock;
 
+  const activeFilterCount =
+    activeBrands.length + (minPrice || maxPrice ? 1 : 0) + (inStock === "1" ? 1 : 0);
+
+  // Quick price presets to avoid opening virtual keyboard on mobile
+  const pricePresets = [
+    {
+      label: isUz ? "50 minggacha" : "До 50 тыс.",
+      min: "",
+      max: "50000",
+    },
+    {
+      label: isUz ? "50 – 200 ming" : "50 – 200 тыс.",
+      min: "50000",
+      max: "200000",
+    },
+    {
+      label: isUz ? "200 – 500 ming" : "200 – 500 тыс.",
+      min: "200000",
+      max: "500000",
+    },
+    {
+      label: isUz ? "500 mingdan yuqori" : "От 500 тыс.",
+      min: "500000",
+      max: "",
+    },
+  ];
+
+  const handlePricePreset = (minVal: string, maxVal: string) => {
+    const isSame = (minPrice || "") === minVal && (maxPrice || "") === maxVal;
+    if (isSame) {
+      setMinPrice(null);
+      setMaxPrice(null);
+    } else {
+      setMinPrice(minVal || null);
+      setMaxPrice(maxVal || null);
+    }
+  };
+
   // Filter and sort brands: active brands always top, matching brandSearch query
   const filteredBrands = useMemo(() => {
     const q = brandSearch.trim().toLowerCase();
@@ -126,7 +167,7 @@ export function FacetedFilter({
 
         {openSections.stock && (
           <div className="mt-3">
-            <label className="flex items-center gap-2.5 text-xs text-slate-700 dark:text-slate-300 cursor-pointer select-none">
+            <label className="flex items-center gap-2.5 text-xs text-slate-700 dark:text-slate-300 cursor-pointer select-none py-1">
               <input
                 type="checkbox"
                 checked={inStock === "1"}
@@ -172,23 +213,23 @@ export function FacetedFilter({
                   value={brandSearch}
                   onChange={(e) => setBrandSearch(e.target.value)}
                   placeholder={isUz ? "Brendni qidirish..." : "Поиск бренда..."}
-                  className="w-full h-8 pl-8 pr-7 text-xs rounded-lg bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-hidden focus:border-sora-500"
+                  className="w-full h-9 pl-8 pr-7 text-xs rounded-lg bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-hidden focus:border-sora-500"
                 />
                 {brandSearch && (
                   <button
                     type="button"
                     onClick={() => setBrandSearch("")}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                     aria-label="Tozalash"
                   >
-                    <X className="w-3 h-3" />
+                    <X className="w-3.5 h-3.5" />
                   </button>
                 )}
               </div>
             )}
 
             {/* Brands List */}
-            <div className="max-h-52 overflow-y-auto space-y-1.5 pr-2 text-xs scrollbar-thin">
+            <div className="max-h-48 overflow-y-auto space-y-1 pr-2 text-xs scrollbar-thin">
               {filteredBrands.length === 0 ? (
                 <p className="text-[11px] text-slate-400 py-2 text-center">
                   {isUz ? "Brend topilmadi" : "Бренд не найден"}
@@ -199,9 +240,9 @@ export function FacetedFilter({
                   return (
                     <label
                       key={brand.id}
-                      className="flex items-center justify-between py-1 px-1.5 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60 hover:text-sora-600 dark:hover:text-sora-400 cursor-pointer select-none transition-colors"
+                      className="flex items-center justify-between py-1.5 px-1.5 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60 hover:text-sora-600 dark:hover:text-sora-400 cursor-pointer select-none transition-colors"
                     >
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2.5">
                         <input
                           type="checkbox"
                           checked={checked}
@@ -221,7 +262,7 @@ export function FacetedFilter({
         )}
       </div>
 
-      {/* 3. Price Range Section (Collapsible) */}
+      {/* 3. Price Range Section with Quick Preset Chips (Collapsible) */}
       <div className="pb-1">
         <button
           type="button"
@@ -237,11 +278,37 @@ export function FacetedFilter({
         </button>
 
         {openSections.price && (
-          <div className="mt-3 space-y-2">
+          <div className="mt-3 space-y-3">
+            {/* Quick Price Preset Chips */}
+            <div className="flex flex-wrap gap-1.5">
+              {pricePresets.map((preset, idx) => {
+                const isActive =
+                  (minPrice || "") === preset.min && (maxPrice || "") === preset.max;
+                return (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => handlePricePreset(preset.min, preset.max)}
+                    className={`px-2.5 py-1.5 rounded-lg text-[11px] font-semibold transition-all cursor-pointer border ${
+                      isActive
+                        ? "bg-sora-600 text-white border-sora-600 shadow-2xs"
+                        : "bg-slate-50 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-sora-400"
+                    }`}
+                  >
+                    {preset.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Custom Min / Max Numeric Inputs */}
             <div className="flex items-center gap-2">
               <div className="relative flex-1">
                 <input
                   type="number"
+                  inputMode="numeric"
+                  min={minPossiblePrice}
+                  max={maxPossiblePrice}
                   placeholder={t("priceFrom")}
                   value={minPrice}
                   onChange={(e) => setMinPrice(e.target.value || null)}
@@ -252,6 +319,9 @@ export function FacetedFilter({
               <div className="relative flex-1">
                 <input
                   type="number"
+                  inputMode="numeric"
+                  min={minPossiblePrice}
+                  max={maxPossiblePrice}
                   placeholder={t("priceTo")}
                   value={maxPrice}
                   onChange={(e) => setMaxPrice(e.target.value || null)}
@@ -275,47 +345,89 @@ export function FacetedFilter({
         {content}
       </aside>
 
-      {/* Mobile Toggle Button */}
+      {/* Mobile 50/50 Filter & Sort Bar + Bottom Sheet Modal */}
       <div className="lg:hidden">
-        <button
-          type="button"
-          onClick={() => setMobileOpen(true)}
-          className="h-10 px-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center gap-2 text-xs font-bold text-slate-800 dark:text-slate-200 shadow-xs active:scale-95 transition-transform cursor-pointer"
-        >
-          <Filter className="w-4 h-4 text-sora-600" />
-          <span>{t("title")}</span>
-          {hasActiveFilters && (
-            <span className="w-2 h-2 rounded-full bg-sora-600" />
-          )}
-        </button>
+        <div className="grid grid-cols-2 gap-2.5 items-center">
+          <button
+            type="button"
+            onClick={() => setMobileOpen(true)}
+            data-testid="mobile-filter-trigger"
+            className="w-full h-10 px-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center gap-2 text-xs font-bold text-slate-800 dark:text-slate-200 shadow-xs active:scale-95 transition-transform cursor-pointer"
+          >
+            <Filter className="w-4 h-4 text-sora-600 shrink-0" />
+            <span className="truncate">{t("title")}</span>
+            {activeFilterCount > 0 && (
+              <span className="px-1.5 py-0.5 rounded-full bg-sora-600 text-white text-[10px] font-bold leading-none">
+                {activeFilterCount}
+              </span>
+            )}
+          </button>
 
-        {/* Mobile Drawer */}
+          <SortSelect className="w-full" />
+        </div>
+
+        {/* Mobile Bottom Sheet Drawer */}
         {mobileOpen && (
-          <div className="fixed inset-0 z-50 flex bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
-            <div className="relative w-full max-w-xs h-full bg-white dark:bg-slate-900 p-6 overflow-y-auto shadow-2xl flex flex-col justify-between">
-              <div>
-                <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-100 dark:border-slate-800">
-                  <h3 className="font-bold text-base text-slate-900 dark:text-white">
-                    {t("title")}
+          <div
+            className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-xs animate-in fade-in duration-200"
+            onClick={() => setMobileOpen(false)}
+          >
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-label={t("title")}
+              data-testid="mobile-filter-bottom-sheet"
+              onClick={(e) => e.stopPropagation()}
+              className="relative w-full max-w-lg max-h-[85vh] bg-white dark:bg-slate-900 rounded-t-3xl pt-3 px-5 pb-[max(env(safe-area-inset-bottom),16px)] shadow-2xl flex flex-col justify-between animate-in slide-in-from-bottom duration-200"
+            >
+              {/* Drag Handle Indicator & Sheet Header */}
+              <div className="shrink-0">
+                <div className="w-12 h-1.5 rounded-full bg-slate-300 dark:bg-slate-700 mx-auto mb-3" />
+                <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-100 dark:border-slate-800">
+                  <h3 className="font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">
+                    <Filter className="w-4 h-4 text-sora-600" />
+                    <span>{t("title")}</span>
                   </h3>
                   <button
                     type="button"
                     onClick={() => setMobileOpen(false)}
-                    className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500"
+                    aria-label={isUz ? "Yopish" : "Закрыть"}
+                    className="w-9 h-9 rounded-xl flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 cursor-pointer"
                   >
                     <X className="w-5 h-5" />
                   </button>
                 </div>
+              </div>
+
+              {/* Scrollable Filter Sections */}
+              <div className="flex-1 overflow-y-auto pr-1 py-1">
                 {content}
               </div>
 
-              <div className="pt-6 border-t border-slate-100 dark:border-slate-800 mt-6">
+              {/* Sticky Bottom Action Bar with Live Product Counter */}
+              <div className="shrink-0 pt-4 border-t border-slate-100 dark:border-slate-800 mt-3 flex items-center gap-2.5">
+                {hasActiveFilters && (
+                  <button
+                    type="button"
+                    onClick={resetAll}
+                    className="h-11 px-4 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer shrink-0"
+                  >
+                    {isUz ? "Tozalash" : "Сброс"}
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={() => setMobileOpen(false)}
-                  className="w-full h-11 bg-sora-600 hover:bg-sora-700 text-white font-bold text-sm rounded-xl active:scale-98 transition-transform shadow-md"
+                  data-testid="mobile-filter-apply"
+                  className="flex-1 h-11 bg-sora-600 hover:bg-sora-700 text-white font-bold text-sm rounded-xl active:scale-98 transition-transform shadow-md cursor-pointer"
                 >
-                  {isUz ? "Ko'rish (Qo'llash)" : "Применить"}
+                  {typeof totalMatchedCount === "number"
+                    ? isUz
+                      ? `${totalMatchedCount} ta tovarni ko'rish`
+                      : `Показать (${totalMatchedCount} товаров)`
+                    : isUz
+                    ? "Ko'rish (Qo'llash)"
+                    : "Применить"}
                 </button>
               </div>
             </div>

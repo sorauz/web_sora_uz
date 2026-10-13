@@ -141,6 +141,44 @@ export default async function CatalogPage({ params, searchParams }: CatalogPageP
           </Link>
         </div>
 
+        {/* Quick Top Products Carousel (Mobile UX 3rd Tier Recommendation: immediate product access before scrolling deep into categories) */}
+        {products.length > 0 && (
+          <section className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Flame className="w-5 h-5 text-amber-500" />
+                <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
+                  {isUz ? "Eng xaridorgir tovarlar" : "Хиты продаж"}
+                </h2>
+              </div>
+              <Link
+                href="/catalog/popular"
+                className="text-xs font-bold text-sora-600 dark:text-sora-400 hover:underline"
+              >
+                {isUz ? "Barchasi →" : "Все →"}
+              </Link>
+            </div>
+            <div
+              data-testid="catalog-top-carousel"
+              className="flex gap-3.5 overflow-x-auto pb-2 snap-x snap-mandatory scrollbar-none -mx-4 px-4 sm:mx-0 sm:px-0"
+            >
+              {products.slice(0, 8).map((p) => (
+                <div
+                  key={p.id}
+                  className="w-[168px] sm:w-[210px] shrink-0 snap-start"
+                >
+                  <ProductCard
+                    product={p}
+                    rating={4.9}
+                    reviewCount={28}
+                    badge={isUz ? "Xit" : "Хит"}
+                  />
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* All Root Categories & Subcategories */}
         <section className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

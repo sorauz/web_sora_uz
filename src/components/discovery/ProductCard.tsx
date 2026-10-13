@@ -105,31 +105,49 @@ export function ProductCard({
           )}
         </div>
 
-        {/* Favorite Button */}
+        {/* Favorite Button (44x44px mobile touch target) */}
         <button
+          type="button"
           onClick={handleFavorite}
           aria-label={t("favorites")}
-          className={`absolute top-2.5 right-2.5 z-10 w-8 h-8 rounded-full flex items-center justify-center transition-colors shadow-xs ${
+          className={`absolute top-1.5 right-1.5 z-10 w-11 h-11 sm:w-9 sm:h-9 rounded-full flex items-center justify-center transition-colors cursor-pointer ${
             isFav
-              ? "bg-rose-50 text-rose-500 dark:bg-rose-950/60"
-              : "bg-white/80 dark:bg-slate-900/80 text-slate-400 hover:text-rose-500"
+              ? "text-rose-500"
+              : "text-slate-400 hover:text-rose-500"
           }`}
         >
-          <Heart className={`w-4 h-4 ${isFav ? "fill-current" : ""}`} />
+          <span
+            className={`w-8 h-8 sm:w-8 sm:h-8 rounded-full flex items-center justify-center shadow-xs transition-colors ${
+              isFav
+                ? "bg-rose-50 text-rose-500 dark:bg-rose-950/80"
+                : "bg-white/90 dark:bg-slate-900/90"
+            }`}
+          >
+            <Heart className={`w-4 h-4 ${isFav ? "fill-current" : ""}`} />
+          </span>
         </button>
 
-        {/* Compare Button */}
+        {/* Compare Button (44x44px mobile touch target) */}
         <button
+          type="button"
           onClick={handleCompare}
           aria-label={t("compare")}
-          className={`absolute top-11.5 right-2.5 z-10 w-8 h-8 rounded-full flex items-center justify-center transition-colors shadow-xs ${
+          className={`absolute top-12.5 sm:top-11 right-1.5 z-10 w-11 h-11 sm:w-9 sm:h-9 rounded-full flex items-center justify-center transition-colors cursor-pointer ${
             inCompare
-              ? "bg-sora-50 text-sora-600 dark:bg-sora-950/60 dark:text-sora-400"
-              : "bg-white/80 dark:bg-slate-900/80 text-slate-400 hover:text-sora-600 dark:hover:text-sora-400"
+              ? "text-sora-600 dark:text-sora-400"
+              : "text-slate-400 hover:text-sora-600 dark:hover:text-sora-400"
           }`}
           title={t("compare")}
         >
-          <Scale className="w-4 h-4" />
+          <span
+            className={`w-8 h-8 sm:w-8 sm:h-8 rounded-full flex items-center justify-center shadow-xs transition-colors ${
+              inCompare
+                ? "bg-sora-50 text-sora-600 dark:bg-sora-950/80 dark:text-sora-400"
+                : "bg-white/90 dark:bg-slate-900/90"
+            }`}
+          >
+            <Scale className="w-4 h-4" />
+          </span>
         </button>
 
         {/* Image with crawlable Link */}
@@ -202,10 +220,11 @@ export function ProductCard({
           </div>
 
           <button
+            type="button"
             onClick={handleAddToCart}
             disabled={isOutOfStock || price <= 0}
             aria-label={inCart ? t("inCart") : t("addToCart")}
-            className={`h-9 px-3 rounded-xl flex items-center justify-center gap-1.5 text-xs font-semibold transition-all duration-200 shadow-xs ${
+            className={`min-h-[40px] min-w-[44px] px-3.5 rounded-xl flex items-center justify-center gap-1.5 text-xs font-semibold transition-all duration-200 shadow-xs cursor-pointer ${
               isOutOfStock || price <= 0
                 ? "bg-slate-100 text-slate-400 cursor-not-allowed dark:bg-slate-800"
                 : inCart || addedAnim
@@ -215,12 +234,12 @@ export function ProductCard({
           >
             {addedAnim || inCart ? (
               <>
-                <Check className="w-3.5 h-3.5" />
+                <Check className="w-4 h-4" />
                 <span className="hidden sm:inline">{t("inCart")}</span>
               </>
             ) : (
               <>
-                <ShoppingCart className="w-3.5 h-3.5" />
+                <ShoppingCart className="w-4 h-4" />
                 <span className="hidden sm:inline">{t("addToCart")}</span>
               </>
             )}

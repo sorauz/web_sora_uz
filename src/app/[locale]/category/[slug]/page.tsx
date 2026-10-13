@@ -212,18 +212,23 @@ export default async function CategoryPage({
         )}
 
         {/* Main Content: Filter Sidebar + Products Grid */}
-        <div className="flex flex-col lg:flex-row gap-8 pt-4">
-          {/* Faceted Filter Sidebar */}
-          <FacetedFilter brands={brandsData.data.brands} />
+        <div className="flex flex-col lg:flex-row gap-4 lg:gap-8 pt-2 sm:pt-4">
+          {/* Faceted Filter Sidebar (Desktop) & 50/50 Filter+Sort Toolbar + Bottom Sheet (Mobile) */}
+          <FacetedFilter
+            brands={brandsData.data.brands}
+            totalMatchedCount={filtered.length}
+          />
 
           {/* Products Column */}
-          <div className="flex-1 space-y-6">
-            {/* Top Toolbar (Count + Sort) */}
-            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
+          <div className="flex-1 space-y-4 sm:space-y-6">
+            {/* Top Toolbar (Count + Desktop Sort) */}
+            <div className="flex items-center justify-between pb-2 sm:pb-3 border-b border-slate-200 dark:border-slate-800">
               <span className="text-xs font-semibold text-slate-500">
                 {filtered.length} {isUz ? "ta mahsulot topildi" : "товаров найдено"}
               </span>
-              <SortSelect />
+              <div className="hidden lg:block">
+                <SortSelect />
+              </div>
             </div>
 
             {/* Product Grid */}

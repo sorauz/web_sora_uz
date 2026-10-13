@@ -309,6 +309,8 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
                   </label>
                   <input
                     type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                     maxLength={9}
                     required={orderType === "B2B"}
                     value={companyInn}
@@ -347,6 +349,7 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
                 <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="tel"
+                  inputMode="tel"
                   required
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
@@ -363,7 +366,8 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
               <div className="relative">
                 <Smartphone className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
-                  type="text"
+                  type="tel"
+                  inputMode="tel"
                   value={altPhone}
                   onChange={(e) => setAltPhone(e.target.value)}
                   placeholder={t("altPhonePlaceholder")}
@@ -708,6 +712,9 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
                       </label>
                       <input
                         type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        maxLength={9}
                         required={paymentMethod === "b2b"}
                         value={companyInn}
                         onChange={(e) => setCompanyInn(e.target.value)}

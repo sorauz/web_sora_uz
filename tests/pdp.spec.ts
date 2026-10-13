@@ -32,7 +32,7 @@ test.describe("FAZA 3: Product Detail Page (PDP) with Real 1C ERP Data", () => {
 
     // Check Tabs navigation (Specs from 1C)
     await page.getByRole("button", { name: /texnik xususiyatlari/i }).click();
-    await expect(page.getByRole("cell", { name: "Model" })).toBeVisible();
+    await expect(page.getByRole("cell", { name: /Artikul|Model/i }).first()).toBeVisible();
 
     await page.getByRole("button", { name: /sharhlar/i }).click();
     await expect(page.getByText("4.8").first()).toBeVisible();

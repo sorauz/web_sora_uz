@@ -6,7 +6,6 @@ import { getProductLocalized } from "@/lib/schemas/product";
 import { Header } from "@/components/layout/Header";
 import { PromoNav } from "@/components/layout/PromoNav";
 import { Footer } from "@/components/layout/Footer";
-import { MobileNav } from "@/components/layout/MobileNav";
 import { Breadcrumbs } from "@/components/discovery/Breadcrumbs";
 import { ProductGallery } from "@/components/pdp/ProductGallery";
 import { ProductActions } from "@/components/pdp/ProductActions";
@@ -375,11 +374,10 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
         )}
       </main>
 
-      {/* Mobile Sticky CTA bar */}
+      {/* Mobile Sticky CTA bar (Yagona pastki xarid paneli - MobileNav bilan ustma-ust tushmasligi uchun) */}
       <MobileStickyCTA product={product} locale={currentLocale} />
 
       <Footer />
-      <MobileNav />
     </div>
   );
 }

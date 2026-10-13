@@ -37,12 +37,34 @@ export function Header({ tree, categories, brands, products }: HeaderProps) {
   const [mounted, setMounted] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [trackerOpen, setTrackerOpen] = useState(false);
+  const [hideMobileSearchOnScroll, setHideMobileSearchOnScroll] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const lastScrollYRef = useRef(0);
 
   useEffect(() => {
     setMounted(true);
     checkAuth();
   }, [checkAuth]);
+
+  // Smart scroll listener: hide mobile search bar when scrolling down, show when scrolling up
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentY = window.scrollY;
+      const diff = currentY - lastScrollYRef.current;
+
+      if (currentY <= 40) {
+        setHideMobileSearchOnScroll(false);
+      } else if (diff > 8 && currentY > 90) {
+        setHideMobileSearchOnScroll(true);
+      } else if (diff < -8) {
+        setHideMobileSearchOnScroll(false);
+      }
+      lastScrollYRef.current = currentY;
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // Click outside to close user dropdown
   useEffect(() => {
@@ -207,8 +229,14 @@ export function Header({ tree, categories, brands, products }: HeaderProps) {
         </div>
       </div>
 
-      {/* Mobile Search Bar Row (Triggers Full-screen Mobile Search Modal) */}
-      <div className="sm:hidden w-full px-4 pb-3">
+      {/* Mobile Search Bar Row (Collapses on scroll-down to save +20% vertical screen space, expands on scroll-up) */}
+      <div
+        className={`sm:hidden w-full px-4 overflow-hidden transition-all duration-200 ease-out ${
+          hideMobileSearchOnScroll
+            ? "max-h-0 pb-0 opacity-0 pointer-events-none"
+            : "max-h-14 pb-2.5 opacity-100"
+        }`}
+      >
         <button
           type="button"
           onClick={openSearch}
