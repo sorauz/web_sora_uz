@@ -87,7 +87,7 @@ class SoraApiClient {
         signal: controller.signal,
         next: {
           tags: options?.tags,
-          revalidate: options?.revalidate ?? 3600,
+          revalidate: options?.revalidate ?? 86400, // 24 hours default ISR cache
         },
       });
 
@@ -335,7 +335,7 @@ class SoraApiClient {
   ): Promise<{ items: OfferItem[]; isFallback: boolean }> {
     const res = await this.request<OfferItem[]>("/low_price_guarantee", {
       tags: options?.tags ?? ["offers", "low_price_guarantee"],
-      revalidate: options?.revalidate ?? 3600,
+      revalidate: options?.revalidate ?? 86400,
     });
     if (!res.isFallback && res.data) {
       const parsed = OfferListResponseSchema.safeParse(res.data);
@@ -354,7 +354,7 @@ class SoraApiClient {
   ): Promise<{ items: OfferItem[]; isFallback: boolean }> {
     const res = await this.request<OfferItem[]>("/new_products", {
       tags: options?.tags ?? ["offers", "new_products"],
-      revalidate: options?.revalidate ?? 3600,
+      revalidate: options?.revalidate ?? 86400,
     });
     if (!res.isFallback && res.data) {
       const parsed = OfferListResponseSchema.safeParse(res.data);
@@ -373,7 +373,7 @@ class SoraApiClient {
   ): Promise<{ items: OfferItem[]; isFallback: boolean }> {
     const res = await this.request<OfferItem[]>("/popular", {
       tags: options?.tags ?? ["offers", "popular"],
-      revalidate: options?.revalidate ?? 3600,
+      revalidate: options?.revalidate ?? 86400,
     });
     if (!res.isFallback && res.data) {
       const parsed = OfferListResponseSchema.safeParse(res.data);
@@ -392,7 +392,7 @@ class SoraApiClient {
   ): Promise<{ items: OfferItem[]; isFallback: boolean }> {
     const res = await this.request<OfferItem[]>("/promotions", {
       tags: options?.tags ?? ["offers", "promotions"],
-      revalidate: options?.revalidate ?? 3600,
+      revalidate: options?.revalidate ?? 86400,
     });
     if (!res.isFallback && res.data) {
       const parsed = OfferListResponseSchema.safeParse(res.data);
@@ -497,7 +497,7 @@ class SoraApiClient {
         `reviews-${productId}`,
         `product-${productId}`,
       ],
-      revalidate: options?.revalidate ?? 3600,
+      revalidate: options?.revalidate ?? 86400,
     });
 
     if (!res.isFallback && res.data && Array.isArray(res.data)) {

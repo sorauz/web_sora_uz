@@ -12,7 +12,7 @@ import { Link } from "@/i18n/routing";
 import { Metadata } from "next";
 import { ShieldCheck, Sparkles, Flame, BadgePercent, ArrowRight } from "lucide-react";
 
-export const revalidate = 3600;
+export const revalidate = 86400; // 24 hours ISR revalidation
 
 const VALID_OFFERS = [
   "low_price_guarantee",

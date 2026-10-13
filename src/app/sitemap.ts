@@ -1,7 +1,7 @@
 import { MetadataRoute } from "next";
 import { api } from "@/lib/api";
 
-export const revalidate = 3600; // 1 hour ISR revalidation
+export const revalidate = 86400; // 24 hours ISR revalidation
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://sora.uz";
