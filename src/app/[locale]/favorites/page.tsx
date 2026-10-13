@@ -58,7 +58,6 @@ export default async function FavoritesPage({ params }: FavoritesPageProps) {
         tree={tree}
         categories={categories}
         brands={brandsRes.data.brands}
-        products={allProdsRes.products}
       />
       <PromoNav />
 

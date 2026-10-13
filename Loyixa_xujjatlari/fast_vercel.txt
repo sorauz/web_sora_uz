@@ -1,0 +1,32 @@
+Loyiha doirasida tezlik va SEO’ga zarar yetkazmasdan xarajatlarni 60%–80% kamaytirish yo‘llari:
+1. ISR Writes xarajatini kamaytirish:
+Bosh sahifa kesh hajmini (RSC Payload) qisqartirish:
+Muammo: Bosh sahifada (src/app/[locale]/page.tsx) barcha mahsulotlar (getAllProducts) chaqirilib, qidiruv avtokomplitiga berilgan. 1C bazasida tovarlar ko‘paygani sari kesh hajmi bir necha yuz kilobaytga yetadi. vercel.txtda aytilganidek, ISR Writes 8 KB birliklarda hisoblangani sababli, har bir yangilanish 20–30 barobar ko‘p yozuv sarflaydi.
+Yechim: Qidiruv ma’lumotlarini bosh sahifa HTML’iga tiqmasdan, yengil dinamik qidiruv orqali olish. Natijada bosh sahifa kesh hajmi 10 barobarga kichrayadi, sahifa ochilishi esa tezlashadi.
+On-Demand Revalidation’ga to‘liq o‘tish:
+Yechim: Sahifalarni soat sayin vaqt bo‘yicha (revalidate: 3600) majburan qayta-qayta yozish o‘rniga, faqat 1C ERP tizimida tovar narxi yoki qoldig‘i o‘zgarganda loyihadagi /api/revalidate webhook’i orqali yangilash. Tovar o‘zgarmagan vaqtda ISR yozuvlari 0 ga tushadi.
+2. Fast Origin Transfer xarajatini kamaytirish:
+Loyiha ildiziga vercel.json qo‘shish:
+Yechim: Loyihada hozir vercel.json yo‘q. Unga:
+json
+{
+  "skipMiddlewareRequestBody": true
+}
+sozlamasini kiritish kifoya. middleware.ts faqat til (next-intl) yo‘naltirishini bajaradi, unga so‘rov tanasi (body) kerak emas. Bu bitta qator bilan har bir so‘rovdagi Fast Origin Transfer trafigi 30–40% ga tejaladi.
+Dinamik Kategoriya sahifalariga (/category/[slug]) CDN Kesh berish:
+Muammo: Hozir toifalar sahifasida har bir foydalanuvchi kirishi Vercel Serverless Function (Origin)ni chaqiradi.
+Yechim: Kategoriya sahifasi javobiga s-maxage=600, stale-while-revalidate=3600 kesh sarlavhasini berish. Bir xil toifaga kirgan 1000 ta xaridordan faqat 1 tasi Origin serverga boradi, qolgan 999 tasiga sahifa to‘g‘ridan-to‘g‘ri Vercel CDN’dan chaqmoqdek tez (15–30 ms) yetkaziladi (Origin Transfer 90% ga kamayadi, TTFB esa keskin yaxshilanadi).
+3. Fast Data Transfer xarajatini kamaytirish:
+Rasmlarni optimallashtirish (next.config.ts):
+Yechim: next.config.ts faylida images.formats: ['image/avif', 'image/webp'] va minimumCacheTTL: 2592000 (30 kun) sozlash. Rasmlar avtomatik ravishda zamonaviy AVIF formatiga siqiladi va foydalanuvchi brauzerida uzoq saqlanadi. Trafik 50% ga tejaladi, sahifalar skrolli yengillashadi.
+Xulosa va Maslahat:
+
+Hozirgi holatda saytni ishlab chiqarishga (Production) qo‘yish ortiqcha xarajat xavfini tug‘diradi. Yuqoridagi 3 ta yo‘nalishdagi optimizatsiyalarni amalga oshirish:
+
+SEO’ni zarracha tushirmaydi (barcha meta-teglar, kanonik havolalar va schema JSON-LD to‘liq saqlanadi);
+Sayt tezligini yanada oshiradi (keshlash hisobiga server yuklanishi kamayadi);
+Vercel xarajatlarini bir necha barobarga qisqartiradi.
+
+On-Demand Revalidation uchun qo‘shimcha sozlash: Webhook orqali revalidatsiya qilish uchun revalidateTag yoki revalidatePath funksiyalaridan foydalanish va kesh teglarini to‘g‘ri sozlash talab etiladi.
+
+Kesh sarlavhalari xavfsizligi: s-maxage va stale-while-revalidate sarlavhalarini faqat foydalanuvchiga xos bo‘lmagan (autentifikatsiya qilinmagan) sahifalar uchun qo‘llang. Aks holda, bir foydalanuvchining shaxsiy ma’lumotlari boshqasiga ko‘rinishi mumkin

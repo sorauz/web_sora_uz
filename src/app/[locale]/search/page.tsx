@@ -83,7 +83,6 @@ export default async function SearchPage({
         tree={tree}
         categories={categories}
         brands={brands}
-        products={products}
       />
       <PromoNav />
 

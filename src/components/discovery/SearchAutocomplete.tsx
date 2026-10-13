@@ -17,15 +17,15 @@ import {
 } from "@/lib/utils/search";
 
 interface SearchAutocompleteProps {
-  products: Product[];
-  categories: Category[];
-  brands: Brand[];
+  products?: Product[];
+  categories?: Category[];
+  brands?: Brand[];
 }
 
 export function SearchAutocomplete({
-  products,
-  categories,
-  brands,
+  products = [],
+  categories = [],
+  brands = [],
 }: SearchAutocompleteProps) {
   const locale = useLocale() as "uz" | "ru";
   const t = useTranslations("common");
@@ -35,6 +35,19 @@ export function SearchAutocomplete({
 
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const [remoteResults, setRemoteResults] = useState<{
+    products: Array<{
+      id: string;
+      slug: string;
+      name: string;
+      main_picture: string;
+      price: number;
+      oldPrice?: number;
+      hasDiscount?: boolean;
+    }>;
+    categories: Array<{ id: string; name: string; slug: string }>;
+    brands: Array<{ id: string; name: string }>;
+  } | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Close when clicking outside
@@ -50,18 +63,73 @@ export function SearchAutocomplete({
 
   const trimmed = query.trim().toLowerCase();
 
-  const matchedProducts =
-    trimmed.length > 1
-      ? searchProducts(products, trimmed, locale).slice(0, 4)
-      : [];
+  // If products are passed locally, use synchronous local search; otherwise fetch lightweight suggestions
+  const hasLocalData = products.length > 0;
 
-  const matchedCategories =
-    trimmed.length > 1
-      ? searchCategories(categories, trimmed, locale).slice(0, 3)
-      : [];
+  useEffect(() => {
+    if (hasLocalData || trimmed.length < 2) {
+      setRemoteResults(null);
+      return;
+    }
 
-  const matchedBrands =
-    trimmed.length > 1 ? searchBrands(brands, trimmed).slice(0, 3) : [];
+    const controller = new AbortController();
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `/api/search/suggestions?q=${encodeURIComponent(trimmed)}&locale=${locale}`,
+          { signal: controller.signal }
+        );
+        if (res.ok) {
+          const data = await res.json();
+          setRemoteResults(data);
+        }
+      } catch {
+        // ignore aborts
+      }
+    }, 150);
+
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [trimmed, locale, hasLocalData]);
+
+  const matchedProducts = hasLocalData
+    ? trimmed.length > 1
+      ? searchProducts(products, trimmed, locale).slice(0, 4).map((p) => {
+          const loc = getProductLocalized(p, locale);
+          const priceInfo = calculateProductPrice(p.price);
+          return {
+            id: p.id,
+            slug: loc.slug,
+            name: loc.name,
+            main_picture: p.main_picture,
+            price: priceInfo.price,
+            oldPrice: priceInfo.oldPrice,
+            hasDiscount: priceInfo.hasDiscount,
+          };
+        })
+      : []
+    : remoteResults?.products || [];
+
+  const matchedCategories = hasLocalData
+    ? trimmed.length > 1
+      ? searchCategories(categories, trimmed, locale).slice(0, 3).map((c) => ({
+          id: c.id,
+          name: isUz ? c.group_uz : c.group_ru,
+          slug: isUz ? c.group_slug_uz : c.group_slug_ru,
+        }))
+      : []
+    : remoteResults?.categories || [];
+
+  const matchedBrands = hasLocalData
+    ? trimmed.length > 1
+      ? searchBrands(brands, trimmed).slice(0, 3).map((b) => ({
+          id: b.id,
+          name: b.name,
+        }))
+      : []
+    : remoteResults?.brands || [];
 
   const hasResults =
     matchedProducts.length > 0 ||
@@ -119,11 +187,11 @@ export function SearchAutocomplete({
                     {matchedCategories.map((c) => (
                       <Link
                         key={c.id}
-                        href={`/category/${isUz ? c.group_slug_uz : c.group_slug_ru}`}
+                        href={`/category/${c.slug}`}
                         onClick={() => setIsOpen(false)}
                         className="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-sora-50 dark:hover:bg-sora-950/40 hover:text-sora-600 transition-colors"
                       >
-                        <span>📁 {isUz ? c.group_uz : c.group_ru}</span>
+                        <span>📁 {c.name}</span>
                         <ArrowRight className="w-3.5 h-3.5 opacity-60" />
                       </Link>
                     ))}
@@ -160,19 +228,17 @@ export function SearchAutocomplete({
                   </div>
                   <div className="space-y-1.5">
                     {matchedProducts.map((p) => {
-                      const loc = getProductLocalized(p, locale);
-                      const priceInfo = calculateProductPrice(p.price);
                       return (
                         <Link
                           key={p.id}
-                          href={`/products/${loc.slug}`}
+                          href={`/products/${p.slug}`}
                           onClick={() => setIsOpen(false)}
                           className="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors"
                         >
                           <div className="relative w-11 h-11 rounded-lg bg-slate-100 dark:bg-slate-800 overflow-hidden shrink-0 border border-slate-200 dark:border-slate-700 flex items-center justify-center">
                             <Image
                               src={p.main_picture}
-                              alt={loc.name}
+                              alt={p.name}
                               fill
                               sizes="44px"
                               className="object-contain p-1"
@@ -180,17 +246,17 @@ export function SearchAutocomplete({
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate">
-                              {loc.name}
+                              {p.name}
                             </div>
                             <div className="text-[11px] font-bold mt-0.5 flex items-center gap-2">
-                              {priceInfo.price > 0 ? (
+                              {p.price > 0 ? (
                                 <>
                                   <span className="text-sora-600 dark:text-sora-400">
-                                    {priceInfo.price.toLocaleString()} {t("currency")}
+                                    {p.price.toLocaleString()} {t("currency")}
                                   </span>
-                                  {priceInfo.hasDiscount && priceInfo.oldPrice && (
+                                  {p.hasDiscount && p.oldPrice && (
                                     <span className="text-[10px] text-slate-400 line-through font-normal">
-                                      {priceInfo.oldPrice.toLocaleString()} {t("currency")}
+                                      {p.oldPrice.toLocaleString()} {t("currency")}
                                     </span>
                                   )}
                                 </>

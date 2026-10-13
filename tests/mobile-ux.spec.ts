@@ -89,6 +89,8 @@ test.describe("Mobile UX, Navigation & Accessibility Enhancements", () => {
       .locator("article")
       .first()
       .getByRole("button", { name: /Sevimlilar/i });
+    await firstCardFavBtn.scrollIntoViewIfNeeded();
+    await expect(firstCardFavBtn).toBeVisible();
     const box = await firstCardFavBtn.boundingBox();
     expect(box).not.toBeNull();
     if (box) {

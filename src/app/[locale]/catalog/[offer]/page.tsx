@@ -243,7 +243,6 @@ export default async function StaticOfferPage({ params }: StaticOfferPageProps) 
         tree={tree}
         categories={categories}
         brands={brands}
-        products={products}
       />
       <PromoNav />
 

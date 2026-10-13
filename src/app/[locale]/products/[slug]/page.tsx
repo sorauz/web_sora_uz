@@ -218,7 +218,6 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
         tree={tree}
         categories={categories}
         brands={brandsRes.data.brands}
-        products={allProducts}
       />
       <PromoNav />
 

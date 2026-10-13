@@ -38,10 +38,9 @@ export default async function BrandsPage({ params }: BrandsPageProps) {
   setRequestLocale(locale);
   const isUz = locale === "uz";
 
-  const [categoriesData, brandsData, productsData] = await Promise.all([
+  const [categoriesData, brandsData] = await Promise.all([
     api.getCategories(),
     api.getBrands(),
-    api.getAllProducts(),
   ]);
 
   const { tree, categories } = categoriesData;
@@ -53,7 +52,6 @@ export default async function BrandsPage({ params }: BrandsPageProps) {
         tree={tree}
         categories={categories}
         brands={brands}
-        products={productsData.products}
       />
       <PromoNav />
 

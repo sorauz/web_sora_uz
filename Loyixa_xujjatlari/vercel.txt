@@ -1,0 +1,30 @@
+📉 ISR Writes (Eng katta xarajat manbai)
+ISR Writes xarajatlari 8 KB birliklarda o'lchanadi, ya'ni keshda saqlanadigan ma'lumot hajmi qanchalik katta bo'lsa, xarajat shunchalik yuqori bo'ladi.
+
+revalidate vaqtini oshirish: Tez-tez o'zgarib turadigan sahifalar uchun revalidate oralig'ini uzaytiring (masalan, 60 soniyadan 3600 soniyaga). Bu keshni tez-tez yangilashdan saqlaydi.
+
+On-demand revalidation (so'rov bo'yicha yangilash): Agar ma'lumotlar faqat ma'lum bir hodisa (masalan, CMS'da yangi post chop etilishi) sodir bo'lganda o'zgarsa, vaqtga asoslangan revalidatsiya o'rniga on-demand usulidan foydalaning. Bu keraksiz yozuvlarni butunlay yo'q qiladi.
+
+Kesh hajmini kichraytirish: Sahifadagi HTML, RSC (React Server Component) payload hajmini kamaytiring. Katta hajmdagi ma'lumotlarni keshda saqlamang.
+
+Dinamik qiymatlarni olib tashlash: Keshda saqlanadigan kodda new Date(), Math.random(), Date.now() kabi har safar o'zgarib turadigan qiymatlardan foydalanmang. Ular har bir yangilanishda keshni o'zgartirib, qo'shimcha yozuvga olib keladi.
+
+📉 Fast Origin Transfer (CDN → Vercel Functions)
+Bu resurs CDN va Vercel Functions (yoki Middleware) o'rtasidagi ma'lumot uzatishni o'lchaydi.
+
+Middleware'ga so'rov tanasini yubormaslik: Agar middleware faylingiz so'rov tanasini (request body) o'qimasa, vercel.json faylida skipMiddlewareRequestBody: true sozlamasini qo'shing. Bu, ayniqsa, katta hajmdagi so'rovlar uchun Fast Origin Transfer xarajatlarini sezilarli darajada kamaytiradi.
+
+Funksiya javoblarini optimallashtirish: Vercel Functions'dan qaytariladigan ma'lumotlar hajmini kamaytiring. API'da faqat kerakli maydonlarni qaytaring va ortiqcha ma'lumotlarni yubormang.
+
+Keshdan foydalanish: Funksiya javoblariga kesh sarlavhalarini (Cache-Control) qo'shing. Bu CDN'ning javobni keshda saqlashiga va keyingi so'rovlarda manbaga (origin) murojaat qilmasligiga yordam beradi.
+
+Vary sarlavhasini boshqarish: Agar Vary: Origin sarlavhasi keraksiz ishlatilsa, Vercel har bir turli Origin uchun alohida kesh nusxasini saqlaydi. Bu kesh samaradorligini pasaytiradi va manbaga ko'proq murojaat qilinishiga olib keladi. Buni Vary sarlavhasini olib tashlash yoki ACAO: * bilan almashtirish orqali tuzatish mumkin.
+
+📉 Fast Data Transfer (CDN → Foydalanuvchi)
+Bu resurs Vercel CDN'dan foydalanuvchi qurilmasiga uzatiladigan ma'lumotlar hajmini o'lchaydi.
+
+Rasmlarni optimallashtirish: next/image komponentidan foydalaning, quality qiymatini 75 ga o'rnating va priority atributini faqat sahifaning yuqori qismidagi muhim rasmlar uchun ishlating. Vercel'ning Image Optimization xizmati rasmlarni avtomatik ravishda WebP/AVIF formatiga o'girib, hajmini kamaytiradi.
+
+Kesh strategiyasini sozlash: next.config.js faylida images.minimumCacheTTL qiymatini oshiring. Bu rasmlarning brauzerda uzoqroq saqlanishini ta'minlaydi.
+
+Bundle hajmini kamaytirish: JavaScript va CSS fayllarining hajmini kamaytirish uchun kodni bo'laklarga ajratish (code-splitting), daraxtni silkitish (tree-shaking) va dangasa yuklash (lazy loading) usullaridan foydalaning.

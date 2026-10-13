@@ -100,7 +100,6 @@ export default async function OffersPage({ params, searchParams }: OffersPagePro
         tree={tree}
         categories={categories}
         brands={brands}
-        products={products}
       />
       <PromoNav />
 

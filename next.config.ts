@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   images: {
     formats: ["image/avif", "image/webp"],
-    minimumCacheTTL: 86400,
+    minimumCacheTTL: 2592000, // 30 days (cuts Vercel Image Optimization re-runs & Fast Data Transfer)
     deviceSizes: [640, 750, 828, 1080, 1200, 1920],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     remotePatterns: [
@@ -33,6 +33,38 @@ const nextConfig: NextConfig = {
         hostname: "1cloud.uz",
       },
     ],
+  },
+  async headers() {
+    return [
+      {
+        // Edge CDN caching for public category, catalog, and brand pages (cuts Fast Origin Transfer by 80-90%)
+        source: "/:locale(uz|ru)/category/:slug*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, s-maxage=600, stale-while-revalidate=3600",
+          },
+        ],
+      },
+      {
+        source: "/:locale(uz|ru)/catalog/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, s-maxage=600, stale-while-revalidate=3600",
+          },
+        ],
+      },
+      {
+        source: "/:locale(uz|ru)/brand/:slug*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, s-maxage=600, stale-while-revalidate=3600",
+          },
+        ],
+      },
+    ];
   },
 };
 

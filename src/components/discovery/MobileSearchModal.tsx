@@ -18,9 +18,9 @@ import {
 import { useMobileSearchStore } from "@/lib/store/mobileSearch";
 
 interface MobileSearchModalProps {
-  products: Product[];
-  categories: Category[];
-  brands: Brand[];
+  products?: Product[];
+  categories?: Category[];
+  brands?: Brand[];
 }
 
 const POPULAR_SEARCHES_UZ = [
@@ -46,9 +46,9 @@ const POPULAR_SEARCHES_RU = [
 ];
 
 export function MobileSearchModal({
-  products,
-  categories,
-  brands,
+  products = [],
+  categories = [],
+  brands = [],
 }: MobileSearchModalProps) {
   const { isOpen, closeSearch } = useMobileSearchStore();
   const locale = useLocale() as "uz" | "ru";
@@ -58,6 +58,19 @@ export function MobileSearchModal({
   const router = useRouter();
 
   const [query, setQuery] = useState("");
+  const [remoteResults, setRemoteResults] = useState<{
+    products: Array<{
+      id: string;
+      slug: string;
+      name: string;
+      main_picture: string;
+      price: number;
+      oldPrice?: number;
+      hasDiscount?: boolean;
+    }>;
+    categories: Array<{ id: string; name: string; slug: string }>;
+    brands: Array<{ id: string; name: string }>;
+  } | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Auto focus input when modal opens & lock body scroll
@@ -87,22 +100,75 @@ export function MobileSearchModal({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, closeSearch]);
 
+  const trimmed = query.trim().toLowerCase();
+  const hasLocalData = products.length > 0;
+
+  useEffect(() => {
+    if (hasLocalData || trimmed.length < 2) {
+      setRemoteResults(null);
+      return;
+    }
+
+    const controller = new AbortController();
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `/api/search/suggestions?q=${encodeURIComponent(trimmed)}&locale=${locale}`,
+          { signal: controller.signal }
+        );
+        if (res.ok) {
+          const data = await res.json();
+          setRemoteResults(data);
+        }
+      } catch {
+        // ignore aborts
+      }
+    }, 150);
+
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [trimmed, locale, hasLocalData]);
+
   if (!isOpen) return null;
 
-  const trimmed = query.trim().toLowerCase();
+  const matchedProducts = hasLocalData
+    ? trimmed.length > 1
+      ? searchProducts(products, trimmed, locale).slice(0, 6).map((p) => {
+          const loc = getProductLocalized(p, locale);
+          const priceInfo = calculateProductPrice(p.price);
+          return {
+            id: p.id,
+            slug: loc.slug,
+            name: loc.name,
+            main_picture: p.main_picture,
+            price: priceInfo.price,
+            oldPrice: priceInfo.oldPrice,
+            hasDiscount: priceInfo.hasDiscount,
+          };
+        })
+      : []
+    : remoteResults?.products || [];
 
-  const matchedProducts =
-    trimmed.length > 1
-      ? searchProducts(products, trimmed, locale).slice(0, 6)
-      : [];
+  const matchedCategories = hasLocalData
+    ? trimmed.length > 1
+      ? searchCategories(categories, trimmed, locale).slice(0, 4).map((c) => ({
+          id: c.id,
+          name: isUz ? c.group_uz : c.group_ru,
+          slug: isUz ? c.group_slug_uz : c.group_slug_ru,
+        }))
+      : []
+    : remoteResults?.categories || [];
 
-  const matchedCategories =
-    trimmed.length > 1
-      ? searchCategories(categories, trimmed, locale).slice(0, 4)
-      : [];
-
-  const matchedBrands =
-    trimmed.length > 1 ? searchBrands(brands, trimmed).slice(0, 4) : [];
+  const matchedBrands = hasLocalData
+    ? trimmed.length > 1
+      ? searchBrands(brands, trimmed).slice(0, 4).map((b) => ({
+          id: b.id,
+          name: b.name,
+        }))
+      : []
+    : remoteResults?.brands || [];
 
   const hasResults =
     matchedProducts.length > 0 ||
@@ -250,21 +316,17 @@ export function MobileSearchModal({
                       <span>{tSearch("categories")}</span>
                     </div>
                     <div className="space-y-1">
-                      {matchedCategories.map((c) => {
-                        const name = isUz ? c.group_uz : c.group_ru;
-                        const slug = isUz ? c.group_slug_uz : c.group_slug_ru;
-                        return (
-                          <Link
-                            key={c.id}
-                            href={`/category/${slug}`}
-                            onClick={closeSearch}
-                            className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-semibold text-slate-800 dark:text-slate-200"
-                          >
-                            <span>📁 {name}</span>
-                            <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
-                          </Link>
-                        );
-                      })}
+                      {matchedCategories.map((c) => (
+                        <Link
+                          key={c.id}
+                          href={`/category/${c.slug}`}
+                          onClick={closeSearch}
+                          className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-semibold text-slate-800 dark:text-slate-200"
+                        >
+                          <span>📁 {c.name}</span>
+                          <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
+                        </Link>
+                      ))}
                     </div>
                   </div>
                 )}
@@ -300,35 +362,29 @@ export function MobileSearchModal({
                     </div>
                     <div className="divide-y divide-slate-100 dark:divide-slate-800">
                       {matchedProducts.map((p) => {
-                        const loc = getProductLocalized(p, locale);
-                        const priceInfo = calculateProductPrice(p.price);
-                        const price = priceInfo.price;
                         return (
                           <Link
                             key={p.id}
-                            href={`/products/${loc.slug}`}
+                            href={`/products/${p.slug}`}
                             onClick={closeSearch}
                             className="flex items-center gap-3 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-xl px-2 transition-colors"
                           >
                             <div className="w-12 h-12 relative rounded-lg bg-slate-50 dark:bg-slate-800 overflow-hidden shrink-0 border border-slate-100 dark:border-slate-800">
                               <Image
                                 src={p.main_picture || "/placeholder-product.svg"}
-                                alt={loc.name}
+                                alt={p.name}
                                 fill
                                 sizes="48px"
                                 className="object-contain p-1"
                               />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <span className="text-[10px] font-bold text-sora-600 dark:text-sora-400 uppercase tracking-wider block">
-                                {p.brand}
-                              </span>
                               <h4 className="text-xs font-semibold text-slate-900 dark:text-white truncate">
-                                {loc.name}
+                                {p.name}
                               </h4>
                               <p className="text-xs font-bold text-slate-800 dark:text-slate-200 mt-0.5">
-                                {price > 0 ? (
-                                  `${price.toLocaleString("ru-RU")} ${t("currency")}`
+                                {p.price > 0 ? (
+                                  `${p.price.toLocaleString("ru-RU")} ${t("currency")}`
                                 ) : (
                                   <span className="text-slate-400 font-normal">
                                     {isUz ? "Narxi kelishiladi" : "Цена по запросу"}

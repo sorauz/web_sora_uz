@@ -44,10 +44,9 @@ export default async function ContactPage({ params }: ContactPageProps) {
   const isUz = locale === "uz";
   setRequestLocale(locale);
 
-  const [categoriesData, brandsData, productsData] = await Promise.all([
+  const [categoriesData, brandsData] = await Promise.all([
     api.getCategories(),
     api.getBrands(),
-    api.getAllProducts(),
   ]);
 
   const breadcrumbs = [
@@ -106,7 +105,6 @@ export default async function ContactPage({ params }: ContactPageProps) {
         tree={categoriesData.tree}
         categories={categoriesData.categories}
         brands={brandsData.data.brands}
-        products={productsData.products}
       />
       <PromoNav />
 

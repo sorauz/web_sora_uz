@@ -109,7 +109,6 @@ export default async function BrandDetailPage({
         tree={tree}
         categories={categories}
         brands={brands}
-        products={productsData.products}
       />
       <PromoNav />
 

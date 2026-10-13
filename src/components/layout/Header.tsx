@@ -23,10 +23,10 @@ interface HeaderProps {
   tree: CategoryTreeNode[];
   categories: Category[];
   brands: Brand[];
-  products: Product[];
+  products?: Product[];
 }
 
-export function Header({ tree, categories, brands, products }: HeaderProps) {
+export function Header({ tree, categories, brands, products = [] }: HeaderProps) {
   const t = useTranslations("common");
   const { getTotalItems } = useCartStore();
   const { getCount } = useFavoritesStore();

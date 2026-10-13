@@ -76,7 +76,6 @@ export default async function CatalogPage({ params, searchParams }: CatalogPageP
         tree={tree}
         categories={categories}
         brands={brands}
-        products={products}
       />
       <PromoNav />
 

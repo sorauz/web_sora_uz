@@ -58,7 +58,6 @@ export default async function ComparePage({ params }: ComparePageProps) {
         tree={tree}
         categories={categories}
         brands={brandsRes.data.brands}
-        products={allProdsRes.products}
       />
       <PromoNav />
 

@@ -44,10 +44,9 @@ export default async function DeliveryPage({ params }: DeliveryPageProps) {
   const isUz = locale === "uz";
   setRequestLocale(locale);
 
-  const [categoriesData, brandsData, productsData] = await Promise.all([
+  const [categoriesData, brandsData] = await Promise.all([
     api.getCategories(),
     api.getBrands(),
-    api.getAllProducts(),
   ]);
 
   const breadcrumbs = [
@@ -63,7 +62,6 @@ export default async function DeliveryPage({ params }: DeliveryPageProps) {
         tree={categoriesData.tree}
         categories={categoriesData.categories}
         brands={brandsData.data.brands}
-        products={productsData.products}
       />
       <PromoNav />
 

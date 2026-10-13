@@ -44,10 +44,9 @@ export default async function B2BPage({ params }: B2BPageProps) {
   const isUz = locale === "uz";
   setRequestLocale(locale);
 
-  const [categoriesData, brandsData, productsData] = await Promise.all([
+  const [categoriesData, brandsData] = await Promise.all([
     api.getCategories(),
     api.getBrands(),
-    api.getAllProducts(),
   ]);
 
   const breadcrumbs = [
@@ -63,7 +62,6 @@ export default async function B2BPage({ params }: B2BPageProps) {
         tree={categoriesData.tree}
         categories={categoriesData.categories}
         brands={brandsData.data.brands}
-        products={productsData.products}
       />
       <PromoNav />
 

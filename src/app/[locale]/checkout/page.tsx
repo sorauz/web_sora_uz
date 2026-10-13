@@ -40,10 +40,9 @@ export default async function CheckoutPage({ params }: CheckoutPageProps) {
   const currentLocale = (locale === "ru" ? "ru" : "uz") as "uz" | "ru";
   setRequestLocale(currentLocale);
 
-  const [{ tree, categories }, brandsRes, allProdsRes] = await Promise.all([
+  const [{ tree, categories }, brandsRes] = await Promise.all([
     api.getCategories(),
     api.getBrands(),
-    api.getAllProducts(),
   ]);
 
   const breadcrumbs = [
@@ -62,7 +61,6 @@ export default async function CheckoutPage({ params }: CheckoutPageProps) {
         tree={tree}
         categories={categories}
         brands={brandsRes.data.brands}
-        products={allProdsRes.products}
       />
       <PromoNav />
 
