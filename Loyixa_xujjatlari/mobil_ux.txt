@@ -251,7 +251,7 @@ Sayt zamonaviy e-tijorat standartlari asosida ishlab chiqilgan. Mobil foydalanuv
 
 ---
 
-### 5. Xulosa va Yaxshilash bo'yicha Tavsiyalar
+### 5. Xulosa va Yaxshilash bo'yicha Tavsiyalar.
 
 | Bosqich | Tavsiya qilinadigan o'zgarish | UX / Biznes samarasi |
 | --- | --- | --- |
