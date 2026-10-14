@@ -38,6 +38,7 @@ export function FacetedFilter({
   const [inStock, setInStock] = useQueryState("inStock", {
     defaultValue: "",
   });
+  const [, setPage] = useQueryState("page");
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [brandSearch, setBrandSearch] = useState("");
@@ -63,6 +64,7 @@ export function FacetedFilter({
       next = [...activeBrands, brandName];
     }
     setSelectedBrand(next.length > 0 ? next.join(",") : null);
+    setPage(null);
   };
 
   const resetAll = () => {
@@ -70,6 +72,7 @@ export function FacetedFilter({
     setMinPrice(null);
     setMaxPrice(null);
     setInStock(null);
+    setPage(null);
     setBrandSearch("");
   };
 
@@ -112,6 +115,7 @@ export function FacetedFilter({
       setMinPrice(minVal || null);
       setMaxPrice(maxVal || null);
     }
+    setPage(null);
   };
 
   // Filter and sort brands: active brands always top, matching brandSearch query
@@ -171,7 +175,10 @@ export function FacetedFilter({
               <input
                 type="checkbox"
                 checked={inStock === "1"}
-                onChange={(e) => setInStock(e.target.checked ? "1" : null)}
+                onChange={(e) => {
+                  setInStock(e.target.checked ? "1" : null);
+                  setPage(null);
+                }}
                 className="w-4 h-4 rounded-md text-sora-600 focus:ring-sora-500 border-slate-300 dark:border-slate-700 cursor-pointer accent-sora-600"
               />
               <span className="font-medium">{t("onlyInStock")}</span>
@@ -311,7 +318,10 @@ export function FacetedFilter({
                   max={maxPossiblePrice}
                   placeholder={t("priceFrom")}
                   value={minPrice}
-                  onChange={(e) => setMinPrice(e.target.value || null)}
+                  onChange={(e) => {
+                    setMinPrice(e.target.value || null);
+                    setPage(null);
+                  }}
                   className="w-full h-9 px-3 text-xs rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-hidden focus:border-sora-500"
                 />
               </div>
@@ -324,7 +334,10 @@ export function FacetedFilter({
                   max={maxPossiblePrice}
                   placeholder={t("priceTo")}
                   value={maxPrice}
-                  onChange={(e) => setMaxPrice(e.target.value || null)}
+                  onChange={(e) => {
+                    setMaxPrice(e.target.value || null);
+                    setPage(null);
+                  }}
                   className="w-full h-9 px-3 text-xs rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-hidden focus:border-sora-500"
                 />
               </div>

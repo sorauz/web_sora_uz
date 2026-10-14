@@ -1,0 +1,43 @@
+Loyihaning amaldagi arxitekturasi (Next.js 16 App Router, Tailwind grid layouti, mobil UI va SEO sozlamalari) to‘liq o‘rganib chiqildi. Katalog va Kategoriya sahifalariga Sahifalash (Pagination — ?page=2) tizimini joriy etish bo‘yicha tahliliy xulosa:
+
+1. Har bir sahifada qancha mahsulot bo‘lgani ma’qul?
+
+TAVSIYA: HAR BIR SAHIFADA ANIQ 24 TA MAHSULOT.
+
+Nima uchun aynan 24 ta? Loyihamizdagi grid (to‘r) tuzilishiga e’tibor beradigan bo‘lsak:
+
+Mobil qurilmalarda (grid-cols-2): 2 ustun.
+Kategoriya sahifasida yon panel (filter) bilan (xl:grid-cols-3): 3 ustun.
+Brend, Qidiruv va Takliflar sahifalarida (lg:grid-cols-4): 4 ustun.
+
+Matematik jihatdan 24 soni 2 ga ham, 3 ga ham, 4 ga ham qoldiqsiz bo‘linadi (EKUK):
+
+Mobilda (2 ustun): Aniq 12 ta to‘liq qator hosil qiladi.
+Kategoriya sahifasida (3 ustun): Aniq 8 ta to‘liq qator hosil qiladi.
+Katta ekranda (4 ustun): Aniq 6 ta to‘liq qator hosil qiladi.
+
+Vizual ustunlik: 20 yoki 25 ta tovar qo‘yilsa, 3 yoki 4 ustunli ekranda oxirgi qatorda 1 ta yoki 2 ta tovar yolg‘iz qolib, xunuk bo‘shliq paydo bo‘ladi. 24 ta tovar esa har qanday ekranda simmetrik, to‘liq to‘ldirilgan chiroyli bloklarni ta'minlaydi.
+
+2. Sahifalashni joriy etish orqali qanday afzalliklarga erishamiz?
+A. Mobil va Qurilma Tezligi (Performance & Core Web Vitals)
+DOM daraxti 7-8 barobarga yengillashadi: Hozirda toifada 150-200 ta mahsulot bo‘lsa, brauzer bir vaqtda 3000 dan ortiq HTML tugunlarni va yuzlab rasmlarni ushlab turishga majbur. Sahifalash orqali bir vaqtda faqat 24 ta karta yuklanadi.
+Mobil telefonlarda qotishlar (Jank) yo‘qoladi: Telefonda pastga aylantirganda xotira (RAM) to‘lib qolmaydi, sahifa silliq (60 kadr/sekund) ishlaydi.
+INP (Interaction to Next Paint) yaxshilanadi: Filtrlash yoki saralash tugmasi bosilganda brauzer 200 ta kartani emas, bir zumda 24 ta kartani qayta chizadi.
+B. Vercel Xarajatlari va Tarmoqni Tejash (Fast Origin & Data Transfer)
+Hozirda butun tovarlar massivi bitta sahifa HTML va RSC Flight Payload hajmiga aylanadi (sahifa og‘irligi 300-500 KB ga yetishi mumkin).
+24 talik qismlarga bo‘linganda dastlabki yuklanish hajmi 50 KB dan ham kamayadi. Bu esa Vercel Fast Data Transfer sarfini sezilarli darajada tejaydi.
+C. Texnik SEO va Qidiruv Botlari (Google & Yandex Crawl Budget)
+Indeksatsiya byudjeti tejaladi: Qidiruv botlari sahifani ochganda ortiqcha MB sarflamaydi, tezroq skanerlaydi.
+Toza URL arxitekturasi: Har bir sahifa alohida manzilga ega bo‘ladi (/category/ofis-jihozlari?page=2).
+Botlar chuqur tovarlarni ham topadi: Cheksiz skroll (infinite scroll) bo‘lsa, qidiruv botlari pastdagi tovarlarni ko‘ra olmay qolishi mumkin. Sahifalash havolalari (1, 2, 3... Keyingi) orqali botlar 100% tovarlarni to‘liq aylanib chiqadi.
+D. Foydalanuvchi Qulayligi (UX & E-Commerce Psixologiyasi)
+Navigatsiyada yo‘qolib qolmaslik: Xaridor o‘zining qayerdaligini aniq biladi ("1–24 dan 96 ta mahsulot").
+Footer va FAQ bo‘limiga yetib borish imkoni: Sahifaning pastida joylashgan muhim bo‘limlar — Tez-tez beriladigan savollar (FAQ), Xarid qilish qo‘llanmasi va Pastki menyu (Footer) ga bemalol yetib borish mumkin (cheksiz skrolda bularga yetib bo‘lmaydi).
+Havola ulashish aniqligi: Foydalanuvchi ma'lum bir sahifani do‘stiga yuborsa (?page=3), do‘stida ham aynan o‘sha tovarlar ochiladi.
+3. Loyihadagi Texnik Imkoniyatlar (Tayyorlik Holati)
+Next.js 16 Server Components imkoniyati:
+Sahifalashni to‘liq serverda (Server-Side) qilish mumkin. Server faqat tanlangan 24 ta tovarning HTML'ini yuboradi, mijoz brauzeriga og‘ir JavaScript yuklanmaydi.
+Kutubxona tayyorligi (nuqs):
+Loyihamizda allaqachon nuqs kutubxonasi o‘rnatilgan. U URL parametrlarini (?brand=Deli&minPrice=50000&page=2) bir-biri bilan to‘qnashuvsiz, silliq va xatosiz boshqarish imkonini beradi.
+Mavjud filtrlar bilan 100% integratsiya:
+Foydalanuvchi filtrni o‘zgartirganda sahifa avtomatik page=1 ga qaytadi, filtr ichida esa yana 24 tadan varaqlab ketish imkoniyati to‘liq saqlanadi.

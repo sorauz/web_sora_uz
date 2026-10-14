@@ -6,6 +6,7 @@ import { Footer } from "@/components/layout/Footer";
 import { MobileNav } from "@/components/layout/MobileNav";
 import { Breadcrumbs } from "@/components/discovery/Breadcrumbs";
 import { ProductCard } from "@/components/discovery/ProductCard";
+import { Pagination } from "@/components/discovery/Pagination";
 import { SortSelect } from "@/components/discovery/SortSelect";
 import { getProductLocalized } from "@/lib/schemas/product";
 import { calculateProductPrice } from "@/lib/utils/price";
@@ -77,6 +78,16 @@ export default async function SearchPage({
     );
   }
 
+  const PAGE_SIZE = 24;
+  const rawPage = Number(query.page);
+  const currentPage = !isNaN(rawPage) && rawPage > 0 ? Math.floor(rawPage) : 1;
+  const totalItems = results.length;
+  const totalPages = Math.ceil(totalItems / PAGE_SIZE);
+  const paginatedResults = results.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
+  );
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col">
       <Header
@@ -114,23 +125,38 @@ export default async function SearchPage({
         {/* Toolbar */}
         <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
           <span className="text-xs text-slate-500 font-medium">
-            {isUz ? "Natijalar ro'yxati" : "Список результатов"}
+            {totalItems > 0
+              ? isUz
+                ? `Ko'rsatilmoqda: ${(currentPage - 1) * PAGE_SIZE + 1}–${Math.min(currentPage * PAGE_SIZE, totalItems)} / jami ${totalItems} ta`
+                : `Показано: ${(currentPage - 1) * PAGE_SIZE + 1}–${Math.min(currentPage * PAGE_SIZE, totalItems)} из ${totalItems}`
+              : isUz ? "Natijalar ro'yxati" : "Список результатов"}
           </span>
           <SortSelect />
         </div>
 
         {/* Results Grid */}
         {results.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-            {results.map((p) => (
-              <ProductCard
-                key={p.id}
-                product={p}
-                rating={4.8}
-                reviewCount={12}
-              />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+              {paginatedResults.map((p) => (
+                <ProductCard
+                  key={p.id}
+                  product={p}
+                  rating={4.8}
+                  reviewCount={12}
+                />
+              ))}
+            </div>
+
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={totalItems}
+              pageSize={PAGE_SIZE}
+              baseUrl={`/${locale}/search`}
+              searchParams={query}
+            />
+          </>
         ) : (
           <div className="p-12 text-center bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 space-y-3">
             <p className="text-base font-bold text-slate-800 dark:text-slate-200">

@@ -9,6 +9,7 @@ import { Breadcrumbs } from "@/components/discovery/Breadcrumbs";
 import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { ProductCard } from "@/components/discovery/ProductCard";
 import { SortSelect } from "@/components/discovery/SortSelect";
+import { Pagination } from "@/components/discovery/Pagination";
 import { calculateProductPrice } from "@/lib/utils/price";
 import { Metadata } from "next";
 import { Award, ShieldCheck, CheckCircle2 } from "lucide-react";
@@ -20,8 +21,10 @@ interface BrandPageProps {
 
 export async function generateMetadata({
   params,
+  searchParams,
 }: BrandPageProps): Promise<Metadata> {
   const { locale, slug } = await params;
+  const sParams = await searchParams;
   const isUz = locale === "uz";
 
   const { data } = await api.getBrands();
@@ -30,14 +33,18 @@ export async function generateMetadata({
   );
 
   const brandName = brand ? brand.name : slug.toUpperCase();
+  const pageNum = typeof sParams.page === "string" ? parseInt(sParams.page, 10) : 1;
+  const isPage = !isNaN(pageNum) && pageNum > 1;
+  const pageTitleSuffix = isPage ? (isUz ? ` (${pageNum}-sahifa)` : ` (Страница ${pageNum})`) : "";
+  const canonicalUrl = `https://sora.uz/${locale}/brand/${slug}${isPage ? `?page=${pageNum}` : ""}`;
 
   return {
-    title: `${brandName} mahsulotlari — Rasmiy kafolat bilan | Sora.uz`,
+    title: `${brandName} mahsulotlari${pageTitleSuffix} — Rasmiy kafolat bilan | Sora.uz`,
     description: isUz
       ? `${brandName} mahsulotlarining to'liq katalogi va arzon narxlari Toshkentda.`
       : `Каталог оригинальной продукции ${brandName} в Ташкенте с гарантией.`,
     alternates: {
-      canonical: `https://sora.uz/${locale}/brand/${slug}`,
+      canonical: canonicalUrl,
       languages: {
         uz: `https://sora.uz/uz/brand/${slug}`,
         "uz-UZ": `https://sora.uz/uz/brand/${slug}`,
@@ -47,11 +54,11 @@ export async function generateMetadata({
       },
     },
     openGraph: {
-      title: `${brandName} — Sora.uz`,
+      title: `${brandName}${pageTitleSuffix} — Sora.uz`,
       description: isUz
         ? `${brandName} mahsulotlarining to'liq katalogi va narxlari.`
         : `Каталог оригинальной продукции ${brandName} в Ташкенте.`,
-      url: `https://sora.uz/${locale}/brand/${slug}`,
+      url: canonicalUrl,
       type: "website",
     },
   };
@@ -102,6 +109,17 @@ export default async function BrandDetailPage({
       (a, b) => calculateProductPrice(b.price).price - calculateProductPrice(a.price).price
     );
   }
+
+  // Pagination (24 items per page for optimal 2, 3, 4 column grid)
+  const PAGE_SIZE = 24;
+  const rawPage = Number(query.page);
+  const currentPage = !isNaN(rawPage) && rawPage > 0 ? Math.floor(rawPage) : 1;
+  const totalItems = brandProducts.length;
+  const totalPages = Math.ceil(totalItems / PAGE_SIZE);
+  const paginatedProducts = brandProducts.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
+  );
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col">
@@ -155,21 +173,33 @@ export default async function BrandDetailPage({
         <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
           <h2 className="text-lg sm:text-xl font-bold">
             {isUz ? `${brandName} mahsulotlari` : `Товары ${brandName}`} (
-            {brandProducts.length})
+            {totalItems > PAGE_SIZE
+              ? `${(currentPage - 1) * PAGE_SIZE + 1}–${Math.min(currentPage * PAGE_SIZE, totalItems)} / ${totalItems}`
+              : totalItems}
+            )
           </h2>
           <SortSelect />
         </div>
 
-        {/* Products Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-          {brandProducts.map((p) => (
-            <ProductCard
-              key={p.id}
-              product={p}
-              rating={4.8}
-              reviewCount={15}
-            />
-          ))}
+        {/* Products Grid & Pagination */}
+        <div className="space-y-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+            {paginatedProducts.map((p) => (
+              <ProductCard
+                key={p.id}
+                product={p}
+                rating={4.8}
+                reviewCount={15}
+              />
+            ))}
+          </div>
+
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={totalItems}
+            pageSize={PAGE_SIZE}
+          />
         </div>
       </main>
 

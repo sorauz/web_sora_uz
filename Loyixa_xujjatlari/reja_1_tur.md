@@ -43,13 +43,15 @@
 
 ## 2. Foydalanuvchi Tajribasi (UX) va Katalog Navigatsiyasi
 
-### 2.1. Katalog va Kategoriya Sahifalash (Pagination) Tizimi
-- **Hozirgi holat:** Tovar ro'yxati filtrlash bilan bitta sahifada chiqadi. Sahifalash (`?page=1`, `?page=2`) mavjud emas.
-- **Mavjud texnik imkoniyat:** Next.js server komponentlari `searchParams.page` parametrini o'qiy oladi va mahsulotlar massivini `slice((page - 1) * pageSize, page * pageSize)` orqali bo'lib bera oladi.
-- **Amalga oshiriladigan ish:**
-  - Sahifalash komponenti (`Pagination.tsx`) yaratiladi: Oldingi/Keyingi tugmalari va sahifa raqamlari.
-  - URL sinxronizatsiyasi: `nuqs` yoki Next.js `useSearchParams` orqali filtrlar bilan birga saqlanadi.
-  - SEO uchun `rel="next"` va `rel="prev"` teglari metadata qismiga kiritiladi.
+### 2.1. Katalog va Kategoriya Sahifalash (Pagination) Tizimi — [BAJARILDI ✅]
+- **Holat:** To'liq amalga oshirildi va ishlab turibdi.
+- **Amalga oshirilgan ishlar:**
+  - Standart sahifa hajmi: `PAGE_SIZE = 24` dona mahsulot (mobil 2 ustun, kategoriya 3 ustun, brend/aksiya 4 ustun uchun simmetrik EKUK).
+  - `Pagination.tsx` komponenti yaratildi: Oldingi/Keyingi navigatsiya, aqlli ellipsis `...` (1 ... 4 5 6 ... 10), mobil uchun kamida 44x44px qulay touch-targetlar va jami hisoblagich.
+  - URL va Filtrlar sinxronizatsiyasi: `nuqs` yordamida filtr yoki saralash o'zgarganda sahifa avtomatik 1-ga qaytariladi (`setPage(null)`).
+  - Kategoriya (`/category/[slug]`), Brend (`/brand/[slug]`), Aksiya to'plamlari (`/catalog/[offer]`) hamda Qidiruv (`/search`) sahifalariga to'liq integratsiya qilindi.
+  - Ko'p sahifali SEO: Canonical havolalar `?page=X` bilan, sarlavhalar `(2-sahifa)`, botlar uchun `rel="prev"` va `rel="next"` belgilari qo'shildi.
+  - Playwright e2e testlari yaratildi (`tests/pagination.spec.ts`) va barcha testlar muvaffaqiyatli o'tdi.
 
 ### 2.2. Mahsulotlarni O'zaro Taqqoslash (Product Comparison) Tizimi — [BAJARILDI ✅]
 - **Hozirgi holat:** PDP da o'xshash tovarlar ro'yxati bor, lekin ularni yonma-yon solishtirib bo'lmaydi.
@@ -96,7 +98,7 @@
 | 3 | **Product JSON-LD boyitish (GTIN, Category, Policies)** | SEO | O'rta | Bajarildi ✅ (Google Rich Snippets va Merchant reytingi) |
 | 4 | **FAQPage JSON-LD Schemasi** | SEO | O'rta | Qidiruvda ochiluvchi FAQ rich snippets |
 | 5 | **IndexNow protokoli integratsiyasi** | SEO | O'rta | Yandex va Bing'da o'zgarishlarni bir soniyada indekslash |
-| 6 | **Katalog sahifalash (Pagination ?page=2)** | UX / Tech | O'rta | Katta tovarlar ro'yxatida tezlik va qulaylik |
+| 6 | **Katalog sahifalash (Pagination ?page=2)** | UX / Tech | O'rta | Bajarildi ✅ (24 tadan simmetrik sahifalash, filtr reset, SEO va mobil 44px) |
 | 7 | **Mahsulotlarni Taqqoslash (Comparison Page)** | UX / E-com | O'rta | Bajarildi ✅ (Konversiya oshishi, xaridorga to'g'ri tanlov berish) |
 | 8 | **1-klikda to'plam xarid qilish (Bundle Cross-sell)** | E-com | O'rta | O'rtacha chek miqdorini (AOV) oshirish |
 | 9 | **Blog va Qo'llanmalar (Content Hub)** | Kontent | Murakkab | Organik qidiruv trafigi va topical authority |

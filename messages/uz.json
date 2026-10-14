@@ -247,5 +247,12 @@
     "brand": "Brend",
     "country": "Ishlab chiqarilgan davlat",
     "switchLang": "Tilni almashtirish"
+  },
+  "pagination": {
+    "prev": "Oldingi",
+    "next": "Keyingi",
+    "page": "Sahifa",
+    "showing": "Ko'rsatilmoqda: {from}–{to} / jami {total} ta",
+    "of": "dan"
   }
 }

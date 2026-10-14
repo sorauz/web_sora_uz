@@ -8,6 +8,7 @@ import { MobileNav } from "@/components/layout/MobileNav";
 import { Breadcrumbs } from "@/components/discovery/Breadcrumbs";
 import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import { ProductCard } from "@/components/discovery/ProductCard";
+import { Pagination } from "@/components/discovery/Pagination";
 import { Link } from "@/i18n/routing";
 import { Metadata } from "next";
 import { ShieldCheck, Sparkles, Flame, BadgePercent, ArrowRight } from "lucide-react";
@@ -112,6 +113,7 @@ const OFFER_CONFIGS: Record<ValidOfferKey, OfferConfig> = {
 
 interface StaticOfferPageProps {
   params: Promise<{ locale: string; offer: string }>;
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 export function generateStaticParams() {
@@ -127,8 +129,12 @@ export function generateStaticParams() {
   return params;
 }
 
-export async function generateMetadata({ params }: StaticOfferPageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+  searchParams,
+}: StaticOfferPageProps): Promise<Metadata> {
   const { locale, offer } = await params;
+  const sParams = (await searchParams) || {};
   const canonicalOffer = OFFER_ALIASES[offer] || (VALID_OFFERS.includes(offer as ValidOfferKey) ? offer : null);
 
   if (!canonicalOffer) {
@@ -138,14 +144,19 @@ export async function generateMetadata({ params }: StaticOfferPageProps): Promis
   const config = OFFER_CONFIGS[canonicalOffer as ValidOfferKey];
   const isUz = locale === "uz";
 
-  const title = isUz ? config.titleUz : config.titleRu;
+  const pageNum = typeof sParams.page === "string" ? parseInt(sParams.page, 10) : 1;
+  const isPage = !isNaN(pageNum) && pageNum > 1;
+  const pageTitleSuffix = isPage ? (isUz ? ` (${pageNum}-sahifa)` : ` (Страница ${pageNum})`) : "";
+  const canonicalUrl = `https://sora.uz/${locale}/catalog/${canonicalOffer}${isPage ? `?page=${pageNum}` : ""}`;
+
+  const title = (isUz ? config.titleUz : config.titleRu) + pageTitleSuffix;
   const description = isUz ? config.descriptionUz : config.descriptionRu;
 
   return {
     title,
     description,
     alternates: {
-      canonical: `https://sora.uz/${locale}/catalog/${canonicalOffer}`,
+      canonical: canonicalUrl,
       languages: {
         uz: `https://sora.uz/uz/catalog/${canonicalOffer}`,
         "uz-UZ": `https://sora.uz/uz/catalog/${canonicalOffer}`,
@@ -157,7 +168,7 @@ export async function generateMetadata({ params }: StaticOfferPageProps): Promis
     openGraph: {
       title,
       description,
-      url: `https://sora.uz/${locale}/catalog/${canonicalOffer}`,
+      url: canonicalUrl,
       siteName: "Sora.uz",
       locale: isUz ? "uz_UZ" : "ru_RU",
       type: "website",
@@ -165,8 +176,12 @@ export async function generateMetadata({ params }: StaticOfferPageProps): Promis
   };
 }
 
-export default async function StaticOfferPage({ params }: StaticOfferPageProps) {
+export default async function StaticOfferPage({
+  params,
+  searchParams,
+}: StaticOfferPageProps) {
   const { locale, offer } = await params;
+  const query = (await searchParams) || {};
 
   // Handle aliases via redirect
   if (OFFER_ALIASES[offer]) {
@@ -204,6 +219,16 @@ export default async function StaticOfferPage({ params }: StaticOfferPageProps) 
   } else if (offerKey === "promotions") {
     offerProducts = specialOffers.promotions;
   }
+
+  const PAGE_SIZE = 24;
+  const rawPage = Number(query.page);
+  const currentPage = !isNaN(rawPage) && rawPage > 0 ? Math.floor(rawPage) : 1;
+  const totalItems = offerProducts.length;
+  const totalPages = Math.ceil(totalItems / PAGE_SIZE);
+  const paginatedProducts = offerProducts.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
+  );
 
   const heading = isUz ? config.headingUz : config.headingRu;
   const description = isUz ? config.descriptionUz : config.descriptionRu;
@@ -330,17 +355,28 @@ export default async function StaticOfferPage({ params }: StaticOfferPageProps) 
         {/* Products Grid */}
         <section className="space-y-6">
           {offerProducts.length > 0 ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-              {offerProducts.map((p) => (
-                <ProductCard
-                  key={p.id}
-                  product={p}
-                  badge={badge}
-                  rating={4.8}
-                  reviewCount={24}
-                />
-              ))}
-            </div>
+            <>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+                {paginatedProducts.map((p) => (
+                  <ProductCard
+                    key={p.id}
+                    product={p}
+                    badge={badge}
+                    rating={4.8}
+                    reviewCount={24}
+                  />
+                ))}
+              </div>
+
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalItems={totalItems}
+                pageSize={PAGE_SIZE}
+                baseUrl={`/${locale}/catalog/${offerKey}`}
+                searchParams={query}
+              />
+            </>
           ) : (
             <div className="text-center py-16 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-8 space-y-4">
               <p className="text-slate-500">

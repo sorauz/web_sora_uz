@@ -7,6 +7,7 @@ import { ArrowUpDown } from "lucide-react";
 export function SortSelect({ className = "" }: { className?: string }) {
   const t = useTranslations("filter");
   const [sort, setSort] = useQueryState("sort", { defaultValue: "popular" });
+  const [, setPage] = useQueryState("page");
 
   return (
     <div className={`flex items-center gap-2 ${className}`}>
@@ -14,7 +15,10 @@ export function SortSelect({ className = "" }: { className?: string }) {
         <ArrowUpDown className="w-4 h-4 text-slate-400 absolute left-3 pointer-events-none" />
         <select
           value={sort}
-          onChange={(e) => setSort(e.target.value)}
+          onChange={(e) => {
+            setSort(e.target.value);
+            setPage(null);
+          }}
           aria-label={t("sortBy")}
           className="w-full h-10 pl-9 pr-7 text-xs font-semibold rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 focus:outline-hidden focus:border-sora-500 cursor-pointer appearance-none shadow-xs truncate"
         >

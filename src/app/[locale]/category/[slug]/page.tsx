@@ -14,6 +14,7 @@ import { findCategoryBySlug, getCategoryBreadcrumb } from "@/lib/utils/category-
 import { getProductLocalized } from "@/lib/schemas/product";
 import { calculateProductPrice } from "@/lib/utils/price";
 import { Link } from "@/i18n/routing";
+import { Pagination } from "@/components/discovery/Pagination";
 import { Metadata } from "next";
 import { Folder, HelpCircle, BookOpen } from "lucide-react";
 
@@ -39,17 +40,21 @@ export async function generateMetadata({
 
   const canonicalSlug = isUz ? category.group_slug_uz : category.group_slug_ru;
   const name = isUz ? category.group_uz : category.group_ru;
+  const pageNum = typeof sParams.page === "string" ? parseInt(sParams.page, 10) : 1;
+  const isPage = !isNaN(pageNum) && pageNum > 1;
+  const pageTitleSuffix = isPage ? (isUz ? ` (${pageNum}-sahifa)` : ` (Страница ${pageNum})`) : "";
+  const canonicalUrl = `https://sora.uz/${locale}/category/${canonicalSlug}${isPage ? `?page=${pageNum}` : ""}`;
   const hasFilterParams = Object.keys(sParams).some((k) =>
     ["brand", "minPrice", "maxPrice", "inStock", "sort"].includes(k)
   );
 
   return {
-    title: `${name} — Sora.uz internet do'koni`,
+    title: `${name}${pageTitleSuffix} — Sora.uz internet do'koni`,
     description: isUz
       ? `${name} bo'yicha sifatli kanselyariya va ofis mahsulotlari arzon narxlarda va rasmiy kafolat bilan O'zbekistonda.`
       : `Качественные канцелярские товары в категории ${name} по доступным ценам с гарантией в Ташкенте.`,
     alternates: {
-      canonical: `https://sora.uz/${locale}/category/${canonicalSlug}`,
+      canonical: canonicalUrl,
       languages: {
         uz: `https://sora.uz/uz/category/${category.group_slug_uz}`,
         "uz-UZ": `https://sora.uz/uz/category/${category.group_slug_uz}`,
@@ -59,11 +64,11 @@ export async function generateMetadata({
       },
     },
     openGraph: {
-      title: `${name} — Sora.uz internet do'koni`,
+      title: `${name}${pageTitleSuffix} — Sora.uz internet do'koni`,
       description: isUz
         ? `${name} mahsulotlari arzon narxlarda Sora.uz do'konida.`
         : `Товары ${name} по доступным ценам в магазине Sora.uz.`,
-      url: `https://sora.uz/${locale}/category/${canonicalSlug}`,
+      url: canonicalUrl,
       type: "website",
     },
     // Faceted navigation SEO policy: noindex if filtered
@@ -168,6 +173,17 @@ export default async function CategoryPage({
     );
   }
 
+  // Pagination (24 items per page for optimal grid layout across all screen sizes)
+  const PAGE_SIZE = 24;
+  const rawPage = Number(query.page);
+  const currentPage = !isNaN(rawPage) && rawPage > 0 ? Math.floor(rawPage) : 1;
+  const totalMatchedCount = filtered.length;
+  const totalPages = Math.ceil(totalMatchedCount / PAGE_SIZE);
+  const paginatedProducts = filtered.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
+  );
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col">
       <Header
@@ -215,7 +231,7 @@ export default async function CategoryPage({
           {/* Faceted Filter Sidebar (Desktop) & 50/50 Filter+Sort Toolbar + Bottom Sheet (Mobile) */}
           <FacetedFilter
             brands={brandsData.data.brands}
-            totalMatchedCount={filtered.length}
+            totalMatchedCount={totalMatchedCount}
           />
 
           {/* Products Column */}
@@ -223,7 +239,9 @@ export default async function CategoryPage({
             {/* Top Toolbar (Count + Desktop Sort) */}
             <div className="flex items-center justify-between pb-2 sm:pb-3 border-b border-slate-200 dark:border-slate-800">
               <span className="text-xs font-semibold text-slate-500">
-                {filtered.length} {isUz ? "ta mahsulot topildi" : "товаров найдено"}
+                {totalMatchedCount > PAGE_SIZE
+                  ? `${(currentPage - 1) * PAGE_SIZE + 1}–${Math.min(currentPage * PAGE_SIZE, totalMatchedCount)} / ${totalMatchedCount} ${isUz ? "ta mahsulot" : "товаров"}`
+                  : `${totalMatchedCount} ${isUz ? "ta mahsulot topildi" : "товаров найдено"}`}
               </span>
               <div className="hidden lg:block">
                 <SortSelect />
@@ -231,16 +249,26 @@ export default async function CategoryPage({
             </div>
 
             {/* Product Grid */}
-            {filtered.length > 0 ? (
-              <div className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
-                {filtered.map((prod) => (
-                  <ProductCard
-                    key={prod.id}
-                    product={prod}
-                    rating={4.7}
-                    reviewCount={18}
-                  />
-                ))}
+            {paginatedProducts.length > 0 ? (
+              <div className="space-y-6">
+                <div className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
+                  {paginatedProducts.map((prod) => (
+                    <ProductCard
+                      key={prod.id}
+                      product={prod}
+                      rating={4.7}
+                      reviewCount={18}
+                    />
+                  ))}
+                </div>
+
+                {/* Pagination Controls */}
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  totalItems={totalMatchedCount}
+                  pageSize={PAGE_SIZE}
+                />
               </div>
             ) : (
               <div className="p-12 text-center bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 space-y-3">
