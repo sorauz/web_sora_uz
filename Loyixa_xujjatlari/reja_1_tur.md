@@ -39,6 +39,14 @@
   - `FaqJsonLd.tsx` komponenti yaratiladi va PDP hamda Kategoriya sahifalariga ulanadi.
   - Google qidiruv natijalarida sahifa ostida kengaytirilgan FAQ savol-javoblari ochilib-yopiluvchi rich snippet ko'rinishida chiqadi.
 
+### 1.5. ItemList (Kategoriya va Brend Ro'yxatlari) JSON-LD Schemasi — [BAJARILDI ✅]
+- **Holat:** To'liq amalga oshirildi va ishlab turibdi (`ItemListJsonLd.tsx`).
+- **Amalga oshirilgan ishlar:**
+  - `ItemListJsonLd.tsx` SEO komponenti yaratildi.
+  - Kategoriya (`/category/[slug]`), Brend (`/brand/[slug]`) va Aksiya to'plamlari (`/catalog/[offer]`) sahifalariga ulandi.
+  - Har bir element uchun `ListItem` shakllantirilib, `position` (ko'p sahifalilik hisobi bilan `(page - 1) * 24 + index + 1`), `name`, `url`, `image`, `sku`, `brand` va `offers` (narx, UZS, mavjudlik) to'liq kiritildi.
+  - Playwright avtomatlashtirilgan testlari bilan qamrab olindi (`tests/itemlist-schema.spec.ts`).
+
 ---
 
 ## 2. Foydalanuvchi Tajribasi (UX) va Katalog Navigatsiyasi

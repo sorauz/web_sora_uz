@@ -7,6 +7,7 @@ import { Footer } from "@/components/layout/Footer";
 import { MobileNav } from "@/components/layout/MobileNav";
 import { Breadcrumbs } from "@/components/discovery/Breadcrumbs";
 import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
+import { ItemListJsonLd } from "@/components/seo/ItemListJsonLd";
 import { ProductCard } from "@/components/discovery/ProductCard";
 import { FacetedFilter } from "@/components/discovery/FacetedFilter";
 import { SortSelect } from "@/components/discovery/SortSelect";
@@ -196,6 +197,18 @@ export default async function CategoryPage({
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full space-y-6">
         {/* Breadcrumb & Structured Data */}
         <BreadcrumbJsonLd items={breadcrumbList} locale={locale} />
+        <ItemListJsonLd
+          name={currentPage > 1 ? `${categoryName} (${currentPage}-sahifa)` : categoryName}
+          description={
+            isUz
+              ? `Sora.uz do'konida ${categoryName} bo'yicha sifatli tovarlar to'plami.`
+              : `Список качественных товаров в категории ${categoryName} в интернет-магазине Sora.uz.`
+          }
+          products={paginatedProducts}
+          locale={locale as "uz" | "ru"}
+          currentPage={currentPage}
+          pageSize={PAGE_SIZE}
+        />
         <Breadcrumbs items={breadcrumbList} />
 
         {/* Category Header */}

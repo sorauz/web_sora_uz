@@ -7,6 +7,7 @@ import { Footer } from "@/components/layout/Footer";
 import { MobileNav } from "@/components/layout/MobileNav";
 import { Breadcrumbs } from "@/components/discovery/Breadcrumbs";
 import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
+import { ItemListJsonLd } from "@/components/seo/ItemListJsonLd";
 import { ProductCard } from "@/components/discovery/ProductCard";
 import { Pagination } from "@/components/discovery/Pagination";
 import { Link } from "@/i18n/routing";
@@ -285,6 +286,15 @@ export default async function StaticOfferPage({
             { name: heading, href: `/${locale}/catalog/${offerKey}` },
           ]}
           locale={locale}
+        />
+
+        <ItemListJsonLd
+          name={currentPage > 1 ? `${heading} (${currentPage}-sahifa)` : heading}
+          description={description}
+          products={paginatedProducts}
+          locale={locale as "uz" | "ru"}
+          currentPage={currentPage}
+          pageSize={PAGE_SIZE}
         />
 
         {/* Themed Hero Banner */}

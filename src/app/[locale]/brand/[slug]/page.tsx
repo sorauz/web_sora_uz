@@ -7,6 +7,7 @@ import { Footer } from "@/components/layout/Footer";
 import { MobileNav } from "@/components/layout/MobileNav";
 import { Breadcrumbs } from "@/components/discovery/Breadcrumbs";
 import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
+import { ItemListJsonLd } from "@/components/seo/ItemListJsonLd";
 import { ProductCard } from "@/components/discovery/ProductCard";
 import { SortSelect } from "@/components/discovery/SortSelect";
 import { Pagination } from "@/components/discovery/Pagination";
@@ -137,6 +138,18 @@ export default async function BrandDetailPage({
             { name: brandName, href: `/brand/${slug}` },
           ]}
           locale={locale}
+        />
+        <ItemListJsonLd
+          name={currentPage > 1 ? `${brandName} (${currentPage}-sahifa)` : brandName}
+          description={
+            isUz
+              ? `Sora.uz platformasida ${brandName} brendining rasmiy tovarlari ro'yxati.`
+              : `Официальная продукция бренда ${brandName} на Sora.uz.`
+          }
+          products={paginatedProducts}
+          locale={locale as "uz" | "ru"}
+          currentPage={currentPage}
+          pageSize={PAGE_SIZE}
         />
         <Breadcrumbs
           items={[
