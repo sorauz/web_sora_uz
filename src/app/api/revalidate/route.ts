@@ -1,5 +1,6 @@
 import { revalidateTag, revalidatePath } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
+import { submitToIndexNow } from "@/lib/seo/indexnow";
 
 function performRevalidation(tag?: string, path?: string) {
   if (tag) {
@@ -48,11 +49,51 @@ function performRevalidation(tag?: string, path?: string) {
   }
 }
 
+/**
+ * Resolves URLs to ping via IndexNow when tags or paths are revalidated
+ */
+function resolveIndexNowUrls(
+  tag?: string,
+  path?: string,
+  customUrls?: string | string[]
+): string[] {
+  const urls: string[] = [];
+
+  if (path) {
+    if (path.startsWith("/uz/") || path.startsWith("/ru/")) {
+      urls.push(`https://sora.uz${path}`);
+    } else {
+      const cleanPath = path.startsWith("/") ? path : `/${path}`;
+      urls.push(`https://sora.uz/uz${cleanPath}`);
+      urls.push(`https://sora.uz/ru${cleanPath}`);
+    }
+  }
+
+  if (tag === "products" || tag === "prices" || tag === "all") {
+    urls.push(
+      "https://sora.uz/uz",
+      "https://sora.uz/ru",
+      "https://sora.uz/uz/catalog",
+      "https://sora.uz/ru/catalog"
+    );
+  } else if (tag === "categories") {
+    urls.push("https://sora.uz/uz/catalog", "https://sora.uz/ru/catalog");
+  }
+
+  if (customUrls) {
+    const list = Array.isArray(customUrls) ? customUrls : [customUrls];
+    urls.push(...list);
+  }
+
+  return urls;
+}
+
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const secret = searchParams.get("secret");
   const tag = searchParams.get("tag");
   const path = searchParams.get("path");
+  const customUrl = searchParams.get("url");
 
   const expectedSecret =
     process.env.REVALIDATION_SECRET || "sora_revalidate_secret_2026";
@@ -64,11 +105,11 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  if (!tag && !path) {
+  if (!tag && !path && !customUrl) {
     return NextResponse.json(
       {
         revalidated: false,
-        message: "Missing 'tag' or 'path' query parameter to revalidate",
+        message: "Missing 'tag', 'path', or 'url' query parameter to revalidate",
       },
       { status: 400 }
     );
@@ -77,10 +118,27 @@ export async function GET(request: NextRequest) {
   try {
     performRevalidation(tag || undefined, path || undefined);
 
+    // Asynchronously dispatch changed URLs to IndexNow (Bing, Yandex, Naver)
+    const indexNowUrls = resolveIndexNowUrls(
+      tag || undefined,
+      path || undefined,
+      customUrl || undefined
+    );
+
+    if (indexNowUrls.length > 0) {
+      submitToIndexNow(indexNowUrls).catch((err) =>
+        console.warn("[IndexNow Webhook Dispatch Error]", err)
+      );
+    }
+
     return NextResponse.json({
       revalidated: true,
       tag: tag || null,
       path: path || null,
+      indexnow: {
+        dispatched: indexNowUrls.length > 0,
+        urlCount: indexNowUrls.length,
+      },
       now: Date.now(),
     });
   } catch (err: unknown) {
@@ -93,7 +151,13 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  let body: { secret?: string; tag?: string; path?: string } = {};
+  let body: {
+    secret?: string;
+    tag?: string;
+    path?: string;
+    urls?: string | string[];
+    url?: string;
+  } = {};
 
   try {
     body = await request.json();
@@ -104,6 +168,7 @@ export async function POST(request: NextRequest) {
       secret: searchParams.get("secret") || undefined,
       tag: searchParams.get("tag") || undefined,
       path: searchParams.get("path") || undefined,
+      url: searchParams.get("url") || undefined,
     };
   }
 
@@ -117,11 +182,13 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  if (!body.tag && !body.path) {
+  const customUrls = body.urls || body.url;
+
+  if (!body.tag && !body.path && !customUrls) {
     return NextResponse.json(
       {
         revalidated: false,
-        message: "Missing 'tag' or 'path' parameter to revalidate",
+        message: "Missing 'tag', 'path', or 'urls' parameter to revalidate",
       },
       { status: 400 }
     );
@@ -130,10 +197,27 @@ export async function POST(request: NextRequest) {
   try {
     performRevalidation(body.tag || undefined, body.path || undefined);
 
+    // Asynchronously dispatch changed URLs to IndexNow
+    const indexNowUrls = resolveIndexNowUrls(
+      body.tag || undefined,
+      body.path || undefined,
+      customUrls || undefined
+    );
+
+    if (indexNowUrls.length > 0) {
+      submitToIndexNow(indexNowUrls).catch((err) =>
+        console.warn("[IndexNow Webhook Dispatch Error]", err)
+      );
+    }
+
     return NextResponse.json({
       revalidated: true,
       tag: body.tag || null,
       path: body.path || null,
+      indexnow: {
+        dispatched: indexNowUrls.length > 0,
+        urlCount: indexNowUrls.length,
+      },
       now: Date.now(),
     });
   } catch (err: unknown) {

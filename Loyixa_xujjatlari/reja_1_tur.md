@@ -80,12 +80,14 @@
 
 ### 3. Yangi Qidiruv Tizimlari va Kontent Arxitekturasi
 
-### 3.1. IndexNow Protokoli Integratsiyasi (Bing & Yandex)
-- **Hozirgi holat:** Yangi yoki o'zgargan URL'lar faqat sitemap orqali navbatda skanerlanishini kutadi.
-- **Mavjud texnik imkoniyat:** IndexNow protokoli ochiq, bepul va hech qanday murakkab shartnomasiz ishlaydi.
-- **Amalga oshiriladigan ish:**
-  - `public/` katalogida maxsus IndexNow kaliti (`indexnow-{key}.txt`) joylashtiriladi.
-  - `src/app/api/indexnow/route.ts` yaratiladi: Har gal mahsulot yoki toifa yangilanganda IndexNow API endpointiga (`https://api.indexnow.org/indexnow`) avtomatik POST so'rovi yuborilib, Yandex va Bing'ga zudlik bilan xabar beriladi.
+### 3.1. IndexNow Protokoli Integratsiyasi (Bing & Yandex) — [BAJARILDI ✅]
+- **Holat:** To'liq amalga oshirildi va ishlab turibdi.
+- **Amalga oshirilgan ishlar:**
+  - Unikal 32-belgili IndexNow API kaliti (`c83b49e19d7a46f28945a8df39b561c2`) yaratildi va `public/c83b49e19d7a46f28945a8df39b561c2.txt` orqali qidiruv tizimlariga verifikatsiya taqdim etildi.
+  - `src/lib/seo/indexnow.ts` mijozi yaratildi: `https://api.indexnow.org/indexnow` endpointiga asinxron va xavfsiz JSON POST so'rovlarini yuboradi.
+  - Maxsus API endpoint (`src/app/api/indexnow/route.ts`) ochildi (Yandex/Bing uchun to'g'ridan-to'g'ri URL jo'natish).
+  - 1C On-Demand Revalidation webhook'iga (`src/app/api/revalidate/route.ts`) to'liq ulandi: 1C dan `tag=prices`, `tag=products` yoki `path` o'zgarganda Next.js keshini tozalash bilan parallel tarzda Yandex va Bing botlarini zudlik bilan chaqiradi.
+  - Avtomatlashtirilgan Playwright testlari bilan to'liq qamrab olindi (`tests/indexnow.spec.ts`).
 
 ### 3.2. Blog va Qo'llanmalar (Content Hub) Bo'limi
 - **Hozirgi holat:** Saytda maqolalar, xarid qo'llanmalari va ekspert sharhlari bo'limi yo'q.
@@ -105,7 +107,7 @@
 | 2 | **Hududiy mintaqa teglari (ru-UZ, uz-UZ)** | SEO | Oson | Bajarildi ✅ (Barcha sahifalar va sitemap alternates ga kiritildi) |
 | 3 | **Product JSON-LD boyitish (GTIN, Category, Policies)** | SEO | O'rta | Bajarildi ✅ (Google Rich Snippets va Merchant reytingi) |
 | 4 | **FAQPage JSON-LD Schemasi** | SEO | O'rta | Qidiruvda ochiluvchi FAQ rich snippets |
-| 5 | **IndexNow protokoli integratsiyasi** | SEO | O'rta | Yandex va Bing'da o'zgarishlarni bir soniyada indekslash |
+| 5 | **IndexNow protokoli integratsiyasi** | SEO | O'rta | Bajarildi ✅ (1C o'zgarishlarida Yandex va Bing'ga 0 soniyada xabar berish) |
 | 6 | **Katalog sahifalash (Pagination ?page=2)** | UX / Tech | O'rta | Bajarildi ✅ (24 tadan simmetrik sahifalash, filtr reset, SEO va mobil 44px) |
 | 7 | **Mahsulotlarni Taqqoslash (Comparison Page)** | UX / E-com | O'rta | Bajarildi ✅ (Konversiya oshishi, xaridorga to'g'ri tanlov berish) |
 | 8 | **1-klikda to'plam xarid qilish (Bundle Cross-sell)** | E-com | O'rta | O'rtacha chek miqdorini (AOV) oshirish |
