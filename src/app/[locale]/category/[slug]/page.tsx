@@ -104,7 +104,18 @@ export default async function CategoryPage({
   // Language switch / canonical redirect: ensure URL matches the active locale's slug
   const canonicalSlug = isUz ? currentCategory.group_slug_uz : currentCategory.group_slug_ru;
   if (slug !== canonicalSlug) {
-    redirect(`/${locale}/category/${canonicalSlug}`);
+    const sParams = new URLSearchParams();
+    Object.entries(query).forEach(([k, v]) => {
+      if (v !== undefined) {
+        if (Array.isArray(v)) {
+          v.forEach((val) => sParams.append(k, val));
+        } else {
+          sParams.set(k, v);
+        }
+      }
+    });
+    const qs = sParams.toString();
+    redirect(`/${locale}/category/${canonicalSlug}${qs ? `?${qs}` : ""}`);
   }
 
   const categoryName = isUz ? currentCategory.group_uz : currentCategory.group_ru;
@@ -281,6 +292,7 @@ export default async function CategoryPage({
                   totalPages={totalPages}
                   totalItems={totalMatchedCount}
                   pageSize={PAGE_SIZE}
+                  searchParams={query}
                 />
               </div>
             ) : (

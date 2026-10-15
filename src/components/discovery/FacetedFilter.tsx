@@ -1,10 +1,10 @@
 "use client";
 
-import { useQueryState } from "nuqs";
+import { useQueryStates, parseAsString } from "nuqs";
 import { useTranslations, useLocale } from "next-intl";
 import { Brand } from "@/lib/schemas/brand";
-import { Filter, X, RotateCcw, Search, ChevronDown } from "lucide-react";
-import { useState, useMemo } from "react";
+import { Filter, X, RotateCcw, Search, ChevronDown, Loader2 } from "lucide-react";
+import { useState, useMemo, useTransition, useEffect } from "react";
 import { SortSelect } from "./SortSelect";
 
 interface FacetedFilterProps {
@@ -24,21 +24,51 @@ export function FacetedFilter({
   const common = useTranslations("common");
   const locale = useLocale();
   const isUz = locale === "uz";
+  const [isPending, startTransition] = useTransition();
 
-  // nuqs URL query states
-  const [selectedBrand, setSelectedBrand] = useQueryState("brand", {
-    defaultValue: "",
-  });
-  const [minPrice, setMinPrice] = useQueryState("minPrice", {
-    defaultValue: "",
-  });
-  const [maxPrice, setMaxPrice] = useQueryState("maxPrice", {
-    defaultValue: "",
-  });
-  const [inStock, setInStock] = useQueryState("inStock", {
-    defaultValue: "",
-  });
-  const [, setPage] = useQueryState("page");
+  // nuqs URL query states synchronized with Next.js Server Components
+  const [filterState, setFilterState] = useQueryStates(
+    {
+      brand: parseAsString.withDefault(""),
+      minPrice: parseAsString.withDefault(""),
+      maxPrice: parseAsString.withDefault(""),
+      inStock: parseAsString.withDefault(""),
+      page: parseAsString.withDefault(""),
+    },
+    {
+      shallow: false,
+      startTransition,
+    }
+  );
+
+  const selectedBrand = filterState.brand;
+  const minPrice = filterState.minPrice;
+  const maxPrice = filterState.maxPrice;
+  const inStock = filterState.inStock;
+
+  // Local inputs state for custom prices to prevent high-frequency server calls while typing
+  const [localMin, setLocalMin] = useState(minPrice);
+  const [localMax, setLocalMax] = useState(maxPrice);
+
+  useEffect(() => {
+    setLocalMin(minPrice);
+  }, [minPrice]);
+
+  useEffect(() => {
+    setLocalMax(maxPrice);
+  }, [maxPrice]);
+
+  const applyCustomPrice = () => {
+    const cleanMin = localMin ? localMin.trim() : "";
+    const cleanMax = localMax ? localMax.trim() : "";
+    if (cleanMin !== minPrice || cleanMax !== maxPrice) {
+      setFilterState({
+        minPrice: cleanMin || null,
+        maxPrice: cleanMax || null,
+        page: null,
+      });
+    }
+  };
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [brandSearch, setBrandSearch] = useState("");
@@ -63,17 +93,23 @@ export function FacetedFilter({
     } else {
       next = [...activeBrands, brandName];
     }
-    setSelectedBrand(next.length > 0 ? next.join(",") : null);
-    setPage(null);
+    setFilterState({
+      brand: next.length > 0 ? next.join(",") : null,
+      page: null,
+    });
   };
 
   const resetAll = () => {
-    setSelectedBrand(null);
-    setMinPrice(null);
-    setMaxPrice(null);
-    setInStock(null);
-    setPage(null);
+    setLocalMin("");
+    setLocalMax("");
     setBrandSearch("");
+    setFilterState({
+      brand: null,
+      minPrice: null,
+      maxPrice: null,
+      inStock: null,
+      page: null,
+    });
   };
 
   const hasActiveFilters =
@@ -109,13 +145,22 @@ export function FacetedFilter({
   const handlePricePreset = (minVal: string, maxVal: string) => {
     const isSame = (minPrice || "") === minVal && (maxPrice || "") === maxVal;
     if (isSame) {
-      setMinPrice(null);
-      setMaxPrice(null);
+      setLocalMin("");
+      setLocalMax("");
+      setFilterState({
+        minPrice: null,
+        maxPrice: null,
+        page: null,
+      });
     } else {
-      setMinPrice(minVal || null);
-      setMaxPrice(maxVal || null);
+      setLocalMin(minVal);
+      setLocalMax(maxVal);
+      setFilterState({
+        minPrice: minVal || null,
+        maxPrice: maxVal || null,
+        page: null,
+      });
     }
-    setPage(null);
   };
 
   // Filter and sort brands: active brands always top, matching brandSearch query
@@ -139,8 +184,17 @@ export function FacetedFilter({
       {/* Header with Title and Reset */}
       <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
         <h3 className="font-bold text-sm text-slate-900 dark:text-slate-100 flex items-center gap-2">
-          <Filter className="w-4 h-4 text-sora-600" />
+          {isPending ? (
+            <Loader2 className="w-4 h-4 text-sora-600 animate-spin" />
+          ) : (
+            <Filter className="w-4 h-4 text-sora-600" />
+          )}
           <span>{t("title")}</span>
+          {isPending && (
+            <span className="text-[10px] text-sora-600 dark:text-sora-400 font-semibold animate-pulse">
+              {isUz ? "Yangilanmoqda..." : "Обновление..."}
+            </span>
+          )}
         </h3>
         {hasActiveFilters && (
           <button
@@ -176,8 +230,10 @@ export function FacetedFilter({
                 type="checkbox"
                 checked={inStock === "1"}
                 onChange={(e) => {
-                  setInStock(e.target.checked ? "1" : null);
-                  setPage(null);
+                  setFilterState({
+                    inStock: e.target.checked ? "1" : null,
+                    page: null,
+                  });
                 }}
                 className="w-4 h-4 rounded-md text-sora-600 focus:ring-sora-500 border-slate-300 dark:border-slate-700 cursor-pointer accent-sora-600"
               />
@@ -317,10 +373,14 @@ export function FacetedFilter({
                   min={minPossiblePrice}
                   max={maxPossiblePrice}
                   placeholder={t("priceFrom")}
-                  value={minPrice}
-                  onChange={(e) => {
-                    setMinPrice(e.target.value || null);
-                    setPage(null);
+                  value={localMin}
+                  onChange={(e) => setLocalMin(e.target.value)}
+                  onBlur={applyCustomPrice}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      applyCustomPrice();
+                    }
                   }}
                   className="w-full h-9 px-3 text-xs rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-hidden focus:border-sora-500"
                 />
@@ -333,10 +393,14 @@ export function FacetedFilter({
                   min={minPossiblePrice}
                   max={maxPossiblePrice}
                   placeholder={t("priceTo")}
-                  value={maxPrice}
-                  onChange={(e) => {
-                    setMaxPrice(e.target.value || null);
-                    setPage(null);
+                  value={localMax}
+                  onChange={(e) => setLocalMax(e.target.value)}
+                  onBlur={applyCustomPrice}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      applyCustomPrice();
+                    }
                   }}
                   className="w-full h-9 px-3 text-xs rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-hidden focus:border-sora-500"
                 />
@@ -354,7 +418,9 @@ export function FacetedFilter({
   return (
     <>
       {/* Desktop Sidebar Filter (w-72 = 288px) */}
-      <aside className="hidden lg:block w-72 shrink-0 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-xs h-fit sticky top-24">
+      <aside className={`hidden lg:block w-72 shrink-0 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-xs h-fit sticky top-24 transition-opacity duration-200 ${
+        isPending ? "opacity-75" : "opacity-100"
+      }`}>
         {content}
       </aside>
 
@@ -367,7 +433,11 @@ export function FacetedFilter({
             data-testid="mobile-filter-trigger"
             className="w-full h-10 px-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center gap-2 text-xs font-bold text-slate-800 dark:text-slate-200 shadow-xs active:scale-95 transition-transform cursor-pointer"
           >
-            <Filter className="w-4 h-4 text-sora-600 shrink-0" />
+            {isPending ? (
+              <Loader2 className="w-4 h-4 text-sora-600 shrink-0 animate-spin" />
+            ) : (
+              <Filter className="w-4 h-4 text-sora-600 shrink-0" />
+            )}
             <span className="truncate">{t("title")}</span>
             {activeFilterCount > 0 && (
               <span className="px-1.5 py-0.5 rounded-full bg-sora-600 text-white text-[10px] font-bold leading-none">
@@ -430,17 +500,23 @@ export function FacetedFilter({
                 )}
                 <button
                   type="button"
-                  onClick={() => setMobileOpen(false)}
+                  onClick={() => {
+                    applyCustomPrice();
+                    setMobileOpen(false);
+                  }}
                   data-testid="mobile-filter-apply"
-                  className="flex-1 h-11 bg-sora-600 hover:bg-sora-700 text-white font-bold text-sm rounded-xl active:scale-98 transition-transform shadow-md cursor-pointer"
+                  className="flex-1 h-11 bg-sora-600 hover:bg-sora-700 text-white font-bold text-sm rounded-xl active:scale-98 transition-transform shadow-md cursor-pointer flex items-center justify-center gap-2"
                 >
-                  {typeof totalMatchedCount === "number"
-                    ? isUz
-                      ? `${totalMatchedCount} ta tovarni ko'rish`
-                      : `Показать (${totalMatchedCount} товаров)`
-                    : isUz
-                    ? "Ko'rish (Qo'llash)"
-                    : "Применить"}
+                  {isPending && <Loader2 className="w-4 h-4 text-white animate-spin" />}
+                  <span>
+                    {typeof totalMatchedCount === "number"
+                      ? isUz
+                        ? `${totalMatchedCount} ta tovarni ko'rish`
+                        : `Показать (${totalMatchedCount} товаров)`
+                      : isUz
+                      ? "Ko'rish (Qo'llash)"
+                      : "Применить"}
+                  </span>
                 </button>
               </div>
             </div>
