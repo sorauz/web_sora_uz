@@ -228,15 +228,16 @@ export function ProductActions({ product, locale }: ProductActionsProps) {
         </div>
 
         {/* 1-Click Buy Button */}
-        <button
-          type="button"
-          disabled={!inStock}
-          onClick={() => setIsModalOpen(true)}
-          className="w-full h-12 flex items-center justify-center gap-2 rounded-xl font-bold text-slate-800 dark:text-white bg-amber-400 hover:bg-amber-500 active:scale-[0.98] transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <Zap className="w-5 h-5 fill-current" />
-          <span>{t("buyNow")}</span>
-        </button>
+        {canAddToCart && (
+          <button
+            type="button"
+            onClick={() => setIsModalOpen(true)}
+            className="w-full h-12 flex items-center justify-center gap-2 rounded-xl font-bold text-slate-800 dark:text-white bg-amber-400 hover:bg-amber-500 active:scale-[0.98] transition-all shadow-sm"
+          >
+            <Zap className="w-5 h-5 fill-current" />
+            <span>{t("buyNow")}</span>
+          </button>
+        )}
 
         {/* Wishlist & Compare Quick Actions */}
         <div className="grid grid-cols-2 gap-2.5 pt-1">
@@ -323,7 +324,7 @@ export function ProductActions({ product, locale }: ProductActionsProps) {
       </div>
 
       {/* 1-Click Fast Order Modal */}
-      {isModalOpen && (
+      {isModalOpen && canAddToCart && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
           <div className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-2xl border border-slate-200 dark:border-slate-800 animate-in fade-in zoom-in-95 duration-200">
             <button
