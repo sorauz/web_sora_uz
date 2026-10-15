@@ -12,6 +12,8 @@ import {
   ThumbsUp,
   ChevronDown,
   MessageSquare,
+  ShieldCheck,
+  CreditCard,
 } from "lucide-react";
 import { Product, getProductLocalized } from "@/lib/schemas/product";
 import { Review, ReviewStats } from "@/lib/schemas/review";
@@ -136,8 +138,8 @@ export function ProductTabs({
 
   return (
     <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden">
-      {/* Tab Navigation (Mobile: 100% visible wrapped pill grid so no tabs are hidden off-screen; Desktop: horizontal tab bar) */}
-      <div className="flex flex-wrap sm:flex-nowrap gap-1.5 sm:gap-0 p-2.5 sm:p-0 border-b border-slate-200 dark:border-slate-800 sm:overflow-x-auto scrollbar-none bg-slate-50/70 dark:bg-slate-900/50">
+      {/* Tab Navigation (Desktop: 5 equal 20% columns stretching edge-to-edge; Mobile: smooth touch-scrollable pill strip) */}
+      <div className="flex overflow-x-auto sm:overflow-visible scrollbar-none p-2 sm:p-0 gap-1.5 sm:gap-0 border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/50">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -146,14 +148,14 @@ export function ProductTabs({
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center justify-center gap-1.5 sm:gap-2 px-3.5 py-2.5 sm:px-5 sm:py-4 text-xs sm:text-sm font-semibold rounded-xl sm:rounded-none sm:border-b-2 transition-all whitespace-nowrap cursor-pointer ${
+              className={`shrink-0 sm:flex-1 sm:min-w-0 flex items-center justify-center gap-1.5 sm:gap-2 px-3.5 py-2.5 sm:px-2 md:px-3 lg:px-4 sm:py-4 text-xs sm:text-xs md:text-sm font-semibold rounded-xl sm:rounded-none sm:border-b-2 sm:border-r border-slate-200/80 dark:border-slate-800/80 last:sm:border-r-0 transition-all cursor-pointer select-none touch-manipulation whitespace-nowrap sm:whitespace-normal text-center min-h-[44px] sm:min-h-0 ${
                 isActive
-                  ? "bg-sora-600 text-white sm:bg-white sm:dark:bg-slate-900 sm:border-sora-600 sm:text-sora-600 sm:dark:text-sora-400 shadow-2xs sm:shadow-none"
-                  : "bg-white dark:bg-slate-800 sm:bg-transparent border border-slate-200/80 dark:border-slate-700 sm:border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+                  ? "bg-sora-600 text-white sm:bg-white sm:dark:bg-slate-900 sm:border-b-sora-600 sm:dark:border-b-sora-400 sm:text-sora-600 sm:dark:text-sora-400 font-bold shadow-2xs sm:shadow-none"
+                  : "bg-white dark:bg-slate-800 sm:bg-transparent border border-slate-200/80 dark:border-slate-700 sm:border-t-0 sm:border-l-0 sm:border-b-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100/60 dark:hover:bg-slate-800/40"
               }`}
             >
               <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
-              <span>{tab.label}</span>
+              <span className="truncate sm:overflow-visible">{tab.label}</span>
             </button>
           );
         })}
@@ -163,7 +165,7 @@ export function ProductTabs({
       <div className="p-4 sm:p-8">
         {/* Description Tab */}
         {activeTab === "desc" && (
-          <div className="space-y-6 max-w-4xl">
+          <div className="space-y-6">
             <h3 className="text-xl font-bold text-slate-900 dark:text-white">
               {loc.title || loc.name}
             </h3>
@@ -263,7 +265,7 @@ export function ProductTabs({
 
         {/* Specs / Attributes Tab */}
         {activeTab === "specs" && (
-          <div className="space-y-6 max-w-4xl">
+          <div className="space-y-6">
             <h3 className="text-xl font-bold text-slate-900 dark:text-white">
               {t("specsTab")}
             </h3>
@@ -342,33 +344,50 @@ export function ProductTabs({
 
         {/* Delivery & Payment Tab */}
         {activeTab === "delivery" && (
-          <div className="space-y-6 max-w-4xl">
+          <div className="space-y-6">
             <h3 className="text-xl font-bold text-slate-900 dark:text-white">
               {t("deliveryTab")}
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              {/* Card 1: Yetkazib berish xizmati */}
               <div className="p-5 rounded-2xl bg-sora-50/50 dark:bg-sora-950/20 border border-sora-100 dark:border-sora-900/40 space-y-3">
                 <div className="flex items-center gap-2 text-sora-600 dark:text-sora-400 font-bold">
-                  <Truck className="w-5 h-5" />
+                  <Truck className="w-5 h-5 shrink-0" />
                   <span>{locale === "uz" ? "Yetkazib berish xizmati" : "Служба доставки"}</span>
                 </div>
-                <ul className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 space-y-2 list-disc list-inside">
+                <ul className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 space-y-2 list-disc list-inside leading-relaxed">
                   <li>{locale === "uz" ? "Toshkent shahri: 24 soat ichida eshikkacha yetkazib berish." : "Город Ташкент: доставка до двери в течение 24 часов."}</li>
+                  <li>{locale === "uz" ? "Toshkentda 500 000 so'mdan yuqori xaridga bepul yetkazish." : "По Ташкенту от 500 000 сум бесплатная доставка."}</li>
                   <li>{locale === "uz" ? "O'zbekiston viloyatlari: BTS, Fargo yoki pochta orqali 1-3 ish kunida." : "Регионы Узбекистана: через курьерские службы BTS, Fargo в течение 1–3 дней."}</li>
                   <li>{locale === "uz" ? "Katta hajmli yuklar uchun maxsus transport va yuk tushirish xizmati." : "Спецтранспорт для крупногабаритных заказов."}</li>
                 </ul>
               </div>
 
+              {/* Card 2: To'lov turlari */}
               <div className="p-5 rounded-2xl bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/40 space-y-3">
                 <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-bold">
-                  <CheckCircle className="w-5 h-5" />
-                  <span>{locale === "uz" ? "To'lov turlari va Kafolat" : "Способы оплаты и Гарантия"}</span>
+                  <CreditCard className="w-5 h-5 shrink-0" />
+                  <span>{locale === "uz" ? "To'lov usullari" : "Способы оплаты"}</span>
                 </div>
-                <ul className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 space-y-2 list-disc list-inside">
-                  <li>{locale === "uz" ? "Onlayn: Uzcard, Humo, Payme, Click." : "Онлайн: Uzcard, Humo, Payme, Click."}</li>
+                <ul className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 space-y-2 list-disc list-inside leading-relaxed">
+                  <li>{locale === "uz" ? "Onlayn: Uzcard, Humo, Payme, Click (0% komissiya)." : "Онлайн: Uzcard, Humo, Payme, Click (без комиссии)."}</li>
                   <li>{locale === "uz" ? "Naqd pul yoki tovar qabul qilinganda terminal orqali." : "Наличными или картой при получении товара."}</li>
-                  <li>{locale === "uz" ? "Yuridik shaxslar uchun: QQS bilan bank shartnomasi va hisob-faktura." : "Для юридических лиц: безналичный расчет с НДС."}</li>
-                  <li>{locale === "uz" ? "12 oylik to'liq rasmiy kafolat sertifikati." : "Официальный гарантийный талон на 12 месяцев."}</li>
+                  <li>{locale === "uz" ? "Yuridik shaxslar uchun: QQS bilan bank shartnomasi va elektron hisob-faktura (ESF)." : "Для юридических лиц: безналичный расчет с НДС (ЭСФ)."}</li>
+                  <li>{locale === "uz" ? "Barcha to'lovlar fiskal chek bilan taqdim etiladi." : "Все расчеты сопровождаются официальными чеками."}</li>
+                </ul>
+              </div>
+
+              {/* Card 3: Kafolat va Qaytarish */}
+              <div className="p-5 rounded-2xl bg-purple-50/50 dark:bg-purple-950/20 border border-purple-100 dark:border-purple-900/40 space-y-3">
+                <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400 font-bold">
+                  <ShieldCheck className="w-5 h-5 shrink-0" />
+                  <span>{locale === "uz" ? "Kafolat va Qaytarish" : "Гарантия и Возврат"}</span>
+                </div>
+                <ul className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 space-y-2 list-disc list-inside leading-relaxed">
+                  <li>{locale === "uz" ? "14 kunlik qaytarish: mahsulot mos kelmasa, muammosiz almashtirish kafolati." : "Гарантия обмена или возврата в течение 14 дней."}</li>
+                  <li>{locale === "uz" ? "Texnika va orgtexnikaga 1 yilgacha to'liq rasmiy kafolat." : "Официальная гарантия производителя до 1 года."}</li>
+                  <li>{locale === "uz" ? "100% original tovarlar va zavod sifat nazorati." : "100% оригинальная заводская продукция."}</li>
+                  <li>{locale === "uz" ? "1C ERP bilan to'liq sinxronlangan qoldiqlar." : "Синхронизация остатков в реальном времени с 1C ERP."}</li>
                 </ul>
               </div>
             </div>
@@ -377,7 +396,7 @@ export function ProductTabs({
 
         {/* Reviews Tab */}
         {activeTab === "reviews" && (
-          <div className="space-y-8 max-w-4xl">
+          <div className="space-y-8">
             {/* Rating Summary Card */}
             <div className="p-6 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center gap-8">
               <div className="text-center sm:text-left space-y-1">
@@ -613,7 +632,7 @@ export function ProductTabs({
 
         {/* FAQ Tab */}
         {activeTab === "faq" && (
-          <div className="space-y-4 max-w-4xl">
+          <div className="space-y-4">
             <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">
               {t("faqTab")}
             </h3>
