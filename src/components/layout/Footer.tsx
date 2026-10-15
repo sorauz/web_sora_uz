@@ -9,7 +9,6 @@ import {
   Truck,
   CreditCard,
   Building2,
-  BadgeCheck,
   Send,
   AlertCircle,
 } from "lucide-react";
@@ -39,12 +38,6 @@ export function Footer() {
                 ? "2018-yildan buyon O'zbekistonda kanselyariya, ofis qog'ozi, sarf materiallari va orgtexnika bo'yicha ishonchli yetkazib beruvchi. 10 000 dan ortiq mahsulotlar 1C ERP tizimi bilan real vaqtda sinxronlangan."
                 : "С 2018 года надежный поставщик канцелярских товаров, офисной бумаги и оргтехники в Узбекистане. Более 10 000 наименований с синхронизацией 1С ERP в реальном времени."}
             </p>
-
-            {/* Deli Official Partner Badge */}
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-950/40 border border-red-800/50 text-red-300 font-semibold text-[11px]">
-              <BadgeCheck className="w-4 h-4 text-red-400 shrink-0" />
-              <span>{isUz ? "Deli rasmiy hamkori" : "Официальный партнер Deli"}</span>
-            </div>
 
             {/* Working Hours */}
             <div className="flex items-start gap-2.5 p-3 rounded-xl bg-slate-800/70 border border-slate-700/60 max-w-sm">

@@ -16,6 +16,7 @@ import {
   CheckCircle2,
   Heart,
   Scale,
+  Send,
 } from "lucide-react";
 import { useCartStore } from "@/lib/store/cart";
 import { useFavoritesStore } from "@/lib/store/favorites";
@@ -128,6 +129,44 @@ export function ProductActions({ product, locale }: ProductActionsProps) {
           </span>
         </div>
       </div>
+
+      {/* Contact info for unpriced or out-of-stock products */}
+      {(!inStock || priceVal <= 0) && (
+        <div className="p-4 sm:p-5 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/60 space-y-3">
+          <div className="flex items-center gap-2 text-amber-900 dark:text-amber-200">
+            <Phone className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+            <span className="text-xs sm:text-sm font-bold uppercase tracking-wide">
+              {locale === "uz" ? "Narx va mavjudlik haqida ma'lumot" : "Уточнить наличие и цену"}
+            </span>
+          </div>
+
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+            {locale === "uz"
+              ? "Ushbu mahsulot narxi yoki omborda mavjudligini aniqlashtirish va buyurtma berish uchun biz bilan bog'laning:"
+              : "Для уточнения точной стоимости, наличия на складе и оформления заказа свяжитесь с нами:"}
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+            <a
+              href="tel:+998903264757"
+              className="inline-flex items-center justify-center gap-2.5 h-11 px-4 rounded-xl bg-sora-600 hover:bg-sora-700 active:scale-[0.98] text-white font-bold text-xs sm:text-sm shadow-sm transition-all"
+            >
+              <Phone className="w-4 h-4 shrink-0" />
+              <span>+998 (90) 326-47-57</span>
+            </a>
+
+            <a
+              href="https://t.me/sora_uz"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2.5 h-11 px-4 rounded-xl bg-[#229ED9] hover:bg-[#1E88E5] active:scale-[0.98] text-white font-bold text-xs sm:text-sm shadow-sm transition-all"
+            >
+              <Send className="w-4 h-4 shrink-0" />
+              <span>Telegram (@sora_uz)</span>
+            </a>
+          </div>
+        </div>
+      )}
 
       {/* Quantity & CTA Buttons */}
       <div className="space-y-3">

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { ShoppingCart, Check } from "lucide-react";
+import { ShoppingCart, Check, Phone, Send } from "lucide-react";
 import { useCartStore } from "@/lib/store/cart";
 import { Product, getProductLocalized } from "@/lib/schemas/product";
 import { calculateProductPrice } from "@/lib/utils/price";
@@ -22,8 +22,9 @@ export function MobileStickyCTA({ product, locale }: MobileStickyCTAProps) {
   const [isAdded, setIsAdded] = useState(false);
   const priceInfo = calculateProductPrice(product.price);
   const priceVal = priceInfo.price;
-  const isOutOfStock = product.price?.stock === "OutOfStock";
-  const canAddToCart = !isOutOfStock && priceVal > 0;
+  const stockQty = product.price?.quantity_remaining ?? (product.price?.stock !== "OutOfStock" ? 10 : 0);
+  const inStock = product.price?.stock !== "OutOfStock" && stockQty > 0;
+  const canAddToCart = inStock && priceVal > 0;
 
   const handleAddToCart = () => {
     if (!canAddToCart) return;
@@ -74,36 +75,51 @@ export function MobileStickyCTA({ product, locale }: MobileStickyCTAProps) {
           </div>
         </div>
 
-        <button
-          type="button"
-          disabled={!canAddToCart}
-          onClick={handleAddToCart}
-          className={`flex items-center justify-center gap-2 px-5 min-h-[44px] rounded-xl font-bold text-xs shrink-0 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
-            isAdded
-              ? "bg-emerald-600 text-white"
-              : "bg-sora-600 text-white active:scale-95 shadow-md shadow-sora-500/20"
-          }`}
-        >
-          {isAdded ? (
-            <>
-              <Check className="w-4 h-4" />
-              <span>{t("addedToCart")}</span>
-            </>
-          ) : (
-            <>
-              <ShoppingCart className="w-4 h-4" />
-              <span>
-                {isOutOfStock
-                  ? common("outOfStock")
-                  : priceVal <= 0
-                  ? locale === "uz"
-                    ? "Kelishiladi"
-                    : "По запросу"
-                  : t("addToCart")}
-              </span>
-            </>
-          )}
-        </button>
+        {!canAddToCart ? (
+          <div className="flex items-center gap-1.5 shrink-0">
+            <a
+              href="tel:+998903264757"
+              className="flex items-center justify-center gap-1.5 px-3 min-h-[44px] rounded-xl font-bold text-xs bg-sora-600 hover:bg-sora-700 text-white active:scale-95 shadow-sm transition-all"
+              title="+998 (90) 326-47-57"
+            >
+              <Phone className="w-3.5 h-3.5 shrink-0" />
+              <span>+998 (90) 326-47-57</span>
+            </a>
+            <a
+              href="https://t.me/sora_uz"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-1.5 px-3 min-h-[44px] rounded-xl font-bold text-xs bg-[#229ED9] hover:bg-[#1E88E5] text-white active:scale-95 shadow-sm transition-all"
+              title="Telegram @sora_uz"
+            >
+              <Send className="w-3.5 h-3.5 shrink-0" />
+              <span>Telegram</span>
+            </a>
+          </div>
+        ) : (
+          <button
+            type="button"
+            disabled={!canAddToCart}
+            onClick={handleAddToCart}
+            className={`flex items-center justify-center gap-2 px-5 min-h-[44px] rounded-xl font-bold text-xs shrink-0 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
+              isAdded
+                ? "bg-emerald-600 text-white"
+                : "bg-sora-600 text-white active:scale-95 shadow-md shadow-sora-500/20"
+            }`}
+          >
+            {isAdded ? (
+              <>
+                <Check className="w-4 h-4" />
+                <span>{t("addedToCart")}</span>
+              </>
+            ) : (
+              <>
+                <ShoppingCart className="w-4 h-4" />
+                <span>{t("addToCart")}</span>
+              </>
+            )}
+          </button>
+        )}
       </div>
     </div>
   );

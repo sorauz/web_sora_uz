@@ -40,7 +40,7 @@ test.describe("FAZA 3: Product Detail Page (PDP) with Real 1C ERP Data", () => {
 
     // Check Distinct Up-sell / Cross-sell blocks
     await expect(
-      page.getByText("O'xshash mahsulotlar (Muqobil variantlar)")
+      page.getByText("O'xshash mahsulotlar").first()
     ).toBeVisible();
   });
 

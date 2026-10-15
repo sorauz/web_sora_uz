@@ -317,8 +317,8 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
               <div>
                 <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
                   {currentLocale === "uz"
-                    ? "O'xshash mahsulotlar (Muqobil variantlar)"
-                    : "Похожие товары (Альтернативные варианты)"}
+                    ? "O'xshash mahsulotlar"
+                    : "Похожие товары"}
                 </h2>
                 <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
                   {currentLocale === "uz"
@@ -348,8 +348,8 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
               <div>
                 <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
                   {currentLocale === "uz"
-                    ? "Bilan birga xarid qilinadi (To'ldiruvchi)"
-                    : "С этим товаром также покупают (Комплектующие)"}
+                    ? "Bilan birga xarid qilinadi"
+                    : "С этим товаром также покупают"}
                 </h2>
                 <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
                   {currentLocale === "uz"
