@@ -27,7 +27,7 @@ test.describe("Homepage Redesign & Special Offers Layout", () => {
     expect(await ruCards.count()).toBe(4);
   });
 
-  test("2. 4 Offer Sections: 5 columns layout with up to 15 items per section", async ({
+  test("2. 4 Offer Sections: 5 columns layout with up to 10 items per section (2 rows)", async ({
     page,
   }) => {
     await page.setViewportSize({ width: 1400, height: 900 });
@@ -48,11 +48,11 @@ test.describe("Homepage Redesign & Special Offers Layout", () => {
         const className = await grid.getAttribute("class");
         expect(className).toContain("lg:grid-cols-5");
 
-        // Check products count is at most 15
+        // Check products count is at most 10 (2 rows of 5 columns)
         const cards = sectionEl.locator("article");
         const cardCount = await cards.count();
         expect(cardCount).toBeGreaterThan(0);
-        expect(cardCount).toBeLessThanOrEqual(15);
+        expect(cardCount).toBeLessThanOrEqual(10);
       }
     }
   });

@@ -197,7 +197,7 @@ export default async function HomePage({ params }: PageProps) {
           <RandomCategories categories={tree} locale={locale as "uz" | "ru"} />
         </section>
 
-        {/* 5. Aksiyalar va Chegirmalar (/promotions) - 5 ustun, 3 qator */}
+        {/* 5. Aksiyalar va Chegirmalar (/promotions) - 5 ustun, 2 qator */}
         {promotionProducts.length > 0 && (
           <section id="promotions" className="space-y-4">
             <div className="flex items-center justify-between">
@@ -220,7 +220,7 @@ export default async function HomePage({ params }: PageProps) {
               </Link>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5 sm:gap-4">
-              {promotionProducts.slice(0, 15).map((p) => (
+              {promotionProducts.slice(0, 10).map((p) => (
                 <ProductCard
                   key={p.id}
                   product={p}
@@ -233,7 +233,7 @@ export default async function HomePage({ params }: PageProps) {
           </section>
         )}
 
-        {/* 6. Eng Arzon Narx Kafolati (/low_price_guarantee) - 5 ustun, 3 qator */}
+        {/* 6. Eng Arzon Narx Kafolati (/low_price_guarantee) - 5 ustun, 2 qator */}
         {lowPriceProducts.length > 0 && (
           <section id="low-price" className="space-y-4">
             <div className="flex items-center justify-between">
@@ -256,7 +256,7 @@ export default async function HomePage({ params }: PageProps) {
               </Link>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5 sm:gap-4">
-              {lowPriceProducts.slice(0, 15).map((p) => (
+              {lowPriceProducts.slice(0, 10).map((p) => (
                 <ProductCard
                   key={p.id}
                   product={p}
@@ -269,7 +269,7 @@ export default async function HomePage({ params }: PageProps) {
           </section>
         )}
 
-        {/* 7. Ommabop Mahsulotlar - Xit Savdo (/popular) - 5 ustun, 3 qator */}
+        {/* 7. Ommabop Mahsulotlar - Xit Savdo (/popular) - 5 ustun, 2 qator */}
         {popularProducts.length > 0 && (
           <section id="popular" className="space-y-4">
             <div className="flex items-center justify-between">
@@ -292,7 +292,7 @@ export default async function HomePage({ params }: PageProps) {
               </Link>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5 sm:gap-4">
-              {popularProducts.slice(0, 15).map((p) => (
+              {popularProducts.slice(0, 10).map((p) => (
                 <ProductCard
                   key={p.id}
                   product={p}
@@ -305,7 +305,7 @@ export default async function HomePage({ params }: PageProps) {
           </section>
         )}
 
-        {/* 8. Yangi Mahsulotlar - Novinki (/new_products) - 5 ustun, 3 qator */}
+        {/* 8. Yangi Mahsulotlar - Novinki (/new_products) - 5 ustun, 2 qator */}
         {newProductsList.length > 0 && (
           <section id="new-products" className="space-y-4">
             <div className="flex items-center justify-between">
@@ -328,7 +328,7 @@ export default async function HomePage({ params }: PageProps) {
               </Link>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5 sm:gap-4">
-              {newProductsList.slice(0, 15).map((p) => (
+              {newProductsList.slice(0, 10).map((p) => (
                 <ProductCard
                   key={p.id}
                   product={p}
