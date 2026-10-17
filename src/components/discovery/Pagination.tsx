@@ -55,7 +55,11 @@ export function Pagination({
     } else {
       params.set("page", pageNumber.toString());
     }
-    const targetPath = baseUrl ?? pathname;
+    const rawTarget = baseUrl ?? pathname;
+    // Ensure leading slash and strip any leading locale (/uz or /ru)
+    // because next-intl's Link component automatically prepends the active locale.
+    const cleanPath = rawTarget.startsWith("/") ? rawTarget : `/${rawTarget}`;
+    const targetPath = cleanPath.replace(/^\/(uz|ru)(\/|$)/, "/");
     const queryString = params.toString();
     return queryString ? `${targetPath}?${queryString}` : targetPath;
   };

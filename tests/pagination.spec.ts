@@ -57,12 +57,29 @@ test.describe("Catalog & Category Pagination System (24 items/page)", () => {
     const count = await productCards.count();
     expect(count).toBeLessThanOrEqual(24);
 
-    // Search page
-    await page.goto("/uz/search?q=deli");
+    // Search page pagination test (Russian locale & no duplicate locale)
+    await page.goto("/ru/search?q=deli");
     await expect(page.locator("h1")).toBeVisible();
     const searchCards = page.locator("article");
     const searchCount = await searchCards.count();
     expect(searchCount).toBeLessThanOrEqual(24);
+
+    const paginationNav = page.locator("nav[aria-label='Sahifalash']");
+    await expect(paginationNav).toBeVisible();
+
+    const nextBtn = paginationNav.locator("a[rel='next']");
+    await expect(nextBtn).toBeVisible();
+    await nextBtn.click();
+
+    await page.waitForURL(/\/ru\/search\?.*page=2/);
+    expect(page.url()).toContain("/ru/search?");
+    expect(page.url()).not.toContain("/ru/ru/search");
+    expect(page.url()).toContain("page=2");
+
+    // Ensure 404 is not shown
+    await expect(page.locator("text=This page could not be found")).not.toBeVisible();
+    const page2Cards = page.locator("article");
+    expect(await page2Cards.count()).toBeGreaterThan(0);
   });
 
   test("4. Mobile touch targets for pagination buttons satisfy min 44x44px", async ({

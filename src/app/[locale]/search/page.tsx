@@ -153,7 +153,7 @@ export default async function SearchPage({
               totalPages={totalPages}
               totalItems={totalItems}
               pageSize={PAGE_SIZE}
-              baseUrl={`/${locale}/search`}
+              baseUrl="/search"
               searchParams={query}
             />
           </>

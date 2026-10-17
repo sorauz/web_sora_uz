@@ -383,7 +383,7 @@ export default async function StaticOfferPage({
                 totalPages={totalPages}
                 totalItems={totalItems}
                 pageSize={PAGE_SIZE}
-                baseUrl={`/${locale}/catalog/${offerKey}`}
+                baseUrl={`/catalog/${offerKey}`}
                 searchParams={query}
               />
             </>
