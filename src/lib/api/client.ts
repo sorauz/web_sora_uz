@@ -47,9 +47,10 @@ import {
   FIXTURE_PROMOTIONS,
 } from "./fixtures";
 
-interface FetchOptions {
+export interface FetchOptions {
   tags?: string[];
   revalidate?: number;
+  noCache?: boolean;
 }
 
 class SoraApiClient {
@@ -77,7 +78,9 @@ class SoraApiClient {
     const timeoutId = setTimeout(() => controller.abort(), this.timeoutMs);
 
     try {
-      const response = await fetch(url, {
+      const fetchInit: RequestInit & {
+        next?: { tags?: string[]; revalidate?: number };
+      } = {
         method: "GET",
         headers: {
           Authorization: this.authHeader,
@@ -85,11 +88,18 @@ class SoraApiClient {
           "Content-Type": "application/json; charset=utf-8",
         },
         signal: controller.signal,
-        next: {
+      };
+
+      if (options?.noCache) {
+        fetchInit.cache = "no-store";
+      } else {
+        fetchInit.next = {
           tags: options?.tags,
           revalidate: options?.revalidate ?? 86400, // 24 hours default ISR cache
-        },
-      });
+        };
+      }
+
+      const response = await fetch(url, fetchInit);
 
       clearTimeout(timeoutId);
 
@@ -198,8 +208,9 @@ class SoraApiClient {
     const res = await this.request<{ products?: ProductPriceStock[] }>(
       "/price",
       {
-        tags: options?.tags ?? ["prices"],
+        tags: options?.noCache ? undefined : (options?.tags ?? ["prices"]),
         revalidate: options?.revalidate,
+        noCache: options?.noCache,
       }
     );
     if (!res.isFallback && res.data) {
@@ -222,8 +233,9 @@ class SoraApiClient {
     options?: FetchOptions
   ): Promise<{ products: Product[]; isFallback: boolean }> {
     const res = await this.request<unknown[]>("/all_product", {
-      tags: options?.tags ?? ["products"],
+      tags: options?.noCache ? undefined : (options?.tags ?? ["products"]),
       revalidate: options?.revalidate,
+      noCache: options?.noCache,
     });
     let list: Product[] = FIXTURE_PRODUCTS;
     let isFallback = true;
@@ -264,8 +276,9 @@ class SoraApiClient {
     options?: FetchOptions
   ): Promise<{ product: Product | null; isFallback: boolean }> {
     const res = await this.request<unknown>(`/product?id=${id}`, {
-      tags: options?.tags ?? ["products", `product-${id}`],
+      tags: options?.noCache ? undefined : (options?.tags ?? ["products", `product-${id}`]),
       revalidate: options?.revalidate,
+      noCache: options?.noCache,
     });
     if (!res.isFallback && res.data) {
       const parsed = ProductSchema.safeParse(res.data);

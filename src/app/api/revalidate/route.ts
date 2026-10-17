@@ -1,6 +1,7 @@
 import { revalidateTag, revalidatePath } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 import { submitToIndexNow } from "@/lib/seo/indexnow";
+import { runSmartDiffRevalidation } from "@/lib/sync/smart-diff";
 
 function performRevalidation(tag?: string, path?: string) {
   if (tag) {
@@ -105,11 +106,21 @@ export async function GET(request: NextRequest) {
     );
   }
 
+  const mode = searchParams.get("mode");
+  const isSmartDiff = mode === "smart-diff" || tag === "smart-diff";
+
+  if (isSmartDiff) {
+    const result = await runSmartDiffRevalidation();
+    return NextResponse.json(result, {
+      status: result.error && !result.summary ? 500 : 200,
+    });
+  }
+
   if (!tag && !path && !customUrl) {
     return NextResponse.json(
       {
         revalidated: false,
-        message: "Missing 'tag', 'path', or 'url' query parameter to revalidate",
+        message: "Missing 'tag', 'path', 'mode', or 'url' query parameter to revalidate",
       },
       { status: 400 }
     );
@@ -153,6 +164,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   let body: {
     secret?: string;
+    mode?: string;
     tag?: string;
     path?: string;
     urls?: string | string[];
@@ -166,6 +178,7 @@ export async function POST(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     body = {
       secret: searchParams.get("secret") || undefined,
+      mode: searchParams.get("mode") || undefined,
       tag: searchParams.get("tag") || undefined,
       path: searchParams.get("path") || undefined,
       url: searchParams.get("url") || undefined,
@@ -182,13 +195,22 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  const isSmartDiff = body.mode === "smart-diff" || body.tag === "smart-diff";
+
+  if (isSmartDiff) {
+    const result = await runSmartDiffRevalidation();
+    return NextResponse.json(result, {
+      status: result.error && !result.summary ? 500 : 200,
+    });
+  }
+
   const customUrls = body.urls || body.url;
 
   if (!body.tag && !body.path && !customUrls) {
     return NextResponse.json(
       {
         revalidated: false,
-        message: "Missing 'tag', 'path', or 'urls' parameter to revalidate",
+        message: "Missing 'tag', 'path', 'mode', or 'urls' parameter to revalidate",
       },
       { status: 400 }
     );
