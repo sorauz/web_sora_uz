@@ -9,6 +9,7 @@ import { MobileNav } from "@/components/layout/MobileNav";
 import { RandomCategories } from "@/components/discovery/RandomCategories";
 import { ProductCard } from "@/components/discovery/ProductCard";
 import { BrandMarquee } from "@/components/discovery/BrandMarquee";
+import { HeroSlider } from "@/components/home/HeroSlider";
 import { Link } from "@/i18n/routing";
 import {
   Sparkles,
@@ -19,9 +20,7 @@ import {
   ShieldCheck,
   CreditCard,
   Building2,
-  CheckCircle2,
 } from "lucide-react";
-import Image from "next/image";
 
 import { Metadata } from "next";
 
@@ -125,60 +124,8 @@ export default async function HomePage({ params }: PageProps) {
 
       {/* Main Page Flow */}
       <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 flex-1 space-y-8 sm:space-y-12">
-        {/* 3. Hero Banner (Compact on mobile so products appear faster above-the-fold) */}
-        <section className="relative rounded-2xl sm:rounded-3xl bg-gradient-to-br from-sora-700 via-sora-800 to-sora-950 text-white overflow-hidden p-4 sm:p-10 lg:p-12 shadow-lg">
-          <div className="absolute right-0 top-0 w-1/2 h-full bg-radial from-sora-400/20 to-transparent pointer-events-none" />
-
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-8 items-center relative z-10">
-            <div className="lg:col-span-7 space-y-2.5 sm:space-y-4">
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[11px] sm:text-xs font-semibold bg-sora-500/30 border border-sora-400/40 text-sora-200">
-                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                <span>{t("heroBadge")}</span>
-              </div>
-              <h1 className="text-xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-snug sm:leading-tight">
-                {t("heroTitle")}
-              </h1>
-              <p className="text-xs sm:text-base text-sora-100 max-w-xl leading-relaxed line-clamp-2 sm:line-clamp-none">
-                {t("heroSubtitle")}
-              </p>
-              <div className="pt-1 sm:pt-2 flex flex-wrap gap-2 sm:gap-3">
-                <Link
-                  href="/catalog"
-                  className="px-4 py-2.5 sm:px-6 sm:py-3 rounded-xl sm:rounded-2xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs sm:text-sm shadow-md transition-all flex items-center gap-1.5 sm:gap-2"
-                >
-                  <span>{t("heroCta")}</span>
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
-                <Link
-                  href="/catalog?badge=sale"
-                  className="px-4 py-2.5 sm:px-6 sm:py-3 rounded-xl sm:rounded-2xl bg-white/10 hover:bg-white/20 text-white font-semibold text-xs sm:text-sm border border-white/20 transition-all"
-                >
-                  {t("heroSecondary")}
-                </Link>
-              </div>
-            </div>
-
-            {/* Hero Visual Showcase */}
-            <div className="lg:col-span-5 flex justify-center">
-              <div className="relative w-44 sm:w-80 h-36 sm:h-72 bg-white/10 rounded-2xl sm:rounded-3xl p-2.5 sm:p-4 backdrop-blur-xs border border-white/10 shadow-2xl flex items-center justify-center">
-                <div className="relative w-full h-full">
-                  <Image
-                    src="https://i.ibb.co/qLcGdmjh/Deli-E3871.jpg"
-                    alt="Deli E3871 Kombi perpletka mashinasi"
-                    fill
-                    sizes="(max-width: 640px) 176px, 320px"
-                    className="object-contain p-1 sm:p-2 drop-shadow-2xl"
-                    priority
-                  />
-                </div>
-                <div className="absolute -bottom-2 -left-2 sm:-bottom-3 sm:-left-3 bg-white text-slate-900 rounded-xl sm:rounded-2xl py-1 px-2.5 sm:py-2 sm:px-4 shadow-xl border border-slate-100 text-[10px] sm:text-xs font-bold flex items-center gap-1.5 sm:gap-2">
-                  <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-500" />
-                  <span>1C ERP Sinxron</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+        {/* 3. Dynamic Hero Banner Carousel (4 interactive slides, 0 CLS, priority LCP on slide 1) */}
+        <HeroSlider />
 
         {/* 4. Ommabop Kategoriyalar (4 random aylanuvchi toifalar) */}
         <section className="space-y-4">

@@ -1,6 +1,63 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("Homepage Redesign & Special Offers Layout", () => {
+  test("0. Dynamic HeroSlider: Renders 4 interactive slides, indicators, arrows, and localized content (UZ & RU)", async ({
+    page,
+    request,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto("/uz");
+
+    const carousel = page.locator("section[aria-roledescription='carousel']");
+    await expect(carousel).toBeVisible();
+
+    // Verify 4 slide indicator tabs exist
+    const tabs = carousel.locator("button[role='tab']");
+    await expect(tabs).toHaveCount(4);
+
+    // Slide 1 (Sale) is active initially
+    await expect(page.locator("h1")).toContainText(
+      "Kanselyariya va Ofis Jihozlari Ulgurji Narxlarda"
+    );
+    await expect(carousel).toContainText("10 000+ tovar mavjud");
+
+    // Click indicator for Slide 2 (B2B)
+    await tabs.nth(1).click();
+    await expect(carousel).toContainText(
+      "Ofisingiz Uchun Barcha Anjomlar — 24 Soatda Yetkazamiz"
+    );
+    await expect(carousel).toContainText("100% Rasmiy hujjatlar va Didox");
+
+    // Click next arrow -> Slide 3 (Deli)
+    await carousel.locator("button[aria-label='Keyingi slayd']").click();
+    await expect(carousel).toContainText(
+      "Deli: Perpletka, Laminator va Professional Jihozlar"
+    );
+
+    // Click next arrow -> Slide 4 (Delivery)
+    await carousel.locator("button[aria-label='Keyingi slayd']").click();
+    await expect(carousel).toContainText(
+      "Toshkent Bo‘ylab 24 Soatda, Viloyatlarga 1–3 Kunda"
+    );
+
+    // Verify all 4 local WebP banner assets return 200 OK
+    for (const img of [
+      "/banners/hero-slide-sale.webp",
+      "/banners/hero-slide-b2b.webp",
+      "/banners/hero-slide-deli.webp",
+      "/banners/hero-slide-delivery.webp",
+    ]) {
+      const res = await request.get(img);
+      expect(res.status()).toBe(200);
+    }
+
+    // Check Russian localization on /ru
+    await page.goto("/ru");
+    await expect(page.locator("h1")).toContainText(
+      "Канцелярия и Товары для Офиса по Оптовым Ценам"
+    );
+  });
+
   test("1. Ommabop kategoriyalar: Exactly 4 categories visible with shuffle ability and localization", async ({
     page,
   }) => {

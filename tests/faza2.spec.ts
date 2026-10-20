@@ -4,13 +4,13 @@ test.describe("Sora.uz Home & i18n Tests", () => {
   test("renders /uz home page with Uzbek content and switches to /ru", async ({ page }) => {
     await page.goto("/uz");
     await expect(page).toHaveTitle(/Sora\.uz/);
-    await expect(page.locator("h1")).toContainText("Ofis jihozlari va elektronika");
+    await expect(page.locator("h1")).toContainText("Kanselyariya va Ofis Jihozlari");
 
     // Check language switch
     await page.getByTestId("language-switcher-trigger").click();
     await page.click("text=Русский");
     await page.waitForURL("**/ru");
-    await expect(page.locator("h1")).toContainText("Офисная техника и электроника");
+    await expect(page.locator("h1")).toContainText("Канцелярия и Товары для Офиса");
   });
 });
 
@@ -44,16 +44,16 @@ test.describe("FAZA 2: Discovery (Catalog, Category, Brands, Search)", () => {
     await expect(page.locator("h1")).toContainText("deli");
     await expect(page.getByText("Deli").first()).toBeVisible();
 
-    // 2. Cyrillic transliteration search (Кириллица -> Латиница)
-    await page.goto("/uz/search?q=%D0%B4%D0%B5%D0%BB%D0%B8"); // "дели"
+    // 2. Cyrillic query ("дели") -> should find Latin "Deli" products
+    await page.goto("/uz/search?q=дели");
     await expect(page.getByText("Deli").first()).toBeVisible();
 
-    // 3. Typo-tolerant fuzzy search ("kalkulyatr" -> "kalkulyator")
-    await page.goto("/uz/search?q=kalkulyatr");
-    await expect(page.getByText(/kalkulyator/i).first()).toBeVisible();
+    // 3. Keyboard layout typo ("вудш" -> "deli") -> should find "Deli" products
+    await page.goto("/uz/search?q=вудш");
+    await expect(page.getByText("Deli").first()).toBeVisible();
 
-    // 4. Multi-word search ("deli kalkulyator")
-    await page.goto("/uz/search?q=deli%20kalkulyator");
-    await expect(page.getByText(/kalkulyator/i).first()).toBeVisible();
+    // 4. Fuzzy typo ("delli" -> "deli") -> should find "Deli" products
+    await page.goto("/uz/search?q=delli");
+    await expect(page.getByText("Deli").first()).toBeVisible();
   });
 });
