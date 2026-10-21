@@ -201,7 +201,7 @@ flowchart LR
 * **Texnik o‘lchami:** 800 $\times$ 600 px, Shaffof orqa fon (Transparent Alpha), hajmi: ~55 KB.
 * **Kompozitsiya (Aniq ob'ektlar joylashuvi):**
   1. **Markaziy ob'ekt:** Sora.uz logotipli ekologik toza kraft qutilar (ustiga ko‘k rangli brend lenta yopishtirilgan, sifatli qadoqlangan posilka).
-  2. **Yetkazish ramzi:** Qutilar yonida zamonaviy yashil rangli tezkor yetkazib beruvchi kuryer skuter/furgonining 3D ramzi yoki piktogrammasi.
+  2. **Yetkazish ramzi:** Qutilar yonida oq rangli **Chevrolet Damas Van (furgon)** yetkazib berish avtomobilining 3D tasviri (`SORA.UZ` brend yozuvi va yon chiziqlari bilan).
   3. **Tezlik va muddat belgisi:** Havoda suzuvchi neon-yashil raqamli taymer (`24h Express Delivery`) va Toshkent xaritasi lokatsiya belgisi (Map Pin).
   4. **To‘lov qulayligi belgilari:** Posilka tagida xavfsiz to‘lov belgilarining ramzlari (Payme, Click, Uzum va Naqd pul ramziy miniatyuralari).
   5. **Vizual kayfiyat:** Tezkorlik, qulaylik, posilkaning butun holda tez yetib kelishi ishonchi.
