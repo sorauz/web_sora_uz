@@ -82,14 +82,14 @@ export function Header({ tree, categories, brands, products = [] }: HeaderProps)
   const compareCount = mounted ? getCompareCount() : 0;
 
   return (
-    <header className="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 w-full overflow-x-clip">
+    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 w-full overflow-x-clip">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-18 flex items-center justify-between gap-2 sm:gap-4">
         {/* Logo - Matching logo.png */}
         <Link href="/" className="flex flex-col shrink-0 group">
-          <span className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight text-sora-600 dark:text-sora-400 leading-none">
+          <span className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight text-sora-600 leading-none">
             SORAUZ
           </span>
-          <span className="text-[8px] sm:text-[9.5px] font-bold tracking-tight text-slate-800 dark:text-slate-300 leading-tight mt-0.5">
+          <span className="text-[8px] sm:text-[9.5px] font-bold tracking-tight text-slate-800 leading-tight mt-0.5">
             Sizga mos ishonchli tanlov
           </span>
         </Link>

@@ -95,7 +95,7 @@ export default async function LocaleLayout({
         <link rel="preconnect" href="http://1cloud.uz:777" />
         <link rel="dns-prefetch" href="http://1cloud.uz:777" />
       </head>
-      <body className={`min-h-full w-full overflow-x-hidden flex flex-col antialiased selection:bg-sora-600 selection:text-white ${fontSans.className}`}>
+      <body className={`min-h-full w-full overflow-x-hidden flex flex-col antialiased bg-white text-slate-900 selection:bg-sora-600 selection:text-white ${fontSans.className}`}>
         <NextTopLoader
           color="#c92f74"
           initialPosition={0.08}

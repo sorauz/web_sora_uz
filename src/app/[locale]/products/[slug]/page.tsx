@@ -207,7 +207,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50/50 dark:bg-slate-950 pb-20 md:pb-0">
+    <div className="min-h-screen flex flex-col bg-white text-slate-900 pb-20 md:pb-0">
       <ProductJsonLd
         product={product}
         locale={currentLocale}

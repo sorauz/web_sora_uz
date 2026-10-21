@@ -43,8 +43,8 @@ test.describe("FAZA 7: Performance va Monitoring (Core Web Vitals)", () => {
   }) => {
     await page.goto(`${BASE_URL}/uz`, { waitUntil: "domcontentloaded" });
 
-    // Main Hero showcase image
-    const heroImage = page.locator('img[alt="Deli E3871 Kombi perpletka mashinasi"]');
+    // Main Hero showcase image (Slide 1 priority LCP)
+    const heroImage = page.locator('img[alt="SvetoCopy Classic A4 qog\'ozi va Deli kanselyariya to\'plami"]');
     await expect(heroImage).toBeVisible();
 
     // Priority ensures it is not lazy loaded (loading is 'auto' or 'eager')

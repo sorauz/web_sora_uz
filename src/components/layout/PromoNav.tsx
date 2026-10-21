@@ -6,7 +6,7 @@ export function PromoNav() {
   const t = useTranslations("nav");
 
   return (
-    <nav className="bg-slate-100/70 dark:bg-slate-800/40 border-b border-slate-200/80 dark:border-slate-800 text-xs font-semibold overflow-x-auto scrollbar-none py-2">
+    <nav className="bg-slate-50 border-b border-slate-200 text-xs font-semibold overflow-x-auto scrollbar-none py-2">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center gap-6 whitespace-nowrap">
         <Link
           href="/catalog"

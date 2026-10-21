@@ -111,7 +111,7 @@ export default async function HomePage({ params }: PageProps) {
       : products;
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-white text-slate-900 flex flex-col">
       {/* 1. Header (Lightweight RSC payload: search autocomplete dynamically fetches suggestions) */}
       <Header
         tree={tree}

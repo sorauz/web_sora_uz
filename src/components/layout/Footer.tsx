@@ -18,35 +18,35 @@ export function Footer() {
   const isUz = locale === "uz";
 
   return (
-    <footer className="bg-slate-900 text-slate-300 border-t border-slate-800 pt-14 pb-24 sm:pb-12 mt-16 text-xs">
+    <footer className="bg-white text-slate-600 border-t border-slate-200 pt-14 pb-24 sm:pb-12 mt-16 text-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
         {/* Top Section: Main 4-column Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 pb-10 border-b border-slate-800">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 pb-10 border-b border-slate-200">
           {/* Col 1: Brand & Identity (Span 4 on large screens) */}
           <div className="lg:col-span-4 space-y-4">
             <div className="flex flex-col">
-              <span className="text-2xl font-black tracking-tight text-sora-400 leading-none">
+              <span className="text-2xl font-black tracking-tight text-sora-600 leading-none">
                 SORAUZ
               </span>
-              <span className="text-[10px] font-bold tracking-tight text-slate-300 leading-tight mt-1">
+              <span className="text-[10px] font-bold tracking-tight text-slate-700 leading-tight mt-1">
                 {isUz ? "Sizga mos ishonchli tanlov" : "Надежный выбор для вас"}
               </span>
             </div>
 
-            <p className="text-xs text-slate-400 leading-relaxed max-w-sm">
+            <p className="text-xs text-slate-500 leading-relaxed max-w-sm">
               {isUz
                 ? "2018-yildan buyon O'zbekistonda kanselyariya, ofis qog'ozi, sarf materiallari va orgtexnika bo'yicha ishonchli yetkazib beruvchi. 10 000 dan ortiq mahsulotlar 1C ERP tizimi bilan real vaqtda sinxronlangan."
                 : "С 2018 года надежный поставщик канцелярских товаров, офисной бумаги и оргтехники в Узбекистане. Более 10 000 наименований с синхронизацией 1С ERP в реальном времени."}
             </p>
 
             {/* Working Hours */}
-            <div className="flex items-start gap-2.5 p-3 rounded-xl bg-slate-800/70 border border-slate-700/60 max-w-sm">
-              <Clock className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+            <div className="flex items-start gap-2.5 p-3 rounded-xl bg-slate-50 border border-slate-200/90 max-w-sm">
+              <Clock className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
               <div className="space-y-0.5">
-                <p className="font-bold text-slate-200">
+                <p className="font-bold text-slate-800">
                   {isUz ? "Ish vaqti: 09:00 — 19:00" : "График работы: 09:00 — 19:00"}
                 </p>
-                <p className="text-[11px] text-slate-400">
+                <p className="text-[11px] text-slate-500">
                   {isUz ? "Dushanba – Shanba (Yakshanba — dam olish)" : "Понедельник – Суббота (Вс — выходной)"}
                 </p>
               </div>
@@ -54,7 +54,7 @@ export function Footer() {
 
             {/* Social Links */}
             <div className="space-y-2 pt-1">
-              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
+              <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
                 {isUz ? "Ijtimoiy tarmoqlarimiz" : "Мы в соцсетях"}
               </span>
               <div className="flex flex-wrap items-center gap-2">
@@ -62,7 +62,7 @@ export function Footer() {
                   href="https://t.me/sorauz"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-950/60 hover:bg-blue-900 border border-blue-800/60 text-blue-300 text-xs font-semibold transition-colors"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sky-50 hover:bg-sky-100 border border-sky-200 text-sky-700 text-xs font-semibold transition-colors"
                   title="Telegram Kanal"
                 >
                   <Send className="w-3.5 h-3.5" />
@@ -72,7 +72,7 @@ export function Footer() {
                   href="https://t.me/sora_uz"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sky-950/60 hover:bg-sky-900 border border-sky-800/60 text-sky-300 text-xs font-semibold transition-colors"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 text-xs font-semibold transition-colors"
                   title="Telegram Menejer"
                 >
                   <Send className="w-3.5 h-3.5" />
@@ -82,7 +82,7 @@ export function Footer() {
                   href="https://www.instagram.com/sorauz/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-950/60 hover:bg-rose-900 border border-rose-800/60 text-rose-300 text-xs font-semibold transition-colors"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 text-xs font-semibold transition-colors"
                   title="Instagram"
                 >
                   <svg className="w-3.5 h-3.5 fill-current shrink-0" viewBox="0 0 24 24">
@@ -96,39 +96,39 @@ export function Footer() {
 
           {/* Col 2: Katalog & Aksiyalar (Span 2 or 3) */}
           <div className="lg:col-span-2 space-y-3">
-            <h4 className="text-sm font-bold text-white uppercase tracking-wider">
+            <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
               {isUz ? "Katalog" : "Каталог"}
             </h4>
-            <ul className="space-y-1 text-slate-300">
+            <ul className="space-y-1 text-slate-600">
               <li>
-                <Link href="/catalog" className="inline-block py-1 hover:text-white transition-colors">
+                <Link href="/catalog" className="inline-block py-1 hover:text-sora-600 transition-colors font-medium">
                   {isUz ? "Barcha toifalar" : "Все категории"}
                 </Link>
               </li>
               <li>
-                <Link href="/catalog/promotions" className="inline-flex items-center gap-1.5 py-1 hover:text-white transition-colors">
-                  <span className="w-1.5 h-1.5 rounded-full bg-red-400"></span>
+                <Link href="/catalog/promotions" className="inline-flex items-center gap-1.5 py-1 hover:text-sora-600 transition-colors font-medium">
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
                   {isUz ? "Aksiya va chegirmalar" : "Акции и скидки"}
                 </Link>
               </li>
               <li>
-                <Link href="/catalog/low_price_guarantee" className="inline-flex items-center gap-1.5 py-1 hover:text-white transition-colors">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                <Link href="/catalog/low_price_guarantee" className="inline-flex items-center gap-1.5 py-1 hover:text-sora-600 transition-colors font-medium">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                   {isUz ? "Eng arzon narx kafolati" : "Гарантия низкой цены"}
                 </Link>
               </li>
               <li>
-                <Link href="/catalog/new_products" className="inline-block py-1 hover:text-white transition-colors">
+                <Link href="/catalog/new_products" className="inline-block py-1 hover:text-sora-600 transition-colors font-medium">
                   {isUz ? "Yangi tovarlar" : "Новые товары"}
                 </Link>
               </li>
               <li>
-                <Link href="/catalog/popular" className="inline-block py-1 hover:text-white transition-colors">
+                <Link href="/catalog/popular" className="inline-block py-1 hover:text-sora-600 transition-colors font-medium">
                   {isUz ? "Top mahsulotlar" : "Популярные товары"}
                 </Link>
               </li>
               <li>
-                <Link href="/brands" className="inline-block py-1 hover:text-white transition-colors">
+                <Link href="/brands" className="inline-block py-1 hover:text-sora-600 transition-colors font-medium">
                   {isUz ? "Rasmiy brendlar" : "Официальные бренды"}
                 </Link>
               </li>
@@ -137,37 +137,37 @@ export function Footer() {
 
           {/* Col 3: Kompaniya va Xizmatlar (Span 3) */}
           <div className="lg:col-span-3 space-y-3">
-            <h4 className="text-sm font-bold text-white uppercase tracking-wider">
+            <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
               {isUz ? "Kompaniya va Xizmatlar" : "Компания и Сервис"}
             </h4>
-            <ul className="space-y-1 text-slate-300">
+            <ul className="space-y-1 text-slate-600">
               <li>
-                <Link href="/about" className="inline-block py-1 hover:text-white transition-colors">
+                <Link href="/about" className="inline-block py-1 hover:text-sora-600 transition-colors font-medium">
                   {isUz ? "Biz haqimizda" : "О компании"}
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="inline-block py-1 hover:text-white transition-colors">
+                <Link href="/contact" className="inline-block py-1 hover:text-sora-600 transition-colors font-medium">
                   {isUz ? "Aloqa va manzil" : "Контакты и адрес"}
                 </Link>
               </li>
               <li>
-                <Link href="/delivery" className="inline-block py-1 hover:text-white transition-colors">
+                <Link href="/delivery" className="inline-block py-1 hover:text-sora-600 transition-colors font-medium">
                   {isUz ? "Yetkazib berish shartlari" : "Условия доставки"}
                 </Link>
               </li>
               <li>
-                <Link href="/payment" className="inline-block py-1 hover:text-white transition-colors">
+                <Link href="/payment" className="inline-block py-1 hover:text-sora-600 transition-colors font-medium">
                   {isUz ? "To'lov usullari" : "Способы оплаты"}
                 </Link>
               </li>
               <li>
-                <Link href="/warranty" className="inline-block py-1 hover:text-white transition-colors">
+                <Link href="/warranty" className="inline-block py-1 hover:text-sora-600 transition-colors font-medium">
                   {isUz ? "Kafolat va qaytarish (14 kun)" : "Гарантия и возврат (14 дней)"}
                 </Link>
               </li>
               <li>
-                <Link href="/b2b" className="inline-flex items-center gap-1.5 py-1 hover:text-white text-purple-400 hover:text-purple-300 font-semibold transition-colors">
+                <Link href="/b2b" className="inline-flex items-center gap-1.5 py-1 text-purple-600 hover:text-purple-700 font-semibold transition-colors">
                   <Building2 className="w-3.5 h-3.5" />
                   {isUz ? "B2B Korporativ xizmat (ESF)" : "B2B Корпоративным клиентам (ЭСФ)"}
                 </Link>
@@ -177,21 +177,21 @@ export function Footer() {
 
           {/* Col 4: Bog'lanish va Manzil (Span 3) */}
           <div className="lg:col-span-3 space-y-3">
-            <h4 className="text-sm font-bold text-white uppercase tracking-wider">
+            <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
               {isUz ? "Aloqa va Manzil" : "Контакты и Адрес"}
             </h4>
-            <div className="space-y-3 text-slate-400">
+            <div className="space-y-3 text-slate-600">
               {/* Phones */}
               <div className="flex items-start gap-2.5">
-                <Phone className="w-4 h-4 text-sora-400 shrink-0 mt-0.5" />
+                <Phone className="w-4 h-4 text-sora-600 shrink-0 mt-0.5" />
                 <div className="flex flex-col gap-1">
-                  <a href="tel:+998903264757" className="font-semibold text-white hover:text-sora-300 transition-colors">
+                  <a href="tel:+998903264757" className="font-bold text-slate-900 hover:text-sora-600 transition-colors">
                     +998 (90) 326-47-57
                   </a>
-                  <a href="tel:+998909699090" className="hover:text-white transition-colors">
+                  <a href="tel:+998909699090" className="hover:text-sora-600 transition-colors">
                     +998 (90) 969-90-90
                   </a>
-                  <a href="tel:+998712280578" className="hover:text-white transition-colors">
+                  <a href="tel:+998712280578" className="hover:text-sora-600 transition-colors">
                     +998 (71) 228-05-78
                   </a>
                 </div>
@@ -199,21 +199,21 @@ export function Footer() {
 
               {/* Emails */}
               <div className="flex items-start gap-2.5">
-                <Mail className="w-4 h-4 text-sora-400 shrink-0 mt-0.5" />
+                <Mail className="w-4 h-4 text-sora-600 shrink-0 mt-0.5" />
                 <div className="flex flex-col gap-1">
-                  <a href="mailto:info@sora.uz" className="hover:text-white transition-colors">
-                    info@sora.uz <span className="text-[10px] text-slate-500">({isUz ? "Mijozlar" : "Клиентам"})</span>
+                  <a href="mailto:info@sora.uz" className="hover:text-sora-600 transition-colors">
+                    info@sora.uz <span className="text-[10px] text-slate-400">({isUz ? "Mijozlar" : "Клиентам"})</span>
                   </a>
-                  <a href="mailto:b2b@sora.uz" className="hover:text-white transition-colors">
-                    b2b@sora.uz <span className="text-[10px] text-slate-500">({isUz ? "Korporativ" : "B2B"})</span>
+                  <a href="mailto:b2b@sora.uz" className="hover:text-sora-600 transition-colors">
+                    b2b@sora.uz <span className="text-[10px] text-slate-400">({isUz ? "Korporativ" : "B2B"})</span>
                   </a>
                 </div>
               </div>
 
               {/* Address */}
               <div className="flex items-start gap-2.5">
-                <MapPin className="w-4 h-4 text-sora-400 shrink-0 mt-0.5" />
-                <span className="leading-snug">
+                <MapPin className="w-4 h-4 text-sora-600 shrink-0 mt-0.5" />
+                <span className="leading-snug text-slate-600">
                   {isUz
                     ? "Toshkent shahri, Olmazor tumani, Dilsaroy ko'chasi, 1-uy"
                     : "г. Ташкент, Алмазарский район, ул. Дилсарой, дом 1"}
@@ -224,17 +224,17 @@ export function Footer() {
         </div>
 
         {/* Middle Section: Trust, Delivery & Payment Badges */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-5 rounded-2xl bg-slate-800/40 border border-slate-800">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-5 rounded-2xl bg-slate-50/70 border border-slate-200/90 shadow-xs">
           {/* Card 1: Yetkazib berish */}
           <div className="flex items-start gap-3">
-            <div className="w-9 h-9 rounded-xl bg-sora-950 text-sora-400 flex items-center justify-center shrink-0 border border-sora-800">
+            <div className="w-9 h-9 rounded-xl bg-sora-50 text-sora-600 flex items-center justify-center shrink-0 border border-sora-100">
               <Truck className="w-4 h-4" />
             </div>
             <div>
-              <p className="font-bold text-white">
+              <p className="font-bold text-slate-900">
                 {isUz ? "Tezkor va bepul yetkazish" : "Быстрая и бесплатная доставка"}
               </p>
-              <p className="text-[11px] text-slate-400 mt-0.5 leading-relaxed">
+              <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
                 {isUz
                   ? "Toshkentda 500 000 so'mdan yuqori xaridga bepul. Viloyatlarga BTS, Fargo, EMU orqali (1–3 kun)."
                   : "По Ташкенту от 500 000 сум бесплатно. В регионы через BTS, Fargo, EMU (1–3 дня)."}
@@ -244,25 +244,25 @@ export function Footer() {
 
           {/* Card 2: To'lov tizimlari va Eslatma */}
           <div className="flex items-start gap-3">
-            <div className="w-9 h-9 rounded-xl bg-emerald-950 text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-800">
+            <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-100">
               <CreditCard className="w-4 h-4" />
             </div>
             <div className="space-y-1.5 w-full">
-              <p className="font-bold text-white">
+              <p className="font-bold text-slate-900">
                 {isUz ? "Qulay to'lov usullari" : "Способы оплаты"}
               </p>
               <div className="flex flex-wrap gap-1.5">
                 {["Payme", "Click", "Uzcard", "Humo", "Visa", "Naqd pul", "B2B"].map((item) => (
                   <span
                     key={item}
-                    className="px-2 py-0.5 rounded bg-slate-800 text-[10px] font-semibold text-slate-300 border border-slate-700"
+                    className="px-2 py-0.5 rounded bg-white text-[10px] font-semibold text-slate-700 border border-slate-200 shadow-xs"
                   >
                     {item}
                   </span>
                 ))}
               </div>
-              <p className="text-[10px] text-amber-400/90 font-medium flex items-center gap-1 pt-0.5">
-                <AlertCircle className="w-3 h-3 shrink-0" />
+              <p className="text-[10px] text-amber-700 font-medium flex items-center gap-1 pt-0.5">
+                <AlertCircle className="w-3 h-3 text-amber-600 shrink-0" />
                 <span>
                   {isUz
                     ? "Kredit va muddatli to'lov (nasiya) mavjud emas"
@@ -274,14 +274,14 @@ export function Footer() {
 
           {/* Card 3: 100% Sifat va Kafolat */}
           <div className="flex items-start gap-3">
-            <div className="w-9 h-9 rounded-xl bg-purple-950 text-purple-400 flex items-center justify-center shrink-0 border border-purple-800">
+            <div className="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0 border border-purple-100">
               <ShieldCheck className="w-4 h-4" />
             </div>
             <div>
-              <p className="font-bold text-white">
+              <p className="font-bold text-slate-900">
                 {isUz ? "14 kunlik qaytarish va kafolat" : "Гарантия и возврат 14 дней"}
               </p>
-              <p className="text-[11px] text-slate-400 mt-0.5 leading-relaxed">
+              <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
                 {isUz
                   ? "Sifat kafolati, mahsulotni 14 kun ichida almashtirish va texnikaga 1 yilgacha rasmiy kafolat."
                   : "Официальная гарантия до 1 года, возврат в течение 14 дней в строгом соответствии с законом."}
@@ -291,8 +291,8 @@ export function Footer() {
         </div>
 
         {/* Legal Details / Yuridik rekvizitlar */}
-        <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800/80 text-[11px] text-slate-400 space-y-1">
-          <p className="font-semibold text-slate-300">
+        <div className="p-4 rounded-xl bg-slate-50/80 border border-slate-200 text-[11px] text-slate-600 space-y-1">
+          <p className="font-semibold text-slate-800">
             {isUz ? "Yuridik rekvizitlar:" : "Юридические реквизиты:"}
           </p>
           <p className="leading-relaxed">
@@ -300,7 +300,7 @@ export function Footer() {
               ? 'Tashkilot: «SORAUZ» MCHJ | STIR (INN): 306286447 | H/r: 20208000905524274001 | Bank: AIKB "IPAK YO\'LI BANK" Sag\'bon filiali, Toshkent shahar | MFO: 01036'
               : 'Организация: ООО «SORAUZ» | ИНН: 306286447 | Р/с: 20208000905524274001 | Банк: АИКБ «ИПАК ЙУЛИ БАНК» филиал Сагбан, г. Ташкент | МФО: 01036'}
           </p>
-          <p className="text-slate-500 text-[10px]">
+          <p className="text-slate-400 text-[10px]">
             {isUz
               ? "Barcha to'lovlar va shartnomalar O'zbekiston Respublikasi qonunchiligiga binoan rasmiylashtiriladi."
               : "Все договоры и расчеты осуществляются в строгом соответствии с законодательством Республики Узбекистан."}
@@ -308,10 +308,10 @@ export function Footer() {
         </div>
 
         {/* Bottom Bar: Copyright & 1C Cert */}
-        <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 border-t border-slate-800/80">
+        <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 border-t border-slate-200">
           <p>© 2018–2026 SORAUZ. {isUz ? "Barcha huquqlar himoyalangan." : "Все права защищены."}</p>
-          <p className="flex items-center gap-1.5 text-slate-400">
-            <ShieldCheck className="w-4 h-4 text-emerald-400" />
+          <p className="flex items-center gap-1.5 text-slate-600 font-medium">
+            <ShieldCheck className="w-4 h-4 text-emerald-600" />
             <span>1C ERP Certified Integration</span>
           </p>
         </div>

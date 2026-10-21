@@ -123,7 +123,7 @@ export default async function BrandDetailPage({
   );
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col">
+    <div className="min-h-screen bg-white text-slate-900 flex flex-col">
       <Header
         tree={tree}
         categories={categories}

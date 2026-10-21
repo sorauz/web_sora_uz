@@ -23,7 +23,7 @@ export function MobileNav() {
   return (
     <nav
       aria-label="Mobil navigatsiya"
-      className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 md:hidden pt-2 pb-[max(env(safe-area-inset-bottom),14px)] px-2 flex items-center justify-around select-none"
+      className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 md:hidden pt-2 pb-[max(env(safe-area-inset-bottom),14px)] px-2 flex items-center justify-around select-none"
       style={{ touchAction: "manipulation" }}
     >
       {/* Home */}

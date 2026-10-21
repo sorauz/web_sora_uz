@@ -3,7 +3,7 @@ import { Search, Home, ShoppingBag, ArrowRight } from "lucide-react";
 
 export default function NotFoundPage() {
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col justify-center items-center px-4 py-16 text-center">
+    <div className="min-h-screen bg-white text-slate-900 flex flex-col justify-center items-center px-4 py-16 text-center">
       <div className="max-w-md w-full space-y-6">
         {/* 404 Badge */}
         <div className="inline-flex items-center justify-center w-24 h-24 rounded-3xl bg-sora-50 dark:bg-sora-950/60 text-sora-600 dark:text-sora-400 font-black text-4xl shadow-inner border border-sora-100 dark:border-sora-900/60">
