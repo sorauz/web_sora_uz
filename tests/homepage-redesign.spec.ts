@@ -94,34 +94,60 @@ test.describe("Homepage Redesign & Special Offers Layout", () => {
     await expect(ruFirstCard).toHaveAttribute("href", "/ru/category/bumazhnaya-produkciya");
   });
 
-  test("2. 4 Offer Sections: 5 columns layout with up to 10 items per section (2 rows)", async ({
+  test("2. Featured Products Tabs: 4 interactive tabs with 5-column layout and dynamic links", async ({
     page,
   }) => {
     await page.setViewportSize({ width: 1400, height: 900 });
     await page.goto("/uz");
 
-    const offerSections = [
-      { id: "promotions", title: "Chegirmalar va maxsus takliflar" },
-      { id: "low-price", title: "Kafolatlangan eng arzon narx" },
-      { id: "popular", title: "Top mahsulotlar" },
-      { id: "new-products", title: "Yangi kelgan mahsulotlar" },
-    ];
+    const featuredSection = page.locator("section#featured-tabs");
+    await expect(featuredSection).toBeVisible();
 
-    for (const section of offerSections) {
-      const sectionEl = page.locator(`section#${section.id}`);
-      if (await sectionEl.isVisible()) {
-        // Check grid has lg:grid-cols-5
-        const grid = sectionEl.locator(".grid");
-        const className = await grid.getAttribute("class");
-        expect(className).toContain("lg:grid-cols-5");
+    // Section title
+    await expect(featuredSection.locator("h2")).toContainText("Maxsus takliflar");
 
-        // Check products count is at most 10 (2 rows of 5 columns)
-        const cards = sectionEl.locator("article");
-        const cardCount = await cards.count();
-        expect(cardCount).toBeGreaterThan(0);
-        expect(cardCount).toBeLessThanOrEqual(10);
-      }
-    }
+    // All 4 tabs must be present and visible
+    const promoTab = page.locator("#tab-promotions");
+    const popularTab = page.locator("#tab-popular");
+    const newTab = page.locator("#tab-new_products");
+    const lowPriceTab = page.locator("#tab-low_price");
+
+    await expect(promoTab).toBeVisible();
+    await expect(popularTab).toBeVisible();
+    await expect(newTab).toBeVisible();
+    await expect(lowPriceTab).toBeVisible();
+
+    // Initial state: promotions tab is active
+    await expect(promoTab).toHaveAttribute("aria-selected", "true");
+    const viewAllLink = featuredSection.locator("a[href*='/catalog/']").first();
+    await expect(viewAllLink).toHaveAttribute("href", "/uz/catalog/promotions");
+
+    // Grid has 5 columns on desktop (lg:grid-cols-5) and up to 10 product cards
+    const grid = featuredSection.locator(".grid");
+    await expect(grid).toBeVisible();
+    const gridClass = await grid.getAttribute("class");
+    expect(gridClass).toContain("lg:grid-cols-5");
+
+    const cards = featuredSection.locator("article");
+    const cardCount = await cards.count();
+    expect(cardCount).toBeGreaterThan(0);
+    expect(cardCount).toBeLessThanOrEqual(10);
+
+    // Switch to Popular tab
+    await popularTab.click();
+    await expect(popularTab).toHaveAttribute("aria-selected", "true");
+    await expect(promoTab).toHaveAttribute("aria-selected", "false");
+    await expect(viewAllLink).toHaveAttribute("href", "/uz/catalog/popular");
+
+    // Switch to Low Price tab
+    await lowPriceTab.click();
+    await expect(lowPriceTab).toHaveAttribute("aria-selected", "true");
+    await expect(viewAllLink).toHaveAttribute("href", "/uz/catalog/low_price_guarantee");
+
+    // Switch to New Arrivals tab
+    await newTab.click();
+    await expect(newTab).toHaveAttribute("aria-selected", "true");
+    await expect(viewAllLink).toHaveAttribute("href", "/uz/catalog/new_products");
   });
 
   test("3. Rasmiy brendlar: 3-row rotating marquee with alternating directions", async ({
