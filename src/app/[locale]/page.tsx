@@ -6,7 +6,7 @@ import { Header } from "@/components/layout/Header";
 import { PromoNav } from "@/components/layout/PromoNav";
 import { Footer } from "@/components/layout/Footer";
 import { MobileNav } from "@/components/layout/MobileNav";
-import { RandomCategories } from "@/components/discovery/RandomCategories";
+import { TopCategories } from "@/components/discovery/TopCategories";
 import { ProductCard } from "@/components/discovery/ProductCard";
 import { BrandMarquee } from "@/components/discovery/BrandMarquee";
 import { HeroSlider } from "@/components/home/HeroSlider";
@@ -127,7 +127,7 @@ export default async function HomePage({ params }: PageProps) {
         {/* 3. Dynamic Hero Banner Carousel (4 interactive slides, 0 CLS, priority LCP on slide 1) */}
         <HeroSlider />
 
-        {/* 4. Ommabop Kategoriyalar (4 random aylanuvchi toifalar) */}
+        {/* 4. Ommabop Kategoriyalar (Top 8 asosiy toifalar real fotolar bilan) */}
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
@@ -135,13 +135,13 @@ export default async function HomePage({ params }: PageProps) {
             </h2>
             <Link
               href="/catalog"
-              className="text-xs font-bold text-sora-600 dark:text-sora-400 hover:underline flex items-center gap-1"
+              className="text-xs font-bold text-sora-600 hover:underline flex items-center gap-1"
             >
               <span>{tCommon("viewAll")}</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
-          <RandomCategories categories={tree} locale={locale as "uz" | "ru"} />
+          <TopCategories categories={tree} locale={locale as "uz" | "ru"} />
         </section>
 
         {/* 5. Aksiyalar va Chegirmalar (/promotions) - 5 ustun, 2 qator */}

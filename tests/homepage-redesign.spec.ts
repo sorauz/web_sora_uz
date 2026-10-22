@@ -58,7 +58,7 @@ test.describe("Homepage Redesign & Special Offers Layout", () => {
     );
   });
 
-  test("1. Ommabop kategoriyalar: Exactly 4 categories visible with shuffle ability and localization", async ({
+  test("1. Ommabop kategoriyalar: Top 8 categories rendered with real product photos and localized links", async ({
     page,
   }) => {
     await page.goto("/uz");
@@ -67,21 +67,31 @@ test.describe("Homepage Redesign & Special Offers Layout", () => {
     const section = page.locator("section", { has: page.locator("h2", { hasText: "Ommabop kategoriyalar" }) });
     await expect(section).toBeVisible();
 
-    // Verify exactly 4 category cards are rendered in the random categories container
+    // Verify all 8 visual category cards are rendered
     const categoryCards = section.locator("a[href*='/category/']");
     const count = await categoryCards.count();
-    expect(count).toBe(4);
+    expect(count).toBe(8);
 
-    // Verify shuffle button exists
-    const shuffleBtn = section.locator("button[aria-label='Boshqa toifalar']");
-    await expect(shuffleBtn).toBeVisible();
+    // Verify first card is Qog'oz mahsulotlari with real WebP image
+    const firstCard = categoryCards.first();
+    await expect(firstCard).toContainText("Qog‘oz mahsulotlari");
+    const firstImg = firstCard.locator("img");
+    await expect(firstImg).toBeVisible();
+    const imgSrc = await firstImg.getAttribute("src");
+    expect(imgSrc).toContain("qogoz.webp");
+
+    // Verify link href
+    await expect(firstCard).toHaveAttribute("href", "/uz/category/qogoz-mahsulotlari");
 
     // Test in Russian locale
     await page.goto("/ru");
     const ruSection = page.locator("section", { has: page.locator("h2", { hasText: "Популярные категории" }) });
     await expect(ruSection).toBeVisible();
     const ruCards = ruSection.locator("a[href*='/category/']");
-    expect(await ruCards.count()).toBe(4);
+    expect(await ruCards.count()).toBe(8);
+    const ruFirstCard = ruCards.first();
+    await expect(ruFirstCard).toContainText("Бумажная продукция");
+    await expect(ruFirstCard).toHaveAttribute("href", "/ru/category/bumazhnaya-produkciya");
   });
 
   test("2. 4 Offer Sections: 5 columns layout with up to 10 items per section (2 rows)", async ({
