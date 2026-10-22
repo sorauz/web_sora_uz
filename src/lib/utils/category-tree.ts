@@ -90,3 +90,44 @@ export function getCategoryBreadcrumb(
 
   return breadcrumb;
 }
+
+/**
+ * Recursively collects all category slugs (both UZ and RU) for a given category node and all of its descendants.
+ * This guarantees that multi-level hierarchies in 1C ERP (parent_id depth >= 2) correctly include all products
+ * assigned to leaf and intermediate subcategories.
+ */
+export function getAllCategorySlugs(node: CategoryTreeNode): Set<string> {
+  const slugs = new Set<string>();
+
+  function collect(curr: CategoryTreeNode) {
+    if (curr.group_slug_uz) slugs.add(curr.group_slug_uz);
+    if (curr.group_slug_ru) slugs.add(curr.group_slug_ru);
+    if (curr.children && curr.children.length > 0) {
+      for (const child of curr.children) {
+        collect(child);
+      }
+    }
+  }
+
+  collect(node);
+  return slugs;
+}
+
+/**
+ * Recursively collects all category IDs for a given category node and all of its descendants.
+ */
+export function getAllCategoryDescendantIds(node: CategoryTreeNode): string[] {
+  const ids: string[] = [];
+
+  function collect(curr: CategoryTreeNode) {
+    ids.push(curr.id);
+    if (curr.children && curr.children.length > 0) {
+      for (const child of curr.children) {
+        collect(child);
+      }
+    }
+  }
+
+  collect(node);
+  return ids;
+}

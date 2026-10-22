@@ -69,4 +69,23 @@ test.describe("Category Interactive Filtering & Sorting Flow", () => {
     await expect(page).not.toHaveURL(/brand=DELI/);
     await expect(page).not.toHaveURL(/maxPrice=/);
   });
+
+  test("5. Multi-level category hierarchy recursively includes all descendant subcategory products", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto("/uz/category/yozuv-qurollari");
+
+    // The counter text should indicate 107 products (not 36 erasers)
+    const countLocator = page.locator("span.text-xs.font-semibold.text-slate-500").first();
+    await expect(countLocator).toContainText("107");
+
+    // Subcategories tags should be visible (Ruchkalar, Markerlar, etc.)
+    await expect(page.getByRole("link", { name: "Ruchkalar" }).first()).toBeVisible();
+    await expect(page.getByRole("link", { name: "Markerlar" }).first()).toBeVisible();
+
+    // Verify pagination exists for 107 items (107 / 24 = 5 pages)
+    const pagination = page.locator("nav[aria-label='Sahifalash']");
+    await expect(pagination).toBeVisible();
+  });
 });

@@ -11,7 +11,7 @@ import { ItemListJsonLd } from "@/components/seo/ItemListJsonLd";
 import { ProductCard } from "@/components/discovery/ProductCard";
 import { FacetedFilter } from "@/components/discovery/FacetedFilter";
 import { SortSelect } from "@/components/discovery/SortSelect";
-import { findCategoryBySlug, getCategoryBreadcrumb } from "@/lib/utils/category-tree";
+import { findCategoryBySlug, getCategoryBreadcrumb, getAllCategorySlugs } from "@/lib/utils/category-tree";
 import { getProductLocalized } from "@/lib/schemas/product";
 import { calculateProductPrice } from "@/lib/utils/price";
 import { Link } from "@/i18n/routing";
@@ -126,21 +126,17 @@ export default async function CategoryPage({
     })
   );
 
-  // Filter products by category (matching this category or its subcategories)
-  const categoryIds = [
-    currentCategory.id,
-    ...currentCategory.children.map((c) => c.id),
-  ];
+  // Filter products by category (recursively matching this category and all its descendant subcategories)
+  const matchingSlugs = getAllCategorySlugs(currentCategory);
 
   let filtered = productsData.products.filter((p) => {
-    const loc = getProductLocalized(p, isUz ? "uz" : "ru");
-    const catSlug = loc.category_slug;
+    const slugUz = p.uz?.category_slug_uz;
+    const slugRu = p.ru?.category_slug_ru;
+    const locSlug = getProductLocalized(p, isUz ? "uz" : "ru").category_slug;
     return (
-      catSlug === slug ||
-      categoryIds.some((id) => {
-        const cat = categories.find((c) => c.id === id);
-        return cat && (isUz ? cat.group_slug_uz : cat.group_slug_ru) === catSlug;
-      })
+      (slugUz && matchingSlugs.has(slugUz)) ||
+      (slugRu && matchingSlugs.has(slugRu)) ||
+      (locSlug && matchingSlugs.has(locSlug))
     );
   });
 
