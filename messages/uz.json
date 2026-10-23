@@ -194,7 +194,9 @@
     "applyPromo": "Qo'llash",
     "proceedToCheckout": "Buyurtma berishga o'tish",
     "securePayment": "Xavfsiz to'lov va rasmiy kafolat",
-    "delete": "O'chirish"
+    "delete": "O'chirish",
+    "quickAdd": "Qo'shish",
+    "quantity": "Miqdori"
   },
   "checkout": {
     "title": "Buyurtmani rasmiylashtirish",

@@ -38,10 +38,24 @@ export default async function CartPage({ params }: CartPageProps) {
   const currentLocale = (locale === "ru" ? "ru" : "uz") as "uz" | "ru";
   setRequestLocale(currentLocale);
 
-  const [{ tree, categories }, brandsRes] = await Promise.all([
+  const [{ tree, categories }, brandsRes, allProdsRes] = await Promise.all([
     api.getCategories(),
     api.getBrands(),
+    api.getAllProducts(),
   ]);
+
+  const localizationMap: Record<
+    string,
+    { name_uz: string; name_ru: string; slug_uz: string; slug_ru: string }
+  > = {};
+  for (const p of allProdsRes.products) {
+    localizationMap[p.id] = {
+      name_uz: p.uz?.name_uz || "",
+      name_ru: p.ru?.name_ru || "",
+      slug_uz: p.uz?.slug_uz || "",
+      slug_ru: p.ru?.slug_ru || "",
+    };
+  }
 
   const breadcrumbs = [
     {
@@ -60,7 +74,7 @@ export default async function CartPage({ params }: CartPageProps) {
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         <Breadcrumbs items={breadcrumbs} />
-        <CartView />
+        <CartView localizationMap={localizationMap} />
       </main>
 
       <Footer />

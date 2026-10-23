@@ -194,7 +194,9 @@
     "applyPromo": "Применить",
     "proceedToCheckout": "Перейти к оформлению",
     "securePayment": "Безопасная оплата и официальная гарантия",
-    "delete": "Удалить"
+    "delete": "Удалить",
+    "quickAdd": "Добавить",
+    "quantity": "Количество"
   },
   "checkout": {
     "title": "Оформление заказа",

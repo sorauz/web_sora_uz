@@ -8,7 +8,14 @@ import { CartSummary } from "./CartSummary";
 import { CartEmptyState } from "./CartEmptyState";
 import { Trash2 } from "lucide-react";
 
-export function CartView() {
+interface CartViewProps {
+  localizationMap?: Record<
+    string,
+    { name_uz: string; name_ru: string; slug_uz: string; slug_ru: string }
+  >;
+}
+
+export function CartView({ localizationMap }: CartViewProps) {
   const t = useTranslations("cart");
   const { items, clearCart, getTotalPrice, getTotalItems } = useCartStore();
 
@@ -54,7 +61,7 @@ export function CartView() {
           <button
             type="button"
             onClick={handleClearCart}
-            className="flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-rose-600 transition-colors"
+            className="flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-rose-600 transition-colors cursor-pointer"
           >
             <Trash2 className="w-3.5 h-3.5" />
             <span>{t("clearCart")}</span>
@@ -64,7 +71,11 @@ export function CartView() {
         {/* Items rows */}
         <div className="space-y-3">
           {items.map((item) => (
-            <CartItemRow key={item.id} item={item} />
+            <CartItemRow
+              key={item.id}
+              item={item}
+              localizationMap={localizationMap}
+            />
           ))}
         </div>
       </div>

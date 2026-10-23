@@ -144,9 +144,16 @@ export function CompareView({ products, locale }: CompareViewProps) {
       id: product.id,
       sku: product.product_sku,
       name: loc.name,
+      name_uz: product.uz?.name_uz || loc.name,
+      name_ru: product.ru?.name_ru || loc.name,
+      slug: loc.slug,
+      slug_uz: product.uz?.slug_uz || loc.slug,
+      slug_ru: product.ru?.slug_ru || loc.slug,
       price: price,
       picture: product.main_picture,
       unit: loc.unit,
+      unit_uz: product.uz?.unit_uz || loc.unit,
+      unit_ru: product.ru?.unit_ru || loc.unit,
     });
 
     setAddedIds((prev) => ({ ...prev, [product.id]: true }));

@@ -5,9 +5,16 @@ export interface CartItem {
   id: string;
   sku: string;
   name: string;
+  name_uz?: string;
+  name_ru?: string;
+  slug?: string;
+  slug_uz?: string;
+  slug_ru?: string;
   price: number;
   picture: string;
   unit: string;
+  unit_uz?: string;
+  unit_ru?: string;
   quantity: number;
 }
 
@@ -32,7 +39,19 @@ export const useCartStore = create<CartStore>()(
           if (existing) {
             return {
               items: state.items.map((i) =>
-                i.id === item.id ? { ...i, quantity: i.quantity + quantity } : i
+                i.id === item.id
+                  ? {
+                      ...i,
+                      quantity: i.quantity + quantity,
+                      name_uz: item.name_uz || i.name_uz,
+                      name_ru: item.name_ru || i.name_ru,
+                      slug_uz: item.slug_uz || i.slug_uz,
+                      slug_ru: item.slug_ru || i.slug_ru,
+                      slug: item.slug || i.slug,
+                      unit_uz: item.unit_uz || i.unit_uz,
+                      unit_ru: item.unit_ru || i.unit_ru,
+                    }
+                  : i
               ),
             };
           }
