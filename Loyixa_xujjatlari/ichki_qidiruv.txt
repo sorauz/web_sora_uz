@@ -1,0 +1,42 @@
+1. Maxsus qidiruv dvigateli (Search Engine) integratsiyasi — Eng professional usul
+An'anaviy SQL bazalari har bir harf bo'yicha tez qidirish uchun mo'ljallanmagan. Quyidagi xotirada (RAM) ishlovchi dvigatellar orqali javob vaqtini 5–15 millisoniyaga tushirish mumkin:
+
+Meilisearch yoki Typesense (Tavsiya etiladi): Rust/C++ da yozilgan, ochiq kodli (open-source) va serverga tekin o'rnatiladigan qidiruv serverlari.
+
+Harfma-harf qidirishga (instant search-as-you-type) moslashgan;
+
+Foydalanuvchi imlo xatosi bilan yozsa ham to'g'ri topadi (Typo tolerance, masalan "ruchka" o'rniga "ruwka" yoki "ruchka" deb yozsa ham);
+
+Next.js bilan juda oson integratsiya qilinadi.
+
+Algolia: Dunyo bo'yicha eng mashhur, CDN larda joylashgan bulutli qidiruv xizmati (react-instantsearch kutubxonasi orqali Next.js ga ulanadi).
+
+2. Kichik/o'rta do'konlar uchun — 0ms lik qidiruv (MiniSearch / FlexSearch)
+Agar do'konda tovarlar soni 5 000 – 10 000 tagacha bo'lsa, serverga umuman murojaat qilmaslik mumkin:
+
+Mahsulotlarning faqat nomi, id, narxi va toifasidan iborat yengil JSON indeks (taxminan 1–2 MB) foydalanuvchi saytga kirganda brauzer foni (Web Worker yoki kesh)ga yuklab olinadi.
+
+Foydalanuvchi harf kiritganida qidiruv to'g'ridan-to'g'ri foydalanuvchi telefonining o'zida (0 millisoniyada) bajariladi. Natijalar xuddi mahalliy dasturlardek bir zumda chiqadi.
+
+Next.js Frontend qismida qilinadigan 4 ta muhim qoida
+Next.js loyihasida qidiruvni tezlashtirish uchun dasturchi quyidagilarni kiritishi kerak:
+
+Optimal Debounce (150ms):
+Foydalanuvchi tez yozayotganda serverga har bir belgi uchun alohida so'rov jo'natmaslik uchun 150 millisoniyalik kechikish qo'yish kerak:
+
+TypeScript
+import { useDebounce } from 'use-debounce';
+const [debouncedQuery] = useDebounce(query, 150);
+AbortController (Eski so'rovlarni bekor qilish):
+Foydalanuvchi "d" harfini kiritib, ketidan darhol "de" deb yozsa, birinchi so'rov bekor qilinishi kerak. Bu internet trafigini tejaydi va eski natijalar yangisining ustiga chiqib qolishining (race condition) oldini oladi.
+
+SWR yoki TanStack Query keshlanishi:
+Foydalanuvchi avval qidirgan so'zini (masalan, "qog'oz") o'chirib, yana yozsa, ma'lumotlar serverdan emas, xotiradagi keshdan 0ms da olinadi.
+
+Next.js Edge Runtime:
+Qidiruv API yo'lagini (API route) standart Node.js serverida emas, Edge serverda ishlatish:
+
+TypeScript
+// app/api/search/route.ts
+export const runtime = 'edge';
+Bu qidiruv so'rovlarini foydalanuvchiga eng yaqin serverlar orqali qabul qilib, kechikishni (ping/latency) bir necha barobar qisqartiradi.

@@ -1,0 +1,32 @@
+Sayt paketlarida swr, react-query, minisearch, flexsearch yoki fuse.js kutubxonalari mavjud emas. Buning o'rniga oddiy, ixcham va to'g'ri optimizatsiya qilingan standart fetch so'rovi ishlatish:
+
+JavaScript
+//kodidan olingan qidiruv funksiyasi:
+async (query) => {
+  // 1. Agar belgilar soni 2 tadan kam bo'lsa, serverga umuman so'rov bormaydi:
+  if (query.length < 2) {
+    setResults([]);
+    return;
+  }
+
+  setLoading(true);
+  try {
+    // 2. To'g'ridan-to'g'ri o'zining yengil API manziliga GET so'rovi:
+    let res = await fetch("/api/search?q=" + encodeURIComponent(query));
+    let data = await res.json();
+    setResults(data);
+  } catch (err) {
+    setResults([]);
+  } finally {
+    setLoading(false);
+  }
+}
+
+Unda nega ularning qidiruvi shunchalik tez ishlaydimi?
+Tezligining siri qo'shimcha og'ir kutubxonalarda emas, balki 2 ta oddiy qoidada:
+
+Minimal 2 ta belgi qoidasi (length < 2):
+Foydalanuvchi bitta harf yozganda (masalan, faqat "a" yoki "q"), serverga umuman so'rov yuborilmaydi. Qidiruv faqat 2-belgi kiritilgandan keyingina ishga tushadi. Bu serverga bo'lgan yuklamani 70–80% ga kamaytiradi.
+
+Server tomonidagi yengil API (/api/search):
+Serverdagi /api/search yo'lagi tovarlarning barcha og'ir parametrlarini emas, faqat qidiruv oynasi uchun kerakli 3-4 ta maydonni (rasm, sarlavha, narx, slug) juda ixcham JSON ko'rinishida qaytaradi. Baza so'rovi to'g'ri indekslangan bo'lgani uchun javob 30–70 ms da yetib keladi.

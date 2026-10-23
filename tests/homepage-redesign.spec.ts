@@ -94,60 +94,52 @@ test.describe("Homepage Redesign & Special Offers Layout", () => {
     await expect(ruFirstCard).toHaveAttribute("href", "/ru/category/bumazhnaya-produkciya");
   });
 
-  test("2. Featured Products Tabs: 4 interactive tabs with 5-column layout and dynamic links", async ({
+  test("2. 4 Distinct Showcase Sections: 5 columns layout with 10 unique items per section (40 total)", async ({
     page,
   }) => {
     await page.setViewportSize({ width: 1400, height: 900 });
     await page.goto("/uz");
 
-    const featuredSection = page.locator("section#featured-tabs");
-    await expect(featuredSection).toBeVisible();
+    const offerSections = [
+      { id: "promotions", title: "Chegirmalar va maxsus takliflar", expectedHref: "/uz/catalog/promotions" },
+      { id: "low-price", title: "Kafolatlangan eng arzon narx", expectedHref: "/uz/catalog/low_price_guarantee" },
+      { id: "popular", title: "Top mahsulotlar", expectedHref: "/uz/catalog/popular" },
+      { id: "new-products", title: "Yangi kelgan mahsulotlar", expectedHref: "/uz/catalog/new_products" },
+    ];
 
-    // Section title
-    await expect(featuredSection.locator("h2")).toContainText("Maxsus takliflar");
+    const allProductHrefs: string[] = [];
 
-    // All 4 tabs must be present and visible
-    const promoTab = page.locator("#tab-promotions");
-    const popularTab = page.locator("#tab-popular");
-    const newTab = page.locator("#tab-new_products");
-    const lowPriceTab = page.locator("#tab-low_price");
+    for (const section of offerSections) {
+      const sectionEl = page.locator(`section#${section.id}`);
+      await expect(sectionEl).toBeVisible();
 
-    await expect(promoTab).toBeVisible();
-    await expect(popularTab).toBeVisible();
-    await expect(newTab).toBeVisible();
-    await expect(lowPriceTab).toBeVisible();
+      // Check section header title and view all link
+      await expect(sectionEl.locator("h2")).toContainText(section.title);
+      const viewAllLink = sectionEl.locator(`a[href='${section.expectedHref}']`);
+      await expect(viewAllLink).toBeVisible();
 
-    // Initial state: promotions tab is active
-    await expect(promoTab).toHaveAttribute("aria-selected", "true");
-    const viewAllLink = featuredSection.locator("a[href*='/catalog/']").first();
-    await expect(viewAllLink).toHaveAttribute("href", "/uz/catalog/promotions");
+      // Check grid has lg:grid-cols-5
+      const grid = sectionEl.locator(".grid");
+      const className = await grid.getAttribute("class");
+      expect(className).toContain("lg:grid-cols-5");
 
-    // Grid has 5 columns on desktop (lg:grid-cols-5) and up to 10 product cards
-    const grid = featuredSection.locator(".grid");
-    await expect(grid).toBeVisible();
-    const gridClass = await grid.getAttribute("class");
-    expect(gridClass).toContain("lg:grid-cols-5");
+      // Check products count is at most 10 (2 rows of 5 columns)
+      const cards = sectionEl.locator("article");
+      const cardCount = await cards.count();
+      expect(cardCount).toBeGreaterThan(0);
+      expect(cardCount).toBeLessThanOrEqual(10);
 
-    const cards = featuredSection.locator("article");
-    const cardCount = await cards.count();
-    expect(cardCount).toBeGreaterThan(0);
-    expect(cardCount).toBeLessThanOrEqual(10);
+      // Collect product links (one per article) to verify uniqueness
+      const links = await sectionEl.locator("article").evaluateAll((articles) =>
+        articles.map((art) => art.querySelector("a[href*='/products/']")?.getAttribute("href") || "")
+      );
+      allProductHrefs.push(...links.filter((h) => h.length > 0));
+    }
 
-    // Switch to Popular tab
-    await popularTab.click();
-    await expect(popularTab).toHaveAttribute("aria-selected", "true");
-    await expect(promoTab).toHaveAttribute("aria-selected", "false");
-    await expect(viewAllLink).toHaveAttribute("href", "/uz/catalog/popular");
-
-    // Switch to Low Price tab
-    await lowPriceTab.click();
-    await expect(lowPriceTab).toHaveAttribute("aria-selected", "true");
-    await expect(viewAllLink).toHaveAttribute("href", "/uz/catalog/low_price_guarantee");
-
-    // Switch to New Arrivals tab
-    await newTab.click();
-    await expect(newTab).toHaveAttribute("aria-selected", "true");
-    await expect(viewAllLink).toHaveAttribute("href", "/uz/catalog/new_products");
+    // Verify deduplication: 100% unique products across all 4 sections
+    const uniqueHrefs = new Set(allProductHrefs);
+    expect(allProductHrefs.length).toBe(40);
+    expect(uniqueHrefs.size).toBe(40);
   });
 
   test("3. Rasmiy brendlar: 3-row rotating marquee with alternating directions", async ({
