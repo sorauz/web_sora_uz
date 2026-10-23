@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import {
   ShoppingCart,
@@ -315,11 +316,14 @@ export function ProductActions({ product, locale }: ProductActionsProps) {
           </div>
         </div>
 
-        <div className="flex items-start gap-3 p-3 rounded-xl bg-slate-50/70 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800/80">
+        <Link
+          href="/warranty"
+          className="flex items-start gap-3 p-3 rounded-xl bg-slate-50/70 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800/80 hover:border-amber-300 dark:hover:border-amber-800 transition-colors group cursor-pointer block"
+        >
           <RotateCcw className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
           <div>
-            <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100">
-              {locale === "uz" ? "14 kunda qaytarish" : "Возврат 14 дней"}
+            <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100 group-hover:text-amber-700 dark:group-hover:text-amber-400 transition-colors">
+              {locale === "uz" ? "10 kunda qaytarish va kafolat" : "Гарантия и возврат 10 дней"}
             </h4>
             <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
               {locale === "uz"
@@ -327,7 +331,7 @@ export function ProductActions({ product, locale }: ProductActionsProps) {
                 : "Гарантия легкого обмена или возврата в случае несоответствия."}
             </p>
           </div>
-        </div>
+        </Link>
       </div>
 
       {/* 1-Click Fast Order Modal */}

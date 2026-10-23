@@ -384,7 +384,7 @@ export function ProductTabs({
                   <span>{locale === "uz" ? "Kafolat va Qaytarish" : "Гарантия и Возврат"}</span>
                 </div>
                 <ul className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 space-y-2 list-disc list-inside leading-relaxed">
-                  <li>{locale === "uz" ? "14 kunlik qaytarish: mahsulot mos kelmasa, muammosiz almashtirish kafolati." : "Гарантия обмена или возврата в течение 14 дней."}</li>
+                  <li>{locale === "uz" ? "10 kunlik qaytarish: nuqson aniqlansa yoki mos kelmasa, qonuniy almashtirish kafolati." : "Гарантия обмена или возврата в течение 10 дней."}</li>
                   <li>{locale === "uz" ? "Texnika va orgtexnikaga 1 yilgacha to'liq rasmiy kafolat." : "Официальная гарантия производителя до 1 года."}</li>
                   <li>{locale === "uz" ? "100% original tovarlar va zavod sifat nazorati." : "100% оригинальная заводская продукция."}</li>
                   <li>{locale === "uz" ? "1C ERP bilan to'liq sinxronlangan qoldiqlar." : "Синхронизация остатков в реальном времени с 1C ERP."}</li>

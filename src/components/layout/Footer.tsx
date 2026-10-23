@@ -163,7 +163,7 @@ export function Footer() {
               </li>
               <li>
                 <Link href="/warranty" className="inline-block py-1 hover:text-sora-600 transition-colors font-medium">
-                  {isUz ? "Kafolat va qaytarish (14 kun)" : "Гарантия и возврат (14 дней)"}
+                  {isUz ? "Kafolat va qaytarish (10 kun)" : "Гарантия и возврат (10 дней)"}
                 </Link>
               </li>
               <li>
@@ -226,12 +226,15 @@ export function Footer() {
         {/* Middle Section: Trust, Delivery & Payment Badges */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-5 rounded-2xl bg-slate-50/70 border border-slate-200/90 shadow-xs">
           {/* Card 1: Yetkazib berish */}
-          <div className="flex items-start gap-3">
-            <div className="w-9 h-9 rounded-xl bg-sora-50 text-sora-600 flex items-center justify-center shrink-0 border border-sora-100">
+          <Link
+            href="/delivery"
+            className="flex items-start gap-3 p-2 -m-2 rounded-xl hover:bg-white/80 transition-all group cursor-pointer"
+          >
+            <div className="w-9 h-9 rounded-xl bg-sora-50 text-sora-600 flex items-center justify-center shrink-0 border border-sora-100 group-hover:bg-sora-100 transition-colors">
               <Truck className="w-4 h-4" />
             </div>
             <div>
-              <p className="font-bold text-slate-900">
+              <p className="font-bold text-slate-900 group-hover:text-sora-600 transition-colors">
                 {isUz ? "Tezkor va bepul yetkazish" : "Быстрая и бесплатная доставка"}
               </p>
               <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
@@ -240,15 +243,18 @@ export function Footer() {
                   : "По Ташкенту от 500 000 сум бесплатно. В регионы через BTS, Fargo, EMU (1–3 дня)."}
               </p>
             </div>
-          </div>
+          </Link>
 
           {/* Card 2: To'lov tizimlari va Eslatma */}
-          <div className="flex items-start gap-3">
-            <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-100">
+          <Link
+            href="/payment"
+            className="flex items-start gap-3 p-2 -m-2 rounded-xl hover:bg-white/80 transition-all group cursor-pointer"
+          >
+            <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-100 group-hover:bg-emerald-100 transition-colors">
               <CreditCard className="w-4 h-4" />
             </div>
             <div className="space-y-1.5 w-full">
-              <p className="font-bold text-slate-900">
+              <p className="font-bold text-slate-900 group-hover:text-emerald-700 transition-colors">
                 {isUz ? "Qulay to'lov usullari" : "Способы оплаты"}
               </p>
               <div className="flex flex-wrap gap-1.5">
@@ -270,24 +276,27 @@ export function Footer() {
                 </span>
               </p>
             </div>
-          </div>
+          </Link>
 
           {/* Card 3: 100% Sifat va Kafolat */}
-          <div className="flex items-start gap-3">
-            <div className="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0 border border-purple-100">
+          <Link
+            href="/warranty"
+            className="flex items-start gap-3 p-2 -m-2 rounded-xl hover:bg-white/80 transition-all group cursor-pointer"
+          >
+            <div className="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0 border border-purple-100 group-hover:bg-purple-100 transition-colors">
               <ShieldCheck className="w-4 h-4" />
             </div>
             <div>
-              <p className="font-bold text-slate-900">
-                {isUz ? "14 kunlik qaytarish va kafolat" : "Гарантия и возврат 14 дней"}
+              <p className="font-bold text-slate-900 group-hover:text-purple-700 transition-colors">
+                {isUz ? "10 kunlik qaytarish va kafolat" : "Гарантия и возврат 10 дней"}
               </p>
               <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
                 {isUz
-                  ? "Sifat kafolati, mahsulotni 14 kun ichida almashtirish va texnikaga 1 yilgacha rasmiy kafolat."
-                  : "Официальная гарантия до 1 года, возврат в течение 14 дней в строгом соответствии с законом."}
+                  ? "Sifat kafolati, mahsulotni 10 kun ichida almashtirish va texnikaga 1 yilgacha rasmiy kafolat."
+                  : "Официальная гарантия до 1 года, возврат в течение 10 дней в строгом соответствии с законом."}
               </p>
             </div>
-          </div>
+          </Link>
         </div>
 
         {/* Legal Details / Yuridik rekvizitlar */}

@@ -29,7 +29,7 @@ export async function GET() {
 - [B2B Korporativ xizmat](${baseUrl}/uz/b2b): Yuridik shaxslar uchun to'g'ridan-to'g'ri shartnoma, elektron hisob-faktura (Didox) va korporativ to'lov.
 - [Yetkazib berish shartlari](${baseUrl}/uz/delivery): Toshkent shahri bo'yicha 24 soat ichida (500 000 so'mdan yuqori xaridlar uchun bepul) va viloyatlarga yetkazib berish.
 - [To'lov usullari](${baseUrl}/uz/payment): Naqd pul, Payme, Click, Uzcard, Humo va korporativ bank o'tkazmalari.
-- [Kafolat va qaytarish](${baseUrl}/uz/warranty): 14 kunlik rasmiy kafolat va almashtirish xizmati.
+- [Kafolat va qaytarish](${baseUrl}/uz/warranty): 10 kunlik rasmiy kafolat va almashtirish xizmati.
 
 ## Maxsus Takliflar va Aksiyalar
 - [Aksiyalar markazi](${baseUrl}/uz/offers): Do'kondagi barcha amaldagi aksiyalar va maxsus takliflar.

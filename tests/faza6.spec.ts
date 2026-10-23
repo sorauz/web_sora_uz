@@ -80,5 +80,16 @@ test.describe("FAZA 6: Marketing, Feeds, Local SEO, and llms.txt", () => {
     // 6. B2B Corporate
     await page.goto("/uz/b2b");
     await expect(page.locator("h1")).toContainText(/Kanselyariya/i);
+
+    // 7. Footer Warranty Link in UZ and RU
+    await page.goto("/uz");
+    const uzFooterWarrantyLink = page.locator("footer a[href='/uz/warranty']").first();
+    await expect(uzFooterWarrantyLink).toBeVisible();
+    await expect(page.locator("footer")).toContainText("10 kunlik qaytarish va kafolat");
+
+    await page.goto("/ru");
+    const ruFooterWarrantyLink = page.locator("footer a[href='/ru/warranty']").first();
+    await expect(ruFooterWarrantyLink).toBeVisible();
+    await expect(page.locator("footer")).toContainText("Гарантия и возврат 10 дней");
   });
 });
