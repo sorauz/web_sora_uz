@@ -54,7 +54,11 @@ export function detectProductChanges(cached: Product, fresh: Product): string[] 
       if (cached.price.stock !== fresh.price.stock) {
         diffs.push(`stock: ${cached.price.stock} -> ${fresh.price.stock}`);
       }
-      if (cached.price.quantity_remaining !== fresh.price.quantity_remaining) {
+      if (
+        cached.price.quantity_remaining !== undefined &&
+        fresh.price.quantity_remaining !== undefined &&
+        cached.price.quantity_remaining !== fresh.price.quantity_remaining
+      ) {
         diffs.push(
           `quantity: ${cached.price.quantity_remaining} -> ${fresh.price.quantity_remaining}`
         );

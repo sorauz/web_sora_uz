@@ -3,7 +3,7 @@ import { z } from "zod";
 export const ProductPriceStockSchema = z.object({
   id: z.string(),
   stock: z.string().default("InStock"),
-  quantity_remaining: z.number().default(0),
+  quantity_remaining: z.number().optional(),
   unit_ru: z.string().default("шт"),
   unit_uz: z.string().default("dona"),
   retail_price: z.number().default(0),

@@ -62,6 +62,9 @@ export async function generateMetadata({
       shortcut: "/for_web_logo_icon.ico",
       apple: "/for_web_logo_icon.ico",
     },
+    verification: {
+      yandex: "def7fffc020ea8fe",
+    },
   };
 }
 

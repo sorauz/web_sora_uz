@@ -38,10 +38,9 @@ export function ProductActions({ product, locale }: ProductActionsProps) {
   const priceInfo = calculateProductPrice(product.price);
   const priceVal = priceInfo.price;
   const oldPriceVal = priceInfo.oldPrice;
-  const stockQty = product.price?.quantity_remaining ?? (product.price?.stock !== "OutOfStock" ? 10 : 0);
-  const inStock = product.price?.stock !== "OutOfStock" && stockQty > 0;
+  const inStock = product.price?.stock !== "OutOfStock";
   const canAddToCart = inStock && priceVal > 0;
-  const maxAvailable = inStock ? (stockQty > 0 ? stockQty : 10) : 0;
+  const maxAvailable = inStock ? (product.price?.quantity_remaining ?? 9999) : 0;
 
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
@@ -125,7 +124,7 @@ export function ProductActions({ product, locale }: ProductActionsProps) {
           {inStock ? (
             <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700 bg-emerald-100/80 dark:bg-emerald-950/60 dark:text-emerald-400 px-2.5 py-1 rounded-full">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-              {common("inStock")} ({maxAvailable} {loc.unit})
+              {common("inStock")}
             </span>
           ) : (
             <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-700 bg-rose-100/80 dark:bg-rose-950/60 dark:text-rose-400 px-2.5 py-1 rounded-full">

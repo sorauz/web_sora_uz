@@ -13,8 +13,8 @@ Maydon,Turi,Ta'rif
 updated_at,String,Hujjatning sanasi (Format: YYYY-MM-DDTHH:mm:ss)
 products,Array,Tovar narxlari va qoldiqlari ro'yxati
 products[].id,String,Tovarning 1C dagi unikal identifikatori (UUID)
-products[].stock,String,Omborda mavjudligi holati (Har doim InStock qaytadi)
-products[].quantity_remaining,Number,Qoldiq miqdori (Hozircha statik 100 qaytadi)
+products[].stock,String,Omborda mavjudligi holati ("InStock" yoki "OutOfStock")
+products[].quantity_remaining,Number,Qoldiq miqdori (Ixtiyoriy/Olib tashlangan, holat "stock" orqali belgilanadi)
 products[].unit_ru,String,O'lchov birligi (Rus tilida)
 products[].unit_uz,String,O'lchov birligi (O'zbek tilida)
 products[].retail_price,Number,Chakana narx (Цена)

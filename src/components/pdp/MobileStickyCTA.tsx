@@ -22,8 +22,7 @@ export function MobileStickyCTA({ product, locale }: MobileStickyCTAProps) {
   const [isAdded, setIsAdded] = useState(false);
   const priceInfo = calculateProductPrice(product.price);
   const priceVal = priceInfo.price;
-  const stockQty = product.price?.quantity_remaining ?? (product.price?.stock !== "OutOfStock" ? 10 : 0);
-  const inStock = product.price?.stock !== "OutOfStock" && stockQty > 0;
+  const inStock = product.price?.stock !== "OutOfStock";
   const canAddToCart = inStock && priceVal > 0;
 
   const handleAddToCart = () => {

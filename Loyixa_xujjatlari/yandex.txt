@@ -1,0 +1,25 @@
+men yandex {webmaster} ga kirib sora.uz saytini qo'shgandim:
+
+"https://webmaster.yandex.ru/site/http:sora.uz:80/settings/access/"
+
+1. Добавьте файл в корень сайтаВ корневой папке сайта создайте файл с именем yandex_def7fffc020ea8fe.html, скопируйте в него код из поля ниже и сохраните.
+``
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    </head>
+    <body>Verification: def7fffc020ea8fe</body>
+</html>
+``
+fayl: "D:\web_sora_uz\Loyixa_xujjatlari\yandex_def7fffc020ea8fe.html"
+
+
+-Добавьте метатег в код сайтаВ <head> главной страницы сайта вставьте метатег из поля ниже и сохраните.
+<meta name="yandex-verification" content="def7fffc020ea8fe" />
+
+-Создайте DNS-записьОткройте панель DNS-хостинга, создайте для домена sora.uz запись TXT, вставьте в неё значение из поля ниже и сохраните.
+yandex-verification: def7fffc020ea8fe
+
+
+nima qilish kerak? 
+
