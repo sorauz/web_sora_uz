@@ -66,6 +66,26 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async rewrites() {
+    return [
+      {
+        source: "/:locale(uz|ru)/products/:slug.md",
+        destination: "/api/md/:locale/products/:slug",
+      },
+      {
+        source: "/products/:slug.md",
+        destination: "/api/md/uz/products/:slug",
+      },
+      {
+        source: "/:locale(uz|ru)/category/:slug.md",
+        destination: "/api/md/:locale/category/:slug",
+      },
+      {
+        source: "/category/:slug.md",
+        destination: "/api/md/uz/category/:slug",
+      },
+    ];
+  },
 };
 
 export default withNextIntl(nextConfig);

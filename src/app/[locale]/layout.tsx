@@ -53,6 +53,9 @@ export async function generateMetadata({
         "ru-UZ": "/ru",
         "x-default": "/uz",
       },
+      types: {
+        "text/markdown": "https://sora.uz/llms.txt",
+      },
     },
     icons: {
       icon: [

@@ -27,7 +27,7 @@ export async function GET() {
 
 ## Xizmatlar va Korporativ Hamkorlik
 - [B2B Korporativ xizmat](${baseUrl}/uz/b2b): Yuridik shaxslar uchun to'g'ridan-to'g'ri shartnoma, elektron hisob-faktura (Didox) va korporativ to'lov.
-- [Yetkazib berish shartlari](${baseUrl}/uz/delivery): Toshkent shahri bo'yicha 24 soat ichida (500 000 so'mdan yuqori xaridlar uchun bepul) va viloyatlarga yetkazib berish.
+- [Yetkazib berish shartlari](${baseUrl}/uz/delivery): Toshkent shahri bo'yicha 24 soat ichida (500 000 so'mdan yuqori xaridlar uchun bepul) va viloyatlarga BTS, Fargo, EMU orqali 1–3 kunda yetkazib berish.
 - [To'lov usullari](${baseUrl}/uz/payment): Naqd pul, Payme, Click, Uzcard, Humo va korporativ bank o'tkazmalari.
 - [Kafolat va qaytarish](${baseUrl}/uz/warranty): 10 kunlik rasmiy kafolat va almashtirish xizmati.
 
@@ -38,12 +38,18 @@ export async function GET() {
 - [Top mahsulotlar](${baseUrl}/uz/catalog/popular): Eng ommabop va ko'p sotilgan ofis/maktab mollari.
 - [Aksiya va chegirmalar](${baseUrl}/uz/catalog/promotions): Aksiya va maxsus chegirmadagi tovarlar.
 
-## Kategoriyalar
+## AI Agentlar uchun Dinamik Markdown (.md) Qo'llanmasi
+Har bir kategoriya va mahsulot o'zining toza Markdown (\`.md\`) versiyasiga ega:
+- Kategoriya indeksi: \`${baseUrl}/uz/category/{slug}.md\` (yoki \`/ru/category/{slug}.md\`)
+- Mahsulot tafsiloti: \`${baseUrl}/uz/products/{slug}.md\` (yoki \`/ru/products/{slug}.md\`)
+- HTTP Content-Negotiation: \`Accept: text/markdown\` sarlavhasi bilan so'ralganda avtomatik Markdown qaytariladi.
+
+## Kategoriyalar (Markdown Hub Indekslari)
 `;
 
   for (const cat of categoriesData.categories) {
     if (cat.group_uz && cat.group_slug_uz) {
-      md += `- [${cat.group_uz}](${baseUrl}/uz/category/${cat.group_slug_uz})\n`;
+      md += `- [${cat.group_uz}](${baseUrl}/uz/category/${cat.group_slug_uz}.md) ([HTML](${baseUrl}/uz/category/${cat.group_slug_uz}))\n`;
     }
   }
 
@@ -53,41 +59,32 @@ export async function GET() {
     md += `- [${b.name}](${baseUrl}/uz/brand/${slug})\n`;
   }
 
-  md += `\n## Mahsulotlar Assortimenti\n\n`;
+  md += `\n## Mahsulotlar Katalogi (.md Indeks)\n\n`;
   for (const p of productsData.products) {
     const nameUz = p.uz?.name_uz || p.ru?.name_ru;
-    const nameRu = p.ru?.name_ru || p.uz?.name_uz;
     const slugUz = p.uz?.slug_uz || p.ru?.slug_ru;
-    const slugRu = p.ru?.slug_ru || p.uz?.slug_uz;
-    const priceInfo = calculateProductPrice(p.price);
-    
-    let priceStr = "Kelishilgan holda";
-    if (priceInfo.price > 0) {
-      if (priceInfo.hasDiscount && priceInfo.oldPrice) {
-        priceStr = `${priceInfo.price.toLocaleString()} UZS (chegirma, asl narxi: ${priceInfo.oldPrice.toLocaleString()} UZS)`;
-      } else {
-        priceStr = `${priceInfo.price.toLocaleString()} UZS`;
-      }
-    }
-    const brand = p.brand ? `[Brend: ${p.brand}]` : "";
-    const sku = p.product_sku ? `[SKU: ${p.product_sku}]` : "";
-    const desc = p.uz?.short_description_uz || p.uz?.meta_description_uz || p.ru?.short_description_ru || "";
+    if (!nameUz || !slugUz) continue;
 
-    md += `### ${nameUz}\n`;
-    md += `- URL (UZ): ${baseUrl}/uz/products/${slugUz}\n`;
-    if (slugRu && slugRu !== slugUz) {
-      md += `- URL (RU): ${baseUrl}/ru/products/${slugRu}\n`;
+    const priceInfo = calculateProductPrice(p.price);
+    const inStock = p.price?.stock !== "OutOfStock";
+
+    let priceStr = "So'rov bo'yicha";
+    if (priceInfo.price > 0) {
+      priceStr = `${priceInfo.price.toLocaleString("ru-RU")} UZS`;
     }
-    md += `- Narxi: ${priceStr}\n`;
-    if (brand || sku) md += `- Xususiyatlar: ${brand} ${sku}\n`;
-    if (desc) md += `- Tavsif: ${desc}\n`;
-    md += `\n`;
+
+    const stockStr = inStock ? "Omborda mavjud" : "Tugagan";
+    const brand = p.brand ? ` | Brend: ${p.brand}` : "";
+    const sku = p.product_sku ? ` | SKU: ${p.product_sku}` : "";
+
+    md += `- [${nameUz}](${baseUrl}/uz/products/${slugUz}.md) — **${priceStr}** | ${stockStr}${brand}${sku}\n`;
   }
 
   return new NextResponse(md, {
     headers: {
       "Content-Type": "text/plain; charset=utf-8",
-      "Cache-Control": "public, max-age=86400, s-maxage=86400, stale-while-revalidate=86400",
+      "Cache-Control":
+        "public, max-age=86400, s-maxage=86400, stale-while-revalidate=86400",
     },
   });
 }

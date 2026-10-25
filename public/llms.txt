@@ -2,7 +2,7 @@
 
 > O'zbekistonning yetakchi kanselyariya, maktab qurollari va ofis anjomlari internet-do'koni (1C ERP integratsiyalangan).
 
-Sora.uz — jismoniy shaxslar (B2C) va korporativ mijozlar (B2B) uchun sifatli ofis anjomlari, yozuv qurollari, namoyish doskalari, qog'oz mahsulotlari, hisoblash va ofis texnikalarini tezkor yetkazib berish xizmati bilan taqdim etuvchi zamonaviy elektron tijorat platformasi. Barcha mahsulotlar va narxlar 1C ERP tizimi orqali real vaqt rejimida sinxronlanadi.
+Sora.uz — jismoniy shaxslar (B2C) va korporativ mijozlar (B2B) uchun sifatli ofis anjomlari, yozuv qurollari, namoyish doskalari, qog'oz mahsulotlari, hisoblash va ofis texnikalarini tezkor yetkazib berish xizmati bilan taqdim etuvchi zamonaviy elektron tijorat platformasi. Barcha mahsulotlar, narxlar va ombor holati 1C ERP tizimi orqali real vaqt rejimida sinxronlanadi.
 
 ## Asosiy Bo'limlar
 - [Bosh sahifa](https://sora.uz/uz): Yangi mahsulotlar, ommabop toifalar, chegirmalar va rasmiy brendlar vitrinasi.
@@ -11,7 +11,7 @@ Sora.uz — jismoniy shaxslar (B2C) va korporativ mijozlar (B2B) uchun sifatli o
 - [B2B Korporativ xizmat](https://sora.uz/uz/b2b): Yuridik shaxslar uchun shartnoma, elektron hisob-faktura (Didox) va STIR (INN) orqali to'lov bilan to'liq xizmat ko'rsatish.
 - [Yetkazib berish](https://sora.uz/uz/delivery): Toshkent shahri bo'ylab 24 soat ichida hamda butun O'zbekiston viloyatlari bo'yicha yetkazib berish shartlari.
 - [To'lov usullari](https://sora.uz/uz/payment): Naqd pul, Payme, Click, Uzcard/Humo va korporativ B2B to'lov.
-- [Kafolat va qaytarish](https://sora.uz/uz/warranty): 14 kunlik qaytarish va almashtirish kafolati, servis xizmati.
+- [Kafolat va qaytarish](https://sora.uz/uz/warranty): 10 kunlik qaytarish va almashtirish kafolati, servis xizmati.
 - [Aloqa va Rekvizitlar](https://sora.uz/uz/contact): Telefon (+998 90 326-47-57 ; +998 90 969-90-90 ; +998 71 228-05-78), manzil (Toshkent shahri, Dilsaroy ko'chasi, 1 uy), ish vaqti (Dush-Shan 09:00-19:00).
 
 ## Maxsus Takliflar va Aksiyalar
@@ -21,14 +21,19 @@ Sora.uz — jismoniy shaxslar (B2C) va korporativ mijozlar (B2B) uchun sifatli o
 - [Top mahsulotlar](https://sora.uz/uz/catalog/popular): Eng ko'p xarid qilinayotgan xaridorgir tovarlar.
 - [Aksiya va chegirmalar](https://sora.uz/uz/catalog/promotions): Ulgurji va chakana chegirmadagi mahsulotlar.
 
-## Asosiy Mahsulot Toifalari
-- [Qogʻoz mahsulotlari](https://sora.uz/uz/category/qogoz-mahsulotlari): A4 formatdagi nusxa ko'chirish qog'ozlari, daftarlar, bloknotlar, stikerlar va kassa lentalari.
-- [Ofis buyumlari](https://sora.uz/uz/category/ofis-buyumlari): Steplerlar, teshkichlar, skrepkalar, qaychilar, korrektorlar va kantselyariya pichoqlari.
-- [Yozuv qurollari](https://sora.uz/uz/category/yozuv-qurollari): Sharikli, gelli va siyohli ruchkalar, matn belgilagichlar (highlighters), avtomatik va oddiy qalamlar.
-- [Kalkulyatorlar](https://sora.uz/uz/category/kalkulyatorlar): Ish stoli, buxgalteriya, ilmiy va cho'ntak kalkulyatorlari (Deli va boshqalar).
-- [Namoyish doskalari](https://sora.uz/uz/category/namoyish-doskalari): Magnitli marker doskalari, flipchartlar, bo'r doskalari va aksessuarlar.
-- [Papkalar va fayllar](https://sora.uz/uz/category/papkalar-va-fayllar): Registrator papkalar, fayllar, konvertlar va arxiv qutilari.
-- [Maktab va oʻqish uchun](https://sora.uz/uz/category/maktab-va-oqish-uchun): Maktab anjomlari, chizmachilik to'plamlari, qalamdonlar va rasm daftarlari.
+## Asosiy Mahsulot Toifalari (AI Markdown Indekslari)
+- [Qogʻoz mahsulotlari (.md)](https://sora.uz/uz/category/qogoz-mahsulotlari.md): A4 formatdagi nusxa ko'chirish qog'ozlari, daftarlar, bloknotlar, stikerlar va kassa lentalari.
+- [Ofis buyumlari (.md)](https://sora.uz/uz/category/ofis-buyumlari.md): Steplerlar, teshkichlar, skrepkalar, qaychilar, korrektorlar va kantselyariya pichoqlari.
+- [Yozuv qurollari (.md)](https://sora.uz/uz/category/yozuv-qurollari.md): Sharikli, gelli va siyohli ruchkalar, matn belgilagichlar (highlighters), avtomatik va oddiy qalamlar.
+- [Kalkulyatorlar (.md)](https://sora.uz/uz/category/kalkulyatorlar.md): Ish stoli, buxgalteriya, ilmiy va cho'ntak kalkulyatorlari (Deli va boshqalar).
+- [Namoyish doskalari (.md)](https://sora.uz/uz/category/namoyish-doskalari.md): Magnitli marker doskalari, flipchartlar, bo'r doskalari va aksessuarlar.
+- [Papkalar va fayllar (.md)](https://sora.uz/uz/category/papkalar-va-fayllar.md): Registrator papkalar, fayllar, konvertlar va arxiv qutilari.
+- [Maktab va oʻqish uchun (.md)](https://sora.uz/uz/category/maktab-va-oqish-uchun.md): Maktab anjomlari, chizmachilik to'plamlari, qalamdonlar va rasm daftarlari.
+
+## AI Agentlar uchun Dinamik Markdown (.md) Arxitekturasi
+- **Mahsulot sahifasi (Markdown):** Har qanday mahsulot URL manziliga `.md` qo'shish orqali uning toza Markdown versiyasini olish mumkin: `https://sora.uz/uz/products/{slug}.md` yoki `https://sora.uz/ru/products/{slug}.md`.
+- **Kategoriya indeksi (Markdown):** Har qanday kategoriya URL manziliga `.md` qo'shish orqali shu toifadagi barcha mahsulotlar ro'yxatini olish mumkin: `https://sora.uz/uz/category/{slug}.md` yoki `https://sora.uz/ru/category/{slug}.md`.
+- **Content-Negotiation:** So'rov sarlavhasida `Accept: text/markdown` yuborilsa, mahsulot va kategoriya sahifalari avtomatik ravishda toza Markdown qaytaradi.
 
 ## Xarid va Buyurtma Siyosati
 - Valyuta: O'zbekiston so'mi (UZS).
@@ -41,4 +46,4 @@ Sora.uz — jismoniy shaxslar (B2C) va korporativ mijozlar (B2B) uchun sifatli o
 - [XML Sitemap](https://sora.uz/sitemap.xml): Qidiruv tizimlari va AI agentlari uchun to'liq URL indeksi.
 - [Google Merchant Feed](https://sora.uz/api/feeds/google-merchant): Google Shopping va Merchant Center mahsulotlar oqimi.
 - [Yandex Market YML Feed](https://sora.uz/api/feeds/yandex-market): Yandex qidiruv va savdo maydonchasi uchun YML oqimi.
-- [To'liq LLM ma'lumotlar](https://sora.uz/llms-full.txt): 1C ERP dagi barcha tovarlar narxlari, parametrlari va tavsiflari bilan to'liq spetsifikatsiya.
+- [To'liq LLM Ma'lumotnoma](https://sora.uz/llms-full.txt): Kompaniya pasporti, kategoriyalar daraxti va mahsulotlarning `.md` katalogi.

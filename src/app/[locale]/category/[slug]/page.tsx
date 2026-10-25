@@ -63,6 +63,9 @@ export async function generateMetadata({
         "ru-UZ": `https://sora.uz/ru/category/${category.group_slug_ru}`,
         "x-default": `https://sora.uz/uz/category/${category.group_slug_uz}`,
       },
+      types: {
+        "text/markdown": `https://sora.uz/${locale}/category/${canonicalSlug}.md`,
+      },
     },
     openGraph: {
       title: `${name}${pageTitleSuffix} — Sora.uz internet do'koni`,

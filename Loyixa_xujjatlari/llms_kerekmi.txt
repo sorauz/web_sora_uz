@@ -1,0 +1,133 @@
+-veb loyixaninig [llms.txt va llms-full.txt] faqat asosiy saxifasida bo'lishi kerakmi? yoki xar bir maxsulot saxifasida bo'lgni yaxshiroqmi? Suniy intelek agentlari uchun qaysi biri qulay?
+
+AI agentlar uchun llms.txt va llms-full.txt fayllari faqat domenning asosiy ildizida (root directory, masalan: sora.uz/llms.txt) bo'lishi xalqaro standart va eng to'g'ri amaliyot hisoblanadi. Har bir mahsulot sahifasida alohida llms.txt yaratish noto'g'ri va agentlar uchun ma'lumotlarni indekslashni qiyinlashtiradi.
+
+Bu xuddi qidiruv tizimlari uchun robots.txt kabi ishlaydi — AI agenti (ChatGPT, Claude yoki sizning lokal Ollama agentlaringiz) saytga kirganda birinchi bo'lib /llms.txt ni qidiradi va u yerdan qolgan barcha ma'lumotlarga yo'llanma (xarita) oladi.
+
+Elektron tijorat (Sora.uz) uchun fayllarni taqsimlash yondashuvi
+
+Fayl / Sahifa,Qanday ishlatiladi?,"E-commerce (10,000+ mahsulot) uchun maslahat"
+/llms.txt (Root),Sayt xaritasi va asosiy yo'riqnoma.,"Kompaniya ma'lumoti, to'lov va yetkazib berish shartlari, qoidalarni hamda asosiy kategoriyalarga havolalarni bering. Hamma mahsulotni bu yerga kiritmang."
+/llms-full.txt (Root),Saytning to'liq matnli versiyasi.,"Juda katta ehtiyotkorlik talab qiladi. Hamma mahsulotni bitta faylga kiritish LLM'larning token limitidan oshib ketadi. Buni faqat informatsion sahifalar (""Biz haqimizda"", ""Qo'llanmalar"") uchun ishlating."
+Mahsulot sahifalari,Konkret mahsulot ma'lumoti.,Mahsulot sahifasida llms.txt qilmang. Buning o'rniga HTML ichida JSON-LD (Schema.org) taqdim eting yoki faqat agentlar uchun shu sahifaning toza Markdown (.md) versiyasini (masalan: /product/deli-3874.md) ishlating.
+
+AI Agentlar uchun nima qulayroq?
+Sun'iy intellekt agentlari uchun iyerarxik (pastga tushuvchi) tizim eng qulaydir. Agar ular to'g'ridan-to'g'ri kerakli ma'lumotni o'qiy olsa, gallyutsinatsiyalar (noto'g'ri javoblar) keskin kamayadi.
+
+Markazlashtirilgan kirish nuqtasi: Agent avval asosiy llms.txt ni o'qiydi. U yerdan kerakli kategoriya indekslarini (masalan, [Kanselyariya](/categories/kanselyariya-llms.txt)) topib oladi. Katta proyektlarda subpath (kichik indeks) fayllar qilish keng tarqalgan amaliyotdir.
+
+Content Negotiation (Sizning Next.js arxitekturangiz uchun): Agent qidiruv qilganda, mahsulot sahifalarini HTML "kavlash" (scraping) o'rniga Markdown o'qishini afzal ko'radi. Agar so'rov yuborayotgan klent agent ekanligini sezsangiz (masalan, header'da Accept: text/markdown bo'lsa), Next.js orqali to'g'ridan-to'g'ri 1C dagi xususiyatlarni toza Markdown ro'yxat qilib qaytarib berish lokal LLM agentlaringiz uchun eng tezkor usuldir.
+
+📍 llms.txt qayerda joylashishi kerak?
+llms.txt standarti saytning ildiz katalogida (https://saytingiz.com/llms.txt) joylashishini talab qiladi. Bu fayl butun sayt uchun “indeks” vazifasini o'taydi: unda saytning asosiy sahifalari, jumladan, mahsulot sahifalari ham ro'yxatga olinadi va qisqacha tavsiflanadi.
+
+Subpath variant: llms.txt ni /docs/llms.txt kabi ichki katalogda ham joylashtirish mumkin, lekin u faqat shu katalog ostidagi sahifalarni qamrab oladi. Mahsulot sahifalari butun sayt bo'ylab tarqalgan bo'lsa, ildizdagi fayl eng to'g'ri yechimdir.
+
+Har bir sahifada alohida llms.txt: Bunday amaliyot standartda ko'zda tutilmagan. Bu AI agentlarni chalkashtirib, ularning har bir sahifadan alohida indeks faylini qidirishiga majbur qiladi, bu esa samarasizdir.
+
+📄 llms-full.txt haqida nima deyish mumkin?
+llms-full.txt — bu llms.txt ning to'ldiruvchisi bo'lib, u havolalar o'rniga to'liq matnni o'z ichiga oladi. U ham odatda sayt ildizida joylashadi.
+
+Maqsad: Bu fayl, asosan, hujjatlashtirish (dokumentatsiya) uchun mo'ljallangan va ko'p hollarda biznes saytlari uchun ortiqcha hisoblanadi. Mahsulot katalogi katta bo'lsa, llms-full.txt juda katta hajmga yetishi mumkin, bu esa AI agentlar uchun kontekst oynasini to'ldirib qo'yadi.
+
+Muqobil: Ba'zi yechimlar (masalan, WooCommerce yoki Shopify uchun plaginlar) llms-full.txt ni avtomatik yaratadi, lekin bu har doim ham zarur emas.
+
+🤖 AI agentlar uchun qaysi biri qulay?
+AI agentlar uchun eng qulay tuzilma quyidagicha:
+
+Bitta indeks fayli (/llms.txt): Agent bir marta shu faylni yuklab oladi va saytdagi barcha muhim sahifalar (shu jumladan, mahsulotlar) haqida umumiy ma'lumot oladi. Bu uning vaqtini va resurslarini tejaydi.
+
+Sahifaga xos Markdown fayllari (ixtiyoriy): Har bir mahsulot sahifasi uchun alohida yengil Markdown fayli (masalan, /llms/slug.md) yaratish mumkin. llms.txt dagi havolalar to'g'ridan-to'g'ri shu fayllarga yo'naltirilishi mumkin. Bu agentga butun katta faylni yuklamasdan, faqat kerakli mahsulot ma'lumotini olish imkonini beradi. Bu yondashuv ayniqsa katta kataloglar uchun samarali.
+
+llms.txt va llms-full.txt ni faqat sayt ildizida joylashtiring. Ularni har bir mahsulot sahifasida takrorlamang.
+
+llms.txt ni “indeks” sifatida ishlating: unda asosiy mahsulot sahifalariga havolalar bering.
+
+Katta katalog uchun har bir mahsulotning yengil Markdown versiyasini yaratib, llms.txt dan o'sha fayllarga havola qiling. Bu AI agentlar uchun eng qulay va samarali yo'ldir.
+
+
+
+-veb loyixada *.md {md (page.md)}lar [https://llmstxt.org/] da keltirilgan AI agentlari uchun Har bir mahsulot yoki alohida sahifada bo'lishi kerakmi? batafsil tushuntirib bering!
+
+Ha, aynan shunday! llmstxt.org standartiga ko'ra va katta e-commerce (masalan, 10,000+ tovar bazasiga ega sora.uz) loyihalari uchun har bir mahsulot yoki alohida sahifaning o'z .md (Markdown) versiyasi bo'lishi eng to'g'ri arxitektura hisoblanadi.
+
+Keling, nima uchun bunday qilish kerakligini va AI agentlar qanday ishlashini batafsil tahlil qilamiz.
+
+1. Nima uchun har bir sahifaga alohida .md kerak?
+Token limiti (Context Window) muammosi: Agar siz barcha 10,000+ mahsulotning (masalan, DELI kantselyariya tovarlari, qog'ozlar, narxlar va xususiyatlar) barcha ma'lumotlarini bitta /llms-full.txt fayliga tiqsangiz, hech qaysi LLM (hatto mahalliy llama3.3:70b yoki qwen2.5-coder:72b bo'lsa ham) buni xotirasiga sig'dira olmaydi. Sig'dirgan taqdirda ham, kerakli ma'lumotni topishda gallyutsinatsiya kuchayadi va javob qaytarish vaqti (latency) oshib ketadi.
+
+Axborotning tozaligi (Signal-to-Noise Ratio): Mahsulotning oddiy veb-sahifasida (HTML) juda ko'p "shovqin" bor: navigatsiya menyulari, footer, Tailwind CSS klasslari, JavaScript kodlari va tavsiya etilgan boshqa mahsulotlar karusellari. AI agentiga bular umuman kerak emas. Unga mahsulotning nomi, narxi, qoldig'i (shtrix kod, artikul) va xususiyatlari toza matn ko'rinishida kerak.
+
+Agentlarning qidirish mantig'i: Avtonom agent (masalan, siz qurayotgan Playwright yoki multi-agent tizimidagi qidiruvchi agent) biron bir mahsulotni qidirganda, dastlab asosiy /llms.txt ga qaraydi. U yerdan toifalar ro'yxatini (masalan, /categories/office-supplies.md) topadi. O'sha toifa ichidan esa aniq mahsulot ssilkasini (masalan, /product/deli-3874.md) topib, to'g'ridan-to'g'ri o'sha aniq mahsulotning Markdown versiyasini o'qiydi.
+
+2. Bu tizim sora.uz da qanday ishlashi kerak? (Ierarxik tuzilma)
+AI agentlari uchun loyihangiz quyidagi "daraxt" (tree) shaklida ulanishi kerak:
+
+/llms.txt (Asosiy xarita):
+Bu yerda sayt maqsadi, kontaktlar, qoidalar va asosiy kategoriyalarga Markdown havolalar bo'ladi.Misol: [Ofis texnikalari](/categories/office-tech.md)
+
+
+/categories/office-tech.md (Kategoriya sahifasi):
+Bu yerda faqat shu kategoriyadagi mahsulotlarning qisqacha ro'yxati va ularning shaxsiy .md sahifalariga havolalar bo'ladi.Misol: [Brog L-23 Laminator - 1,200,000 so'm](/product/brog-l-23.md)
+
+/product/brog-l-23.md (Mahsulotning aniq sahifasi):
+Bu yerda faqat shu mahsulotning barcha detallari toza holatda turadi (Siz buni 1C dan kelgan ma'lumotlardan shakllantirasiz).
+
+3. Next.js App Router va 1C integratsiyasida buni qanday qilasiz?
+Siz 10,000 ta mahsulot uchun qo'lda yoki fayl tizimida alohida .md fayllar yaratmaysiz. Bularning barchasi dinamik tarzda (On-demand) yaratiladi.
+
+Next.js da siz maxsus Route Handler yaratishingiz mumkin. Vebsaytga brauzerdan odam kirsa /product/deli-3874 sahifasi ochiladi (chiroyli React komponentlari bilan). Ammo URL oxiriga .md qo'shilsa (yoki Agent Accept: text/markdown so'rovini yuborsa), server 1C dan shu tovarning xususiyatlarini olib, uni oddiy Markdown shaklida qaytaradi.
+
+Mahsulotning .md sahifasida nimalar bo'lishi ideal:
+``
+# Deli 3874 - Qog'oz kesish uskunasi (Gilyotina)
+
+> **Narxi:** 450,000 so'm
+> **Holati:** Omborimizda mavjud
+> **Kategoriyasi:** Ofis uskunalari > Qog'oz kesgichlar
+
+## Asosiy xususiyatlari:
+- **Kesish formati:** A4
+- **Bir martalik kesish sig'imi:** 15 varaq (80 g/m2 qog'oz)
+- **Material:** Metall asos va zanglamaydigan po'lat tig'......
+
+## Mahsulot ta'rifi:
+Deli 3874 ofis va kichik poligrafiya markazlari uchun mo'ljallangan...
+``
+Xulosa qilib aytganda: Ha, har bir mahsulot sahifasini o'ziga xos Markdown (.md) endpointi bilan ta'minlash LLM va qidiruv agentlari uchun sora.uz ma'lumotlarini qulay va aniq o'qishini ta'minlovchi eng zo'r yechimdir.
+
+Yo'q, llms.txt standarti (llmstxt.org) bo'yicha har bir mahsulot yoki alohida sahifa uchun page.md fayli yaratish majburiy emas. Bu standartda tavsiya etilgan (optional) ilg'or amaliyot hisoblanadi, lekin talab qilinmaydi. Keling, buni rasmiy hujjat va amaldagi tajribalar asosida batafsil tushuntiraman.
+
+📜 Standart nima deydi? Majburiyatmi yoki tavsiyami?
+
+llmstxt.org dagi rasmiy taklifda aniq ko'rsatilgan:
+
+"We furthermore propose that pages with information that agents might need provide a clean markdown version of those pages at the same URL as the original page, either with .md appended..."
+
+Bu yerda "propose" (taklif qilmoq) so'zi ishlatilgan. Standartning majburiy qismi faqat llms.txt faylining o'zida (H1 sarlavha va tavsif) bo'lib, sahifalarning Markdown nusxalari ixtiyoriy ravishda tavsiya etiladi, talab qilinmaydi. Buni turli manbalar ham tasdiqlaydi: "The proposal also suggests offering clean Markdown versions of pages... Those are optional, and most sites skip them". Docusaurus plagini hujjatida ham aynan shu ta'kidlanadi: "Optionally writes individual .md files per page, which the llmstxt.org spec recommends".
+
+🤔 Unda nima uchun page.md fayllari tavsiya etiladi?
+Garchi majburiy bo'lmasa-da, har bir muhim sahifa uchun toza Markdown nusxasini yaratishning amaliy afzalliklari bor. Buni AI agentlar nuqtai nazaridan ko'rib chiqaylik:
+
+1. Kontekst oynasini tejash va aniqlikni oshirish
+llms-full.txt butun sayt matnini bitta faylga jamlaydi. Katta katalogli saytlar uchun bu fayl juda katta hajmga yetishi mumkin va agentning cheklangan kontekst oynasini to'ldirib qo'yadi. page.md fayllari esa agentga faqat kerakli mahsulot yoki sahifa matnini yuklash imkonini beradi. Bu, ayniqsa, agentlar uchun samarali: ular butun "kitobni" emas, faqat kerakli "bobni" o'qiydi.
+
+2. Toza va strukturaviy ma'lumot
+HTML sahifalar navigatsiya, reklama va JavaScript bilan to'la bo'lib, ularni toza matnga aylantirish qiyin. page.md fayli esa mahsulot tavsifi, narxi, xususiyatlari kabi ma'lumotlarni allaqachon toza Markdown formatida taqdim etadi. Bu agentning ma'lumotni noto'g'ri talqin qilish xavfini kamaytiradi.
+
+3. Standartga muvofiqlik va "kelajakka tayyorlik"
+Garchi hozircha majburiy bo'lmasa-da, yetakchi kompaniyalar (Stripe, Vercel, Cloudflare, Anthropic) va yirik hujjat platformalari (Mintlify, X) o'z saytlarida sahifalarning .md nusxalarini taqdim etadi. Bu amaliyot AI agentlar ekotizimida tobora standartlashib bormoqda. Uni hozirdan joriy etish saytingizni kelajakdagi agentlar uchun tayyor holatga keltiradi.
+
+⚙️ Qanday qilib to'g'ri amalga oshiriladi?
+Agar page.md fayllarini yaratishga qaror qilsangiz, standart quyidagi usullarni taklif qiladi:
+
+URL tuzilishi: Asl sahifa URL manziliga .md qo'shiladi. Masalan, https://sayt.com/mahsulot/telefon sahifasining Markdown versiyasi https://sayt.com/mahsulot/telefon.md bo'ladi.
+
+Bog'lanish (link relation): HTML sahifa kodi orqali AI agentlarga Markdown versiyasi mavjudligini bildirish uchun rel="alternate" type="text/markdown" atributi qo'shiladi. Bu agentga sahifaning toza matn nusxasini avtomatik topish imkonini beradi.
+
+💎 Xulosa: Sizning holatingizda nima qilish kerak?
+Majburiyat emas: Agar loyihangiz kichik yoki o'rtacha bo'lsa va llms.txt faylini allaqachon yaratgan bo'lsangiz, har bir sahifa uchun alohida .md fayl yaratmaslikning o'zi katta muammo emas.
+
+Tavsiya: Agar mahsulot katalogingiz katta bo'lsa yoki AI agentlar saytingizdan faol foydlanishini istasangiz, har bir asosiy mahsulot sahifasi uchun page.md yaratish kuchli tavsiya etiladi. Bu agentlarning ishini sezilarli darajada osonlashtiradi va ularning saytingizdan to'g'ri ma'lumot olish ehtimolini oshiradi.
+
+Eng yaxshi amaliyot: llms.txt faylida mahsulot sahifalariga havola berishda, iloji bo'lsa, to'g'ridan-to'g'ri ularning .md versiyalariga havola qiling. Bu agentni darhol toza ma'lumotga yo'naltiradi va ortiqcha qadamni (HTML sahifani yuklab, uni qayta ishlashni) yo'q qiladi.

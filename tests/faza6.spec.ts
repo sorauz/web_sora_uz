@@ -24,6 +24,60 @@ test.describe("FAZA 6: Marketing, Feeds, Local SEO, and llms.txt", () => {
     expect(text).toContain("https://sora.uz/uz/b2b");
     expect(text).toContain("https://sora.uz/uz/offers");
     expect(text).toContain("https://sora.uz/uz/catalog/low_price_guarantee");
+    expect(text).toContain(".md)");
+  });
+
+  test("Dynamic .md endpoints and Accept: text/markdown Content-Negotiation work for products and categories", async ({
+    request,
+    page,
+  }) => {
+    // 1. Extract a valid category .md and product .md URL from /llms-full.txt
+    const fullRes = await request.get("/llms-full.txt");
+    const fullText = await fullRes.text();
+
+    const catMatch = fullText.match(/\]\(https:\/\/sora\.uz(\/uz\/category\/[^)]+\.md)\)/);
+    expect(catMatch).not.toBeNull();
+    const catMdPath = catMatch![1];
+
+    const prodMatch = fullText.match(/\]\(https:\/\/sora\.uz(\/uz\/products\/[^)]+\.md)\)/);
+    expect(prodMatch).not.toBeNull();
+    const prodMdPath = prodMatch![1];
+
+    // 2. Test Category .md endpoint
+    const catRes = await request.get(catMdPath);
+    expect(catRes.status()).toBe(200);
+    expect(catRes.headers()["content-type"]).toContain("text/markdown");
+    const catMd = await catRes.text();
+    expect(catMd).toContain("# ");
+    expect(catMd).toContain("Mahsulotlar ro'yxati");
+
+    // 3. Test Product .md endpoint
+    const prodRes = await request.get(prodMdPath);
+    expect(prodRes.status()).toBe(200);
+    expect(prodRes.headers()["content-type"]).toContain("text/markdown");
+    const prodMd = await prodRes.text();
+    expect(prodMd).toContain("# ");
+    expect(prodMd).toContain("> **Narxi:**");
+    expect(prodMd).toContain("> **Holati:**");
+    expect(prodMd).toContain("## Savdo shartlari:");
+
+    // 4. Test Content-Negotiation (Accept: text/markdown on standard HTML path)
+    const htmlProdPath = prodMdPath.replace(/\.md$/, "");
+    const negotiatedRes = await request.get(htmlProdPath, {
+      headers: { Accept: "text/markdown" },
+    });
+    expect(negotiatedRes.status()).toBe(200);
+    expect(negotiatedRes.headers()["content-type"]).toContain("text/markdown");
+    const negotiatedMd = await negotiatedRes.text();
+    expect(negotiatedMd).toContain("> **Narxi:**");
+
+    // 5. Verify <link rel="alternate" type="text/markdown"> in HTML <head>
+    await page.goto(htmlProdPath);
+    const mdAlternateHref = await page
+      .locator('link[rel="alternate"][type="text/markdown"]')
+      .last()
+      .getAttribute("href");
+    expect(mdAlternateHref).toContain(prodMdPath);
   });
 
   test("Google Merchant Center XML feed is valid and contains required product attributes", async ({

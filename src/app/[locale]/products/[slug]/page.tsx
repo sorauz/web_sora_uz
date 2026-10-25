@@ -67,6 +67,9 @@ export async function generateMetadata({
         "ru-UZ": `https://sora.uz/ru/products/${product.ru.slug_ru}`,
         "x-default": `https://sora.uz/uz/products/${product.uz.slug_uz}`,
       },
+      types: {
+        "text/markdown": `https://sora.uz/${locale}/products/${expectedSlug}.md`,
+      },
     },
     openGraph: {
       title,
