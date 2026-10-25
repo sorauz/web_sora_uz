@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: CatalogPageProps): Promise<Me
   const { locale } = await params;
   const isUz = locale === "uz";
   return {
-    title: isUz ? "Mahsulotlar Katalogi — Sora.uz" : "Каталог товаров — Sora.uz",
+    title: isUz ? "Mahsulotlar Katalogi" : "Каталог товаров",
     description: isUz
       ? "Sora.uz barcha toifalar katalogi: Ofis jihozlari, kanselyariya mollari, smartfonlar va kompyuter anjomlari."
       : "Каталог всех категорий Sora.uz: Офисная техника, канцелярия, смартфоны и компьютерные аксессуары.",

@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: BrandsPageProps): Promise<Met
   const { locale } = await params;
   const isUz = locale === "uz";
   return {
-    title: isUz ? "Barcha Brendlar — Sora.uz" : "Все Бренды — Sora.uz",
+    title: isUz ? "Barcha Brendlar" : "Все Бренды",
     description: isUz
       ? "Sora.uz do'konidagi rasmiy ishlab chiqaruvchilar: DELI, Samsung, Logitech, Canon, HP va boshqalar."
       : "Официальные бренды магазина Sora.uz: DELI, Samsung, Logitech, Canon, HP и другие.",

@@ -18,8 +18,8 @@ export async function generateMetadata({ params }: B2BPageProps): Promise<Metada
   const isUz = locale === "uz";
 
   const title = isUz
-    ? "B2B Korporativ ta'minot va ulgurji xaridlar | Sora.uz"
-    : "B2B Корпоративное обслуживание и оптовые закупки | Sora.uz";
+    ? "B2B Korporativ ta'minot va ulgurji xaridlar"
+    : "B2B Корпоративное обслуживание и оптовые закупки";
 
   const description = isUz
     ? "Korxonalar va ofislar uchun kanselyariya, qog'oz va ofis jihozlarini ulgurji yetkazib berish. Shartnoma, Didox orqali elektron hisob-faktura va qulay to'lov shartlari."

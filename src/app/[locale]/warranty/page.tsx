@@ -35,8 +35,8 @@ export async function generateMetadata({
   const isUz = locale === "uz";
 
   const title = isUz
-    ? "Kafolat va mahsulotni qaytarish siyosati — Sora.uz"
-    : "Гарантия и условия возврата товара — Sora.uz";
+    ? "Kafolat va mahsulotni qaytarish siyosati (10 kun)"
+    : "Гарантия и условия возврата товара (10 дней)";
 
   const description = isUz
     ? "Sora.uz rasmiy kafolati va 10 kunlik qaytarish siyosati. Tovarni kuryer oldida tekshirish qoidalari, almashtirish shartlari va rasmiy servis xizmati."

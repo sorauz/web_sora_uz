@@ -41,13 +41,14 @@ export async function generateMetadata({
 
   if (!product) {
     return {
-      title: isUz ? "Mahsulot topilmadi — Sora.uz" : "Товар не найден — Sora.uz",
+      title: isUz ? "Mahsulot topilmadi" : "Товар не найден",
     };
   }
 
   const expectedSlug = isUz ? product.uz.slug_uz : product.ru.slug_ru;
   const loc = getProductLocalized(product, isUz ? "uz" : "ru");
-  const title = `${loc.title || loc.name} — narxi, xususiyatlari | Sora.uz`;
+  const titleSuffix = isUz ? "— narxi, xususiyatlari" : "— цена, характеристики";
+  const title = `${loc.title || loc.name} ${titleSuffix}`;
   const description =
     loc.meta_description ||
     loc.short_description ||
@@ -81,7 +82,7 @@ export async function generateMetadata({
           alt: loc.name,
         },
       ],
-      type: "website",
+      type: "article",
     },
     twitter: {
       card: "summary_large_image",

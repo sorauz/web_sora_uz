@@ -29,7 +29,7 @@ export async function generateMetadata({
   const isUz = locale === "uz";
 
   return {
-    title: `"${q}" bo'yicha qidiruv natijalari — Sora.uz`,
+    title: `"${q}" bo'yicha qidiruv natijalari`,
     description: isUz
       ? `Sora.uz do'konida "${q}" so'rovi bo'yicha topilgan tovarlar.`
       : `Результаты поиска по запросу "${q}" в интернет-магазине Sora.uz.`,

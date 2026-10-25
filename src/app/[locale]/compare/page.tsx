@@ -20,8 +20,8 @@ export async function generateMetadata({
 
   return {
     title: isUz
-      ? "Mahsulotlarni taqqoslash — Sora.uz"
-      : "Сравнение товаров — Sora.uz",
+      ? "Mahsulotlarni taqqoslash"
+      : "Сравнение товаров",
     description: isUz
       ? "Tanlangan mahsulotlarning narxlari va texnik xususiyatlarini o'zaro solishtiring."
       : "Сравнение цен и технических характеристик выбранных товаров.",

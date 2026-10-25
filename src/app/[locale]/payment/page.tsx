@@ -18,8 +18,8 @@ export async function generateMetadata({ params }: PaymentPageProps): Promise<Me
   const isUz = locale === "uz";
 
   const title = isUz
-    ? "To'lov usullari va shartlari | Sora.uz"
-    : "Способы и условия оплаты | Sora.uz";
+    ? "To'lov usullari va shartlari"
+    : "Способы и условия оплаты";
 
   const description = isUz
     ? "Sora.uz do'konida qulay to'lov usullari: Payme, Click, naqd pul, bank kartalari hamda yuridik shaxslar uchun B2B hisob-faktura."

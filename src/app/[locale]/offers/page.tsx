@@ -20,8 +20,8 @@ export async function generateMetadata({ params }: OffersPageProps): Promise<Met
   const isUz = locale === "uz";
   return {
     title: isUz
-      ? "Maxsus Takliflar va Chegirmalar — Sora.uz"
-      : "Специальные предложения и скидки — Sora.uz",
+      ? "Maxsus Takliflar va Chegirmalar"
+      : "Специальные предложения и скидки",
     description: isUz
       ? "Sora.uz do'konining maxsus takliflari: Kafolatlangan eng arzon narxlar, aksiyalar, xit mahsulotlar va yangiliklar."
       : "Специальные предложения магазина Sora.uz: Гарантия лучшей цены, акции, хиты продаж и новинки.",

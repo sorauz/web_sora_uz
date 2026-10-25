@@ -41,7 +41,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     : "Sora.uz — Более 10 000 наименований канцелярских товаров, бумаги и офисной техники с быстрой доставкой по Ташкенту и всему Узбекистану.";
 
   return {
-    title,
+    title: { absolute: title },
     description,
     alternates: {
       canonical: `https://sora.uz/${locale}`,

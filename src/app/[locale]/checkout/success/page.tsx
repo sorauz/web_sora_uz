@@ -20,8 +20,8 @@ export async function generateMetadata({
 
   return {
     title: isUz
-      ? "Buyurtma qabul qilindi — Sora.uz"
-      : "Заказ успешно оформлен — Sora.uz",
+      ? "Buyurtma qabul qilindi"
+      : "Заказ успешно оформлен",
     robots: {
       index: false,
       follow: false,

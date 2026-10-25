@@ -20,8 +20,8 @@ export async function generateMetadata({
 
   return {
     title: isUz
-      ? "Buyurtmani rasmiylashtirish — Sora.uz"
-      : "Оформление заказа — Sora.uz",
+      ? "Buyurtmani rasmiylashtirish"
+      : "Оформление заказа",
     description: isUz
       ? "Sora.uz platformasida buyurtmani tez va oson rasmiylashtiring. O'zbekiston bo'ylab tezkor yetkazib berish."
       : "Быстрое и удобное оформление заказа на Sora.uz. Быстрая доставка по всему Узбекистану.",

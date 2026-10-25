@@ -139,7 +139,7 @@ export async function generateMetadata({
   const canonicalOffer = OFFER_ALIASES[offer] || (VALID_OFFERS.includes(offer as ValidOfferKey) ? offer : null);
 
   if (!canonicalOffer) {
-    return { title: "Sahifa topilmadi — Sora.uz" };
+    return { title: "Sahifa topilmadi" };
   }
 
   const config = OFFER_CONFIGS[canonicalOffer as ValidOfferKey];

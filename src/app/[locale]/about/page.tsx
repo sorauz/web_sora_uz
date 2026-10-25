@@ -18,8 +18,8 @@ export async function generateMetadata({ params }: AboutPageProps): Promise<Meta
   const isUz = locale === "uz";
 
   const title = isUz
-    ? "Biz haqimizda — Sora.uz internet do'koni tarixi va missiyasi"
-    : "О нас — История и миссия интернет-магазина Sora.uz";
+    ? "Biz haqimizda — internet do'koni tarixi va missiyasi"
+    : "О нас — история и миссия интернет-магазина";
 
   const description = isUz
     ? "Sora.uz — O'zbekistonda kanselyariya, maktab qurollari va ofis anjomlarining ishonchli yetkazib beruvchisi. 1C ERP integratsiyasi va 10 000+ tovarlar."

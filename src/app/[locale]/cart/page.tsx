@@ -19,7 +19,7 @@ export async function generateMetadata({
   const isUz = locale === "uz";
 
   return {
-    title: isUz ? "Xaridlar savatchasi — Sora.uz" : "Корзина покупок — Sora.uz",
+    title: isUz ? "Xaridlar savatchasi" : "Корзина покупок",
     description: isUz
       ? "Sora.uz internet do'konidagi xaridlaringiz savatchasi. Tezkor buyurtma va qulay to'lov."
       : "Корзина ваших покупок в интернет-магазине Sora.uz. Быстрое оформление и удобная оплата.",

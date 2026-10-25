@@ -18,8 +18,8 @@ export async function generateMetadata({ params }: DeliveryPageProps): Promise<M
   const isUz = locale === "uz";
 
   const title = isUz
-    ? "Yetkazib berish shartlari va muddatlari | Sora.uz"
-    : "Условия и сроки доставки | Sora.uz";
+    ? "Yetkazib berish shartlari va muddatlari"
+    : "Условия и сроки доставки";
 
   const description = isUz
     ? "Sora.uz internet do'konida yetkazib berish shartlari. Toshkent bo'ylab 500 000 so'mdan bepul yetkazib berish. Butun O'zbekiston viloyatlariga tezkor xizmat."

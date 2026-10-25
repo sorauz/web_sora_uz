@@ -50,7 +50,7 @@ export async function generateMetadata({
   );
 
   return {
-    title: `${name}${pageTitleSuffix} — Sora.uz internet do'koni`,
+    title: isUz ? `${name}${pageTitleSuffix} — internet do'koni` : `${name}${pageTitleSuffix} — интернет-магазин`,
     description: isUz
       ? `${name} bo'yicha sifatli kanselyariya va ofis mahsulotlari arzon narxlarda va rasmiy kafolat bilan O'zbekistonda.`
       : `Качественные канцелярские товары в категории ${name} по доступным ценам с гарантией в Ташкенте.`,
@@ -68,7 +68,7 @@ export async function generateMetadata({
       },
     },
     openGraph: {
-      title: `${name}${pageTitleSuffix} — Sora.uz internet do'koni`,
+      title: isUz ? `${name}${pageTitleSuffix} — internet do'koni` : `${name}${pageTitleSuffix} — интернет-магазин`,
       description: isUz
         ? `${name} mahsulotlari arzon narxlarda Sora.uz do'konida.`
         : `Товары ${name} по доступным ценам в магазине Sora.uz.`,

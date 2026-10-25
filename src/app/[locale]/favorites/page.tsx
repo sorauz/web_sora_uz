@@ -20,8 +20,8 @@ export async function generateMetadata({
 
   return {
     title: isUz
-      ? "Sevimli mahsulotlar — Sora.uz"
-      : "Избранные товары — Sora.uz",
+      ? "Sevimli mahsulotlar"
+      : "Избранные товары",
     description: isUz
       ? "Siz saqlab qo'ygan sevimli tovarlar ro'yxati."
       : "Список сохраненных вами избранных товаров.",

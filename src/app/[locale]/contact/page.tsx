@@ -18,8 +18,8 @@ export async function generateMetadata({ params }: ContactPageProps): Promise<Me
   const isUz = locale === "uz";
 
   const title = isUz
-    ? "Aloqa, do'kon manzili va rekvizitlar | Sora.uz"
-    : "Контакты, адрес шоурума и реквизиты | Sora.uz";
+    ? "Aloqa, do'kon manzili va rekvizitlar"
+    : "Контакты, адрес шоурума и реквизиты";
 
   const description = isUz
     ? "Sora.uz internet do'koni bilan bog'lanish: telefon raqamlar, Toshkentdagi manzil, ish vaqti, elektron pochta va to'liq yuridik rekvizitlar."

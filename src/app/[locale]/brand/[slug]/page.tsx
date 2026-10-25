@@ -40,7 +40,7 @@ export async function generateMetadata({
   const canonicalUrl = `https://sora.uz/${locale}/brand/${slug}${isPage ? `?page=${pageNum}` : ""}`;
 
   return {
-    title: `${brandName} mahsulotlari${pageTitleSuffix} — Rasmiy kafolat bilan | Sora.uz`,
+    title: isUz ? `${brandName} mahsulotlari${pageTitleSuffix} — Rasmiy kafolat bilan` : `Продукция ${brandName}${pageTitleSuffix} — С официальной гарантией`,
     description: isUz
       ? `${brandName} mahsulotlarining to'liq katalogi va arzon narxlari Toshkentda.`
       : `Каталог оригинальной продукции ${brandName} в Ташкенте с гарантией.`,
@@ -55,7 +55,7 @@ export async function generateMetadata({
       },
     },
     openGraph: {
-      title: `${brandName}${pageTitleSuffix} — Sora.uz`,
+      title: isUz ? `${brandName}${pageTitleSuffix} — Rasmiy kafolat bilan` : `Продукция ${brandName}${pageTitleSuffix} — С официальной гарантией`,
       description: isUz
         ? `${brandName} mahsulotlarining to'liq katalogi va narxlari.`
         : `Каталог оригинальной продукции ${brandName} в Ташкенте.`,
