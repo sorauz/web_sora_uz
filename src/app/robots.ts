@@ -2,6 +2,7 @@ import { MetadataRoute } from "next";
 
 export default function robots(): MetadataRoute.Robots {
   const commonDisallow = [
+    "/api/",
     "/uz/cart",
     "/ru/cart",
     "/uz/checkout",
@@ -12,7 +13,6 @@ export default function robots(): MetadataRoute.Robots {
     "/ru/compare",
     "/uz/search",
     "/ru/search",
-    "/api/",
     "/*?*brand=",
     "/*?*sort=",
     "/*?*minPrice=",
@@ -40,10 +40,10 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: [
           "OAI-SearchBot",
+          "ChatGPT-User",
           "PerplexityBot",
           "Claude-SearchBot",
           "Claude-User",
-          "ChatGPT-User",
         ],
         allow: commonAllow,
         disallow: commonDisallow,
@@ -51,18 +51,18 @@ export default function robots(): MetadataRoute.Robots {
       // AI Training & Scraper Bots (Completely blocked from model pre-training / bulk dataset scraping)
       {
         userAgent: [
-          "ClaudeBot",
           "GPTBot",
+          "ClaudeBot",
+          "Claude-Web",
+          "anthropic-ai",
           "Google-Extended",
           "Applebot-Extended",
           "CCBot",
           "Bytespider",
-          "anthropic-ai",
         ],
         disallow: ["/"],
       },
     ],
     sitemap: "https://sora.uz/sitemap.xml",
-    host: "https://sora.uz",
   };
 }
