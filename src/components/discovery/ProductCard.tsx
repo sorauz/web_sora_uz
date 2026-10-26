@@ -9,6 +9,7 @@ import { Heart, ShoppingCart, Check, Star, Scale } from "lucide-react";
 import { useCartStore } from "@/lib/store/cart";
 import { useFavoritesStore } from "@/lib/store/favorites";
 import { useCompareStore } from "@/lib/store/compare";
+import { reachGoal, sendEcommerceEvent } from "@/lib/analytics/yandex";
 import { useState } from "react";
 
 interface ProductCardProps {
@@ -73,6 +74,26 @@ export function ProductCard({
 
     setAddedAnim(true);
     setTimeout(() => setAddedAnim(false), 1200);
+
+    // Yandex Metrika Goal & Ecommerce event
+    reachGoal("ADD_TO_CART", {
+      id: product.id,
+      name: loc.name,
+      price: price,
+      quantity: 1,
+    });
+    sendEcommerceEvent("add", {
+      products: [
+        {
+          id: product.id,
+          name: loc.name,
+          price: price,
+          brand: product.brand,
+          category: loc.category,
+          quantity: 1,
+        },
+      ],
+    });
   };
 
   const handleFavorite = (e: React.MouseEvent) => {

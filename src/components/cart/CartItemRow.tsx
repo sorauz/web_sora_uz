@@ -6,6 +6,7 @@ import { Link } from "@/i18n/routing";
 import { Trash2 } from "lucide-react";
 import { CartItem, useCartStore } from "@/lib/store/cart";
 import { useTranslations, useLocale } from "next-intl";
+import { reachGoal, sendEcommerceEvent } from "@/lib/analytics/yandex";
 
 interface CartItemRowProps {
   item: CartItem;
@@ -151,7 +152,25 @@ export function CartItemRow({ item, localizationMap }: CartItemRowProps) {
           {/* Delete item button */}
           <button
             type="button"
-            onClick={() => removeItem(item.id)}
+            onClick={() => {
+              removeItem(item.id);
+              reachGoal("REMOVE_FROM_CART", {
+                id: item.id,
+                name: displayName,
+                price: item.price,
+                quantity: item.quantity,
+              });
+              sendEcommerceEvent("remove", {
+                products: [
+                  {
+                    id: item.id,
+                    name: displayName,
+                    price: item.price,
+                    quantity: item.quantity,
+                  },
+                ],
+              });
+            }}
             aria-label={t("delete")}
             className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-colors cursor-pointer"
           >

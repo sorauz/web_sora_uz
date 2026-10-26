@@ -24,6 +24,7 @@ import { useFavoritesStore } from "@/lib/store/favorites";
 import { useCompareStore } from "@/lib/store/compare";
 import { Product, getProductLocalized } from "@/lib/schemas/product";
 import { calculateProductPrice } from "@/lib/utils/price";
+import { reachGoal, sendEcommerceEvent } from "@/lib/analytics/yandex";
 
 interface ProductActionsProps {
   product: Product;
@@ -78,12 +79,40 @@ export function ProductActions({ product, locale }: ProductActionsProps) {
     );
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 2200);
+
+    // Yandex Metrika Goal & Ecommerce event
+    reachGoal("ADD_TO_CART", {
+      id: product.id,
+      name: loc.name,
+      price: priceVal,
+      quantity,
+    });
+    sendEcommerceEvent("add", {
+      products: [
+        {
+          id: product.id,
+          name: loc.name,
+          price: priceVal,
+          brand: product.brand,
+          category: loc.category,
+          quantity,
+        },
+      ],
+    });
   };
 
   const handleFastOrderSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!customerPhone || customerPhone.length < 9) return;
     setFastOrderSubmitted(true);
+
+    reachGoal("ONE_CLICK_SUBMIT", {
+      id: product.id,
+      name: loc.name,
+      price: priceVal,
+      quantity,
+    });
+
     setTimeout(() => {
       setFastOrderSubmitted(false);
       setIsModalOpen(false);
@@ -238,7 +267,10 @@ export function ProductActions({ product, locale }: ProductActionsProps) {
         {canAddToCart && (
           <button
             type="button"
-            onClick={() => setIsModalOpen(true)}
+            onClick={() => {
+              setIsModalOpen(true);
+              reachGoal("ONE_CLICK_OPEN", { id: product.id, name: loc.name });
+            }}
             className="w-full h-12 flex items-center justify-center gap-2 rounded-xl font-bold text-slate-800 dark:text-white bg-amber-400 hover:bg-amber-500 active:scale-[0.98] transition-all shadow-sm"
           >
             <Zap className="w-5 h-5 fill-current" />
@@ -385,7 +417,8 @@ export function ProductActions({ product, locale }: ProductActionsProps) {
                         value={customerName}
                         onChange={(e) => setCustomerName(e.target.value)}
                         placeholder={locale === "uz" ? "Masalan: Jasur" : "Например: Жасур"}
-                        className="w-full pl-9 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sora-500 dark:text-white"
+                        data-metrika-noindex="true"
+                        className="w-full pl-9 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sora-500 dark:text-white ym-disable-keys"
                       />
                     </div>
                   </div>
@@ -402,7 +435,8 @@ export function ProductActions({ product, locale }: ProductActionsProps) {
                         value={customerPhone}
                         onChange={(e) => setCustomerPhone(e.target.value)}
                         placeholder="+998 90 123 45 67"
-                        className="w-full pl-9 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sora-500 dark:text-white"
+                        data-metrika-noindex="true"
+                        className="w-full pl-9 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sora-500 dark:text-white ym-disable-keys"
                       />
                     </div>
                   </div>

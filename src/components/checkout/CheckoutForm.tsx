@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useCartStore } from "@/lib/store/cart";
 import { useAuthStore } from "@/lib/store/auth";
 import { useTranslations } from "next-intl";
+import { reachGoal, sendEcommerceEvent } from "@/lib/analytics/yandex";
 import {
   User,
   Phone,
@@ -63,6 +64,12 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
 
   useEffect(() => {
     setMounted(true);
+    if (items.length > 0) {
+      reachGoal("START_CHECKOUT", {
+        items_count: items.length,
+        total: getTotalPrice(),
+      });
+    }
   }, []);
 
   useEffect(() => {
@@ -176,6 +183,24 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
       } catch {
         // Ignore localStorage errors
       }
+
+      // Yandex Metrika Goal & Ecommerce event
+      reachGoal("PURCHASE_SUCCESS", {
+        orderId,
+        orderNumber,
+        total,
+        currency: "UZS",
+        items_count: items.length,
+      });
+      sendEcommerceEvent("purchase", {
+        actionField: { id: orderNumber, revenue: total, currency: "UZS" },
+        products: items.map((i) => ({
+          id: i.id,
+          name: i.name,
+          price: i.price,
+          quantity: i.quantity,
+        })),
+      });
 
       router.push(`/checkout/success?orderId=${encodeURIComponent(orderId)}&orderNumber=${encodeURIComponent(orderNumber)}`);
     } catch {
@@ -300,7 +325,8 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
                     value={companyName}
                     onChange={(e) => setCompanyName(e.target.value)}
                     placeholder={locale === "uz" ? "«Navruz International» MCHJ" : "ООО «Навруз»"}
-                    className="w-full px-3.5 py-2 bg-white dark:bg-slate-800 border border-amber-200 dark:border-slate-700 rounded-xl text-sm dark:text-white"
+                    data-metrika-noindex="true"
+                    className="w-full px-3.5 py-2 bg-white dark:bg-slate-800 border border-amber-200 dark:border-slate-700 rounded-xl text-sm dark:text-white ym-disable-keys"
                   />
                 </div>
                 <div>
@@ -316,7 +342,8 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
                     value={companyInn}
                     onChange={(e) => setCompanyInn(e.target.value)}
                     placeholder="204393073"
-                    className="w-full px-3.5 py-2 bg-white dark:bg-slate-800 border border-amber-200 dark:border-slate-700 rounded-xl text-sm font-mono dark:text-white"
+                    data-metrika-noindex="true"
+                    className="w-full px-3.5 py-2 bg-white dark:bg-slate-800 border border-amber-200 dark:border-slate-700 rounded-xl text-sm font-mono dark:text-white ym-disable-keys"
                   />
                 </div>
               </div>
@@ -336,7 +363,8 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder={t("fullNamePlaceholder")}
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sora-500 dark:text-white"
+                  data-metrika-noindex="true"
+                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sora-500 dark:text-white ym-disable-keys"
                 />
               </div>
             </div>
@@ -354,7 +382,8 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder={t("phonePlaceholder")}
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sora-500 dark:text-white"
+                  data-metrika-noindex="true"
+                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sora-500 dark:text-white ym-disable-keys"
                 />
               </div>
             </div>
@@ -371,7 +400,8 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
                   value={altPhone}
                   onChange={(e) => setAltPhone(e.target.value)}
                   placeholder={t("altPhonePlaceholder")}
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sora-500 dark:text-white"
+                  data-metrika-noindex="true"
+                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sora-500 dark:text-white ym-disable-keys"
                 />
               </div>
             </div>
@@ -387,7 +417,8 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder={t("emailPlaceholder")}
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sora-500 dark:text-white"
+                  data-metrika-noindex="true"
+                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sora-500 dark:text-white ym-disable-keys"
                 />
               </div>
             </div>

@@ -7,6 +7,7 @@ import { ShoppingCart, Check, Phone, Send } from "lucide-react";
 import { useCartStore } from "@/lib/store/cart";
 import { Product, getProductLocalized } from "@/lib/schemas/product";
 import { calculateProductPrice } from "@/lib/utils/price";
+import { reachGoal, sendEcommerceEvent } from "@/lib/analytics/yandex";
 
 interface MobileStickyCTAProps {
   product: Product;
@@ -47,6 +48,26 @@ export function MobileStickyCTA({ product, locale }: MobileStickyCTAProps) {
     );
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 2000);
+
+    // Yandex Metrika Goal & Ecommerce event
+    reachGoal("ADD_TO_CART", {
+      id: product.id,
+      name: loc.name,
+      price: priceVal,
+      quantity: 1,
+    });
+    sendEcommerceEvent("add", {
+      products: [
+        {
+          id: product.id,
+          name: loc.name,
+          price: priceVal,
+          brand: product.brand,
+          category: loc.category,
+          quantity: 1,
+        },
+      ],
+    });
   };
 
   return (

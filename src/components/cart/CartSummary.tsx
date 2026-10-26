@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import { ShieldCheck, Truck, ArrowRight, Tag, CheckCircle2 } from "lucide-react";
+import { reachGoal } from "@/lib/analytics/yandex";
 
 interface CartSummaryProps {
   subtotal: number;
@@ -147,6 +148,7 @@ export function CartSummary({ subtotal }: CartSummaryProps) {
       {/* Checkout Button */}
       <Link
         href="/checkout"
+        onClick={() => reachGoal("START_CHECKOUT", { subtotal, total })}
         className="w-full flex items-center justify-center gap-2 py-3.5 px-6 rounded-2xl bg-sora-600 hover:bg-sora-700 active:scale-[0.98] text-white font-bold text-sm shadow-md shadow-sora-500/25 transition-all"
       >
         <span>{t("proceedToCheckout")}</span>

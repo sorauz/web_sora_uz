@@ -9,6 +9,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { OrganizationJsonLd } from "@/components/seo/OrganizationJsonLd";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
+import { YandexMetrika } from "@/components/analytics/YandexMetrika";
 import NextTopLoader from "nextjs-toploader";
 import "../globals.css";
 
@@ -96,6 +97,8 @@ export default async function LocaleLayout({
         <link rel="apple-touch-icon" href="/for_web_logo_icon.ico" />
 
         {/* Preconnect to external image servers and 1C API to reduce LCP */}
+        <link rel="preconnect" href="https://mc.yandex.ru" />
+        <link rel="dns-prefetch" href="https://mc.yandex.ru" />
         <link rel="preconnect" href="https://i.ibb.co" />
         <link rel="dns-prefetch" href="https://i.ibb.co" />
         <link rel="preconnect" href="http://1cloud.uz:777" />
@@ -115,6 +118,7 @@ export default async function LocaleLayout({
         />
         <OrganizationJsonLd />
         <GoogleAnalytics />
+        <YandexMetrika />
         <NextIntlClientProvider messages={messages}>
           <NuqsAdapter>{children}</NuqsAdapter>
         </NextIntlClientProvider>
