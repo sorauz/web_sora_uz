@@ -1,0 +1,11 @@
+Bu interfeys [D:\web_sora_uz\Loyixa_xujjatlari\mobile\1.jpg; D:\web_sora_uz\Loyixa_xujjatlari\mobile\2.jpg] elementi "Collapsible" (yig'iladigan/ochiladigan) yoki "Show more / Show less" (ko'proq ko'rsatish / yig'ish) komponenti deb ataladi. UX/UI dizaynida bu usul "Progressive Disclosure" (bosqichma-bosqich ochib berish) tamoyilining bir qismi hisoblanadi.
+
+Quyidagi atamalar bilan ham tez-tez uchraydi:
+
+Accordion (Akkordeon): odatda ro'yxat yoki bo'limlarni vertikal ravishda ochish/yopish uchun ishlatiladi.
+
+Expand / Collapse (Kengaytirish / Yig'ish): Oracle va boshqa design systemlarda standart nomi.
+
+Chip-based Show more (Chip shaklidagi "Ko'proq" tugmasi): mobil ilovalarda gorizontal tugmalar (chips) orqali kategoriyalarni birlashtirishda qo'llaniladi.
+
+Bu yondashuvning asosiy maqsadi — ekranda joyni tejash va foydalanuvchini ortiqcha ma'lumot bilan charchatmaslikdir. "Ещё 10" tugmasini bosganda yashirin kategoriyalar ochiladi va tugma "Свернуть" (Yig'ish) ga o'zgaradi, bu esa foydalanuvchiga boshqaruvni o'z qo'lida ushlab turish imkonini beradi.

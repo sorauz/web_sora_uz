@@ -16,6 +16,7 @@ import { getProductLocalized } from "@/lib/schemas/product";
 import { calculateProductPrice } from "@/lib/utils/price";
 import { Link } from "@/i18n/routing";
 import { Pagination } from "@/components/discovery/Pagination";
+import { SubcategoryChips } from "@/components/discovery/SubcategoryChips";
 import { Metadata } from "next";
 import { Folder, HelpCircle, BookOpen } from "lucide-react";
 
@@ -132,6 +133,28 @@ export default async function CategoryPage({
   // Filter products by category (recursively matching this category and all its descendant subcategories)
   const matchingSlugs = getAllCategorySlugs(currentCategory);
 
+  // Subcategories with matching product count for progressive disclosure chips
+  const subcategoryChips = currentCategory.children.map((sub) => {
+    const subSlugs = getAllCategorySlugs(sub);
+    const count = productsData.products.filter((p) => {
+      const slugUz = p.uz?.category_slug_uz;
+      const slugRu = p.ru?.category_slug_ru;
+      const locSlug = getProductLocalized(p, isUz ? "uz" : "ru").category_slug;
+      return (
+        (slugUz && subSlugs.has(slugUz)) ||
+        (slugRu && subSlugs.has(slugRu)) ||
+        (locSlug && subSlugs.has(locSlug))
+      );
+    }).length;
+
+    return {
+      id: sub.id,
+      name: isUz ? sub.group_uz : sub.group_ru,
+      slug: isUz ? sub.group_slug_uz : sub.group_slug_ru,
+      count,
+    };
+  });
+
   let filtered = productsData.products.filter((p) => {
     const slugUz = p.uz?.category_slug_uz;
     const slugRu = p.ru?.category_slug_ru;
@@ -233,20 +256,13 @@ export default async function CategoryPage({
           </p>
         </div>
 
-        {/* Subcategories Tags if any */}
-        {currentCategory.children.length > 0 && (
-          <div className="flex flex-wrap gap-2 pt-1">
-            {currentCategory.children.map((sub) => (
-              <Link
-                key={sub.id}
-                href={`/category/${isUz ? sub.group_slug_uz : sub.group_slug_ru}`}
-                className="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:border-sora-500 hover:text-sora-600 transition-colors shadow-2xs flex items-center gap-1.5"
-              >
-                <Folder className="w-3.5 h-3.5 text-sora-500" />
-                <span>{isUz ? sub.group_uz : sub.group_ru}</span>
-              </Link>
-            ))}
-          </div>
+        {/* Subcategories Progressive Disclosure Chips */}
+        {subcategoryChips.length > 0 && (
+          <SubcategoryChips
+            items={subcategoryChips}
+            locale={locale as "uz" | "ru"}
+            initialLimit={3}
+          />
         )}
 
         {/* Main Content: Filter Sidebar + Products Grid */}
