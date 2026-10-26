@@ -56,51 +56,8 @@ export default async function ContactPage({ params }: ContactPageProps) {
     },
   ];
 
-  // LocalBusiness / Store Schema for Local SEO
-  const localStoreSchema = {
-    "@context": "https://schema.org",
-    "@type": "Store",
-    "@id": "https://sora.uz/#store",
-    name: "Sora.uz — Kanselyariya va ofis mollari do'koni",
-    url: "https://sora.uz",
-    telephone: "+998-90-326-47-57",
-    image: "https://sora.uz/icon.png",
-    priceRange: "$$",
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: "Olmazor tumani, Dilsaroy ko'chasi, 1 uy",
-      addressLocality: "Toshkent",
-      addressRegion: "Toshkent shahri",
-      postalCode: "100000",
-      addressCountry: "UZ",
-    },
-    geo: {
-      "@type": "GeoCoordinates",
-      latitude: 41.2858,
-      longitude: 69.2558,
-    },
-    openingHoursSpecification: [
-      {
-        "@type": "OpeningHoursSpecification",
-        dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
-        opens: "09:00",
-        closes: "19:00",
-      },
-    ],
-    sameAs: [
-      "https://t.me/sorauz",
-      "https://t.me/sora_uz",
-      "https://www.instagram.com/sorauz/",
-    ],
-  };
-
   return (
     <div className="min-h-screen bg-white text-slate-900 flex flex-col">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(localStoreSchema) }}
-      />
-
       <Header
         tree={categoriesData.tree}
         categories={categoriesData.categories}

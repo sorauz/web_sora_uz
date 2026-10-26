@@ -21,12 +21,10 @@ export function OrganizationJsonLd() {
           "https://t.me/sorauz",
           "https://t.me/sora_uz",
           "https://www.instagram.com/sorauz/",
-          "https://instagram.com/sora_uz",
-          "https://facebook.com/sora_uz",
         ],
       },
       {
-        "@type": "Store",
+        "@type": ["LocalBusiness", "Store"],
         "@id": "https://sora.uz/#store",
         name: "Sora.uz — Kanselyariya va ofis mollari do'koni",
         url: "https://sora.uz",
@@ -68,7 +66,6 @@ export function OrganizationJsonLd() {
           "https://t.me/sorauz",
           "https://t.me/sora_uz",
           "https://www.instagram.com/sorauz/",
-          "https://facebook.com/sora_uz",
         ],
       },
       {

@@ -42,6 +42,7 @@ export default function robots(): MetadataRoute.Robots {
           "OAI-SearchBot",
           "PerplexityBot",
           "ClaudeBot",
+          "Claude-Web",
           "ChatGPT-User",
         ],
         allow: commonAllow,
@@ -60,7 +61,7 @@ export default function robots(): MetadataRoute.Robots {
           "/api/auth/",
         ],
       },
-      // AI Training & Scraper Bots (Separated: Directed to structured Markdown & llms.txt, blocked from heavy query params & internal carts)
+      // AI Training & Scraper Bots (Directed to structured Markdown & llms.txt only; full HTML scraping blocked)
       {
         userAgent: [
           "GPTBot",
@@ -76,24 +77,7 @@ export default function robots(): MetadataRoute.Robots {
           "/*.md",
           "/api/md/",
         ],
-        disallow: [
-          "/uz/cart",
-          "/ru/cart",
-          "/uz/checkout",
-          "/ru/checkout",
-          "/uz/favorites",
-          "/ru/favorites",
-          "/uz/compare",
-          "/ru/compare",
-          "/uz/search",
-          "/ru/search",
-          "/api/",
-          "/*?*brand=",
-          "/*?*sort=",
-          "/*?*minPrice=",
-          "/*?*maxPrice=",
-          "/*?*inStock=",
-        ],
+        disallow: ["/"],
       },
     ],
     sitemap: "https://sora.uz/sitemap.xml",

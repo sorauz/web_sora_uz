@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { Metadata } from "next";
 import { api } from "@/lib/api";
 import { getProductLocalized } from "@/lib/schemas/product";
+import { calculateProductPrice } from "@/lib/utils/price";
 import { Header } from "@/components/layout/Header";
 import { PromoNav } from "@/components/layout/PromoNav";
 import { Footer } from "@/components/layout/Footer";
@@ -72,18 +73,6 @@ export async function generateMetadata({
         "text/markdown": `https://sora.uz/${locale}/products/${expectedSlug}.md`,
       },
     },
-    openGraph: {
-      title,
-      description,
-      url: `https://sora.uz/${locale}/products/${expectedSlug}`,
-      images: [
-        {
-          url: product.main_picture,
-          alt: loc.name,
-        },
-      ],
-      type: "article",
-    },
     twitter: {
       card: "summary_large_image",
       title,
@@ -111,6 +100,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
   }
 
   const loc = getProductLocalized(product, currentLocale);
+  const priceInfo = calculateProductPrice(product.price);
 
   // Fetch categories, brands, all products, and live reviews
   const [{ tree, categories }, brandsRes, allProdsRes, reviewsRes] =
@@ -212,6 +202,18 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
 
   return (
     <div className="min-h-screen flex flex-col bg-white text-slate-900 pb-20 md:pb-0">
+      {/* OpenGraph E-Commerce Product Metadata */}
+      <meta property="og:type" content="product" />
+      <meta property="og:site_name" content="Sora.uz" />
+      <meta property="og:title" content={loc.title || loc.name} />
+      <meta property="og:description" content={loc.meta_description || loc.short_description || loc.name} />
+      <meta property="og:url" content={`https://sora.uz/${currentLocale}/products/${expectedSlug}`} />
+      <meta property="og:image" content={product.main_picture} />
+      <meta property="product:price:amount" content={priceInfo.price.toString()} />
+      <meta property="product:price:currency" content="UZS" />
+      <meta property="product:availability" content={product.price?.stock !== "OutOfStock" ? "in stock" : "out of stock"} />
+      {product.brand && <meta property="product:brand" content={product.brand} />}
+      {product.product_sku && <meta property="product:retailer_item_id" content={product.product_sku} />}
       <ProductJsonLd
         product={product}
         locale={currentLocale}

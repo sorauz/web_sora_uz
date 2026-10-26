@@ -104,13 +104,17 @@ export function ProductJsonLd({
         returnFees: "https://schema.org/FreeReturn",
       },
     },
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue,
-      reviewCount,
-      bestRating: "5",
-      worstRating: "1",
-    },
+    ...(stats && stats.reviewCount > 0
+      ? {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: stats.averageRating.toString(),
+            reviewCount: stats.reviewCount.toString(),
+            bestRating: "5",
+            worstRating: "1",
+          },
+        }
+      : {}),
     ...(hasRealReviews
       ? {
           review: reviews.map((r) => ({
