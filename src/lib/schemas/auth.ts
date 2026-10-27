@@ -13,16 +13,14 @@ export function normalizePhone(phone: string): string {
 }
 
 /**
- * Login Schema:
- * B2C uses phone + password
- * B2B uses INN + password
+ * Login Schema (Legacy password or identifier lookup)
  */
 export const LoginInputSchema = z
   .object({
     type: z.enum(["B2C", "B2B"]).default("B2C"),
     phone: z.string().optional(),
     inn: z.string().optional(),
-    password: z.string().min(4, "Parol kamida 4 ta belgidan iborat bo'lishi kerak"),
+    password: z.string().optional(),
   })
   .refine(
     (data) => {
@@ -41,8 +39,7 @@ export type LoginInput = z.infer<typeof LoginInputSchema>;
 
 /**
  * Registration Schema:
- * Always defaults to B2C (Name, Phone, Password).
- * B2B can also be registered directly or during checkout.
+ * Supports both passwordless (OTP) and legacy password registration
  */
 export const RegisterInputSchema = z.object({
   type: z.enum(["B2C", "B2B"]).default("B2C"),
@@ -50,10 +47,61 @@ export const RegisterInputSchema = z.object({
   phone1: z.string().min(9, "Telefon raqami kiritilishi shart"),
   phone2: z.string().optional(),
   inn: z.string().optional(),
-  password: z.string().min(4, "Parol kamida 4 ta belgidan iborat bo'lishi kerak"),
+  password: z.string().optional(),
 });
 
 export type RegisterInput = z.infer<typeof RegisterInputSchema>;
+
+/**
+ * SMS OTP Step 1: Send OTP Code
+ */
+export const OtpSendInputSchema = z.object({
+  phone: z.string().min(9, "Telefon raqami kiritilishi shart"),
+  type: z.enum(["B2C", "B2B"]).default("B2C"),
+  inn: z.string().optional(),
+  locale: z.enum(["uz", "ru"]).default("uz"),
+});
+
+export type OtpSendInput = z.infer<typeof OtpSendInputSchema>;
+
+/**
+ * SMS OTP Step 2: Verify 4-digit OTP Code
+ */
+export const OtpVerifyInputSchema = z.object({
+  phone: z.string().min(9, "Telefon raqami kiritilishi shart"),
+  code: z.string().regex(/^\d{4}$/, "Tasdiqlash kodi 4 ta raqamdan iborat bo'lishi kerak"),
+  type: z.enum(["B2C", "B2B"]).default("B2C"),
+  inn: z.string().optional(),
+  locale: z.enum(["uz", "ru"]).default("uz"),
+});
+
+export type OtpVerifyInput = z.infer<typeof OtpVerifyInputSchema>;
+
+/**
+ * SMS OTP Step 3: Complete New Customer Registration in 1C ERP
+ */
+export const OtpCompleteInputSchema = z
+  .object({
+    verifiedToken: z.string().min(10, "Tasdiqlash tokeni topilmadi"),
+    name: z.string().min(2, "Ism-sharif yoki tashkilot nomi kamida 2 ta belgidan iborat bo'lishi kerak"),
+    type: z.enum(["B2C", "B2B"]).default("B2C"),
+    inn: z.string().optional(),
+    phone2: z.string().optional(),
+  })
+  .refine(
+    (data) => {
+      if (data.type === "B2B") {
+        return !!data.inn && /^\d{9}$/.test(data.inn.trim());
+      }
+      return true;
+    },
+    {
+      message: "Tashkilotning 9 xonali STIR (INN) raqami kiritilishi shart",
+      path: ["inn"],
+    }
+  );
+
+export type OtpCompleteInput = z.infer<typeof OtpCompleteInputSchema>;
 
 /**
  * User Session representation stored in encrypted cookie / state

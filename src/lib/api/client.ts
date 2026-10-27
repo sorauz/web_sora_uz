@@ -542,7 +542,7 @@ class SoraApiClient {
   async loginUser(params: {
     type: "B2C" | "B2B";
     identifier: string;
-    password: string;
+    password?: string;
   }): Promise<{
     success: boolean;
     user?: OneCUserResponse;
@@ -553,9 +553,10 @@ class SoraApiClient {
     const queryParam = isB2C
       ? `phone=${encodeURIComponent(params.identifier)}`
       : `inn=${encodeURIComponent(params.identifier)}`;
-    const url = `${this.baseUrl}/register?type=${params.type}&${queryParam}&password=${encodeURIComponent(
-      params.password
-    )}`;
+    const pwdParam = params.password
+      ? `&password=${encodeURIComponent(params.password)}`
+      : "";
+    const url = `${this.baseUrl}/register?type=${params.type}&${queryParam}${pwdParam}`;
 
     try {
       const response = await fetch(url, {
@@ -629,7 +630,7 @@ class SoraApiClient {
     phone1?: string;
     phone2?: string;
     inn?: string;
-    password: string;
+    password?: string;
   }): Promise<{
     success: boolean;
     id?: string;

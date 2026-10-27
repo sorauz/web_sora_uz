@@ -41,7 +41,7 @@ flowchart LR
 
 ---
 
-# 1-QISM: Veb-dasturchi Ishlari (Next.js Backend va Frontend)
+# 1-QISM: Veb-dasturchi Ishlari (Next.js Backend va Frontend) — ✅ TO'LIQ BAJARILDI
 
 Veb-dasturchi zimmasiga Eskiz.uz API bilan ishlovchi barqaror servis qatlamini yozish, kriptografik OTP xavfsizligini ta'minlash, 1C ERP bilan ulash va foydalanuvchi interfeysini (UI/UX) parolsiz (Passwordless) tizimga o'tkazish kiradi.
 
@@ -63,9 +63,9 @@ Veb-dasturchi zimmasiga Eskiz.uz API bilan ishlovchi barqaror servis qatlamini y
    - Eskiz hujjatiga ko'ra (`encoding` parametri, 386-qator):
      * Lotin (ASCII / GSM 03.38) matnda 1 ta SMS = **160 ta belgi**.
      * Kirill (UCS2) yoki maxsus belgili (`oʻ`, `gʻ` dagi noodatiy apostrof) matnda 1 ta SMS = **faqat 70 ta belgi**! Agar 71 ta belgi bo'lib ketsa, `parts_count: 2` bo'lib, har bir kod uchun **2 ta SMS puli (100–120 so'm)** yechiladi.
-   - **Yechim:** O'zbek va rus tillaridagi OTP xabarlari 70 ta belgidan oshmaydigan qilib loyihalanadi va oddiy ASCII apostrof (`'`) ishlatiladi:
-     * **UZ (53 belgi — 1 SMS):** `Sora.uz tasdiqlash kodi: 4892. Kodni hech kimga bermang.`
-     * **RU (52 belgi — 1 SMS):** `Sora.uz: Код подтверждения: 4892. Никому не сообщайте.`
+   - **Yechim:** O'zbek va rus tillaridagi OTP xabarlari Eskiz.uz **Punkt 2** qoidasiga (resurs nomi + ishlatish maqsadi) va **1 ta SMS** limitiga to'liq mos qilib loyihalanadi:
+     * **UZ (76 belgi, Lotin GSM — 160 dan 76, ya'ni 1 SMS):** `Kodni hech kimga bermang! Sora.uz saytiga kirish uchun tasdiqlash kodi: 0000`
+     * **RU (49 belgi, Kirill Unicode — 70 dan 49, ya'ni 1 SMS):** `Код подтверждения для входа на сайт Sora.uz: 0000`
 4. **SMS Yuborish (`POST https://notify.eskiz.uz/api/message/sms/send`):**
    - `formdata` parametrlari:
      * `mobile_phone`: `998901234567` (faqat 12 ta raqam, `+` belgisisiz).
@@ -175,15 +175,15 @@ Eskiz.uz qoidalariga binoan (`СМС шлюз от Eskiz.uz.txt`, 110–183 va 2
 **Qilinishi kerak bo'lgan ish:**
 `my.eskiz.uz` shaxsiy kabinetidagi **"Шаблоны" (Templates)** bo'limiga kirib (yoki `POST notify.eskiz.uz/api/user/template` orqali), quyidagi **2 ta shablonni** moderatsiyaga yuborish va ularning statusi **`service` (Сервисный)** bo'lishini tasdiqlatish kerak:
 
-1. **O'zbekcha shablon:**
+1. **O'zbekcha shablon (76 belgi — Lotin GSM, 1 SMS):**
    ```text
-   Sora.uz tasdiqlash kodi: 0000. Kodni hech kimga bermang.
+   Kodni hech kimga bermang! Sora.uz saytiga kirish uchun tasdiqlash kodi: 0000
    ```
-2. **Ruscha shablon:**
+2. **Ruscha shablon (49 belgi — Kirill Unicode, 1 SMS):**
    ```text
-   Sora.uz: Код подтверждения: 0000. Никому не сообщайте.
+   Код подтверждения для входа на сайт Sora.uz: 0000
    ```
-*(Eskiz qoidasiga ko'ra, moderatsiyaga yuborilayotganda o'zgaruvchan 4 xonali kod o'rniga `0000` yoki `{code}` yozib topshiriladi).*
+*(Eskiz.uz Yo'riqnomasining 1 va 2-punktlariga ko'ra: matnda **resurs nomi** (`Sora.uz sayti`), **ishlatish maqsadi** (`kirish uchun` / `для входа`) va haqiqiy raqam ko'rinishi (`0000`) bo'lishi shart).*
 
 ---
 
@@ -208,9 +208,9 @@ Eskiz.uz hujjatidagi (2374–2417-qatorlar) rasmiy tariflarga ko'ra, O'zbekiston
 
 | Bosqich | Vazifa | Mas'ul | Holat |
 | :-: | :--- | :---: | :---: |
-| **1** | Eskiz.uz kabinetidan `ESKIZ_EMAIL` va `ESKIZ_SECRET_PASSWORD` (API kalit) ni olish | Loyiha ma'muri (Eskiz.uz) | ⏳ Kutilmoqda |
-| **2** | Eskiz.uz ga 2 ta (UZ/RU) OTP shablonini moderatsiyaga (`service` maqomiga) topshirish | Loyiha ma'muri (Eskiz.uz) | ⏳ Kutilmoqda |
+| **1** | Eskiz.uz kabinetidan `ESKIZ_EMAIL` va `ESKIZ_SECRET_PASSWORD` (API kalit) ni olish | Loyiha ma'muri (Eskiz.uz) | ⏳ Kutilmoqda (`ESKIZ_FROM="4546"` qabul qilindi) |
+| **2** | Eskiz.uz ga 2 ta (UZ/RU) OTP shablonini moderatsiyaga (`service` maqomiga) topshirish | Loyiha ma'muri (Eskiz.uz) | 🟡 Moderatsiyaga yuborildi (javob kutilmoqda) |
 | **3** | 1C da `GET /register` telefon qidiruvini formatdan mustaqil qilish va `POST /register` da parolni ixtiyoriy qilish | 1C Dasturchisi | ⏳ Kutilmoqda |
-| **4** | `src/lib/sms/eskiz.ts`, `otp-store.ts` va `/api/auth/otp/*` backend endpointlarini yozish (`Test Mode` qo'llab-quvvatlovi bilan) | Veb-dasturchi | 🚀 Boshlashga tayyor |
-| **5** | `AuthModal.tsx` ni 3 qadamli zamonaviy OTP + WebOTP interfeysiga o'tkazish | Veb-dasturchi | 🚀 Boshlashga tayyor |
-| **6** | Jonli SMS yuborish va 1C ERP bilan to'liq integratsiya sinovi (End-to-End Test) | Barcha tomonlar | ⏳ Rejada |
+| **4** | `src/lib/sms/eskiz.ts`, `otp-store.ts` va `/api/auth/otp/*` backend endpointlarini yozish (`Test Mode` qo'llab-quvvatlovi bilan) | Veb-dasturchi | ✅ **To'liq bajarildi** |
+| **5** | `AuthModal.tsx` ni 3 qadamli zamonaviy OTP + WebOTP interfeysiga o'tkazish | Veb-dasturchi | ✅ **To'liq bajarildi** |
+| **6** | Jonli SMS yuborish va 1C ERP bilan to'liq integratsiya sinovi (End-to-End Test) | Barcha tomonlar | ⏳ Moderatsiya tasdiqlangach |
