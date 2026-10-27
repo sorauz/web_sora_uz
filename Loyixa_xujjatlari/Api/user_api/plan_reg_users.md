@@ -1,6 +1,6 @@
-# Sora.uz — SMS OTP Asosida Mijozlarni Ro'yxatdan O'tkazish va Avtorizatsiya Qilish Rejasi
+# Sora.uz — SMS OTP Asosida Mijozlarni Ro'yxatdan O'tkazish va Avtorizatsiya Qilish Rejasi (Kengaytirilgan va To'liq Tahlil)
 
-> **Hujjat maqomi:** Tasdiqlash uchun loyiha (Draft)  
+> **Hujjat maqomi:** Tasdiqlash uchun to'liq texnik loyiha (Complete Technical Specification)  
 > **Asos hujjatlar:**  
 > - [`Loyixa_xujjatlari/Api/user_api/OTP/SMS_OTP.txt`](file:///d:/web_sora_uz/Loyixa_xujjatlari/Api/user_api/OTP/SMS_OTP.txt) (Eskiz.uz SMS API)  
 > - [`Loyixa_xujjatlari/Api/user_api/Yangi foydalanuvchini ro'yxatdan o'tkazish.txt`](file:///d:/web_sora_uz/Loyixa_xujjatlari/Api/user_api/Yangi%20foydalanuvchini%20ro'yxatdan%20o'tkazish.txt) (1C ERP POST /register)  
@@ -39,10 +39,10 @@ sequenceDiagram
     API->>Eskiz: POST /api/message/sms/send (Bearer Token, 998901234567, "Tasdiqlash kodi: 4892")
     Eskiz-->>API: 200 OK (status: waiting / sent)
     API-->>Front: { success: true, resendCooldown: 60 }
-    Front-->>User: OTP kiritish oynasi + 60s taymer
+    Front-->>User: OTP kiritish oynasi + 60s taymer (WebOTP kutish)
 
     %% Step 2: Verify OTP
-    User->>Front: SMS orqali kelgan 4 xonali kodni kiritadi
+    User->>Front: SMS orqali kelgan 4 xonali kodni kiritadi (yoki WebOTP orqali avto-joylanadi)
     Front->>API: POST /api/auth/otp/verify { phone, code, name?, type, inn? }
     API->>API: Koddagi muddat (TTL) va urinishlar sonini tekshiradi
     
@@ -181,6 +181,7 @@ Mavjud [`src/components/auth/AuthModal.tsx`](file:///d:/web_sora_uz/src/componen
 - 4 ta alohida kvadrat katakchalar (Pin Input / OTP Box).
 - Birinchi katakchaga raqam yozilishi bilan fokus keyingi katakchaga avtomatik o'tadi.
 - Klaviaturadan Paste (Nusxalash-joylash) qilinganda butun 4 ta raqam to'g'ri taqsimlanadi.
+- **WebOTP API qo'llab-quvvatlash:** Android (Chrome) va iOS (Safari) da SMS kelganda bir marta bosish bilan kod avtomatik kiritiladi (`autocomplete="one-time-code"`).
 - Pastda jonli teskari hisoblash taymeri: `00:59 soniyadan so'ng qayta yuborish mumkin`.
 - Taymer tugagach, "Kodni qayta yuborish" havolasi faollashadi.
 - "Raqamni o'zgartirish" tugmasi (agar mijoz raqamda xato qilgan bo'lsa, ortga qaytish uchun).
@@ -202,7 +203,7 @@ Mijozlar buyurtma berayotganda ([`CheckoutForm.tsx`](file:///d:/web_sora_uz/src/
 
 ---
 
-## 4. B2B (Yuridik Shaxslar) Uchun O'ziga Xosliklar
+### 6-BOSQICH: B2B (Yuridik Shaxslar) Uchun O'ziga Xosliklar
 
 1C arxitekturasiga binoan ([`Foydalanuvchini bazadan qidirish.txt`](file:///d:/web_sora_uz/Loyixa_xujjatlari/Api/user_api/Foydalanuvchini%20bazadan%20qidirish.txt)):
 - B2B mijozlar 1C bazasida **STIR (INN)** orqali qidiriladi va ro'yxatga olinadi.
@@ -213,7 +214,74 @@ Mijozlar buyurtma berayotganda ([`CheckoutForm.tsx`](file:///d:/web_sora_uz/src/
 
 ---
 
-## 5. Sinov va Tekshiruv Rejasi (Testing Scenarios)
+## 7. 1C Dasturchisi Tomonidan Qilinishi Kerak Bo'lgan Amaliyotlar (1C Checklist)
+
+1C dasturchisi bilan o'rganilgan API asosida quyidagi aniqlashtirishlar tahlil qilindi:
+
+### 1C da nimalar allaqachon tayyor va yetarli?
+- `POST /SORA/hs/for_msp/register` — Yangi mijoz yaratish HTTP xizmati mavjud.
+- `GET /SORA/hs/for_msp/register` — Telefon raqami (`phone`) yoki STIR (`inn`) bo'yicha mijozni qidirish HTTP xizmati mavjud.
+- 1C tomonida yangi maxsus endpoint yaratish shart emas!
+
+### 1C dasturchisi tekshirishi va bajarishi kerak bo'lgan 4 ta muhim nuqta:
+1. **Parol (password) talabini olib tashlash (yoki ixtiyoriy qilish):**
+   - Hozirgi `client.ts` da `password` maydoni yuborilmoqda edi. SMS OTP tizimida telefon raqami SMS orqali 100% tasdiqlangani sababli parolsiz kirish (Passwordless) amalga oshiriladi.
+   - *1C topshirig'i:* `POST /register` xizmatida `password` maydoni majburiy bo'lmasligi yoki bo'sh kelsa ham xato bermasligi kerak. Agar 1C parolni talab qilsa, sayt serveri foniy avtomatik xesh yuboradi.
+2. **Telefon raqamini tozalab qidirish (Sanitization in 1C):**
+   - 1C bazasidagi `Тел1` maydonida raqamlar turlicha saqlangan bo'lishi mumkin (masalan, `+998901234567`, `998901234567`, `+998 (90) 123-45-67`).
+   - *1C topshirig'i:* `GET /register?type=B2C&phone=...` qidiruvida kiruvchi parametr va bazadagi maydon faqat raqamlar (raqamlar ketma-ketligi) bo'yicha taqqoslanishi kerak. Veb-sayt har doim toza `+998901234567` yuboradi.
+3. **Mijoz ismini yangilash (UPDATE operatsiyasi):**
+   - Agar telefon raqami 1C da oldin "ОДНОРАЗОВЫЕ_КЛИЕНТЫ" ichida nomsiz yoki "Mijoz" nomi bilan ochilgan bo'lsa, xaridor veb-saytda o'z ismini to'ldirganda uning nomini 1C da yangilab qo'yish (UPDATE / PUT) kerakmi yoki yo'qmi kelishib olinadi (veb-sayt tomonidan `id` va yangi `name` yuboriladi).
+4. **Indekslash va Javob tezligi (Performance):**
+   - 1C HTTP xizmatida `Тел1`, `Тел2` va `ИНН` rekvizitlari indekslangan bo'lishi shart, aks holda baza kattalashganda qidiruv 3-5 soniyagacha cho'zilib ketishi mumkin. Qidiruv tezligi 500ms dan oshmasligi tavsiya etiladi.
+
+---
+
+## 8. SMS Uchun Integratsiya Ma'lumotlari Yetarliligi Tahlili
+
+[`Loyixa_xujjatlari/Api/user_api/OTP/SMS_OTP.txt`](file:///d:/web_sora_uz/Loyixa_xujjatlari/Api/user_api/OTP/SMS_OTP.txt) hujjati dasturiy kod yozish uchun yetarli texnik endpointlarni bergan:
+- Avtorizatsiya: `POST https://notify.eskiz.uz/api/auth/login`
+- SMS yuborish: `POST https://notify.eskiz.uz/api/message/sms/send`
+
+### Biroq tizimni to'liq ishga tushirish (Go-Live) uchun quyidagi 4 ta amaliy ma'lumot talab etiladi:
+1. **Eskiz.uz hisob rekvizitlari (Hisob ochilganmi?):**
+   - Kompaniya nomidan [Eskiz.uz](https://eskiz.uz) da ochilgan shaxsiy kabinetning `email` va `password` i kerak. (Hozircha `.env` da faqat test placeholderlari bor).
+2. **SMS balansi (Hisobda mablag' mavjudligi):**
+   - Eskiz.uz da har bir SMS narxi o'rtacha 40–50 so'm. Sayt ishga tushganda hisobda kamida 50 000 – 100 000 so'm (1000–2000 ta SMS paketi) bo'lishi shart. Aks holda Eskiz `402 Payment Required` qaytaradi va yangi xaridorlar SMS ololmay qoladi.
+3. **Jo'natuvchi nomi (Sender ID / Alfa-nom):**
+   - SMS kim nomidan boradi?
+     * **Standart nom:** `4546` (Eskiz tomonidan taqdim etiladi, zudlik bilan ishlatish mumkin).
+     * **Rasmiy brend nomi:** `Sora` yoki `Sora.uz`. O'zbekiston aloqa operatorlari qoidasiga ko'ra, brend nomidan SMS yuborish uchun Eskiz.uz orqali operatorlarga ariza topshirilib, Alfa-nom tasdiqlanishi kerak (1-3 ish kuni oladi). Boshlanishida `4546` dan boshlab, ariza chiqqach `Sora` ga o'tkazish mumkin.
+4. **Balans monitoringi va Admin ogohlantirish (Avtomatlashtirish):**
+   - Eskiz.uz ning `GET https://notify.eskiz.uz/api/user/get-limit` endpointi mavjud. Sayt backendiga kunlik yoki har 50 ta SMS da balansni tekshirib, hisobda 300 tadan kam SMS qolganda administratorning Telegram botiga ogohlantirish jo'natuvchi xizmat qo'shiladi.
+
+---
+
+## 9. Tizim Kamchiliklari, Xavflar va Foydalanuvchi Qiyinchiliklari Tahlili (Edge Cases & Fallbacks)
+
+Har qanday tizimda eng muhim qism — kutilmagan vaziyatlar va noqulayliklarning oldini olishdir.
+
+| № | Ehtimoliy Muammo / Qiyinchilik | Xavf darajasi | Texnik Yechim va Zaxira Mexanizmi |
+| :--- | :--- | :---: | :--- |
+| **1** | **SMS kechikishi yoki kelmasligi** (Mobil operator nosozligi yoki telefon o'chiqligi) | 🟡 O'rta | 60 soniyalik taymer. 60s dan keyin "Kodni qayta yuborish" ochiladi. Agar 2 marta ham kelmasa, "Raqamni to'g'rilash" yoki Telegram bot orqali kod olish taklif etiladi. |
+| **2** | **Kodni qo'lda yozish noqulayligi** (Ayniqsa mobil foydalanuvchilar uchun) | 🟢 Qulaylik | **WebOTP API** va `autocomplete="one-time-code"` kiritiladi. iOS Safari va Android Chrome brauzerlarida SMS kelishi bilan klaviatura tepasida kod chiqadi va 1 marta bosishda avtomatik to'ldiriladi. |
+| **3** | **Sahifani yangilab yuborish (Page Refresh)** | 🟡 O'rta | Mijoz kod kutayotganda sahifani yangilab yuborsa, telefon raqami va taymer yo'qolmaydi — holat vaqtinchalik `sessionStorage` da saqlanadi. |
+| **4** | **Spammerlar tomonidan SMS balansni bo'shatish (SMS Bombing / DDoS)** | 🔴 Yuqori | **IP va Raqam bo'yicha Rate Limiting:** 1 ta raqamga soatiga ko'pi bilan 4 ta SMS. 1 ta IP dan soatiga ko'pi bilan 10 ta SMS. 3 marta noto'g'ri kod kiritilsa — bloklash. |
+| **5** | **Eskiz.uz da mablag' tugab qolishi** | 🔴 Yuqori | Har soatlik avtomatik balans monitoringi (`get-limit`). Balans 300 tadan kam qolganda Telegram orqali mas'ul shaxsga xabar jo'natish. |
+| **6** | **Xalqaro raqamlar (Chet el fuqarolari)** | 🟢 Qulaylik | Hozircha tizim faqat O'zbekiston raqamlari (`+998`) uchun moslanadi. Chet el fuqarolari uchun login formasida alohida Email orqali yoki Telegram orqali kirish imkoniyati saqlanadi. |
+| **7** | **Oldin parolli tizimda ro'yxatdan o'tgan mijozlar** | 🟢 O'tish davri | Ularning hisobiga hech narsa qilmaydi. Ular telefon raqamini kiritib, 1 marta OTP tasdiqlashi bilan darhol o'zlarining eski hisoblariga bog'lanadilar (Parolsiz migratsiya). |
+
+---
+
+## 10. Zaxira Kanal: Telegram Bot Orqali OTP (Kelajakdagi Kengaytma)
+
+SMS har doim pullik va aloqa operatorlariga bog'liq. Kelgusida xarajatlarni tejash va SMS yetib bormagan holatlarda muqobil kanal sifatida:
+- Saytda: *"SMS kelmadimi? Telegram orqali kod olish"* tugmasi qo'yiladi.
+- Mijoz [@sora_uz_bot](https://t.me/sora_uz) ga o'tib, bitta `[ Kontaktni ulashish ]` tugmasini bosadi va Telegram bot unga bepul OTP kod taqdim etadi.
+
+---
+
+## 11. Sinov va Tekshiruv Rejasi (Testing Scenarios)
 
 | № | Sinov holati (Test Case) | Kutilayotgan natija |
 | :--- | :--- | :--- |
@@ -225,17 +293,14 @@ Mijozlar buyurtma berayotganda ([`CheckoutForm.tsx`](file:///d:/web_sora_uz/src/
 | **6** | 60 soniya ichida qayta kod so'rashga urinish | Tugma nofaol, so'rov bloklanadi |
 | **7** | Spammer bir xil raqamga ketma-ket SMS yuborishi | 4-urinishdan so'ng 1 soatga cheklov (Rate limit: 429 Too Many Requests) |
 | **8** | 1C ERP da mavjud raqam bilan OTP dan o'tish | 1C ga dublikat yaratmaydi, mavjud UUID bilan sessiya ochiladi |
-| **9** | Dev muhitda (`MOCK_SMS_OTP=true`) | SMS Eskizga ketmaydi, kod konsolda va javobda ko'rinadi (bepul test) |
+| **9** | WebOTP avto-to'ldirish sinovi | Mobil Chrome/Safari da SMS kelgach 1-bosishda kod katakchalarga tushadi |
+| **10** | Dev muhitda (`MOCK_SMS_OTP=true`) | SMS Eskizga ketmaydi, kod konsolda va javobda ko'rinadi (bepul test) |
 
 ---
 
-## 6. Xulosa va Keyingi Qadam
+## 12. Ishni Boshlash Uchun Zarur Ma'lumotlar Ro'yxati (Pre-requisites)
 
-Ushbu reja orqali Sora.uz saytida mijozlarni ro'yxatdan o'tkazish to'liq avtomatlashgan, qulay, xavfsiz va O'zbekistonning yetakchi IT standartlariga mos holatga keladi.
-
-**Ishni boshlash uchun tavsiya etilgan navbat:**
-1. Eskiz.uz hisob ma'lumotlarini (Login va Parol) `.env.local` ga biriktirish.
-2. `src/lib/sms/eskiz.ts` servis modulini yaratish.
-3. Next.js API marshrutlarini (`/api/auth/otp/send` va `/verify`) qurish.
-4. `AuthModal.tsx` dizaynini 3 bosqichli Pin-kodli ko'rinishga moslashtirish.
-5. 1C ERP sinov serveri bilan to'liq integratsiyani tekshirish.
+Dasturlashni boshlash va uni jonli (production) rejimga chiqarish uchun quyidagi 3 ta narsa kerak bo'ladi:
+1. **Eskiz.uz hisobining Login (Email) va Paroli** (loyihaning `.env.local` fayliga kiritish uchun).
+2. **Eskiz.uz hisobida SMS balansi mavjudligi**.
+3. **1C dasturchisi bilan qidiruv formati (`phone`) va parol maydoni ixtiyoriyligini 1 marta tasdiqlab olish**.
