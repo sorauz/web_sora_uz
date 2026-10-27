@@ -1,0 +1,100 @@
+API orqali ishlash jarayoni asosan ikki bosqichdan iborat:
+
+Avtorizatsiya (Token olish)
+SMS yuborishdan oldin tizimga kirib, maxsus ruxsatnoma (token) olish kerak.
+
+Endpoint: POST [https://notify.eskiz.uz/api/auth/login]
+Parametrlar: Tizimda ro'yxatdan o'tgan email va password.
+
+Natija: Sizga bir oygacha amal qiladigan token (Bearer token) qaytariladi.
+
+SMS Yuborish
+Olingan token yordamida foydalanuvchilarga xabar yuboriladi.
+
+Endpoint: POST [https://notify.eskiz.uz/api/message/sms/send]
+Header: Authorization: Bearer SIZNING_TOKENINGIZ
+
+Parametrlar (Body):
+
+mobile_phone: Qabul qiluvchining telefon raqami (masalan, 998901234567 — + belgisiz yoziladi).
+
+message: Yuborilayotgan xabar matni.
+
+from: Jo'natuvchi nomi (eskiz.uz tomonidan tasdiqlangan maxsus nom yoki standart 4546 raqami).
+
+callback_url: (Ixtiyoriy) SMS yetib borganligi haqidagi statusni qabul qilib olish uchun o'zingizning serveringizdagi manzil.
+
+
+Mijozni tasdiqlash (OTP - One Time Password) tizimini yaratish uchun Eskiz.uz API'sining ikkita asosiy so'rovidan foydalanasiz. Quyida to'liq texnik ketma-ketlik va parametrlar keltirilgan.
+
+1. Avtorizatsiya (Token olish)
+SMS yuborishdan oldin tizimga ulanib, xavfsizlik tokenini olishingiz kerak. Token odatda 30 kun amal qiladi, shuning uchun uni har bir SMS yuborganda emas, balki faqat muddati tugaganda yangilab olish tavsiya etiladi.
+
+Endpoint: POST [https://notify.eskiz.uz/api/auth/login](https://notify.eskiz.uz/api/auth/login)
+
+Headers: Content-Type: application/json yoki form-data
+
+Body (Request):
+
+JSON
+{
+  "email": "sizning_emailingiz@mail.com",
+  "password": "sizning_parolingiz"
+}
+
+Natija (Response): Muvaffaqiyatli so'rovdan so'ng tizim sizga tokenni qaytaradi.
+
+JSON
+{
+  "message": "Successfully",
+  "data": {
+    "token": "eyJ0eXAiOiJKV1QiLCJhbG..." 
+  },
+  "token_type": "Bearer"
+}
+2. SMS (Tasdiqlash kodi) Yuborish
+Olingan tokenni HTTP Header'ga joylab, mijoz raqamiga generatsiya qilingan tasdiqlash kodini jo'natasiz.
+
+Endpoint: POST [https://notify.eskiz.uz/api/message/sms/send](https://notify.eskiz.uz/api/message/sms/send)
+
+Headers:
+
+Authorization: Bearer {SIZNING_TOKENINGIZ}
+
+Content-Type: application/json
+
+Body (Request):
+
+JSON
+{
+  "mobile_phone": "998901234567",
+  "message": "Saytimizga xush kelibsiz! Tasdiqlash kodingiz: 4892",
+  "from": "4546", 
+  "callback_url": "http://sizning-saytingiz.uz/api/callback" 
+}
+mobile_phone: Faqat raqamlardan iborat bo'lishi shart (+ belgisiz).
+
+from: Eskiz.uz tomonidan biriktirilgan nom. Standart holatda 4546 raqami ishlatiladi.
+
+callback_url: (Ixtiyoriy) SMS yetib borganligi haqida hisobot qabul qiluvchi manzilingiz. OTP uchun bu odatda shart emas.
+
+Natija (Response):
+
+JSON
+{
+  "id": "1234567",
+  "message": "Waiting for SMS provider",
+  "status": "waiting"
+}
+3. Saytda OTP Tasdiqlash Logikasi (Qadamlar)
+Eskiz API o'z-o'zidan kodning to'g'riligini tekshirmaydi. Tasdiqlash jarayonini saytingizning backend qismida quyidagicha qurasiz:
+
+Kod yaratish: Mijoz saytga telefon raqamini kiritganda, backend'da tasodifiy 4 yoki 6 xonali raqam (masalan, 4892) generatsiya qilasiz.
+
+Saqlash: Bu kodni va uning yaroqlilik vaqtini (masalan, kiritilgandan keyin 2 daqiqa) ma'lumotlar bazasida, Keshda (Redis) yoki Sessiyada mijozning telefon raqamiga bog'lab vaqtinchalik saqlab qo'yasiz.
+
+Yuborish: Yuqoridagi 2-bosqich API'si orqali kodni mijozga SMS qilib jo'natasiz.
+
+Tekshirish: Mijoz saytdagi maydonga SMS orqali kelgan kodni kiritganida, backend uni bazadagi saqlangan kod bilan solishtiradi.
+
+Tasdiqlash: Agar kod to'g'ri bo'lsa va vaqti o'tib ketmagan bo'lsa, mijoz muvaffaqiyatli ro'yxatdan o'tkaziladi yoki tizimga kiritiladi. Saqlangan kod esa bazadan o'chirib tashlanadi (qayta ishlatilmasligi uchun).
