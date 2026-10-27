@@ -24,6 +24,62 @@ export function ProductJsonLd({
   const canonicalUrl = `${baseUrl}/${locale}/products/${loc.slug}`;
 
   const hasRealReviews = reviews.length > 0;
+  const isUz = locale === "uz";
+
+  // Build Schema.org PropertyValue array for AI & Search Engine crawlers
+  const additionalProperties: {
+    "@type": "PropertyValue";
+    name: string;
+    value: string;
+  }[] = [];
+
+  if (product.country) {
+    additionalProperties.push({
+      "@type": "PropertyValue",
+      name: isUz ? "Ishlab chiqarilgan davlat" : "Страна производства",
+      value: product.country,
+    });
+  }
+  if (product.manufacturer) {
+    additionalProperties.push({
+      "@type": "PropertyValue",
+      name: isUz ? "Ishlab chiqaruvchi" : "Производитель",
+      value: product.manufacturer,
+    });
+  }
+  if (product.package) {
+    additionalProperties.push({
+      "@type": "PropertyValue",
+      name: isUz ? "Qadoqda" : "Упаковка",
+      value: product.package,
+    });
+  }
+  if (loc.unit) {
+    additionalProperties.push({
+      "@type": "PropertyValue",
+      name: isUz ? "O'lchov birligi" : "Единица измерения",
+      value: loc.unit,
+    });
+  }
+  if (product.attributes && product.attributes.length > 0) {
+    for (const attr of product.attributes) {
+      const propName =
+        (isUz ? attr.property_uz : attr.property_ru) ||
+        attr.property_uz ||
+        attr.property_ru;
+      const propVal =
+        (isUz ? attr.value_uz : attr.value_ru) ||
+        attr.value_uz ||
+        attr.value_ru;
+      if (propName?.trim() && propVal?.trim()) {
+        additionalProperties.push({
+          "@type": "PropertyValue",
+          name: propName.trim(),
+          value: propVal.trim(),
+        });
+      }
+    }
+  }
 
   const productSchema = {
     "@context": "https://schema.org",
@@ -46,6 +102,9 @@ export function ProductJsonLd({
       "@type": "Brand",
       name: product.brand,
     },
+    ...(additionalProperties.length > 0
+      ? { additionalProperty: additionalProperties }
+      : {}),
     offers: {
       "@type": "Offer",
       url: canonicalUrl,

@@ -25,6 +25,7 @@ import { useCompareStore } from "@/lib/store/compare";
 import { Product, getProductLocalized } from "@/lib/schemas/product";
 import { calculateProductPrice } from "@/lib/utils/price";
 import { reachGoal, sendEcommerceEvent } from "@/lib/analytics/yandex";
+import { ProductAiAssistant } from "@/components/pdp/ProductAiAssistant";
 
 interface ProductActionsProps {
   product: Product;
@@ -308,6 +309,9 @@ export function ProductActions({ product, locale }: ProductActionsProps) {
           </button>
         </div>
       </div>
+
+      {/* AI-Expert Product Analysis Assistant (Smart Visibility Filtered) */}
+      <ProductAiAssistant product={product} locale={locale} />
 
       {/* Trust Badges / Guarantees Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-slate-200 dark:border-slate-800">
