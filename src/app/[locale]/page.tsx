@@ -153,8 +153,6 @@ export default async function HomePage({ params }: PageProps) {
                 <ProductCard
                   key={p.id}
                   product={p}
-                  rating={4.8}
-                  reviewCount={24}
                   badge={isUz ? "Aksiya" : "Скидка"}
                 />
               ))}
@@ -189,8 +187,6 @@ export default async function HomePage({ params }: PageProps) {
                 <ProductCard
                   key={p.id}
                   product={p}
-                  rating={4.9}
-                  reviewCount={31}
                   badge={isUz ? "Eng arzon narx" : "Лучшая цена"}
                 />
               ))}
@@ -225,8 +221,6 @@ export default async function HomePage({ params }: PageProps) {
                 <ProductCard
                   key={p.id}
                   product={p}
-                  rating={4.9}
-                  reviewCount={38}
                   badge={isUz ? "Xit" : "Хит"}
                 />
               ))}
@@ -261,8 +255,6 @@ export default async function HomePage({ params }: PageProps) {
                 <ProductCard
                   key={p.id}
                   product={p}
-                  rating={4.7}
-                  reviewCount={19}
                   badge={isUz ? "Yangi" : "Новинка"}
                 />
               ))}

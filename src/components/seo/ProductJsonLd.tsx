@@ -24,12 +24,6 @@ export function ProductJsonLd({
   const canonicalUrl = `${baseUrl}/${locale}/products/${loc.slug}`;
 
   const hasRealReviews = reviews.length > 0;
-  const ratingValue = (
-    stats && stats.reviewCount > 0 ? stats.averageRating : 4.8
-  ).toString();
-  const reviewCount = (
-    stats && stats.reviewCount > 0 ? stats.reviewCount : 24
-  ).toString();
 
   const productSchema = {
     "@context": "https://schema.org",

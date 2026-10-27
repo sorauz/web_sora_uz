@@ -209,8 +209,6 @@ export default async function BrandDetailPage({
               <ProductCard
                 key={p.id}
                 product={p}
-                rating={4.8}
-                reviewCount={15}
               />
             ))}
           </div>

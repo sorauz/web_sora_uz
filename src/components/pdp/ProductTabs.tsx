@@ -40,15 +40,9 @@ export function ProductTabs({
 
   const loc = getProductLocalized(product, locale);
 
-  const hasRealReviews = reviews.length > 0;
-  const currentRating =
-    hasRealReviews && stats && stats.reviewCount > 0
-      ? stats.averageRating
-      : 4.8;
-  const currentReviewCount =
-    hasRealReviews && stats && stats.reviewCount > 0
-      ? stats.reviewCount
-      : 24;
+  const hasRealReviews = reviews.length > 0 && !!stats && stats.reviewCount > 0;
+  const currentRating = hasRealReviews && stats ? stats.averageRating : 0;
+  const currentReviewCount = hasRealReviews && stats ? stats.reviewCount : 0;
 
   const tabs: {
     id: TabType;
@@ -60,7 +54,7 @@ export function ProductTabs({
     { id: "delivery", label: t("deliveryTab"), icon: Truck },
     {
       id: "reviews",
-      label: `${t("reviewsTab")} (${hasRealReviews && stats ? stats.reviewCount : 4.8})`,
+      label: hasRealReviews && stats ? `${t("reviewsTab")} (${stats.reviewCount})` : t("reviewsTab"),
       icon: Star,
     },
     { id: "faq", label: t("faqTab"), icon: HelpCircle },
@@ -397,91 +391,103 @@ export function ProductTabs({
         {/* Reviews Tab */}
         {activeTab === "reviews" && (
           <div className="space-y-8">
-            {/* Rating Summary Card */}
-            <div className="p-6 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center gap-8">
-              <div className="text-center sm:text-left space-y-1">
-                <div className="text-5xl font-black text-slate-900 dark:text-white">
-                  {currentRating}
+            {/* Rating Summary Card (Only when genuine reviews exist) */}
+            {hasRealReviews && stats && stats.reviewCount > 0 ? (
+              <div className="p-6 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center gap-8">
+                <div className="text-center sm:text-left space-y-1">
+                  <div className="text-5xl font-black text-slate-900 dark:text-white">
+                    {currentRating}
+                  </div>
+                  <div className="flex items-center justify-center sm:justify-start gap-1 text-amber-400">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className={`w-4 h-4 ${
+                          i < Math.round(currentRating)
+                            ? "fill-current text-amber-400"
+                            : "text-slate-300 dark:text-slate-600"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    {currentReviewCount} {t("reviewsCount")}
+                  </p>
                 </div>
-                <div className="flex items-center justify-center sm:justify-start gap-1 text-amber-400">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`w-4 h-4 ${
-                        i < Math.round(currentRating)
-                          ? "fill-current text-amber-400"
-                          : "text-slate-300 dark:text-slate-600"
-                      }`}
-                    />
-                  ))}
-                </div>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  {currentReviewCount} {t("reviewsCount")}
-                </p>
-              </div>
 
-              {/* Progress bars */}
-              <div className="flex-1 w-full space-y-1.5 text-xs">
-                <div className="flex items-center gap-2">
-                  <span className="w-12 text-slate-500">
-                    5 {locale === "uz" ? "yulduz" : "звезд"}
-                  </span>
-                  <div className="flex-1 h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-amber-400 rounded-full transition-all duration-300"
-                      style={{
-                        width: `${hasRealReviews && stats && stats.reviewCount > 0 ? stats.percentages[5] : 85}%`,
-                      }}
-                    ></div>
+                {/* Progress bars */}
+                <div className="flex-1 w-full space-y-1.5 text-xs">
+                  <div className="flex items-center gap-2">
+                    <span className="w-12 text-slate-500">
+                      5 {locale === "uz" ? "yulduz" : "звезд"}
+                    </span>
+                    <div className="flex-1 h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-amber-400 rounded-full transition-all duration-300"
+                        style={{
+                          width: `${stats.percentages[5]}%`,
+                        }}
+                      ></div>
+                    </div>
+                    <span className="w-8 text-right font-medium text-slate-600 dark:text-slate-300">
+                      {stats.percentages[5]}%
+                    </span>
                   </div>
-                  <span className="w-8 text-right font-medium text-slate-600 dark:text-slate-300">
-                    {hasRealReviews && stats && stats.reviewCount > 0
-                      ? stats.percentages[5]
-                      : 85}
-                    %
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="w-12 text-slate-500">
+                      4 {locale === "uz" ? "yulduz" : "звезд"}
+                    </span>
+                    <div className="flex-1 h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-amber-400 rounded-full transition-all duration-300"
+                        style={{
+                          width: `${stats.percentages[4]}%`,
+                        }}
+                      ></div>
+                    </div>
+                    <span className="w-8 text-right font-medium text-slate-600 dark:text-slate-300">
+                      {stats.percentages[4]}%
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="w-12 text-slate-500">
+                      3 {locale === "uz" ? "yulduz" : "звезд"}
+                    </span>
+                    <div className="flex-1 h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-amber-400 rounded-full transition-all duration-300"
+                        style={{
+                          width: `${stats.percentages[3]}%`,
+                        }}
+                      ></div>
+                    </div>
+                    <span className="w-8 text-right font-medium text-slate-600 dark:text-slate-300">
+                      {stats.percentages[3]}%
+                    </span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="w-12 text-slate-500">
-                    4 {locale === "uz" ? "yulduz" : "звезд"}
-                  </span>
-                  <div className="flex-1 h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-amber-400 rounded-full transition-all duration-300"
-                      style={{
-                        width: `${hasRealReviews && stats && stats.reviewCount > 0 ? stats.percentages[4] : 12}%`,
-                      }}
-                    ></div>
-                  </div>
-                  <span className="w-8 text-right font-medium text-slate-600 dark:text-slate-300">
-                    {hasRealReviews && stats && stats.reviewCount > 0
-                      ? stats.percentages[4]
-                      : 12}
-                    %
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="w-12 text-slate-500">
-                    3 {locale === "uz" ? "yulduz" : "звезд"}
-                  </span>
-                  <div className="flex-1 h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-amber-400 rounded-full transition-all duration-300"
-                      style={{
-                        width: `${hasRealReviews && stats && stats.reviewCount > 0 ? stats.percentages[3] : 3}%`,
-                      }}
-                    ></div>
-                  </div>
-                  <span className="w-8 text-right font-medium text-slate-600 dark:text-slate-300">
-                    {hasRealReviews && stats && stats.reviewCount > 0
-                      ? stats.percentages[3]
-                      : 3}
-                    %
-                  </span>
+
+                <div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      alert(
+                        locale === "uz"
+                          ? "Sharh qoldirish uchun xaridni amalga oshirishingiz lozim."
+                          : "Для оставления отзыва необходимо совершить покупку."
+                      )
+                    }
+                    className="px-5 py-2.5 rounded-xl bg-sora-600 hover:bg-sora-700 text-white font-bold text-xs shadow-xs transition-colors whitespace-nowrap"
+                  >
+                    {t("writeReview")}
+                  </button>
                 </div>
               </div>
-
-              <div>
+            ) : (
+              <div className="flex items-center justify-between p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800">
+                <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                  {locale === "uz" ? "Mahsulot haqida fikringizni bildiring" : "Поделитесь своим мнением о товаре"}
+                </span>
                 <button
                   type="button"
                   onClick={() =>
@@ -496,7 +502,7 @@ export function ProductTabs({
                   {t("writeReview")}
                 </button>
               </div>
-            </div>
+            )}
 
             {/* Reviews List */}
             {hasRealReviews ? (

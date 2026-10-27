@@ -197,8 +197,6 @@ export default async function OffersPage({ params, searchParams }: OffersPagePro
                     key={p.id}
                     product={p}
                     badge={isUz ? "Eng arzon narx" : "Лучшая цена"}
-                    rating={4.9}
-                    reviewCount={32}
                   />
                 ))}
               </div>
@@ -240,8 +238,6 @@ export default async function OffersPage({ params, searchParams }: OffersPagePro
                     key={p.id}
                     product={p}
                     badge={isUz ? "Aksiya" : "Акция"}
-                    rating={4.8}
-                    reviewCount={24}
                   />
                 ))}
               </div>
@@ -283,8 +279,6 @@ export default async function OffersPage({ params, searchParams }: OffersPagePro
                     key={p.id}
                     product={p}
                     badge={isUz ? "Xit" : "Хит"}
-                    rating={5.0}
-                    reviewCount={45}
                   />
                 ))}
               </div>
@@ -326,8 +320,6 @@ export default async function OffersPage({ params, searchParams }: OffersPagePro
                     key={p.id}
                     product={p}
                     badge={isUz ? "Yangi" : "Новинка"}
-                    rating={4.7}
-                    reviewCount={12}
                   />
                 ))}
               </div>

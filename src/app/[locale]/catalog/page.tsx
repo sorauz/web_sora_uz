@@ -168,8 +168,6 @@ export default async function CatalogPage({ params, searchParams }: CatalogPageP
                 >
                   <ProductCard
                     product={p}
-                    rating={4.9}
-                    reviewCount={28}
                     badge={isUz ? "Xit" : "Хит"}
                   />
                 </div>
@@ -265,8 +263,6 @@ export default async function CatalogPage({ params, searchParams }: CatalogPageP
               <ProductCard
                 key={p.id}
                 product={p}
-                rating={4.8}
-                reviewCount={24}
                 badge={isUz ? "Top" : "Топ"}
               />
             ))}

@@ -142,8 +142,6 @@ export default async function SearchPage({
                 <ProductCard
                   key={p.id}
                   product={p}
-                  rating={4.8}
-                  reviewCount={12}
                 />
               ))}
             </div>

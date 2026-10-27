@@ -372,8 +372,6 @@ export default async function StaticOfferPage({
                     key={p.id}
                     product={p}
                     badge={badge}
-                    rating={4.8}
-                    reviewCount={24}
                   />
                 ))}
               </div>

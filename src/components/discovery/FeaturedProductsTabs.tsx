@@ -19,8 +19,6 @@ interface TabConfig {
   badgeRu: string;
   viewAllHref: string;
   activeClass: string;
-  defaultRating: number;
-  defaultReviews: number;
 }
 
 const TABS_CONFIG: TabConfig[] = [
@@ -33,8 +31,6 @@ const TABS_CONFIG: TabConfig[] = [
     badgeRu: "Скидка",
     viewAllHref: "/catalog/promotions",
     activeClass: "bg-rose-600 text-white shadow-sm shadow-rose-600/30",
-    defaultRating: 4.8,
-    defaultReviews: 24,
   },
   {
     key: "popular",
@@ -45,8 +41,6 @@ const TABS_CONFIG: TabConfig[] = [
     badgeRu: "Хит",
     viewAllHref: "/catalog/popular",
     activeClass: "bg-amber-600 text-white shadow-sm shadow-amber-600/30",
-    defaultRating: 4.9,
-    defaultReviews: 38,
   },
   {
     key: "new_products",
@@ -57,8 +51,6 @@ const TABS_CONFIG: TabConfig[] = [
     badgeRu: "Новинка",
     viewAllHref: "/catalog/new_products",
     activeClass: "bg-emerald-600 text-white shadow-sm shadow-emerald-600/30",
-    defaultRating: 4.7,
-    defaultReviews: 19,
   },
   {
     key: "low_price",
@@ -69,8 +61,6 @@ const TABS_CONFIG: TabConfig[] = [
     badgeRu: "Выгодно",
     viewAllHref: "/catalog/low_price_guarantee",
     activeClass: "bg-sora-600 text-white shadow-sm shadow-sora-600/30",
-    defaultRating: 4.9,
-    defaultReviews: 31,
   },
 ];
 
@@ -197,8 +187,6 @@ export function FeaturedProductsTabs({
             <ProductCard
               key={p.id}
               product={p}
-              rating={currentTabConfig.defaultRating}
-              reviewCount={currentTabConfig.defaultReviews}
               badge={isUz ? currentTabConfig.badgeUz : currentTabConfig.badgeRu}
             />
           ))}

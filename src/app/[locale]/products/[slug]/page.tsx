@@ -270,23 +270,21 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
                     </span>
                   </div>
 
-                  {/* Rating & Reviews summary */}
-                  <div className="flex items-center gap-2 text-xs text-slate-500">
-                    <div className="flex items-center text-amber-400">
-                      <Star className="w-4 h-4 fill-current" />
-                      <span className="ml-1 font-bold text-slate-800 dark:text-slate-200">
-                        {stats.reviewCount > 0 ? stats.averageRating : 4.8}
+                  {/* Rating & Reviews summary (Only shown when real reviews exist) */}
+                  {stats && stats.reviewCount > 0 && (
+                    <div className="flex items-center gap-2 text-xs text-slate-500">
+                      <div className="flex items-center text-amber-400">
+                        <Star className="w-4 h-4 fill-current" />
+                        <span className="ml-1 font-bold text-slate-800 dark:text-slate-200">
+                          {stats.averageRating}
+                        </span>
+                      </div>
+                      <span>•</span>
+                      <span className="text-slate-500">
+                        {`${stats.reviewCount} ${currentLocale === "uz" ? "sharh" : "отзыва"}`}
                       </span>
                     </div>
-                    <span>•</span>
-                    <span className="text-slate-500">
-                      {stats.reviewCount > 0
-                        ? `${stats.reviewCount} ${currentLocale === "uz" ? "sharh" : "отзыва"}`
-                        : currentLocale === "uz"
-                        ? "24 sharh"
-                        : "24 отзыва"}
-                    </span>
-                  </div>
+                  )}
                 </div>
 
                 {/* Main H1 Title */}

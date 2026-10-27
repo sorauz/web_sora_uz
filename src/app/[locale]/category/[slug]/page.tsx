@@ -296,8 +296,6 @@ export default async function CategoryPage({
                     <ProductCard
                       key={prod.id}
                       product={prod}
-                      rating={4.7}
-                      reviewCount={18}
                     />
                   ))}
                 </div>

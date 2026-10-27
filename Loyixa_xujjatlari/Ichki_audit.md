@@ -2,7 +2,7 @@
 
 > **Hujjat maqsadi:** Tashqi audit ([`Loyixa_xujjatlari/tashqi audit .txt`](file:///d:/web_sora_uz/Loyixa_xujjatlari/tashqi%20audit%20.txt)) xulosalarini Sora.uz ning amaldagi kod bazasi (`src/`) va 1C ERP arxitekturasi bilan solishtirish, hal qilingan ishlarni ajratish, auditdagi xatoliklarni aniqlash, 1C dasturchisi zimmasidagi vazifalarni belgilash hamda saytda qilinishi shart bo'lgan kamchiliklar bo'yicha aniq harakatlar rejasini tuzish.  
 > **Sana:** 27-oktyabr, 2026-yil  
-> **Holati:** Tayyor (Reviewed)  
+> **Holati:** Amalga oshirildi (4 ta texnik vazifa to'liq bajarildi)  
 
 ---
 
@@ -85,51 +85,50 @@ Tashqi auditda qayd etilgan bir qator kamchiliklar frontend/backend kodiga emas,
 
 ## 5. 4-TOIFA: Saytimizda Haqiqatdan Ham Qilinishi Kerak Bo'lgan Kamchiliklar (Actionable Technical Tasks)
 
-Kodni qatorma-qator tekshirish natijasida **haqiqatdan ham saytimizda to'g'irlanishi kerak bo'lgan 4 ta aniq kamchilik** aniqlandi:
+Kodni qatorma-qator tekshirish natijasida aniqlangan barcha **4 ta texnik kamchilik to'liq bartaraf etildi**:
 
-### 1. Header, MobileNav va PromoNav dagi 4 ta qotib qolgan (Hardcoded) O'zbekcha Matn
-Tashqi audit haqli ravishda ko'rsatganidek, ruscha versiyada quyidagi 4 ta element tarjima qilinmay qolgan:
-- **`src/components/layout/Header.tsx` (93-qator):**  
-  `<span ...>Sizga mos ishonchli tanlov</span>` — hardcoded o'zbekcha.  
-  *Tuzatish:* `{isUz ? "Sizga mos ishonchli tanlov" : "Надежный выбор для вас"}` ga almashtirish.
-- **`src/components/layout/Header.tsx` (247-qator):**  
-  `<span className="truncate">Tovar, brend yoki kategoriya...</span>` — hardcoded o'zbekcha.  
-  *Tuzatish:* `{isUz ? "Tovar, brend yoki kategoriya..." : "Товар, бренд или категория..."}` ga almashtirish.
-- **`src/components/layout/MobileNav.tsx` (55-qator):**  
-  `<span>Qidiruv</span>` — hardcoded o'zbekcha.  
-  *Tuzatish:* `<span>{isUz ? "Qidiruv" : "Поиск"}</span>` ga almashtirish.
-- **`src/components/layout/PromoNav.tsx` (50-qator):**  
-  `<span>1C Aksiyalar</span>` — hardcoded o'zbekcha.  
-  *Tuzatish:* `<span>{isUz ? "1C Aksiyalar" : "Акции 1С"}</span>` ga almashtirish.
+### 1. Header, MobileNav va PromoNav dagi 4 ta qotib qolgan (Hardcoded) O'zbekcha Matn — ✅ TO'LIQ BAJARILDI
+Tashqi audit haqli ravishda ko'rsatganidek, ruscha versiyada tarjima qilinmay qolgan 4 ta element ikki tilli qilindi:
+- **`src/components/layout/Header.tsx`:**  
+  `{isUz ? "Sizga mos ishonchli tanlov" : "Надежный выбор для вас"}`
+- **`src/components/layout/Header.tsx`:**  
+  `{isUz ? "Tovar, brend yoki kategoriya..." : "Товар, бренд или категория..."}`
+- **`src/components/layout/MobileNav.tsx`:**  
+  `<span>{isUz ? "Qidiruv" : "Поиск"}</span>`
+- **`src/components/layout/PromoNav.tsx`:**  
+  `<span>{isUz ? "1C Aksiyalar" : "Акции 1С"}</span>`
 
 ---
 
-### 2. Paginatsiya Sahifalari Uchun Crawl Budget va Noindex Himoyasi
-- **Muammo:** Google qidiruvida `/ru/brand/deli?page=34`, `?page=35` kabi sahifalar asosiy sahifa bilan raqobatlashib, indeksga kirib ketmoqda.
-- **Sababi:** [`src/app/[locale]/brand/[slug]/page.tsx`](file:///d:/web_sora_uz/src/app/[locale]/brand/[slug]/page.tsx#L40) va [`category/[slug]/page.tsx`](file:///d:/web_sora_uz/src/app/[locale]/category/[slug]/page.tsx#L79) fayllarida `pageNum > 1` bo'lganda `robots: { index: false, follow: true }` berilmagan.
-- **Tuzatish:** 1-sahifadan keyingi barcha sahifalarda (`page > 1` yoki filtrlar bo'lganda) botlar havolalarni ko'rishi (`follow`), lekin qidiruv natijalariga chiqarmasligi (`noindex`) ta'minlanishi shart.
+### 2. Paginatsiya Sahifalari Uchun Crawl Budget va Noindex Himoyasi — ✅ TO'LIQ BAJARILDI
+- **Muammo:** Google qidiruvida `/ru/brand/deli?page=34`, `?page=35` kabi sahifalar asosiy sahifa bilan raqobatlashib, indeksga kirib ketayotgan edi.
+- **Qilingan tuzatish:** [`src/app/[locale]/brand/[slug]/page.tsx`](file:///d:/web_sora_uz/src/app/[locale]/brand/[slug]/page.tsx) va [`category/[slug]/page.tsx`](file:///d:/web_sora_uz/src/app/[locale]/category/[slug]/page.tsx) fayllarida:
+  1. Kanonik URL dan sahifalash parametrlari olib tashlanib, har doim asosiy toza URL ga yo'naltirildi.
+  2. 1-sahifadan keyingi barcha sahifalarda (`pageNum > 1` yoki filtr parametrlari mavjud bo'lganda) botlar tovar havolalarini kezishi (`follow: true`), lekin qidiruv natijalariga chiqarmasligi (`index: false`) qilib `robots: { index: false, follow: true }` kiritildi.
 
 ---
 
-### 3. Tovar Kartochkasida (ProductCard) Narxi 0 Bo'lgan Tovar UX'i
-- **Muammo:** Hozirda mahsulot narxi 0 bo'lsa, savat tugmasi shunchaki xira (disabled) bo'lib qoladi.
-- **Tuzatish:** Foydalanuvchi "bu tovar sotilmaydimi?" deb o'ylamasligi uchun, narxi 0 bo'lgan tovarlarda disabled savatcha o'rniga:
-  * Kichik telefon/aloqa belgisi bilan **`Narxni so'rash`** / **`Уточнить`** tugmasini chiqarish yoki to'g'ridan-to'g'ri PDP sahifasiga yo'naltirish.
+### 3. Tovar Kartochkasida (ProductCard) Narxi 0 Bo'lgan Tovar UX'i — ✅ TO'LIQ BAJARILDI
+- **Muammo:** Narxi 0 bo'lgan mahsulotlarda savat tugmasi shunchaki xira (disabled) bo'lib, foydalanuvchida tushunmovchilik uyg'otayotgan edi.
+- **Qilingan tuzatish:** [`src/components/discovery/ProductCard.tsx`](file:///d:/web_sora_uz/src/components/discovery/ProductCard.tsx) da narxi 0 bo'lgan tovarlar uchun disabled savatcha o'rniga telefon belgisi bilan faol **`Narxni so'rash`** (mobil formatda **`So'rash`**) / **`Уточнить`** tugmasi joylashtirildi. Bosilganda PDP sahifasiga yo'naltiradi, u yerda mijoz bir bosishda qo'ng'iroq qilishi yoki Telegram orqali bog'lanishi mumkin.
 
 ---
 
-### 4. Sun'iy Reyting Ko'rsatkichlarini Tozalash
-- **Muammo:** [`src/app/[locale]/page.tsx`](file:///d:/web_sora_uz/src/app/[locale]/page.tsx#L156) va boshqa sahifalarda barcha tovarlarga sun'iy `rating={4.8}` yoki `rating={4.9}` uzatilmoqda.
-- **Tuzatish:** Haqiqiy izohlar tizimi to'liq ishga tushgunga qadar, agar tovarda real sharh bo'lmasa, unga shablon yulduzcha ko'rsatmaslik. Bu foydalanuvchida ishonchni oshiradi va Google spam-filtrlaridan asraydi.
+### 4. Sun'iy Reyting Ko'rsatkichlarini Tozalash — ✅ TO'LIQ BAJARILDI
+- **Muammo:** Barcha katalog, qidiruv va bosh sahifalardagi tovarlarga sun'iy `rating={4.8}` yoki `rating={4.9}` berilayotgan edi.
+- **Qilingan tuzatish:** Haqiqiy izohlar tizimi to'liq integratsiya qilinguncha barcha sun'iy reytinglar va soxta sharh sonlari olib tashlandi:
+  1. `page.tsx`, `brand/[slug]`, `catalog`, `category/[slug]`, `offers`, `search` va `FeaturedProductsTabs` dan soxta `rating` va `reviewCount` proplari butunlay tozalandi.
+  2. Mahsulot sahifasida (`products/[slug]`) va `ProductTabs` da agar haqiqiy sharh mavjud bo'lmasa (`stats.reviewCount === 0`), shablon 4.8 yulduzcha va 24 sharh ko'rsatilmaydi, faqat haqiqiy sharhlar mavjud bo'lgandagina reyting aks etadi. Bu Google spam-filtrlaridan asraydi va mijoz ishonchini oshiradi.
 
 ---
 
 ## 6. Xulosa va Amalga Oshirish Ustuvorligi (Action Plan)
 
-| Ustuvorlik | Vazifa | Mas'ul | Mehnat sarfi |
+| Ustuvorlik | Vazifa | Mas'ul | Holati |
 | :--- | :--- | :---: | :---: |
-| 🔴 **1. Zudlik bilan (Bugfix)** | Header, MobileNav va PromoNav dagi 4 ta hardcoded o'zbekcha matnni ikki tilli qilish | Web Developer | 15 daqiqa |
-| 🔴 **2. Zudlik bilan (SEO)** | Brand va Category paginatsiyalariga (`?page > 1`) `noindex, follow` qo'shish | Web Developer | 20 daqiqa |
-| 🟠 **3. Muhim (UX)** | Narxi 0 bo'lgan tovarlar kartochkasida "Narxni so'rash" tugmasini chiroyli ko'rsatish | Web Developer | 30 daqiqa |
-| 🟡 **4. Muhim (Kontent)** | 1C da tovar nomlari va toifalarning ruscha tarjimalarini to'ldirish | 1C Dasturchi / Kontent-menejer | 1–2 kun |
-| 🟡 **5. Rejali (Kontent)** | 1C dan `slug_ru` transliteratsiyasini to'g'ri uzatish | 1C Dasturchi | 2–3 soat |
+| 🟢 **1. Bugfix** | Header, MobileNav va PromoNav dagi 4 ta hardcoded matnni ikki tilli qilish | Web Developer | ✅ **Bajarildi** (c66781f) |
+| 🟢 **2. SEO** | Brand va Category paginatsiyalariga (`?page > 1`) `noindex, follow` qo'shish | Web Developer | ✅ **Bajarildi** (4e0a373) |
+| 🟢 **3. UX** | Narxi 0 bo'lgan tovarlar kartochkasida "Narxni so'rash" tugmasini chiqarish | Web Developer | ✅ **Bajarildi** (4e0a373) |
+| 🟢 **4. SEO & UX** | Barcha sahifalardagi sun'iy reyting va soxta sharh ko'rsatkichlarini tozalash | Web Developer | ✅ **Bajarildi** |
+| 🟡 **5. Kontent** | 1C da tovar nomlari va toifalarning ruscha tarjimalarini to'ldirish | 1C Dasturchi / Kontent-menejer | ⏳ Rejada (1C jamoasida) |
+| 🟡 **6. Kontent** | 1C dan `slug_ru` transliteratsiyasini to'g'ri uzatish | 1C Dasturchi | ⏳ Rejada (1C jamoasida) |
