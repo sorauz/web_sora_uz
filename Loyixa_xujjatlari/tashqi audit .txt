@@ -1,0 +1,463 @@
+https://sora.uz/ veb-sayti hamda uning ichki sahifalari (katalog, kategoriyalar, brendlar, tovar kartochkalari va Google qidiruv indeksi) bo‘yicha o‘tkazilgan kompleks texnik, UI/UX, kontent va SEO tahlili natijalari:
+
+1. Umumiy Biznes Pozitsiyasi va Ustunliklar (USP)
+Sora.uz — O‘zbekiston bozorida kanselyariya mollari, ofis qog‘ozlari, maktab anjomlari, xo‘jalik tovarlari va orgtexnika savdosiga ixtisoslashgan B2B hamda B2C e-commerce platformasi sifatida juda aniq va kuchli pozitsiyaga ega:
+
+1C ERP bilan integratsiya: Sayt bo‘ylab «1C ERP Certified Integration» va ombor qoldiqlarining real vaqtda sinxronlanishi (10 000+ assortiment) foydalanuvchilarda ma’lumotlarning aniqligiga bo‘lgan ishonchni oshiradi.
+
+B2B segmentga moslashganlik: Korporativ mijozlar uchun shartnoma asosida ishlash, QQS hisobi, Didox EHF (elektron hisob-faktura) integratsiyasi va alohida aloqa kanallari (b2b@sora.uz, Telegram menejer) bosh sahifaning o‘zidayoq yaqqol ko‘rsatilgan.
+
+Yuridik shaffoflik va ishonch (Trust Factor): Saytning quyi qismida (Footer) barcha yuridik rekvizitlar («SORAUZ» MCHJ, STIR: 306286447, H/r, Bank va MFO) ochiq berilgan. Shuningdek, «Kredit va muddatli to‘lov (nasiya) mavjud emas» degan aniq eslatma to‘lov siyosatining shaffofligini belgilaydi.
+
+Kuchli brendlar portfeli: DELI, Svetocopy, Schneider, Colop, Trodat, Hatber, Uniball, Double A, Canon, Elma kabi 27 dan ortiq rasmiy brendlar alohida bo‘limlarga ajratilgan.
+
+2. UI/UX va Arxitektura Tahlili
+✅ Kuchli jihatlar:
+Bosh sahifa strukturasi: 4 ta maqsadli Hero-banner (Chegirmalar, B2B/Didox, Deli texnikasi va 24 soatda yetkazib berish) hamda ularning ostida mantiqiy ketma-ketlikda joylashgan vitrinalar (Ommabop kategoriyalar, Chegirmalar, Eng arzon narx kafolati, Top mahsulotlar, Yangi tovarlar) xaridorni tezda kerakli bo‘limga yo‘naltiradi.
+
+Boyitilgan tovar kartochkalari (PDP): Har bir mahsulot sahifasida (masalan, Deli E5001 yoki Deli 7945) qoldiq soni (В наличии: 100 шт), SKU artikul, EAN-13 shtrix-kod, 1 klikda xarid va juda batafsil texnik tavsif mavjud.
+
+Narxsiz tovarlar uchun B2B yechim: Tovar ichki sahifasida narx «Цена по запросу» bo‘lganda, savat tugmasi o‘rniga avtomatik tarzda «Уточнить наличие и цену» bloki (telefon raqami va Telegram havolasi bilan) chiqishi lidlarni yo‘qotmaslik uchun to‘g‘ri o‘ylangan.
+
+Mobil navigatsiya: Ekranning pastki qismida doimiy Bosh sahifa, Katalog, Qidiruv, Sevimlilar, Savatcha paneli mobil foydalanuvchilar uchun qulay.
+
+3. Aniqlangan Texnik va Kontent Xatoliklar (Audit Topilmalari)
+Saytning ichki sahifalarini ko‘zdan kechirish jarayonida foydalanuvchi tajribasi (UX) va qidiruv tizimlariga salbiy ta’sir qilayotgan quyidagi kamchiliklar aniqlandi:
+
+🔴 1. Lokalizatsiya (Til) aralashib ketishi (i18n muammolari)
+Ruscha versiyada (/ru/...) o‘zbekcha matnlar qolib ketgan:
+
+Header va qidiruv qismida: logotip ostidagi «Sizga mos ishonchli tanlov» shiori, qidiruv satridagi «Tovar, brend yoki kategoriya...» matni, menyudagi «1C Aksiyalar» bandi hamda pastki mobil menyudagi «Qidiruv» tugmasi rus tiliga o‘girilmagan.
+
+Katalog daraxtida (/ru/catalog): Ruscha bo‘limlar orasida «Shtampellar yostiqchalar» va «Karton» kabi lotin alifbosidagi o‘zbekcha nomlar chiqib qolgan.
+
+O‘zbekcha versiyada (/uz) ruscha va inglizcha nomlar qorishmasi:
+
+Tovar sarlavhalarida uchta til aralashgan holatlar bor: «Deli E0325 – Ofis stapleri, 20 листов», «Deli E0386 Effortless Heavy‑Duty stapler – 120 листов», «DELI E3872 – A4 сплит‑комб брошюровка машинеси», «Deli E39034A – 90×120 см магнитли оқ доска».
+
+🔴 2. Tovar reytinglari (Reviews) bir xil shablon ko‘rinishida
+Bosh sahifa va kategoriyalardagi tovarlarning barchasida bloklar bo‘yicha bir xil statik reyting va izohlar soni takrorlangan:
+
+Chegirmalar blokidagi barcha tovarlarda: 4.8 (24)
+
+Eng arzon narx blokidagi barcha tovarlarda: 4.9 (31)
+
+Top mahsulotlar blokidagi barcha tovarlarda: 4.9 (38)
+
+Yangi tovarlar blokida: 4.7 (19)
+
+Xoz tovarlar kategoriyasida: 4.7 (18)
+
+Xavfi: Xaridorda baholar sun’iy qo‘yilgandek taassurot uyg‘otadi, Google esa bir xil shablonli AggregateRating mikro-belgilarini spam sifatida qabul qilib, qidiruv natijalarida yulduzchalarni (Rich Snippets) ko‘rsatmay qo‘yishi mumkin.
+
+🟠 3. Ma’lumotlardagi nomuvofiqliklar (Content Consistency)
+Qaytarish muddati (10 kun vs 14 kun): Bosh sahifa va /ru/delivery sahifasining footer qismida «Kafolat va qaytarish (10 kun)» deb yozilgan bo‘lsa, kategoriya (/ru/category/...), brend va tovar sahifalarida «Гарантия и возврат (14 дней)» deb ko‘rsatilgan.
+
+Bo‘sh va noo‘rin bo‘limlar:
+
+/ru/catalog sahifasida «Аксессуары для смартфонов (0 подразд.)» bo‘limi bo‘sh turibdi.
+
+/ru/delivery sahifasining quyi menyusida kanselyariya do‘koniga aloqasi bo‘lmagan «Смартфоны» havolasi qolib ketgan (boshqa sahifalardagi footer'dan farq qiladi).
+
+🟠 4. Katalog va Tavsiyalar mantiqidagi kamchiliklar
+Narxsiz tovarlarda «Savatga» tugmasi: Tovar ichiga kirganda «Цена по запросу» uchun aloqa bloki chiqsa-da, katalog va kategoriya ro‘yxatlarida bunday tovarlar ostida ham oddiy «В корзину / Savatga» tugmasi faol turibdi.
+
+«Похожие товары» (O‘xshash tovarlar) algoritmi: Har qanday tovar sahifasiga kirilganda (masalan, papka-fayl yoki kundalik daftar), «O‘xshash tovarlar» blokida aynan bir xil 4 ta tovar (list-protektor, oltin skrepka, stepler, axlat chelagi) chiqmoqda. Ya’ni tovarlar joriy kategoriyadan emas, umumiy ro‘yxatdan olinmoqda.
+
+4. SEO va Qidiruv Tizimlari Indeksatsiyasi Tahlili
+Meta Title ikki marta takrorlanishi (| Sora.uz | Sora.uz) va til qorishmasi:
+
+Ko‘plab ichki sahifalarda brend nomi ikki marta takrorlanmoqda va ruscha sahifa sarlavhasiga o‘zbekcha qo‘shimcha qo‘shilib qolgan.
+
+Misol: Deli E5001 папка‑файл A4 на 10 карманов — narxi, xususiyatlari | Sora.uz | Sora.uz yoki DELI mahsulotlari (Страница 34) - Sora.uz (/ru/brand/deli?page=34 sahifasida).
+
+Sababi: Asosiy layout faylida title.template: '%s | Sora.uz' belgilangan bo‘lib, ichki sahifalarning generateMetadata funksiyasida yana qo‘shimcha | Sora.uz va o‘zbekcha shablon matni (— narxi, xususiyatlari) statik yozib yuborilgan.
+
+URL Slug'larda til nomuvofiqligi:
+
+Rus tilidagi sahifalarning ba’zilarida URL manzili o‘zbekcha so‘zlar bilan shakllangan (masalan: sora.uz/ru/products/deli-3344-kundalik-16k-jigar-rang-pu).
+
+Paginatsiya sahifalarining indekslanishi:
+
+Google qidiruvida brend sahifalarining chuqur paginatsiyalari (?page=34, ?page=35) asosiy sahifalardan ko‘ra faolroq indekslangan. Paginatsiya sahifalarida canonical URL va indeksatsiya qoidalarini tartibga solish asosiy kategoriya/tovar sahifalarining reytingini ko‘taradi.
+
+Kuchli SEO bazasi:
+
+Tovar sahifalarida yozilgan kengaytirilgan tavsiflar (long-read descriptions) hamda kategoriya ostidagi «Как выбрать...» va «FAQ» bloklari juda sifatli tuzilgan bo‘lib, ham Google, ham AI-qidiruv tizimlari uchun katta ustunlik beradi.
+
+5. Bosqichma-bosqich Amaliy Tavsiyalar (Roadmap)
+Ustuvorlik,Yo‘nalish,Amalga oshirilishi kerak bo‘lgan ishlar
+1. Tezkor (Quick Wins),Lokalizatsiya (i18n),"/ru versiyadagi tarjima lug‘atini (Header shiori, qidiruv placeholderi, 1C Aksiyalar, mobil menyudagi Qidiruv) to‘liq ruschaga o‘tkazish."
+1. Tezkor (Quick Wins),SEO Title & Meta,"Ichki sahifalardagi ortiqcha | Sora.uz qo‘shimchasini olib tashlash va /ru/products/... sahifalaridagi — narxi, xususiyatlari matnini — цена, характеристики, купить в Ташкенте ga almashtirish."
+2. O‘rta muddatli,Kontent sinxronizatsiyasi,Qaytarish muddatini barcha sahifalarda yagona standartga (10 kun yoki 14 kun) keltirish; /ru/delivery sahifasidagi eski footer'ni umumiy global footer komponentiga ulash.
+2. O‘rta muddatli,UX va Katalog,Katalogda narxi 0 yoki Narxi kelishiladi bo‘lgan tovarlarning kartochkasida «Savatga» tugmasi o‘rniga «Narxni so‘rash» (modal yoki Telegram link) tugmasini chiqarish.
+3. Tizimli,1C ma’lumotlar bazasi,1C dan kelayotgan tovar va sub-kategoriya nomlarini (krill/lotin va uz/ru aralashmasini) normalizatsiya qilish; «O‘xshash tovarlar» blokini ayni shu category_id ichidagi tovarlarni chiqaradigan qilish.
+
+Sora.uz saytining joriy holati (Next.js App Router arxitekturasi va 1C ERP ma’lumotlar bazasi)dan kelib chiqib, texnik SEO va Schema.org (JSON-LD) mikro-belgilarini qidiruv tizimlari (Google, Yandex) hamda AI-qidiruv botlari uchun 100% talabga javob beradigan darajaga olib chiqish bo‘yicha amaliy yechimlar:
+
+1. Texnik SEO: Meta-teglar, hreflang va Paginatsiya muammolarini yechish
+Audit davomida aniqlangan 3 ta asosiy texnik xatolik — Title dublikati (| Sora.uz | Sora.uz), ruscha sahifada o‘zbekcha shablon chiqishi (— narxi, xususiyatlari) hamda chuqur paginatsiya sahifalarining (?page=34) indeksga kirib ketishi — bevosita generateMetadata funksiyasida hal qilinadi.
+
+1.1. Tovar sahifasi uchun to‘g‘ri generateMetadata (app/[locale]/products/[slug]/page.tsx)
+Root layout.tsx faylida title.template: "%s | Sora.uz" belgilangan bo‘lsa, ichki sahifalarda | Sora.uz yozish shart emas. Shuningdek, har bir sahifada canonical va ikki tilli alternates.languages (uz-UZ, ru-UZ) aniq ko‘rsatilishi zarur:
+``
+import type { Metadata } from 'next';
+
+interface Props {
+  params: { locale: 'uz' | 'ru'; slug: string };
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale, slug } = params;
+  const product = await getProductBySlug(slug, locale); // 1C / DB dan ma'lumot olish
+
+  if (!product) return {};
+
+  const isRu = locale === 'ru';
+  const baseUrl = 'https://sora.uz';
+
+  // Tilga mos SEO Title va Description shablonlari (ortiqcha "| Sora.uz" siz)
+  const title = isRu
+    ? `${product.nameRu} (SKU: ${product.sku}) — купить по оптовой цене в Ташкенте`
+    : `${product.nameUz} (SKU: ${product.sku}) — Toshkentda ulgurji narxda xarid qilish`;
+
+  const description = isRu
+    ? `${product.shortDescriptionRu || product.nameRu}. Официальная гарантия 1С ERP, работаем по договору и ЭСФ Didox. Доставка по Ташкенту за 24 часа.`
+    : `${product.shortDescriptionUz || product.nameUz}. Rasmiy 1C ERP kafolati, shartnoma va Didox EHF orqali xarid. Toshkent bo'ylab 24 soatda yetkazib berish.`;
+
+  const currentPath = isRu ? `/ru/products/${slug}` : `/products/${slug}`;
+
+  return {
+    title, // Layout template avtomatik "| Sora.uz" ni qo'shadi
+    description,
+    alternates: {
+      canonical: `${baseUrl}${currentPath}`,
+      languages: {
+        'uz-UZ': `${baseUrl}/products/${product.slugUz || slug}`,
+        'ru-UZ': `${baseUrl}/ru/products/${product.slugRu || slug}`,
+        'x-default': `${baseUrl}/products/${product.slugUz || slug}`,
+      },
+    },
+    openGraph: {
+      title,
+      description,
+      url: `${baseUrl}${currentPath}`,
+      siteName: 'Sora.uz',
+      images: [
+        {
+          url: product.imageUrl || `${baseUrl}/og-default.jpg`,
+          width: 800,
+          height: 800,
+          alt: isRu ? product.nameRu : product.nameUz,
+        },
+      ],
+      locale: isRu ? 'ru_RU' : 'uz_UZ',
+      type: 'website',
+    },
+  };
+}
+``
+1.2. Kategoriya va Brend paginatsiyalarini tartibga solish (Crawl Budget himoyasi)
+Google qidiruvida /ru/brand/deli?page=34 kabi sahifalar asosiy sahifa bilan raqobatlashmasligi uchun 1-sahifadan keyingi barcha paginatsiya va filtr parametrlariga noindex, follow qoidasini berish tavsiya etiladi:
+
+``
+// app/[locale]/brand/[slug]/page.tsx yoki category/[slug]/page.tsx ichida:
+export async function generateMetadata({
+  params,
+  searchParams,
+}: {
+  params: { locale: 'uz' | 'ru'; slug: string };
+  searchParams: { page?: string; sort?: string; price?: string };
+}): Promise<Metadata> {
+  const pageNum = Number(searchParams.page) || 1;
+  const hasFilters = Boolean(searchParams.sort || searchParams.price);
+  const isRu = params.locale === 'ru';
+  const cleanUrl = `https://sora.uz${isRu ? '/ru' : ''}/brand/${params.slug}`;
+
+  return {
+    // Canonical har doim parametrsiz 1-sahifaga yoki o'zining toza URL'iga qaraydi
+    alternates: {
+      canonical: cleanUrl,
+    },
+    // Agar page 1 dan katta bo'lsa yoki filtr ishlasa: bot linklarni o'qiydi (follow), lekin sahifani indekslamaydi (noindex)
+    robots:
+      pageNum > 1 || hasFilters
+        ? { index: false, follow: true }
+        : { index: true, follow: true },
+  };
+}
+``
+
+2. Schema.org (JSON-LD) Mikro-belgilaridagi Kritik Nuqtalar
+Saytingizda 1C ERP bazasidan keladigan juda qimmatli ma’lumotlar (SKU artikul, EAN-13 shtrix-kod, ombor qoldig‘i, brend) bor. Biroq Google Search Console (Merchant Listing & Product Snippets) xatolik bermasligi uchun quyidagi 3 ta qoidaga qat’iy amal qilish kerak:
+
+
+Muammo,Google qanday baholaydi?,To‘g‘ri texnik yechim
+«Narxi kelishiladi» (Цена по запросу),"Agar offers.price ichiga 0 yoki matn yozilsa, Google Search Console Critical Error beradi.","Narx 0 ga teng bo‘lsa, offers blokida price ko‘rsatilmaydi yoki offers faqat price noldan katta bo‘lganda qo‘shiladi."
+Shablon reytinglar (4.8 (24)),"Barcha tovarlarda bir xil ratingValue: 4.8 va reviewCount: 24 takrorlansa, Google buni spam deb topib, barcha yulduzchalarni o‘chirib qo‘yadi.",Haqiqiy izohlar yozilgan tovarlardagina aggregateRating blokini chiqarish (yoki har bir tovarda real/unikal sharhlar bo‘lishini ta’minlash).
+EAN-13 shtrix-kod va qaytarish shartlari,"gtin13, shippingDetails va hasMerchantReturnPolicy berilmasa, qidiruvda tovar narxi yonida ""Yetkazib berish bepul"" va ""14 kun qaytarish"" belgilari chiqmaydi.","1C dagi 13 xonali shtrix-kodni gtin13 ga, Toshkent bo‘ylab yetkazish va qaytarish shartlarini Offer ichiga bog‘lash."
+
+3. Tovar sahifasi uchun Mukammal @graph JSON-LD Komponenti
+Tovar sahifasida alohida-alohida skriptlar o‘rniga Product, BreadcrumbList va FAQPage sxemalarini yagona @graph ichida birlashtirib berish eng yuqori SEO samaradorlikni beradi.
+
+Quyidagi tayyor komponentni tovar sahifasiga (app/[locale]/products/[slug]/page.tsx) joylashtirishingiz mumkin:
+
+TypeScript
+``
+// components/seo/ProductJsonLd.tsx
+import React from 'react';
+
+interface ProductData {
+  id: string;
+  sku: string;
+  gtin13?: string; // 1C dagi EAN-13 shtrix-kod (masalan: "6942625454087")
+  name: string;
+  description: string;
+  slug: string;
+  brandName: string;
+  categoryName: string;
+  categorySlug: string;
+  price: number; // 0 bo'lsa - "Narxi kelishiladi"
+  stockCount: number; // 1C ombor qoldig'i
+  images: string[];
+  ratingValue?: number;
+  reviewCount?: number;
+}
+
+export function ProductJsonLd({
+  product,
+  locale,
+}: {
+  product: ProductData;
+  locale: 'uz' | 'ru';
+}) {
+  const isRu = locale === 'ru';
+  const baseUrl = 'https://sora.uz';
+  const productUrl = `${baseUrl}${isRu ? '/ru' : ''}/products/${product.slug}`;
+  const categoryUrl = `${baseUrl}${isRu ? '/ru' : ''}/category/${product.categorySlug}`;
+
+  // EAN-13 shtrix-kod tekshiruvi (faqat 13 ta raqamdan iborat bo'lsa qo'shiladi)
+  const isValidGtin13 = Boolean(
+    product.gtin13 && /^\d{13}$/.test(product.gtin13.trim())
+  );
+
+  // Narx mavjud bo'lgandagina to'liq Offer obyektini shakllantiramiz
+  const offerObject =
+    product.price > 0
+      ? {
+          '@type': 'Offer',
+          url: productUrl,
+          priceCurrency: 'UZS',
+          price: product.price.toString(),
+          priceValidUntil: '2027-12-31',
+          itemCondition: 'https://schema.org/NewCondition',
+          availability:
+            product.stockCount > 0
+              ? 'https://schema.org/InStock'
+              : 'https://schema.org/OutOfStock',
+          inventoryLevel: {
+            '@type': 'QuantitativeValue',
+            value: product.stockCount,
+          },
+          seller: {
+            '@type': 'Organization',
+            name: 'SORAUZ MCHJ',
+            url: baseUrl,
+          },
+          // Yetkazib berish shartlari (500 000 so'mdan yuqori bepul, aks holda 30 000 so'm)
+          shippingDetails: {
+            '@type': 'OfferShippingDetails',
+            shippingRate: {
+              '@type': 'MonetaryAmount',
+              value: product.price >= 500000 ? '0' : '30000',
+              currency: 'UZS',
+            },
+            shippingDestination: {
+              '@type': 'DefinedRegion',
+              addressCountry: 'UZ',
+            },
+            deliveryTime: {
+              '@type': 'ShippingDeliveryTime',
+              handlingTime: {
+                '@type': 'QuantitativeValue',
+                minValue: 0,
+                maxValue: 1,
+                unitCode: 'DAY',
+              },
+              transitTime: {
+                '@type': 'QuantitativeValue',
+                minValue: 1,
+                maxValue: 3,
+                unitCode: 'DAY',
+              },
+            },
+          },
+          // Qaytarish siyosati (14 kun)
+          hasMerchantReturnPolicy: {
+            '@type': 'MerchantReturnPolicy',
+            applicableCountry: 'UZ',
+            returnPolicyCategory:
+              'https://schema.org/MerchantReturnFiniteReturnWindow',
+            merchantReturnDays: 14,
+            returnMethod: 'https://schema.org/ReturnInStore',
+            returnFees: 'https://schema.org/FreeReturn',
+          },
+        }
+      : undefined;
+
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      // 1. BreadcrumbList (Navigatsiya zanjiri)
+      {
+        '@type': 'BreadcrumbList',
+        '@id': `${productUrl}#breadcrumb`,
+        itemListElement: [
+          {
+            '@type': 'ListItem',
+            position: 1,
+            name: isRu ? 'Главная' : 'Bosh sahifa',
+            item: `${baseUrl}${isRu ? '/ru' : ''}`,
+          },
+          {
+            '@type': 'ListItem',
+            position: 2,
+            name: isRu ? 'Каталог' : 'Katalog',
+            item: `${baseUrl}${isRu ? '/ru/catalog' : '/catalog'}`,
+          },
+          {
+            '@type': 'ListItem',
+            position: 3,
+            name: product.categoryName,
+            item: categoryUrl,
+          },
+          {
+            '@type': 'ListItem',
+            position: 4,
+            name: product.name,
+            item: productUrl,
+          },
+        ],
+      },
+
+      // 2. Product (Asosiy mahsulot mikro-belgisi)
+      {
+        '@type': 'Product',
+        '@id': `${productUrl}#product`,
+        name: product.name,
+        description: product.description,
+        image: product.images,
+        sku: product.sku,
+        mpn: product.sku,
+        ...(isValidGtin13 ? { gtin13: product.gtin13!.trim() } : {}),
+        brand: {
+          '@type': 'Brand',
+          name: product.brandName,
+        },
+        ...(offerObject ? { offers: offerObject } : {}),
+        // Faqat haqiqiy izohlar mavjud bo'lganda qo'shiladi
+        ...(product.reviewCount && product.reviewCount > 0 && product.ratingValue
+          ? {
+              aggregateRating: {
+                '@type': 'AggregateRating',
+                ratingValue: product.ratingValue.toString(),
+                reviewCount: product.reviewCount.toString(),
+                bestRating: '5',
+                worstRating: '1',
+              },
+            }
+          : {}),
+      },
+    ],
+  };
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+    />
+  );
+}
+``
+4. Bosh sahifa uchun Organization va WebSite (B2B + Yuridik ishonch)
+Saytning asosiy layout.tsx yoki bosh sahifasiga «SORAUZ» MCHJ ning rasmiy rekvizitlari, manzili (Olmazor tumani, Dilsaroy ko‘chasi, 1-uy), telefon raqamlari va qidiruv funksiyasini (SearchAction) bildiruvchi global JSON-LD qo‘shish Google Knowledge Graph (o‘ng tarafdagi tashkilot kartochkasi) shakllanishiga yordam beradi:
+
+``
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "OfficeEquipmentStore",
+      "@id": "https://sora.uz/#organization",
+      "name": "Sora.uz — Kanselyariya va ofis mollari do'koni",
+      "legalName": "OOO «SORAUZ»",
+      "taxID": "306286447",
+      "url": "https://sora.uz",
+      "logo": "https://sora.uz/logo.png",
+      "foundingDate": "2018",
+      "email": "info@sora.uz",
+      "telephone": "+998903264757",
+      "priceRange": "UZS",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Dilsaroy ko'chasi, 1-uy",
+        "addressLocality": "Toshkent",
+        "addressRegion": "Olmazor tumani",
+        "postalCode": "100000",
+        "addressCountry": "UZ"
+      },
+      "openingHoursSpecification": [
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+          "opens": "09:00",
+          "closes": "19:00"
+        }
+      ],
+      "contactPoint": [
+        {
+          "@type": "ContactPoint",
+          "telephone": "+998903264757",
+          "contactType": "customer service",
+          "email": "info@sora.uz",
+          "availableLanguage": ["Uzbek", "Russian"]
+        },
+        {
+          "@type": "ContactPoint",
+          "telephone": "+998909699090",
+          "contactType": "sales",
+          "email": "b2b@sora.uz",
+          "description": "B2B korporativ mijozlar va Didox EHF bo'limi",
+          "availableLanguage": ["Uzbek", "Russian"]
+        }
+      ],
+      "sameAs": [
+        "https://t.me/sora_uz",
+        "https://t.me/sorauz"
+      ]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://sora.uz/#website",
+      "url": "https://sora.uz",
+      "name": "Sora.uz",
+      "publisher": {
+        "@id": "https://sora.uz/#organization"
+      },
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://sora.uz/catalog?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+  ]
+}
+``
+
+5. Tekshirish va Validatsiya (Deployment'dan so‘ng)
+Ushbu o‘zgarishlar kiritilgach, natijani quyidagi ketma-ketlikda tekshirib olish tavsiya etiladi:
+
+Google Rich Results Test ([search.google.com/test/rich-results](https://search.google.com/test/rich-results)) ga ham narxi bor tovarni (Deli E5001), ham narxi kelishiladigan tovarni (Deli 7945) kiritib, Product snippets va Merchant listings bo‘limlari yashil yonishini tekshirish.
+
+Schema Markup Validator (validator.schema.org) orqali gtin13 va BreadcrumbList bog‘lamalarini ko‘zdan kechirish.
+
