@@ -1,0 +1,2425 @@
+СМС шлюз от Eskiz.uz
+Отправляйте СМС по всему миру, в любом количестве!
+
+В тестовом статусе для отправки тестовых смс сообщений, Вы можете использовать только нижеуказанные тексты:
+
+Это тест от Eskiz
+
+Bu Eskiz dan test
+
+This is test from Eskiz
+
+AUTHORIZATION
+Bearer Token
+Авторизация
+Срок токена - 30 дней
+
+Если Вы новый пользователь, пройдите регистрацию по https://eskiz.uz/sms и получите логин и пароль, если же у Вас есть свой логин и пароль, то используйте его
+
+AUTHORIZATION
+Bearer Token
+This folder is using Bearer Token from collectionСМС шлюз от Eskiz.uz
+POST
+Получить токен
+notify.eskiz.uz/api/auth/login
+Для авторизации используйте этот API, возвращает токен
+
+AUTHORIZATION
+Bearer Token
+This request is using Bearer Token from collectionСМС шлюз от Eskiz.uz
+Body
+formdata
+email
+vash@email.uz
+
+password
+vash_sekretniy_kod_s_kabineta
+
+
+Example Request
+curl --location 'notify.eskiz.uz/api/auth/login' \
+--form 'email="vash@email.uz"' \
+--form 'password="vash_sekretniy_kod_s_kabineta"'
+
+
+Example Response
+
+Body
+{
+  "message": "token_generated",
+  "data": {
+    "token": "Ваш токен"
+  },
+  "token_type": "bearer"
+}
+
+PATCH
+Обновить токен
+notify.eskiz.uz/api/auth/refresh
+Обновляет текущий токен
+
+AUTHORIZATION
+Bearer Token
+This request is using Bearer Token from collectionСМС шлюз от Eskiz.uz
+
+Example Request
+пример
+curl --location --request PATCH 'notify.eskiz.uz/api/auth/refresh'
+Example Response
+Body
+{
+  "message": "token_generated",
+  "data": {
+    "token": "Новый токен"
+  },
+  "token_type": "bearer"
+}
+
+GET
+Данные ползователья
+notify.eskiz.uz/api/auth/user
+Возвращает все данные о пользователе
+
+AUTHORIZATION
+Bearer Token
+This request is using Bearer Token from collectionСМС шлюз от Eskiz.uz
+Example Request
+пример
+curl
+curl --location 'notify.eskiz.uz/api/auth/user'
+Example Response
+Body
+{
+  "status": "success",
+  "data": {
+    "id": 378,
+    "created_at": "2020-10-14T18:27:03Z",
+    "updated_at": "2023-11-03T20:09:31.527361Z",
+    "name": "Name",
+    "email": "vash@email.uz",
+    "password": "",
+    "role": "user",
+    "status": "active",
+    "is_vip": false,
+    "balance": 0
+  },
+  "id": null
+}
+
+
+POST
+Отправить шаблон
+notify.eskiz.uz/api/user/template
+Получить шаблон по ID
+
+AUTHORIZATION
+Bearer Token
+This request is using Bearer Token from collectionСМС шлюз от Eskiz.uz
+HEADERS
+Authorization
+Bearer {vash_token_zdes}
+
+Body
+formdata
+template
+шаблон или текс сообщение
+
+Example Request
+пример
+curl
+curl --location --request POST 'notify.eskiz.uz/api/user/template' \
+--header 'Authorization: Bearer {vash_token_zdes}'
+Example Response
+Body
+Headers (0)
+{
+  "template": "шаблон или текс сообщение"
+}
+GET
+Получить список шаблонов
+notify.eskiz.uz/api/user/templates?id&original_text
+Получить все шаблоны
+
+status:
+moderation => На модерации
+inproccess => В процессе
+service => Сервисный
+reklama => Рекламный
+rejected => Отказано
+
+AUTHORIZATION
+Bearer Token
+This request is using Bearer Token from collectionСМС шлюз от Eskiz.uz
+HEADERS
+Authorization
+Bearer {vash_token_zdes}
+
+PARAMS
+id
+фильтр по идентификатору шаблона. Выполняется точное совпадение
+
+original_text
+фильтр по исходному тексту шаблона. Выполняется поиск по частичному совпадению
+
+Example Request
+пример
+curl
+curl --location 'notify.eskiz.uz/api/user/templates' \
+--header 'Authorization: Bearer {vash_token_zdes}'
+Example Response
+Body
+
+{
+    "success": true,
+    "result": [
+        {
+            "id": 1,
+            "template": "",
+            "original_text": "Eskiz API test 2",
+            "status": "moderation"
+        }, 
+        ...
+    ]
+}
+
+Отправка
+СТАТУС СООБЩЕНИЕЯ
+
+NEW - СМС в ожидании отправления оператору
+STORED - Отправляется только через CALLBACK_URL и означает, что SMS уже записано в базу данных.
+ACCEPTED - Минимум одна часть SMS передана сотовому оператору, но со стороны оператора не получен обратный статус SMS сообщения;
+PARTDELIVERED - Минимум одна часть SMS доставлено;
+DELIVERED - доставлено;
+REJECTED - один из основных причин это то что номер находится в черном списке;
+
+СТАТУС КАЖДОЙ ЧАСТИ СООБЩЕНИЯ
+
+NEW - СМС в ожидании отправления оператору
+ACCEPTED - СМС передан сотовому оператору, но со стороны оператора обратно не получено статус смс сообщений;
+DELIVRD - доставлено;
+UNDELIV / UNDELIVERABLE - недоставлено, обычно причиной может быть то что абонент блокируется со стороны оператора(недостаточно средст или долг);
+EXPIRED - срок жизни смс истек(когда абонент в течение сутки не выходил на связь. У билайн если в теение часа);
+REJECTD - один из основных причин это то что номер находится в черном списке;
+DELETED - ошибка при отправки запроса(например когда адрес отправителя указан неверно);
+UNKNOWN - Неопределенный статус
+ENROUTE - Неопределенный статус в процессе отправки
+
+AUTHORIZATION
+Bearer Token
+This folder is using Bearer Token from collectionСМС шлюз от Eskiz.uz
+POST
+Отправить СМС
+notify.eskiz.uz/api/message/sms/send
+Для того, чтобы использовать никнейм, вам нужно поменять поле «FROM» на свои.
+
+callback_url - Это необязательное поле, которое используется для автоматического получения смс-статуса с сервера. Укажите URL-адрес обратного вызова, по которому вы будете получать данные POST в следующем формате:
+
+{"request_id": "UUID", "message_id": "4385062", "user_sms_id": "vash_ID_zdes", "country": "UZ", "phone_number": "998991234567", "sms_count": "1", "status" : "DELIVRD", "status_date": "2021-04-02 00:39:36"}
+
+request_id — это значение, возвращаемое в поле "id" в результате выполнения API запросов send, send-batch и send-global.
+
+AUTHORIZATION
+Bearer Token
+Token
+<token>
+
+Body
+formdata
+mobile_phone
+998991234567
+
+Номер телефона
+
+message
+Eskiz Test
+
+Сообщение
+
+from
+4546
+
+Для того, чтобы использовать никнейм, вам нужно поменять 4546 на свои.
+
+callback_url
+Это необязательное поле, которое используется для автоматического получения смс-статуса с сервера. Укажите URL-адрес обратного вызова, по которому вы будете получать данные POST в следующем формате: {"request_id": "UUID", "message_id": "4385062", "user_sms_id": "vash_ID_zdes", "country": "UZ", "phone_number": "998991234567", "sms_count": "1", "status" : "DELIVRD", "status_date": "2021-04-02 00:39:36"}.
+
+request_id — это значение, возвращаемое в поле "id" в результате выполнения API запросов send, send-batch и send-global.
+
+Example Request
+пример
+curl
+curl --location 'notify.eskiz.uz/api/message/sms/send' \
+--form 'mobile_phone="99899012345678"' \
+--form 'message="Eskiz Test"' \
+--form 'from="4546"' \
+--form 'callback_url="http://0000.uz/test.php"'
+Example Response
+Body
+{
+  "id": "59bf10a2-aba8-4694-8fd5-0be20102a580",
+  "message": "Waiting for SMS provider",
+  "status": "waiting"
+}
+POST
+Отправить СМС рассылка
+notify.eskiz.uz/api/message/sms/send-batch
+Поле user_sms_id позволяет сопоставить статус доставки с вашим внутренним идентификатором. Максимальная длина: 12 символов.
+
+AUTHORIZATION
+Bearer Token
+Token
+<token>
+
+HEADERS
+Authorization
+Bearer {vash_token_zdes}
+
+Body
+raw (json)
+json
+{
+    "messages": [
+        {"user_sms_id":"sms1","to": 998990000000, "text": "eto test"},
+        {"user_sms_id":"sms2","to": 998980000000, "text": "eto test 2"}
+    ],
+    "from": "4546",
+    "dispatch_id": 123,
+    "callback_url": ""
+}
+
+Example Request
+пример
+curl
+curl --location 'notify.eskiz.uz/api/message/sms/send-batch' \
+--header 'Authorization: Bearer {vash_token_zdes}' \
+--data '{
+    "messages": [
+        {"user_sms_id":"sms1","to": 998990000000, "text": "eto test"},
+        {"user_sms_id":"sms2","to": 998980000000, "text": "eto test 2"}
+    ],
+    "from": "4546",
+    "dispatch_id": 123
+}'
+Example Response
+Body
+{
+  "id": "03759b6d-c4db-449f-81c1-f625ab1bc1b4",
+  "message": "Waiting for SMS provider",
+  "status": [
+    "waiting",
+    "waiting"
+  ]
+}
+
+POST
+Отправить Международный СМС
+notify.eskiz.uz/api/message/sms/send-global
+Используя этот API вы можете отправить СМС зарубежных стран мира.
+
+callback_url - Это необязательное поле, которое используется для автоматического получения смс-статуса с сервера. Укажите URL-адрес обратного вызова, по которому вы будете получать данные POST в следующем формате:
+
+{"message_id": "4385062", "country": "US", "phone_number": "1234567891011", "sms_count": "1", "status" : "DELIVRD", "status_date": "2021-04-02 00:39:36"}
+
+AUTHORIZATION
+Bearer Token
+Token
+<token>
+
+HEADERS
+Authorization
+Bearer {vash_token_zdes}
+
+Body
+formdata
+mobile_phone
+1234567891011
+
+Номер телефона
+
+message
+Тест начинается
+
+Сообщение
+
+country_code
+US
+
+Страна
+
+callback_url
+Это необязательное поле, которое используется для автоматического получения смс-статуса с сервера. Укажите URL-адрес обратного вызова, по которому вы будете получать данные POST в следующем формате: {"request_id": "UUID", "message_id": "4385062", "user_sms_id": "vash_ID_zdes", "country": "UZ", "phone_number": "998991234567", "sms_count": "1", "status" : "DELIVRD", "status_date": "2021-04-02 00:39:36"}
+
+request_id — это значение, возвращаемое в поле "id" в результате выполнения API запросов send, send-batch и send-global.
+
+unicode
+0
+
+1 - если хотите отправить на кирилице
+
+Example Request
+Отправить Международный СМС
+curl
+curl --location 'notify.eskiz.uz/api/message/sms/send-global' \
+--header 'Authorization: Bearer {vash_token_zdes}' \
+--form 'mobile_phone="1234567891011"' \
+--form 'message="Тест начинается"' \
+--form 'country_code="US"' \
+--form 'callback_url=""' \
+--form 'unicode="0"'
+Example Response
+Body
+
+POST
+Детализация
+notify.eskiz.uz/api/message/sms/get-user-messages?status
+id - Идентификатор пользователя
+country_id - Идентификатор страны, куда отправлено SMS (null - Узбекистан)
+smsc_id - Идентификатор компании, отправившей SMS
+dispatch_id - Идентификатор рассылки
+user_sms_id - Идентификатор SMS, который отправил пользователь
+request_id - Идентификатор запроса, по которому было отправлено SMS
+price - Цена за каждую часть SMS (полная стоимость SMS вычисляется как price * parts_count)
+is_ad - Рекламное SMS
+nick - Никнейм
+to - Номер телефона, на который отправлено SMS
+message - Текст SMS
+encoding - Способ кодирования SMS (0 - GSM 0338, 1 - ASCII, 8 - UCS2)
+parts_count - Количество частей SMS (зависит от типа кодировки)
+parts: - Информация о частях SMS
+
+[MSG_ID]: Идентификатор SMS, полученный от компании
+
+part_index - Порядковый номер каждой части SMS
+
+accepted - true или false
+
+accept_time - Время отправки SMS
+
+accept_status - Состояние SMS, полученной от компании (значение SubmitSMResp.CommandStatus)
+
+dlr_state - Статус доставленного SMS
+
+dlr_time - Время доставки SMS
+
+status - Общее состояние SMS
+smsc_data - Изменение состояния для каждой части
+sent_at - Время, когда система Eskiz.uz приняла SMS
+submit_sm_resp_at - Время отправки последней части SMS компании
+delivery_sm_at - Время доставки последней части SMS пользователю
+created_at - Дата создания записи
+updated_at - Дата последнего изменения записи
+
+AUTHORIZATION
+Bearer Token
+This request is using Bearer Token from collectionСМС шлюз от Eskiz.uz
+HEADERS
+Authorization
+Bearer {vash_token_zdes}
+
+PARAMS
+status
+[пустой] - все "delivered" - только частично и полностью доставленное "rejected" - только не доставленное
+
+Body
+formdata
+start_date
+2023-11-01 00:00
+
+С %Y-%m-%d %H:%M
+
+to_date
+2023-11-02 23:59
+
+По %Y-%m-%d %H:%M
+
+page_size
+20
+
+Количество SMS сообщений (с 20 до 200)
+
+count
+0
+
+1 - Если необходимо получить итог по статусу
+
+is_ad
+[пустой] - все 1 - только рекламное 0 - только сервисное
+
+Example Request
+пример
+curl
+curl --location 'notify.eskiz.uz/api/message/sms/get-user-messages' \
+--header 'Authorization: Bearer {vash_token_zdes}' \
+--form 'start_date="2023-11-01 00:00"' \
+--form 'end_date="2023-11-02 23:59"' \
+--form 'page_size="20"' \
+--form 'count="0"'
+Example Response
+Body
+{
+  "data": {
+    "current_page": 1,
+    "path": "https://notify.eskiz.uz/api/message/sms/get-user-messages",
+    "prev_page_url": null,
+    "first_page_url": "https://notify.eskiz.uz/api/message/sms/get-user-messages?page=1",
+    "last_page_url": "https://notify.eskiz.uz/api/message/sms/get-user-messages?page=1",
+    "next_page_url": null,
+    "per_page": 20,
+    "last_page": 1,
+    "from": 1,
+    "to": 20,
+    "total": 4,
+    "result": [
+      {
+        "id": 16,
+        "user_id": 378,
+        "country_id": null,
+        "connection_id": 1,
+        "smsc_id": 1,
+        "dispatch_id": null,
+        "user_sms_id": "hiha124",
+        "request_id": "7fc5c514-aa30-4adc-9b80-2956d612fb4c",
+        "price": 50,
+        "is_ad": true,
+        "nick": "4546",
+        "to": "Номер телефона",
+        "message": "Eskiz test",
+        "encoding": 1,
+        "parts_count": 1,
+        "parts": {
+          "[MSG_ID]": {
+            "accept": "2023-11-02T00:40:34.606121+05:00",
+            "status": "DELIVRD",
+            "submit": 0,
+            "delivery": "2023-11-02T00:40:38.619241+05:00"
+          }
+        },
+        "status": "DELIVERED",
+        "smsc_data": {
+          "[MSG_ID]": [
+            "DELIVRD"
+          ]
+        },
+        "sent_at": "2023-11-02T00:40:32Z",
+        "submit_sm_resp_at": "2023-11-02T00:40:34.606121Z",
+        "delivery_sm_at": "2023-11-02T00:40:38.619241Z",
+        "created_at": "2023-11-02T00:40:34.563038Z",
+        "updated_at": "2023-11-02T00:40:40.566277Z"
+      }
+    ],
+    "links": [
+      {
+        "url": null,
+        "label": "&laquo; Previous",
+        "active": false
+      },
+      {
+        "url": "https://notify.eskiz.uz/api/message/sms/get-user-messages?page=1",
+        "label": "1",
+        "active": true
+      },
+      {
+        "url": null,
+        "label": "Next &raquo;",
+        "active": false
+      }
+    ]
+  },
+  "status": "success"
+}
+
+POST
+Получить СМС по рассылке
+notify.eskiz.uz/api/message/sms/get-user-messages-by-dispatch?status&page-size
+Получить все отправленные СМС по ID рассылке
+
+AUTHORIZATION
+Bearer Token
+This request is using Bearer Token from collectionСМС шлюз от Eskiz.uz
+HEADERS
+Authorization
+Bearer {vash_token_zdes}
+
+PARAMS
+status
+[пустой] - все "delivered" - только частично и полностью доставленное "rejected" - только не доставленное
+
+page-size
+Количество элементов, возвращаемых в одном запросе. Допустимый диапазон значений — от 20 до 1000.
+
+Body
+formdata
+dispatch_id
+123
+
+ID рассылки
+
+count
+0
+
+1 - Если необходимо получить итог по статусу
+
+is_ad
+[пустой] - все 1 - только рекламное 0 - только сервисное
+
+Example Request
+пример
+curl
+curl --location 'notify.eskiz.uz/api/message/sms/get-user-messages-by-dispatch' \
+--header 'Authorization: Bearer {vash_token_zdes}' \
+--form 'dispatch_id="123"' \
+--form 'count="0"'
+Example Response
+Body
+Headers (0)
+{
+  "result": "Одинокий с детализацией"
+}
+POST
+Статус рассылки
+notify.eskiz.uz/api/message/sms/get-dispatch-status
+Получить статус рассылки
+
+AUTHORIZATION
+Bearer Token
+This request is using Bearer Token from collectionСМС шлюз от Eskiz.uz
+
+HEADERS
+Authorization
+Bearer {vash_token_zdes}
+
+Body
+formdata
+user_id
+1
+
+ID пользователя
+
+dispatch_id
+123
+
+ID рассылки
+
+Example Request
+пример
+curl
+curl --location 'notify.eskiz.uz/api/message/sms/get-dispatch-status' \
+--header 'Authorization: Bearer {vash_token_zdes}' \
+--form 'dispatch_id="123"' \
+--form 'is_global="0"'
+Example Response
+Body
+Headers (0)
+{
+  "status": "success",
+  "data": [
+    {
+      "status": "DELIVERED",
+      "total": 18
+    }
+  ],
+  "id": null
+}
+GET
+Получить список ник
+https://notify.eskiz.uz/api/nick/me
+AUTHORIZATION
+Bearer Token
+Token
+<token>
+
+Example Request
+пример
+curl
+curl --location 'https://notify.eskiz.uz/api/nick/me'
+Example Response
+Body
+
+[
+  "Eskiz.uz"
+]
+POST
+Нормализации SMS
+https://notify.eskiz.uz/api/message/sms/normalizer
+Этот API предоставляет информацию о наличии специальных символов в SMS-сообщении, а также о том, какими символами можно заменить специальные символы.
+
+Используя этот API, вы можете отправлять свои SMS дешевле.
+
+AUTHORIZATION
+Bearer Token
+This request is using Bearer Token from collectionСМС шлюз от Eskiz.uz
+Body
+formdata
+message
+Сообщение
+
+Example Request
+Нормализации SMS
+curl
+curl --location 'https://notify.eskiz.uz/api/message/sms/normalizer' \
+--form 'message="Sms xabar narxi €100 | Xitoy tili 世界 | Ѕɑӏоｍ Éśķíź | Привет Ескиз"'
+Example Response
+Content-Type application/json
+Body
+{
+  "special_characters": [
+    {
+      "position": 16,
+      "code": "0x20AC",
+      "char": "€"
+    },
+    {
+      "position": 23,
+      "code": "0x7C",
+      "char": "|"
+    },
+    {
+      "position": 36,
+      "code": "0x4E16",
+      "char": "世"
+    },
+    {
+      "position": 39,
+      "code": "0x754C",
+      "char": "界"
+    },
+    {
+      "position": 43,
+      "code": "0x7C",
+      "char": "|"
+    },
+    {
+      "position": 45,
+      "code": "0x405",
+      "char": "Ѕ"
+    },
+    {
+      "position": 47,
+      "code": "0x251",
+      "char": "ɑ"
+    },
+    {
+      "position": 49,
+      "code": "0x4CF",
+      "char": "ӏ"
+    },
+    {
+      "position": 51,
+      "code": "0x43E",
+      "char": "о"
+    },
+    {
+      "position": 53,
+      "code": "0xFF4D",
+      "char": "ｍ"
+    },
+    {
+      "position": 57,
+      "code": "0xC9",
+      "char": "É"
+    },
+    {
+      "position": 59,
+      "code": "0x15B",
+      "char": "ś"
+    },
+    {
+      "position": 61,
+      "code": "0x137",
+      "char": "ķ"
+    },
+    {
+      "position": 63,
+      "code": "0xED",
+      "char": "í"
+    },
+    {
+      "position": 65,
+      "code": "0x17A",
+      "char": "ź"
+    },
+    {
+      "position": 68,
+      "code": "0x7C",
+      "char": "|"
+    },
+    {
+      "position": 70,
+      "code": "0x41F",
+      "char": "П"
+    },
+    {
+      "position": 72,
+      "code": "0x440",
+      "char": "р"
+    },
+    {
+      "position": 74,
+      "code": "0x438",
+      "char": "и"
+    },
+    {
+      "position": 76,
+      "code": "0x432",
+      "char": "в"
+    },
+    {
+      "position": 78,
+      "code": "0x435",
+      "char": "е"
+    },
+    {
+      "position": 80,
+      "code": "0x442",
+      "char": "т"
+    },
+    {
+      "position": 83,
+      "code": "0x415",
+      "char": "Е"
+    },
+    {
+      "position": 85,
+      "code": "0x441",
+      "char": "с"
+    },
+    {
+      "position": 87,
+      "code": "0x43A",
+      "char": "к"
+    },
+    {
+      "position": 89,
+      "code": "0x438",
+      "char": "и"
+    },
+    {
+      "position": 91,
+      "code": "0x437",
+      "char": "з"
+    }
+  ],
+  "recommendations": [
+    {
+      "from": "€",
+      "to": "EU"
+    },
+    {
+      "from": "|",
+      "to": ":"
+    },
+    {
+      "from": "世",
+      "to": "Shi "
+    },
+    {
+      "from": "界",
+      "to": "Jie "
+    },
+    {
+      "from": "|",
+      "to": ":"
+    },
+    {
+      "from": "Ѕ",
+      "to": "Dz"
+    },
+    {
+      "from": "ɑ",
+      "to": "a"
+    },
+    {
+      "from": "ӏ",
+      "to": "[?]"
+    },
+    {
+      "from": "о",
+      "to": "o"
+    },
+    {
+      "from": "ｍ",
+      "to": "m"
+    },
+    {
+      "from": "É",
+      "to": "E"
+    },
+    {
+      "from": "ś",
+      "to": "s"
+    },
+    {
+      "from": "ķ",
+      "to": "k"
+    },
+    {
+      "from": "í",
+      "to": "i"
+    },
+    {
+      "from": "ź",
+      "to": "z"
+    },
+    {
+      "from": "|",
+      "to": ":"
+    },
+    {
+      "from": "П",
+      "to": "P"
+    },
+    {
+      "from": "р",
+      "to": "r"
+    },
+    {
+      "from": "и",
+      "to": "i"
+    },
+    {
+      "from": "в",
+      "to": "v"
+    },
+    {
+      "from": "е",
+      "to": "e"
+    },
+    {
+      "from": "т",
+      "to": "t"
+    },
+    {
+      "from": "Е",
+      "to": "E"
+    },
+    {
+      "from": "с",
+      "to": "s"
+    },
+    {
+      "from": "к",
+      "to": "k"
+    },
+    {
+      "from": "и",
+      "to": "i"
+    },
+    {
+      "from": "з",
+      "to": "z"
+    }
+  ],
+  "message": "Sms xabar narxi EU100 : Xitoy tili Shi Jie  : Dza[?]om Eskiz : Privet Eskiz"
+}
+
+GET
+Проверка символов SMS
+https://notify.eskiz.uz/api/message/sms/check
+Проверка SMS-сообщения. С помощью данного API вы можете получить информацию о том, попало ли SMS в черный список, из скольких частей состоит сообщение, а также узнать стоимость для каждой компании.
+
+AUTHORIZATION
+Bearer Token
+This request is using Bearer Token from collectionСМС шлюз от Eskiz.uz
+Body
+raw (json)
+json
+{
+    "message": "..."
+}
+Example Request
+Проверка SMS
+curl
+curl --location --request GET 'https://notify.eskiz.uz/api/message/sms/check' \
+--data '{
+    "message": "Тест Тест Тест Тест Тест Тест Тест Тест Тест Тест Тест Тест Тест Тест Тест Тест Тест Тест Тест Тест Тест Тест"
+}'
+Example Response
+Content-Type application/json
+Body
+{
+  "status": "success",
+  "data": {
+    "user_id": 23,
+    "info": [
+      {
+        "smsc": 1,
+        "is_ad": true,
+        "price": 175,
+        "is_error": false,
+        "error": ""
+      },
+      {
+        "smsc": 2,
+        "is_ad": true,
+        "price": 95,
+        "is_error": false,
+        "error": ""
+      },
+      {
+        "smsc": 3,
+        "is_ad": true,
+        "price": 340,
+        "is_error": false,
+        "error": ""
+      },
+      {
+        "smsc": 4,
+        "is_ad": true,
+        "price": 95,
+        "is_error": false,
+        "error": ""
+      },
+      {
+        "smsc": 5,
+        "is_ad": true,
+        "price": 175,
+        "is_error": false,
+        "error": ""
+      },
+      {
+        "smsc": 6,
+        "is_ad": true,
+        "price": 175,
+        "is_error": false,
+        "error": ""
+      },
+      {
+        "smsc": 7,
+        "is_ad": true,
+        "price": 95,
+        "is_error": false,
+        "error": ""
+      }
+    ],
+    "forbidden": false,
+    "keywords": null,
+    "can_send": true,
+    "bytes_count": 218,
+    "chars_count": 109,
+    "parts_count": 2
+  },
+  "id": null
+}
+
+Отчеты
+AUTHORIZATION
+Bearer Token
+This folder is using Bearer Token from collectionСМС шлюз от Eskiz.uz
+POST
+Итог отправленных СМС
+https://notify.eskiz.uz/api/user/totals
+Итого отправленных СМС
+
+AUTHORIZATION
+Bearer Token
+This request is using Bearer Token from collectionСМС шлюз от Eskiz.uz
+HEADERS
+Authorization
+Bearer {vash_token_zdes}
+
+Body
+urlencoded
+year
+2023
+
+Год
+
+month
+11
+
+Месяц
+
+is_global
+0
+
+1 - Если нужно получить итог по международным SMS
+
+Example Request
+пример
+curl
+curl --location 'https://notify.eskiz.uz/api/user/totals' \
+--header 'Authorization: Bearer {vash_token_zdes}' \
+--data-urlencode 'year=2018' \
+--data-urlencode 'user_id=5'
+Example Response
+Body
+{
+  "status": "success",
+  "data": [
+    {
+      "status": "DELIVERED",
+      "month": "Nov",
+      "packets": 3
+    }
+  ],
+  "id": null
+}
+GET
+Получить баланс
+http://notify.eskiz.uz/api/user/get-limit
+AUTHORIZATION
+Bearer Token
+Token
+<token>
+
+HEADERS
+Authorization
+Bearer {vash_token_zdes}
+Example Request
+пример
+curl
+curl --location 'http://notify.eskiz.uz/api/user/get-limit' \
+--header 'Authorization: Bearer {vash_token_zdes}'
+Example Response
+Body
+Headers (0)
+{
+  "data": {
+    "balance": 0
+  },
+  "status": "success"
+}
+
+POST
+Экспортировать в формате CSV
+notify.eskiz.uz/api/message/export?status=all
+AUTHORIZATION
+Bearer Token
+This request is using Bearer Token from collectionСМС шлюз от Eskiz.uz
+PARAMS
+status
+all
+
+all или delivered или rejected
+
+Body
+formdata
+year
+2024
+
+Год
+
+month
+1
+
+Месяц
+
+start
+YYYY-MM-DD HH:mm:ss
+
+end
+YYYY-MM-DD HH:mm:ss
+
+Example Request
+Экспортировать в формате CSV
+curl
+curl --location 'notify.eskiz.uz/api/message/export?status=all' \
+--form 'year="2024"' \
+--form 'month="1"' \
+--form 'start=""' \
+--form 'end=""'
+
+GET
+Итого по месяцам
+notify.eskiz.uz/api/report/total-by-month?year=2024
+ad_parts - Количество рекламных СМС
+ad_spent - Расходы на рекламные СМС
+
+parts - Количество сервисных СМС
+spent - Расходы на сервисные СМС
+
+AUTHORIZATION
+Bearer Token
+This request is using Bearer Token from collectionСМС шлюз от Eskiz.uz
+PARAMS
+year
+2024
+
+Год
+
+Example Request
+Итого по месяцам
+curl
+curl --location 'notify.eskiz.uz/api/report/total-by-month?year=2024'
+Example Response
+Content-Type application/json
+Body
+{
+  "data": [
+    {
+      "year": 2024,
+      "month": 2,
+      "ad_parts": 14,
+      "ad_spent": 1610,
+      "parts": 409,
+      "spent": 22594,
+      "total_parts": 423,
+      "total_spent": 24204
+    },
+    {
+      "year": 2024,
+      "month": 1,
+      "ad_parts": 8,
+      "ad_spent": 920,
+      "parts": 30,
+      "spent": 1500,
+      "total_parts": 38,
+      "total_spent": 2420
+    }
+  ]
+}
+POST
+Итого по компаниям
+notify.eskiz.uz/api//report/total-by-smsc
+smsc_id - ID компании
+
+smsc_id	Компания
+1	Mobiuz
+2	Beeline
+3	Ucell
+4	Humans
+5	Uzmobile GSM
+6	Uzmobile CDMA
+7	Perfectum
+8	Global
+ad_parts - Количество рекламных СМС
+ad_spent - Расходы на рекламные СМС
+
+parts - Количество сервисных СМС
+spent - Расходы на сервисные СМС
+
+AUTHORIZATION
+Bearer Token
+This request is using Bearer Token from collectionСМС шлюз от Eskiz.uz
+Body
+formdata
+year
+2024
+
+Год
+
+month
+1
+
+Месяц
+
+Example Request
+Итого по компаниям
+curl
+curl --location --request POST 'notify.eskiz.uz/api//report/total-by-smsc'
+Example Response
+Body
+{
+  "data": [
+    {
+      "year": 2024,
+      "month": 1,
+      "ad_parts": 0,
+      "ad_spent": 0,
+      "parts": 9,
+      "spent": 450,
+      "total_parts": 9,
+      "total_spent": 450,
+      "smsc_id": 1
+    },
+    {
+      "year": 2024,
+      "month": 1,
+      "ad_parts": 0,
+      "ad_spent": 0,
+      "parts": 10,
+      "spent": 500,
+      "total_parts": 10,
+      "total_spent": 500,
+      "smsc_id": 2
+    },
+    {
+      "year": 2024,
+      "month": 1,
+      "ad_parts": 8,
+      "ad_spent": 920,
+      "parts": 0,
+      "spent": 0,
+      "total_parts": 8,
+      "total_spent": 920,
+      "smsc_id": 3
+    },
+    {
+      "year": 2024,
+      "month": 1,
+      "ad_parts": 0,
+      "ad_spent": 0,
+      "parts": 5,
+      "spent": 250,
+      "total_parts": 5,
+      "total_spent": 250,
+      "smsc_id": 4
+    },
+    {
+      "year": 2024,
+      "month": 1,
+      "ad_parts": 0,
+      "ad_spent": 0,
+      "parts": 6,
+      "spent": 300,
+      "total_parts": 6,
+      "total_spent": 300,
+      "smsc_id": 5
+    }
+  ]
+}
+
+GET
+Системные логи
+notify.eskiz.uz/api/logs/sms/:id
+AUTHORIZATION
+Bearer Token
+This request is using Bearer Token from collectionСМС шлюз от Eskiz.uz
+PATH VARIABLES
+id
+ID СМС
+
+Example Request
+Системные логи
+curl
+curl --location 'notify.eskiz.uz/api/logs/sms/:id'
+Example Response
+Body
+
+
+{
+  "messages": [
+    {
+      "ip": "127.0.0.1",
+      "from": "4546",
+      "to": "99899*******",
+      "dispatch_id": "<nil>",
+      "user_sms_id": "test-sms-1",
+      "timestamp": "2024-02-27T11:30:28.066Z",
+      "message": "CallbackURL bo'sh",
+      "full_message": "",
+      "level_name": "WARN"
+    },
+    {
+      "ip": "127.0.0.1",
+      "from": "4546",
+      "to": "99899*******",
+      "dispatch_id": "<nil>",
+      "user_sms_id": "test-sms-1",
+      "timestamp": "2024-02-27T11:30:28.061Z",
+      "message": "SMS muvaffaqiyatli update qilindi",
+      "full_message": "",
+      "level_name": "INFO"
+    },
+    {
+      "ip": "127.0.0.1",
+      "from": "4546",
+      "to": "99899*******",
+      "dispatch_id": "<nil>",
+      "user_sms_id": "test-sms-1",
+      "timestamp": "2024-02-27T11:30:28.044Z",
+      "message": "SMS ning 1-qismi holati o'zgardi (state=DELIVRD, command status=0)",
+      "full_message": "",
+      "level_name": "INFO"
+    },
+    {
+      "ip": "127.0.0.1",
+      "from": "4546",
+      "to": "99899*******",
+      "dispatch_id": "<nil>",
+      "user_sms_id": "test-sms-1",
+      "timestamp": "2024-02-27T11:30:28.034Z",
+      "message": "SMS ni update qilishdan oldin",
+      "full_message": "",
+      "level_name": "INFO"
+    },
+    {
+      "ip": "127.0.0.1",
+      "from": "4546",
+      "to": "99899*******",
+      "dispatch_id": "<nil>",
+      "user_sms_id": "test-sms-1",
+      "timestamp": "2024-02-27T11:30:27.130Z",
+      "message": "SMS ning holati o'zgardi (state=DELIVRD, date=2024-02-27 16:30:27.128016004 +0500 +05)",
+      "full_message": "",
+      "level_name": "INFO"
+    },
+    {
+      "ip": "127.0.0.1",
+      "from": "4546",
+      "to": "99899*******",
+      "dispatch_id": "<nil>",
+      "user_sms_id": "test-sms-1",
+      "timestamp": "2024-02-27T11:30:27.128Z",
+      "message": "Kompaniya tomonidan SMS bo'yicha holat qabul qilindi (state=DELIVRD)",
+      "full_message": "",
+      "level_name": "INFO"
+    },
+    {
+      "ip": "127.0.0.1",
+      "from": "4546",
+      "to": "99899*******",
+      "dispatch_id": "<nil>",
+      "user_sms_id": "test-sms-1",
+      "timestamp": "2024-02-27T11:30:25.064Z",
+      "message": "CallbackURL bo'sh",
+      "full_message": "",
+      "level_name": "WARN"
+    },
+    {
+      "ip": "127.0.0.1",
+      "from": "4546",
+      "to": "99899*******",
+      "dispatch_id": "<nil>",
+      "user_sms_id": "test-sms-1",
+      "timestamp": "2024-02-27T11:30:25.062Z",
+      "message": "SMS muvaffaqiyatli update qilindi",
+      "full_message": "",
+      "level_name": "INFO"
+    },
+    {
+      "ip": "127.0.0.1",
+      "from": "4546",
+      "to": "99899*******",
+      "dispatch_id": "<nil>",
+      "user_sms_id": "test-sms-1",
+      "timestamp": "2024-02-27T11:30:25.044Z",
+      "message": "SMS ning 1-qismi holati o'zgardi (state=ACCEPTED, command status=0)",
+      "full_message": "",
+      "level_name": "INFO"
+    },
+    {
+      "ip": "127.0.0.1",
+      "from": "4546",
+      "to": "99899*******",
+      "dispatch_id": "<nil>",
+      "user_sms_id": "test-sms-1",
+      "timestamp": "2024-02-27T11:30:25.039Z",
+      "message": "SMS ni update qilishdan oldin",
+      "full_message": "",
+      "level_name": "INFO"
+    },
+    {
+      "ip": "127.0.0.1",
+      "from": "4546",
+      "to": "99899*******",
+      "dispatch_id": "<nil>",
+      "user_sms_id": "test-sms-1",
+      "timestamp": "2024-02-27T11:30:24.064Z",
+      "message": "Barcha SMS qismlari kompaniya tomonidan muvaffaqiyatli qabul qilindi",
+      "full_message": "",
+      "level_name": "INFO"
+    },
+    {
+      "ip": "127.0.0.1",
+      "from": "4546",
+      "to": "99899*******",
+      "dispatch_id": "<nil>",
+      "user_sms_id": "test-sms-1",
+      "timestamp": "2024-02-27T11:30:24.063Z",
+      "message": "SMS ning holati o'zgardi (state=ACCEPTED)",
+      "full_message": "",
+      "level_name": "INFO"
+    },
+    {
+      "ip": "127.0.0.1",
+      "from": "4546",
+      "to": "99899*******",
+      "dispatch_id": "<nil>",
+      "user_sms_id": "test-sms-1",
+      "timestamp": "2024-02-27T11:30:24.062Z",
+      "message": "SMS ning 1-qismi kompaniya tomonidan qabul qilindi (sequence number=1541125, status=0)",
+      "full_message": "",
+      "level_name": "INFO"
+    },
+    {
+      "ip": "127.0.0.1",
+      "to": "99899*******",
+      "dispatch_id": "<nil>",
+      "user_sms_id": "test-sms-1",
+      "timestamp": "2024-02-27T11:30:24.040Z",
+      "message": "CallbackURL bo'sh",
+      "full_message": "",
+      "level_name": "WARN"
+    },
+    {
+      "ip": "127.0.0.1",
+      "from": "4546",
+      "to": "99899*******",
+      "dispatch_id": "<nil>",
+      "user_sms_id": "test-sms-1",
+      "timestamp": "2024-02-27T11:30:24.038Z",
+      "message": "SMS muvaffaqiyatli jo'natish uchun navbatga qo'yildi",
+      "full_message": "",
+      "level_name": "INFO"
+    },
+    {
+      "ip": "127.0.0.1",
+      "from": "4546",
+      "to": "99899*******",
+      "dispatch_id": "<nil>",
+      "user_sms_id": "test-sms-1",
+      "timestamp": "2024-02-27T11:30:24.038Z",
+      "message": "SMS ning 1-qismi muvaffaqiyatli jo'natildi (total=1, sequence number=1541125, src npi/ton=0/5, dst npi/ton=1/1)",
+      "full_message": "",
+      "level_name": "INFO"
+    },
+    {
+      "ip": "127.0.0.1",
+      "from": "4546",
+      "to": "99899*******",
+      "dispatch_id": "<nil>",
+      "user_sms_id": "test-sms-1",
+      "timestamp": "2024-02-27T11:30:24.037Z",
+      "message": "SMS qismlari haqida ma'lumot: encoding = 0, parts = 1",
+      "full_message": "",
+      "level_name": "INFO"
+    },
+    {
+      "ip": "127.0.0.1",
+      "from": "4546",
+      "to": "99899*******",
+      "dispatch_id": "<nil>",
+      "user_sms_id": "test-sms-1",
+      "timestamp": "2024-02-27T11:30:24.033Z",
+      "message": "SMS ni bazaga yozishdan oldin",
+      "full_message": "",
+      "level_name": "INFO"
+    },
+    {
+      "ip": "127.0.0.1",
+      "to": "99899*******",
+      "user_sms_id": "test-sms-1",
+      "timestamp": "2024-02-27T11:30:23.358Z",
+      "message": "SMS bazaga yozish uchun qabul qilindi",
+      "full_message": "",
+      "level_name": "INFO"
+    },
+    {
+      "ip": "127.0.0.1",
+      "from": "4546",
+      "to": "99899*******",
+      "user_sms_id": "test-sms-1",
+      "timestamp": "2024-02-27T11:30:23.353Z",
+      "message": "SMS muvaffaqiyatli ma'lumotlar bazasiga yozish uchun navbatga qo'yildi",
+      "full_message": "",
+      "level_name": "WARN"
+    },
+    {
+      "ip": "127.0.0.1",
+      "from": "4546",
+      "to": "99899*******",
+      "user_sms_id": "test-sms-1",
+      "timestamp": "2024-02-27T11:30:23.352Z",
+      "message": "Ma'lumotlar muvaffaqiyatli tahlil (parse) qilindi",
+      "full_message": "",
+      "level_name": "INFO"
+    },
+    {
+      "ip": "127.0.0.1",
+      "timestamp": "2024-02-27T11:30:23.351Z",
+      "message": "HTTP/POST ma'lumotlari (body=----------------------------467337800515581272133271",
+      "full_message": "HTTP/POST ma'lumotlari (body=----------------------------467337800515581272133271\r\nContent-Disposition: form-data; name=\"mobile_phone\"\r\n\r\n99899*******\r\n----------------------------467337800515581272133271\r\nContent-Disposition: form-data; name=\"message\"\r\n\r\nTest sms\r\n----------------------------467337800515581272133271\r\nContent-Disposition: form-data; name=\"from\"\r\n\r\n4546\r\n----------------------------467337800515581272133271\r\nContent-Disposition: form-data; name=\"user_sms_id\"\r\n\r\ntest-sms-1\r\n----------------------------467337800515581272133271--\r\n)",
+      "level_name": "INFO"
+    }
+  ],
+  "messages_count": 22
+}
+POST
+Расходы по датам
+notify.eskiz.uz/api/report/total-by-range?status
+AUTHORIZATION
+Bearer Token
+This request is using Bearer Token from collectionСМС шлюз от Eskiz.uz
+PARAMS
+status
+[пустой] - все "delivered" - только частично и полностью доставленное "rejected" - только не доставленное
+
+Body
+formdata
+start_date
+2023-11-01 00:00
+
+С %Y-%m-%d %H:%M
+
+to_date
+2023-11-02 23:59
+
+По %Y-%m-%d %H:%M
+
+is_ad
+[пустой] - все 1 - только рекламное 0 - только сервисное
+
+Example Request
+Расходы по датам
+curl
+curl --location 'notify.eskiz.uz/api/report/total-by-range?status=null' \
+--form 'start_date="2023-11-01 00:00"' \
+--form 'to_date="2023-11-02 23:59"' \
+--form 'is_ad=""'
+
+
+POST
+Расходы по рассылке
+notify.eskiz.uz/api/report/total-by-dispatch?status
+AUTHORIZATION
+Bearer Token
+This request is using Bearer Token from collectionСМС шлюз от Eskiz.uz
+PARAMS
+status
+[пустой] - все "delivered" - только частично и полностью доставленное "rejected" - только не доставленное
+
+Body
+formdata
+dispatch_id
+123
+
+ID рассылки
+
+is_ad
+[пустой] - все 1 - только рекламное 0 - только сервисное
+
+Example Request
+Расходы по рассылке
+curl
+curl --location 'notify.eskiz.uz/api/report/total-by-dispatch?status=null' \
+--form 'dispatch_id="123"' \
+--form 'is_ad=""'
+
+GET
+Получить статус по ID
+notify.eskiz.uz/api/message/sms/status_by_id/:id
+Если :id INT - это ID SMS на платформе Eskiz
+
+Если :id имеет тип UUID (полученный в результате вызова API send, send-batch, send-global или значение столбца request_id в результатах других API), то по данному UUID система возвращает информацию о статусе SMS, отправленной за последние 30 дней.
+
+Если с момента отправки SMS прошло более 30 дней, необходимо передать в параметре :id значение ID SMS на платформе Eskiz.
+
+AUTHORIZATION
+Bearer Token
+This request is using Bearer Token from collectionСМС шлюз от Eskiz.uz
+PATH VARIABLES
+id
+INT или UUID
+
+Example Request
+Получить статус по ID
+curl
+curl --location 'notify.eskiz.uz/api/message/sms/status_by_id/61359094'
+Example Response
+Body
+
+{
+  "status": "success",
+  "data": {
+    "id": 61359094,
+    "user_id": 0,
+    "country_id": 83,
+    "connection_id": 8,
+    "smsc_id": 8,
+    "dispatch_id": null,
+    "user_sms_id": null,
+    "request_id": "b169553b-de29-4649-b5dd-cfafd85984f9",
+    "price": 0,
+    "total_price": 0,
+    "is_ad": false,
+    "nick": "from",
+    "to": "to",
+    "message": "Test",
+    "encoding": 1,
+    "parts_count": 1,
+    "parts": {
+      "msgid": {
+        "group": 457,
+        "accepted": true,
+        "dlr_time": "2024-05-31T22:02:32+05:00",
+        "dlr_state": "DELIVRD",
+        "part_index": 0,
+        "accept_time": "2024-05-31T22:02:28.672497042+05:00",
+        "accept_status": 0
+      }
+    },
+    "status": "DELIVERED",
+    "smsc_data": {
+      "msgid": [
+        "DELIVRD"
+      ]
+    },
+    "sent_at": "2024-05-31T22:02:27Z",
+    "submit_sm_resp_at": "2024-05-31T22:02:28.672497Z",
+    "delivery_sm_at": "2024-05-31T22:02:32Z",
+    "created_at": "2024-05-31T22:02:27.954Z",
+    "updated_at": "2024-05-31T22:02:33.065096Z"
+  },
+  "id": null
+}
+
+GET
+Получить цены
+notify.eskiz.uz/api/user/prices
+Данный API возвращает стоимость отправки одного SMS через глобальные и локальные сети операторов.
+
+AUTHORIZATION
+Bearer Token
+This request is using Bearer Token from collectionСМС шлюз от Eskiz.uz
+Example Request
+Получить цены
+curl
+curl --location 'notify.eskiz.uz/api/user/prices'
+Example Response
+Body
+{
+  "global": [
+    {
+      "code": "ae",
+      "name": "United Arab Emirates",
+      "prefix": "971",
+      "status": "active",
+      "price": 1901
+    },
+    {
+      "code": "af",
+      "name": "Afghanistan",
+      "prefix": "93",
+      "status": "active",
+      "price": 5241
+    },
+    {
+      "code": "al",
+      "name": "Albania",
+      "prefix": "355",
+      "status": "active",
+      "price": 1320
+    },
+    {
+      "code": "am",
+      "name": "Armenia",
+      "prefix": "374",
+      "status": "active",
+      "price": 2471
+    },
+    {
+      "code": "ao",
+      "name": "Angola",
+      "prefix": "244",
+      "status": "active",
+      "price": 1640
+    },
+    {
+      "code": "ar",
+      "name": "Argentina",
+      "prefix": "54",
+      "status": "active",
+      "price": 1033
+    },
+    {
+      "code": "at",
+      "name": "Austria",
+      "prefix": "43",
+      "status": "active",
+      "price": 1385
+    },
+    {
+      "code": "au",
+      "name": "Australia",
+      "prefix": "61",
+      "status": "active",
+      "price": 870
+    },
+    {
+      "code": "aw",
+      "name": "Aruba",
+      "prefix": "297",
+      "status": "active",
+      "price": 1458
+    },
+    {
+      "code": "ax",
+      "name": "Aland Islands",
+      "prefix": "35818",
+      "status": "active",
+      "price": 1224
+    },
+    {
+      "code": "az",
+      "name": "Azerbaijan",
+      "prefix": "994",
+      "status": "active",
+      "price": 5912
+    },
+    {
+      "code": "ba",
+      "name": "Bosnia and Herzegovina",
+      "prefix": "387",
+      "status": "active",
+      "price": 103
+    },
+    {
+      "code": "bb",
+      "name": "Barbados",
+      "prefix": "1246",
+      "status": "active",
+      "price": 112
+    },
+    {
+      "code": "bd",
+      "name": "Bangladesh",
+      "prefix": "880",
+      "status": "active",
+      "price": 4091
+    },
+    {
+      "code": "be",
+      "name": "Belgium",
+      "prefix": "32",
+      "status": "active",
+      "price": 1487
+    },
+    {
+      "code": "bg",
+      "name": "Bulgaria",
+      "prefix": "359",
+      "status": "active",
+      "price": 2199
+    },
+    {
+      "code": "bh",
+      "name": "Bahrain",
+      "prefix": "973",
+      "status": "active",
+      "price": 669
+    },
+    {
+      "code": "br",
+      "name": "Brazil",
+      "prefix": "55",
+      "status": "active",
+      "price": 881
+    },
+    {
+      "code": "bs",
+      "name": "Bahamas",
+      "prefix": "1242",
+      "status": "active",
+      "price": 112
+    },
+    {
+      "code": "by",
+      "name": "Belarus",
+      "prefix": "375",
+      "status": "active",
+      "price": 3849
+    },
+    {
+      "code": "bz",
+      "name": "Belize",
+      "prefix": "501",
+      "status": "active",
+      "price": 4907
+    },
+    {
+      "code": "ca",
+      "name": "Canada",
+      "prefix": "1",
+      "status": "active",
+      "price": 112
+    },
+    {
+      "code": "cf",
+      "name": "Central African Republic",
+      "prefix": "236",
+      "status": "active",
+      "price": 584
+    },
+    {
+      "code": "ch",
+      "name": "Switzerland",
+      "prefix": "41",
+      "status": "active",
+      "price": 1049
+    },
+    {
+      "code": "cn",
+      "name": "China",
+      "prefix": "86",
+      "status": "active",
+      "price": 615
+    },
+    {
+      "code": "co",
+      "name": "Colombia",
+      "prefix": "57",
+      "status": "active",
+      "price": 713
+    },
+    {
+      "code": "cu",
+      "name": "Cuba",
+      "prefix": "53",
+      "status": "active",
+      "price": 1196
+    },
+    {
+      "code": "cy",
+      "name": "Cyprus",
+      "prefix": "357",
+      "status": "active",
+      "price": 1244
+    },
+    {
+      "code": "cz",
+      "name": "Czech Republic",
+      "prefix": "420",
+      "status": "active",
+      "price": 940
+    },
+    {
+      "code": "de",
+      "name": "Germany",
+      "prefix": "49",
+      "status": "active",
+      "price": 1610
+    },
+    {
+      "code": "dk",
+      "name": "Denmark",
+      "prefix": "45",
+      "status": "active",
+      "price": 910
+    },
+    {
+      "code": "ee",
+      "name": "Estonia",
+      "prefix": "372",
+      "status": "active",
+      "price": 1351
+    },
+    {
+      "code": "eg",
+      "name": "Egypt",
+      "prefix": "20",
+      "status": "active",
+      "price": 2937
+    },
+    {
+      "code": "es",
+      "name": "Spain",
+      "prefix": "34",
+      "status": "active",
+      "price": 543
+    },
+    {
+      "code": "fi",
+      "name": "Finland",
+      "prefix": "358",
+      "status": "active",
+      "price": 1266
+    },
+    {
+      "code": "fr",
+      "name": "France",
+      "prefix": "33",
+      "status": "active",
+      "price": 1136
+    },
+    {
+      "code": "gb",
+      "name": "United Kingdom",
+      "prefix": "44",
+      "status": "active",
+      "price": 745
+    },
+    {
+      "code": "ge",
+      "name": "Georgia",
+      "prefix": "995",
+      "status": "active",
+      "price": 3091
+    },
+    {
+      "code": "gg",
+      "name": "Guernsey",
+      "prefix": "44",
+      "status": "active",
+      "price": 718
+    },
+    {
+      "code": "gr",
+      "name": "Greece",
+      "prefix": "30",
+      "status": "active",
+      "price": 892
+    },
+    {
+      "code": "hk",
+      "name": "Hong Kong",
+      "prefix": "852",
+      "status": "active",
+      "price": 1143
+    },
+    {
+      "code": "hr",
+      "name": "Croatia",
+      "prefix": "385",
+      "status": "active",
+      "price": 1317
+    },
+    {
+      "code": "hu",
+      "name": "Hungary",
+      "prefix": "36",
+      "status": "active",
+      "price": 1243
+    },
+    {
+      "code": "id",
+      "name": "Indonesia",
+      "prefix": "62",
+      "status": "active",
+      "price": 6178
+    },
+    {
+      "code": "ie",
+      "name": "Ireland",
+      "prefix": "353",
+      "status": "active",
+      "price": 1058
+    },
+    {
+      "code": "il",
+      "name": "Israel",
+      "prefix": "972",
+      "status": "active",
+      "price": 2803
+    },
+    {
+      "code": "in",
+      "name": "India",
+      "prefix": "91",
+      "status": "active",
+      "price": 1221
+    },
+    {
+      "code": "iq",
+      "name": "Iraq",
+      "prefix": "964",
+      "status": "active",
+      "price": 4317
+    },
+    {
+      "code": "ir",
+      "name": "Iran",
+      "prefix": "98",
+      "status": "active",
+      "price": 3227
+    },
+    {
+      "code": "is",
+      "name": "Iceland",
+      "prefix": "354",
+      "status": "active",
+      "price": 1145
+    },
+    {
+      "code": "it",
+      "name": "Italy",
+      "prefix": "39",
+      "status": "active",
+      "price": 1335
+    },
+    {
+      "code": "jp",
+      "name": "Japan",
+      "prefix": "81",
+      "status": "active",
+      "price": 1266
+    },
+    {
+      "code": "kg",
+      "name": "Kyrgyzstan",
+      "prefix": "996",
+      "status": "active",
+      "price": 5053
+    },
+    {
+      "code": "kh",
+      "name": "Cambodia",
+      "prefix": "855",
+      "status": "active",
+      "price": 2333
+    },
+    {
+      "code": "kr",
+      "name": "South Korea",
+      "prefix": "82",
+      "status": "active",
+      "price": 723
+    },
+    {
+      "code": "kw",
+      "name": "Kuwait",
+      "prefix": "965",
+      "status": "active",
+      "price": 3975
+    },
+    {
+      "code": "kz",
+      "name": "Kazakhstan",
+      "prefix": "7",
+      "status": "active",
+      "price": 8311
+    },
+    {
+      "code": "li",
+      "name": "Liechtenstein",
+      "prefix": "423",
+      "status": "active",
+      "price": 872
+    },
+    {
+      "code": "lk",
+      "name": "Sri Lanka",
+      "prefix": "94",
+      "status": "active",
+      "price": 4135
+    },
+    {
+      "code": "lt",
+      "name": "Lithuania",
+      "prefix": "370",
+      "status": "active",
+      "price": 964
+    },
+    {
+      "code": "lu",
+      "name": "Luxembourg",
+      "prefix": "352",
+      "status": "active",
+      "price": 1167
+    },
+    {
+      "code": "lv",
+      "name": "Latvia",
+      "prefix": "371",
+      "status": "active",
+      "price": 1067
+    },
+    {
+      "code": "ma",
+      "name": "Morocco",
+      "prefix": "212",
+      "status": "active",
+      "price": 2872
+    },
+    {
+      "code": "mc",
+      "name": "Monaco",
+      "prefix": "377",
+      "status": "active",
+      "price": 2293
+    },
+    {
+      "code": "md",
+      "name": "Moldova",
+      "prefix": "373",
+      "status": "active",
+      "price": 1125
+    },
+    {
+      "code": "mg",
+      "name": "Madagascar",
+      "prefix": "261",
+      "status": "active",
+      "price": 6614
+    },
+    {
+      "code": "mk",
+      "name": "Macedonia",
+      "prefix": "389",
+      "status": "active",
+      "price": 1024
+    },
+    {
+      "code": "mm",
+      "name": "Myanmar",
+      "prefix": "95",
+      "status": "active",
+      "price": 3471
+    },
+    {
+      "code": "mn",
+      "name": "Mongolia",
+      "prefix": "976",
+      "status": "active",
+      "price": 2892
+    },
+    {
+      "code": "mt",
+      "name": "Malta",
+      "prefix": "356",
+      "status": "active",
+      "price": 1282
+    },
+    {
+      "code": "mv",
+      "name": "Maldives",
+      "prefix": "960",
+      "status": "active",
+      "price": 476
+    },
+    {
+      "code": "mx",
+      "name": "Mexico",
+      "prefix": "52",
+      "status": "active",
+      "price": 742
+    },
+    {
+      "code": "my",
+      "name": "Malaysia",
+      "prefix": "60",
+      "status": "active",
+      "price": 1121
+    },
+    {
+      "code": "nl",
+      "name": "Netherlands",
+      "prefix": "31",
+      "status": "active",
+      "price": 1438
+    },
+    {
+      "code": "no",
+      "name": "Norway",
+      "prefix": "47",
+      "status": "active",
+      "price": 1049
+    },
+    {
+      "code": "nz",
+      "name": "New Zealand",
+      "prefix": "64",
+      "status": "active",
+      "price": 1485
+    },
+    {
+      "code": "om",
+      "name": "Oman",
+      "prefix": "968",
+      "status": "active",
+      "price": 2212
+    },
+    {
+      "code": "ph",
+      "name": "Philippines",
+      "prefix": "63",
+      "status": "active",
+      "price": 3142
+    },
+    {
+      "code": "pk",
+      "name": "Pakistan",
+      "prefix": "92",
+      "status": "active",
+      "price": 5874
+    },
+    {
+      "code": "pl",
+      "name": "Poland",
+      "prefix": "48",
+      "status": "active",
+      "price": 620
+    },
+    {
+      "code": "pt",
+      "name": "Portugal",
+      "prefix": "351",
+      "status": "active",
+      "price": 770
+    },
+    {
+      "code": "qa",
+      "name": "Qatar",
+      "prefix": "974",
+      "status": "active",
+      "price": 912
+    },
+    {
+      "code": "ro",
+      "name": "Romania",
+      "prefix": "40",
+      "status": "active",
+      "price": 1092
+    },
+    {
+      "code": "rs",
+      "name": "Serbia",
+      "prefix": "381",
+      "status": "active",
+      "price": 3125
+    },
+    {
+      "code": "ru",
+      "name": "Russia",
+      "prefix": "7",
+      "status": "active",
+      "price": 8311
+    },
+    {
+      "code": "sa",
+      "name": "Saudi Arabia",
+      "prefix": "966",
+      "status": "active",
+      "price": 1682
+    },
+    {
+      "code": "se",
+      "name": "Sweden",
+      "prefix": "46",
+      "status": "active",
+      "price": 946
+    },
+    {
+      "code": "sg",
+      "name": "Singapore",
+      "prefix": "65",
+      "status": "active",
+      "price": 790
+    },
+    {
+      "code": "si",
+      "name": "Slovenia",
+      "prefix": "386",
+      "status": "active",
+      "price": 2892
+    },
+    {
+      "code": "sk",
+      "name": "Slovakia",
+      "prefix": "421",
+      "status": "active",
+      "price": 1331
+    },
+    {
+      "code": "th",
+      "name": "Thailand",
+      "prefix": "66",
+      "status": "active",
+      "price": 430
+    },
+    {
+      "code": "tj",
+      "name": "Tajikistan",
+      "prefix": "992",
+      "status": "active",
+      "price": 8557
+    },
+    {
+      "code": "tm",
+      "name": "Turkmenistan",
+      "prefix": "993",
+      "status": "active",
+      "price": 2720
+    },
+    {
+      "code": "tn",
+      "name": "Tunisia",
+      "prefix": "216",
+      "status": "active",
+      "price": 3818
+    },
+    {
+      "code": "tr",
+      "name": "Turkey",
+      "prefix": "90",
+      "status": "active",
+      "price": 430
+    },
+    {
+      "code": "tw",
+      "name": "Taiwan",
+      "prefix": "886",
+      "status": "active",
+      "price": 803
+    },
+    {
+      "code": "ua",
+      "name": "Ukraine",
+      "prefix": "380",
+      "status": "active",
+      "price": 2532
+    },
+    {
+      "code": "us",
+      "name": "United States",
+      "prefix": "1",
+      "status": "active",
+      "price": 112
+    },
+    {
+      "code": "uy",
+      "name": "Uruguay",
+      "prefix": "598",
+      "status": "active",
+      "price": 1364
+    },
+    {
+      "code": "vi",
+      "name": "Vietnam",
+      "prefix": "1340",
+      "status": "active",
+      "price": 112
+    }
+  ],
+  "local": [
+    {
+      "smsc_id": 2,
+      "name": "beeline",
+      "price": 50,
+      "ad_price": 50
+    },
+    {
+      "smsc_id": 3,
+      "name": "ucell",
+      "price": 50,
+      "ad_price": 115
+    },
+    {
+      "smsc_id": 4,
+      "name": "humans",
+      "price": 50,
+      "ad_price": 50
+    },
+    {
+      "smsc_id": 5,
+      "name": "uzmobile",
+      "price": 50,
+      "ad_price": 50
+    },
+    {
+      "smsc_id": 6,
+      "name": "uzmobile_cdma",
+      "price": 50,
+      "ad_price": 50
+    },
+    {
+      "smsc_id": 7,
+      "name": "perfectum",
+      "price": 50,
+      "ad_price": 50
+    },
+    {
+      "smsc_id": 1,
+      "name": "mobiuz",
+      "price": 60,
+      "ad_price": 80
+    }
+  ]
+}
+
+
+
+
+
+
+

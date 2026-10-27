@@ -1,0 +1,62 @@
+E-commerce loyihangizda ushbu blok haqiqatan ham savdoga va GEO (Generative Engine Optimization) ko'rsatkichlariga xizmat qilishi uchun tugmalar sonini optimallashtirish, promptlarga do'kon nomi hamda mahsulotning asosiy parametrlarini qo'shish va sahifani AI botlar uchun texnik jihatdan tayyorlash kerak (Note, Commerce-UI).
+
+1. Qaysi AI tugmalarini qo'ygan afzal?
+Mahsulot kartochkasida 4–5 ta tugmani qatorlashtirib tashlash xaridor e'tiborini "Savatga qo'shish" tugmasidan chalg'itadi. O'zbekiston bozori va AI tizimlarning texnik ishlash mexanizmini hisobga olsak, 3 ta asosiy tugma eng optimal tanlovdir (Note):
+
+AI xizmati,Tavsiya darajasi,Sahifani o'qish mexanizmi,Nima uchun qo'yish (yoki qo'ymaslik) kerak?
+ChatGPT,1-o'rin (Majburiy),Berilgan URL-manzilga real vaqtda kirib o'qiydi (Direct fetch) (Note),O'zbekistonda eng ommabop AI; yangi qo'shilgan mahsulot sahifasini ham darhol o'qiy oladi.
+Google AI Mode (udm=50),2-o'rin (Majburiy),Google qidiruv indeksi orqali ishlaydi va javobni avtomatik chiqaradi (Note),"gemini.google.com URL orqali prompt qabul qilmaydi, udm=50 esa Enter bosishni ham kutmay darhol javob beradi (Note)."
+Perplexity,3-o'rin (Tavsiya etiladi),Qidiruv indeksi va manbalar (Citations) asosida ishlaydi (Note),Javob ichida saytingizga faol kliklanadigan havola qoldiradi va GEO uchun eng kuchli signal beradi (Commerce-UI).
+Claude,Ixtiyoriy (B2B uchun),URL-manzilni real vaqtda o'qiydi (Direct fetch) (Note),"Murakkab IT, sanoat yoki B2B uskunalar sotadigan do'konlar uchun mos, oddiy B2C do'konda shart emas."
+Grok,Tavsiya etilmaydi,X (Twitter) va veb-qidiruv,"O'zbekistonda xarid qilishda deyarli ishlatilmaydi, tugmalar qatorini bekorga ko'paytiradi."
+
+2. Eng samarali Prompt shablonlari (Tayyor formulalar)
+sora.uz qilgan eng katta kamchilik — promptda faqat URL berilgan. Vaholanki, Google AI Mode va Perplexity saytingizdagi yangi mahsulotni hali indeksga kiritmagan bo'lsa, faqat URL'ning o'zidan ma'lumot ololmaydi (Note). Bundan tashqari, promptda do'koningiz nomi va raqobatchilarga chalg'imaslik sharti bo'lishi kerak.
+
+Quyidagi shablonlarda {...} ichidagi o'zgaruvchilarni CMS (Shop-Script, Bitrix, WooCommerce, Shopify va h.k.) orqali dinamik uzatasiz:
+
+A. Universal "Sotuvchi" prompt (Konversiyani oshirish va brendni eslatish uchun)
+O'zbek tilida (O'zbek tilidagi sahifalar uchun):
+
+{DO'KON_NOMI} onlayn do'konidagi "{MAHSULOT_NOMI}" (narxi: {NARXI} so'm) mahsulotini tahlil qilib ber: {KANONIK_URL} — Uning asosiy afzalliklari, texnik ustunliklari va aynan qanday vazifalar uchun eng yaxshi tanlov ekanligini qisqa punktlarda tushuntir.
+
+Rus tilida (Rus tilidagi sahifalar uchun):
+
+Проанализируй товар «{MAHSULOT_NOMI}» (цена: {NARXI} сум) в интернет-магазине {DO'KON_NOMI} на основе страницы: {KANONIK_URL} — Кратко выдели главные преимущества, ключевые характеристики и объясни, для каких задач эта модель подойдет лучше всего.
+
+B. Murakkab texnika va uskunalar uchun prompt (Mijozga tanlashda yordam berish)
+O'zbek tilida:
+
+{DO'KON_NOMI} saytidagi "{MAHSULOT_NOMI}" ({QISQA_XUSUSIYATLARI}) mahsulotining texnik ko'rsatkichlarini oddiy tilda tushuntirib ber: {KANONIK_URL} — Ushbu modelning kuchli tomonlari nimada va uni o'rnatish yoki ishlatishda nimalarga e'tibor berish kerak?
+
+Rus tilida:
+
+Объясни простым языком технические характеристики товара «{MAHSULOT_NOMI}» ({QISQA_XUSUSIYATLARI}) из магазина {DO'KON_NOMI}: {KANONIK_URL} — В чем сильные стороны этой модели и на что обратить внимание при установке и эксплуатации?
+
+C. Tayyor HTML/URL konstruksiyasi (Toza kod namunasi)
+Har bir AI xizmati uchun URL quyidagi formatda shakllantiriladi (bunda {ENCODED_PROMPT} — urlencode() qilingan matn) (Note):
+
+ChatGPT: https://chatgpt.com/?q={ENCODED_PROMPT}
+
+Google AI Mode: https://www.google.com/search?udm=50&q={ENCODED_PROMPT}
+
+Perplexity: https://www.perplexity.ai/search?q={ENCODED_PROMPT}
+
+Claude: https://claude.ai/new?q={ENCODED_PROMPT}
+
+3. E-commerce loyihangiz uchun 7 ta amaliy tavsiya
+Ushbu tugmalar saytingizdan mijozlarni qochirmasligi, aksincha savdo va SEO/GEO'ni kuchaytirishi uchun quyidagi qoidalarni joriy qiling:
+
+Kanonik (toza) URL uzating: Prompt ichiga hech qachon ?roistat_visit=..., ?utm_source=... yoki ?yclid=... kabi sessiya parametrlarini qo'shmang. Faqat mahsulotning toza kanonik manzilini (https://sora.uz/product/nomi/) bering, aks holda AI keshda chalkashlik yuzaga keladi.
+
+Narx va kategoriya filtri (Smart Visibility) qo'ying: Tugmalarni barcha tovarlarda ko'rsatmang. Shart kiriting: masalan, faqat narxi 300 000 so'mdan yuqori bo'lgan yoki "Texnika / Uskunalar" kategoriyasidagi mahsulotlarda chiqsin. Oddiy qog'oz, kabel yoki arzon aksessuarlarda bu blokni yashiring.
+
+Tugma ustiga tushunarli sarlavha (Micro-copy) yozing: sora.uz'da tugmalar hech qanday izohsiz turibdi — oddiy xaridor ularni "Ulashish (Share)" tugmasi deb o'ylaydi. Tugmalar ustiga "Mahsulot sizga mos kelishiga ikkilanyapsizmi? AI-ekspertdan 5 soniyada qisqa tahlil oling:" degan yozuv qo'shsangiz, bosishlar soni (CTR) va maqsadli foydalanish keskin oshadi.
+
+Promptda "Salbiy so'zlarni" ishlatmang: sora.uz Grok uchun "преимущества и недостатки" (afzalliklari va kamchiliklari) deb yozgan. AI'dan "kamchiliklarini top" deb so'rasangiz, hatto ideal mahsulotdan ham sun'iy ravishda 3–4 ta minus o'ylab topadi va xaridorni cho'chitadi. Uning o'rniga "для каких задач подойдет лучше всего, и на что обратить внимание при выборе" (qanday vazifalarga mos keladi va tanlashda nimaga e'tibor berish kerak) deb so'rang.
+
+robots.txt da AI botlarga ruxsat bering: Agar saytingizda AI tugmalari bo'lsa-yu, lekin robots.txt yoki Cloudflare himoyasi ChatGPT-User, OAI-SearchBot, PerplexityBot va Google-Extended botlarini bloklasa, AI sahifani o'qiy olmaydi (Note). Ushbu User-Agent'lar uchun kirish ochiq ekanligini tekshiring.
+
+JSON-LD (Schema.org/Product) mikrobelgilarini to'liq sozlang: AI botlar sahifaga kirganda dizaynni emas, birinchi navbatda strukturalangan ma'lumotlarni (narx, valyuta, ombordagi holati InStock, brend va xususiyatlar jadvalini) o'qiydi (Nicolas Dabène).
+
+Analitikada kliklarni o'lchang (GA4 / Yandex Metrika): Har bir tugmaga Goal/Event bog'lang (ai_analyze_click). Qaysi mahsulotlarda xaridorlar AI tugmasini ko'p bosayotgan bo'lsa, demak o'sha mahsulotning saytdagi tavsifi yetarli emas — ularni aniqlab, mahsulot tavsifini boyitib borasiz.
