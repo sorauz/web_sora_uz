@@ -45,7 +45,7 @@ export async function generateMetadata({
   const pageNum = typeof sParams.page === "string" ? parseInt(sParams.page, 10) : 1;
   const isPage = !isNaN(pageNum) && pageNum > 1;
   const pageTitleSuffix = isPage ? (isUz ? ` (${pageNum}-sahifa)` : ` (Страница ${pageNum})`) : "";
-  const canonicalUrl = `https://sora.uz/${locale}/category/${canonicalSlug}${isPage ? `?page=${pageNum}` : ""}`;
+  const canonicalUrl = `https://sora.uz/${locale}/category/${canonicalSlug}`;
   const hasFilterParams = Object.keys(sParams).some((k) =>
     ["brand", "minPrice", "maxPrice", "inStock", "sort"].includes(k)
   );
@@ -76,10 +76,11 @@ export async function generateMetadata({
       url: canonicalUrl,
       type: "website",
     },
-    // Faceted navigation SEO policy: noindex if filtered
-    robots: hasFilterParams
-      ? { index: false, follow: true }
-      : { index: true, follow: true },
+    // Crawl budget & index protection: noindex for deep pagination (?page > 1) and faceted filters
+    robots:
+      isPage || hasFilterParams
+        ? { index: false, follow: true }
+        : { index: true, follow: true },
   };
 }
 

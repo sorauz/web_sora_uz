@@ -37,7 +37,10 @@ export async function generateMetadata({
   const pageNum = typeof sParams.page === "string" ? parseInt(sParams.page, 10) : 1;
   const isPage = !isNaN(pageNum) && pageNum > 1;
   const pageTitleSuffix = isPage ? (isUz ? ` (${pageNum}-sahifa)` : ` (Страница ${pageNum})`) : "";
-  const canonicalUrl = `https://sora.uz/${locale}/brand/${slug}${isPage ? `?page=${pageNum}` : ""}`;
+  const hasFilterParams = Object.keys(sParams).some((k) =>
+    ["minPrice", "maxPrice", "inStock", "sort"].includes(k)
+  );
+  const canonicalUrl = `https://sora.uz/${locale}/brand/${slug}`;
 
   return {
     title: isUz ? `${brandName} mahsulotlari${pageTitleSuffix} — Rasmiy kafolat bilan` : `Продукция ${brandName}${pageTitleSuffix} — С официальной гарантией`,
@@ -62,6 +65,11 @@ export async function generateMetadata({
       url: canonicalUrl,
       type: "website",
     },
+    // Crawl budget & index protection: noindex for deep pagination (?page > 1) and faceted filters
+    robots:
+      isPage || hasFilterParams
+        ? { index: false, follow: true }
+        : { index: true, follow: true },
   };
 }
 

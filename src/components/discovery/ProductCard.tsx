@@ -5,7 +5,7 @@ import { calculateProductPrice } from "@/lib/utils/price";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import Image from "next/image";
-import { Heart, ShoppingCart, Check, Star, Scale } from "lucide-react";
+import { Heart, ShoppingCart, Check, Star, Scale, PhoneCall } from "lucide-react";
 import { useCartStore } from "@/lib/store/cart";
 import { useFavoritesStore } from "@/lib/store/favorites";
 import { useCompareStore } from "@/lib/store/compare";
@@ -247,31 +247,51 @@ export function ProductCard({
             )}
           </div>
 
-          <button
-            type="button"
-            onClick={handleAddToCart}
-            disabled={isOutOfStock || price <= 0}
-            aria-label={inCart ? t("inCart") : t("addToCart")}
-            className={`min-h-[40px] min-w-[44px] px-3.5 rounded-xl flex items-center justify-center gap-1.5 text-xs font-semibold transition-all duration-200 shadow-xs cursor-pointer ${
-              isOutOfStock || price <= 0
-                ? "bg-slate-100 text-slate-400 cursor-not-allowed dark:bg-slate-800"
-                : inCart || addedAnim
-                ? "bg-emerald-600 hover:bg-emerald-700 text-white"
-                : "bg-sora-600 hover:bg-sora-700 text-white active:scale-95"
-            }`}
-          >
-            {addedAnim || inCart ? (
-              <>
-                <Check className="w-4 h-4" />
-                <span className="hidden sm:inline">{t("inCart")}</span>
-              </>
-            ) : (
-              <>
-                <ShoppingCart className="w-4 h-4" />
-                <span className="hidden sm:inline">{t("addToCart")}</span>
-              </>
-            )}
-          </button>
+          {price <= 0 ? (
+            <Link
+              href={productUrl}
+              aria-label={locale === "uz" ? "Narxni so'rash" : "Уточнить цену"}
+              className="min-h-[40px] px-2.5 sm:px-3 rounded-xl flex items-center justify-center gap-1.5 text-xs font-semibold bg-amber-500 hover:bg-amber-600 text-white transition-all duration-200 shadow-xs active:scale-95 shrink-0"
+              title={locale === "uz" ? "Narxni so'rash va buyurtma berish" : "Уточнить цену и наличие"}
+            >
+              <PhoneCall className="w-3.5 h-3.5 shrink-0" />
+              <span className="hidden sm:inline">{locale === "uz" ? "Narxni so'rash" : "Уточнить"}</span>
+              <span className="sm:hidden">{locale === "uz" ? "So'rash" : "Уточнить"}</span>
+            </Link>
+          ) : isOutOfStock ? (
+            <button
+              type="button"
+              disabled
+              aria-label={t("outOfStock")}
+              className="min-h-[40px] min-w-[44px] px-3.5 rounded-xl flex items-center justify-center gap-1.5 text-xs font-semibold bg-slate-100 text-slate-400 cursor-not-allowed dark:bg-slate-800"
+            >
+              <ShoppingCart className="w-4 h-4" />
+              <span className="hidden sm:inline">{t("outOfStock")}</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={handleAddToCart}
+              aria-label={inCart ? t("inCart") : t("addToCart")}
+              className={`min-h-[40px] min-w-[44px] px-3.5 rounded-xl flex items-center justify-center gap-1.5 text-xs font-semibold transition-all duration-200 shadow-xs cursor-pointer ${
+                inCart || addedAnim
+                  ? "bg-emerald-600 hover:bg-emerald-700 text-white"
+                  : "bg-sora-600 hover:bg-sora-700 text-white active:scale-95"
+              }`}
+            >
+              {addedAnim || inCart ? (
+                <>
+                  <Check className="w-4 h-4" />
+                  <span className="hidden sm:inline">{t("inCart")}</span>
+                </>
+              ) : (
+                <>
+                  <ShoppingCart className="w-4 h-4" />
+                  <span className="hidden sm:inline">{t("addToCart")}</span>
+                </>
+              )}
+            </button>
+          )}
         </div>
       </div>
     </article>
