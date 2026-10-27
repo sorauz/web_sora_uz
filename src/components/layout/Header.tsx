@@ -17,7 +17,7 @@ import { AuthModal } from "@/components/auth/AuthModal";
 import { OrderTrackerModal } from "@/components/checkout/OrderTrackerModal";
 import { MobileSearchModal } from "@/components/discovery/MobileSearchModal";
 import { useEffect, useState, useRef } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 
 interface HeaderProps {
   tree: CategoryTreeNode[];
@@ -28,6 +28,8 @@ interface HeaderProps {
 
 export function Header({ tree, categories, brands, products = [] }: HeaderProps) {
   const t = useTranslations("common");
+  const locale = useLocale();
+  const isUz = locale === "uz";
   const { getTotalItems } = useCartStore();
   const { getCount } = useFavoritesStore();
   const { getCount: getCompareCount } = useCompareStore();
@@ -90,7 +92,7 @@ export function Header({ tree, categories, brands, products = [] }: HeaderProps)
             SORAUZ
           </span>
           <span className="text-[8px] sm:text-[9.5px] font-bold tracking-tight text-slate-800 leading-tight mt-0.5">
-            Sizga mos ishonchli tanlov
+            {isUz ? "Sizga mos ishonchli tanlov" : "Надежный выбор для вас"}
           </span>
         </Link>
 
@@ -240,11 +242,11 @@ export function Header({ tree, categories, brands, products = [] }: HeaderProps)
         <button
           type="button"
           onClick={openSearch}
-          aria-label="Qidiruv oynasini ochish"
+          aria-label={isUz ? "Qidiruv oynasini ochish" : "Открыть окно поиска"}
           className="w-full h-10 px-3.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 text-xs font-normal flex items-center gap-2.5 border border-slate-200 dark:border-slate-700/60 active:scale-[0.99] transition-transform text-left cursor-pointer"
         >
           <Search className="w-4 h-4 text-slate-400 shrink-0" />
-          <span className="truncate">Tovar, brend yoki kategoriya...</span>
+          <span className="truncate">{isUz ? "Tovar, brend yoki kategoriya..." : "Товар, бренд или категория..."}</span>
         </button>
       </div>
 

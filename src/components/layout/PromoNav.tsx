@@ -1,9 +1,11 @@
 import { Link } from "@/i18n/routing";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { Sparkles, TrendingUp, Percent, Tag, Award, Grid } from "lucide-react";
 
 export function PromoNav() {
   const t = useTranslations("nav");
+  const locale = useLocale();
+  const isUz = locale === "uz";
 
   return (
     <nav className="bg-slate-50 border-b border-slate-200 text-xs font-semibold overflow-x-auto scrollbar-none py-2">
@@ -47,7 +49,7 @@ export function PromoNav() {
           href="/offers"
           className="flex items-center gap-1.5 text-purple-600 dark:text-purple-400 hover:text-purple-700 font-bold transition-colors"
         >
-          <span>1C Aksiyalar</span>
+          <span>{isUz ? "1C Aksiyalar" : "Акции 1С"}</span>
         </Link>
         <Link
           href="/brands"

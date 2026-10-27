@@ -6,10 +6,12 @@ import { useCartStore } from "@/lib/store/cart";
 import { useFavoritesStore } from "@/lib/store/favorites";
 import { useMobileSearchStore } from "@/lib/store/mobileSearch";
 import { useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 
 export function MobileNav() {
   const t = useTranslations("common");
+  const locale = useLocale();
+  const isUz = locale === "uz";
   const { getTotalItems } = useCartStore();
   const { getCount } = useFavoritesStore();
   const { openSearch } = useMobileSearchStore();
@@ -22,7 +24,7 @@ export function MobileNav() {
 
   return (
     <nav
-      aria-label="Mobil navigatsiya"
+      aria-label={isUz ? "Mobil navigatsiya" : "Мобильная навигация"}
       className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 md:hidden pt-2 pb-[max(env(safe-area-inset-bottom),14px)] px-2 flex items-center justify-around select-none"
       style={{ touchAction: "manipulation" }}
     >
@@ -48,11 +50,11 @@ export function MobileNav() {
       <button
         type="button"
         onClick={openSearch}
-        aria-label="Qidiruv"
+        aria-label={isUz ? "Qidiruv" : "Поиск"}
         className="min-w-[48px] min-h-[44px] flex flex-col items-center justify-center gap-1 text-[10px] font-medium text-slate-600 dark:text-slate-400 hover:text-sora-600 active:scale-95 transition-transform cursor-pointer"
       >
         <Search className="w-5 h-5" />
-        <span>Qidiruv</span>
+        <span>{isUz ? "Qidiruv" : "Поиск"}</span>
       </button>
 
       {/* Favorites */}
