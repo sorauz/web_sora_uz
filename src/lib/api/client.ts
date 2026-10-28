@@ -535,6 +535,34 @@ class SoraApiClient {
   }
 
   /**
+   * Safely parses 1C `/register` JSON responses, including B2B company names
+   * that may contain unescaped inner double quotes (e.g. `"name": ""NAVRUZ" MCHJ"`).
+   */
+  private parseRegisterJson(text: string): Record<string, unknown> {
+    try {
+      return JSON.parse(text);
+    } catch {
+      const idMatch = text.match(/"id"\s*:\s*"([^"]+)"/);
+      const typeMatch = text.match(/"type"\s*:\s*"(B2C|B2B)"/);
+      const errorMatch = text.match(/"error"\s*:\s*"([^"]+)"/);
+      const msgMatch = text.match(/"message"\s*:\s*"([^"]+)"/);
+      const nameMatch = text.match(
+        /"name"\s*:\s*"(.*?)"\s*(?:,\s*"(?:type|id|error|message)"|\s*\})/s
+      );
+      if (idMatch || errorMatch || msgMatch || nameMatch) {
+        return {
+          ...(idMatch ? { id: idMatch[1] } : {}),
+          ...(nameMatch ? { name: nameMatch[1].trim() } : {}),
+          ...(typeMatch ? { type: typeMatch[1] } : {}),
+          ...(errorMatch ? { error: errorMatch[1] } : {}),
+          ...(msgMatch ? { message: msgMatch[1] } : {}),
+        };
+      }
+      return { error: text };
+    }
+  }
+
+  /**
    * Authorize existing customer in 1C ERP via GET /register
    * - B2C: type=B2C&phone=+998...&password=...
    * - B2B: type=B2B&inn=...&password=...
@@ -570,12 +598,7 @@ class SoraApiClient {
       });
 
       const text = await response.text();
-      let data: Record<string, unknown> = {};
-      try {
-        data = JSON.parse(text);
-      } catch {
-        data = { error: text };
-      }
+      const data = this.parseRegisterJson(text);
 
       if (response.ok) {
         const parsed = OneCUserResponseSchema.safeParse(data);
@@ -654,12 +677,7 @@ class SoraApiClient {
       });
 
       const text = await response.text();
-      let data: Record<string, unknown> = {};
-      try {
-        data = JSON.parse(text);
-      } catch {
-        data = { error: text };
-      }
+      const data = this.parseRegisterJson(text);
 
       if (response.status === 201 || response.ok) {
         return {

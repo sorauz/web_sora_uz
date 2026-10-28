@@ -70,13 +70,8 @@ export async function POST(request: NextRequest) {
       result.isConflict && result.name ? result.name.trim() : name.trim();
 
     if (!result.success && !result.isConflict) {
-      // If 1C server is temporarily unreachable (>=500) or throws the 1C module 'type' check bug,
-      // provide a resilient fallback UUID so the OTP-verified customer is never blocked.
-      const isOneCTypeBug =
-        typeof result.error === "string" &&
-        result.error.includes("'type' parametri");
-
-      if (result.statusCode >= 500 || isOneCTypeBug) {
+      // If 1C server is temporarily unreachable, provide resilient fallback UUID so verified customer is not blocked
+      if (result.statusCode >= 500) {
         userId = crypto.randomUUID();
       } else {
         return NextResponse.json(
