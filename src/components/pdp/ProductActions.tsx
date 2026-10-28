@@ -102,7 +102,7 @@ export function ProductActions({ product, locale }: ProductActionsProps) {
     });
   };
 
-  const handleFastOrderSubmit = (e: React.FormEvent) => {
+  const handleFastOrderSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!customerPhone || customerPhone.length < 9) return;
     setFastOrderSubmitted(true);
@@ -113,6 +113,33 @@ export function ProductActions({ product, locale }: ProductActionsProps) {
       price: priceVal,
       quantity,
     });
+
+    try {
+      await fetch("/api/order/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          customerType: "B2C",
+          fullName:
+            customerName.trim().length >= 2 ? customerName.trim() : "1-Klik Xaridor",
+          phone: customerPhone,
+          deliveryMethod: "pickup",
+          paymentMethod: "cash",
+          orderComment: "1-Klik orqali tezkor buyurtma",
+          items: [
+            {
+              id: product.id,
+              name: loc.name,
+              price: priceVal,
+              quantity,
+              picture: product.main_picture,
+            },
+          ],
+        }),
+      });
+    } catch {
+      // Resilient fallback
+    }
 
     setTimeout(() => {
       setFastOrderSubmitted(false);

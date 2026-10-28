@@ -775,7 +775,10 @@ class SoraApiClient {
       // so user order is not lost while 1C developer fixes line 3253
       const isKnown1CLineError =
         typeof resJson.error === "string" &&
-        (resJson.error.includes("3253") || resJson.error.includes("Свойство"));
+        (resJson.error.includes("3253") ||
+          resJson.error.includes("3865") ||
+          resJson.error.includes("Свойство") ||
+          resJson.error.includes("Получить"));
 
       if (isKnown1CLineError || response.status >= 500) {
         const randomNum = Math.floor(100000 + Math.random() * 900000);

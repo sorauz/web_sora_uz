@@ -6,6 +6,7 @@ import {
   OneCOrderRequest,
 } from "@/lib/schemas/order";
 import { AuthUserSchema, normalizePhone } from "@/lib/schemas/auth";
+import { deriveOneCPassword } from "@/lib/sms/otp-store";
 
 export async function POST(req: NextRequest) {
   try {
@@ -41,18 +42,25 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // 2. Determine contact_id (КонтактноеЛицо GUID)
-    let contactId = sessionUser?.id;
+    const cleanPhone = normalizePhone(data.phone);
+    const cleanAltPhone = data.altPhone ? normalizePhone(data.altPhone) : "";
+    const isB2B = data.customerType === "B2B";
 
-    if (!contactId) {
-      // Guest order: attempt to get or create contact in 1C
-      const cleanPhone = normalizePhone(data.phone);
+    // 2. Determine contact_id (КонтактноеЛицо GUID — required for B2C, optional for B2B)
+    let contactId: string | undefined =
+      sessionUser?.type === "B2C" && sessionUser.id
+        ? sessionUser.id
+        : undefined;
+
+    if (!isB2B && !contactId) {
+      // B2C guest order: get or create КонтактноеЛицо in 1C
       try {
         const regRes = await api.registerUser({
           type: "B2C",
           name: data.fullName,
           phone1: cleanPhone,
-          password: "GuestOrder123",
+          phone2: cleanAltPhone,
+          password: deriveOneCPassword(cleanPhone),
         });
 
         if (regRes.id) {
@@ -67,9 +75,8 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // 3. Determine client_id if B2B
+    // 3. Determine client_id (Контрагент GUID — required for B2B)
     let clientId: string | undefined = undefined;
-    const isB2B = data.customerType === "B2B";
 
     if (isB2B) {
       if (sessionUser?.type === "B2B" && sessionUser.id) {
@@ -81,7 +88,8 @@ export async function POST(req: NextRequest) {
             type: "B2B",
             name: data.companyName || data.fullName,
             inn: cleanInn,
-            password: "B2BOrder123",
+            phone1: cleanPhone,
+            password: deriveOneCPassword(cleanInn || cleanPhone),
           });
           if (regB2B.id) {
             clientId = regB2B.id;
@@ -99,6 +107,9 @@ export async function POST(req: NextRequest) {
 
     // 4. Delivery and Geolocation formatting
     const withoutDelivery = data.deliveryMethod === "pickup";
+    const resolvedGeolocation = withoutDelivery
+      ? ""
+      : (data.geolocation || "").trim().slice(0, 150);
     let comment = data.orderComment || "";
 
     if (!withoutDelivery) {
@@ -126,7 +137,7 @@ export async function POST(req: NextRequest) {
       contact_id: contactId,
       client_id: isB2B ? clientId : undefined,
       without_delivery: withoutDelivery,
-      geolocation: "",
+      geolocation: resolvedGeolocation,
       comment: comment.substring(0, 350),
       products: data.items.map((item) => ({
         product_id: item.id,

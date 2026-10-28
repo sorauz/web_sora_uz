@@ -52,6 +52,8 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
   const [district, setDistrict] = useState("");
   const [address, setAddress] = useState("");
   const [landmark, setLandmark] = useState("");
+  const [geolocation, setGeolocation] = useState("");
+  const [isLocating, setIsLocating] = useState(false);
   const [orderComment, setOrderComment] = useState("");
 
   const [paymentMethod, setPaymentMethod] = useState<"cash" | "payme" | "click" | "card" | "b2b">("cash");
@@ -128,6 +130,7 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
           district,
           address,
           landmark,
+          geolocation,
           orderComment,
           paymentMethod,
           companyName,
@@ -524,9 +527,52 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                  {t("address")} *
-                </label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                    {t("address")} *
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (typeof navigator === "undefined" || !navigator.geolocation) return;
+                      setIsLocating(true);
+                      navigator.geolocation.getCurrentPosition(
+                        (pos) => {
+                          const lat = pos.coords.latitude.toFixed(6);
+                          const lng = pos.coords.longitude.toFixed(6);
+                          setGeolocation(
+                            `https://maps.google.com/maps?q=${lat},${lng}&ll=${lat},${lng}&z=16`
+                          );
+                          setIsLocating(false);
+                        },
+                        () => {
+                          setIsLocating(false);
+                        },
+                        { enableHighAccuracy: true, timeout: 8000 }
+                      );
+                    }}
+                    className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-lg border transition-colors cursor-pointer ${
+                      geolocation
+                        ? "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300"
+                        : "bg-sora-50 dark:bg-sora-950/40 border-sora-200 dark:border-sora-800 text-sora-600 dark:text-sora-400 hover:bg-sora-100"
+                    }`}
+                  >
+                    <MapPin className="w-3 h-3" />
+                    <span>
+                      {isLocating
+                        ? locale === "uz"
+                          ? "Aniqlanmoqda..."
+                          : "Определение..."
+                        : geolocation
+                        ? locale === "uz"
+                          ? "GPS biriktirildi ✓"
+                          : "GPS прикреплен ✓"
+                        : locale === "uz"
+                        ? "GPS joylashuvni ulash"
+                        : "Прикрепить GPS-локацию"}
+                    </span>
+                  </button>
+                </div>
                 <div className="relative">
                   <MapPin className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                   <input

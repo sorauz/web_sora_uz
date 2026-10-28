@@ -17,7 +17,7 @@ export type OrderProductItem = z.infer<typeof OrderProductItemSchema>;
  */
 export const OneCOrderRequestSchema = z.object({
   type: z.enum(["B2C", "B2B"]),
-  contact_id: z.string().min(1, "contact_id majburiy!"),
+  contact_id: z.string().optional(),
   client_id: z.string().optional(),
   without_delivery: z.boolean(),
   geolocation: z.string().max(150).optional().default(""),
@@ -25,14 +25,16 @@ export const OneCOrderRequestSchema = z.object({
   products: z.array(OrderProductItemSchema).min(1, "Savatcha bo'sh! 'products' massivi yuborilmadi."),
 }).refine(
   (data) => {
+    if (data.type === "B2C") {
+      return !!data.contact_id && data.contact_id.trim().length > 0;
+    }
     if (data.type === "B2B") {
       return !!data.client_id && data.client_id.trim().length > 0;
     }
     return true;
   },
   {
-    message: "B2B buyurtma uchun 'client_id' majburiy!",
-    path: ["client_id"],
+    message: "B2C uchun 'contact_id', B2B uchun esa 'client_id' majburiy!",
   }
 );
 
@@ -79,6 +81,7 @@ export const CheckoutCreateOrderInputSchema = z.object({
   district: z.string().optional(),
   address: z.string().optional(),
   landmark: z.string().optional(),
+  geolocation: z.string().max(150).optional().default(""),
   orderComment: z.string().optional(),
   paymentMethod: z.string(),
   companyName: z.string().optional(),
