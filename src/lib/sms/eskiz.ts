@@ -75,14 +75,14 @@ export function buildOtpMessage(code: string, locale: "uz" | "ru" = "uz"): strin
 
 class EskizSmsService {
   private get email(): string {
-    return (process.env.ESKIZ_EMAIL || "").trim();
+    return (process.env.ESKIZ_EMAIL || "alfaprintservis@mail.ru").trim();
   }
 
   private get password(): string {
     return (
       process.env.ESKIZ_SECRET_PASSWORD ||
       process.env.ESKIZ_PASSWORD ||
-      ""
+      "NC9Lkx0lof6FHaDQ7j4COrctzkUGns49ByajAWon"
     ).trim();
   }
 
@@ -91,11 +91,7 @@ class EskizSmsService {
   }
 
   private get isMockEnabled(): boolean {
-    return (
-      process.env.MOCK_SMS_OTP === "true" ||
-      !this.email ||
-      !this.password
-    );
+    return process.env.MOCK_SMS_OTP === "true";
   }
 
   private get isExplicitTestMode(): boolean {
@@ -312,25 +308,21 @@ class EskizSmsService {
     // 2. Acquire Bearer Token
     let token = await this.getValidToken();
     if (!token) {
-      console.warn(
-        `[Eskiz] Token olib bo'lmadi, test rejimida davom etilmoqda. Code: ${code}`
-      );
+      console.error("[Eskiz] Token olib bo'lmadi!");
       return {
-        success: true,
-        status: "fallback_test",
-        isTestMode: true,
-        devCode: code,
+        success: false,
+        error:
+          locale === "uz"
+            ? "SMS shlyuziga ulanishda xatolik yuz berdi"
+            : "Ошибка подключения к СМС-шлюзу",
       };
     }
 
-    // 3. If ESKIZ_TEST_MODE="true", send Eskiz standard test text ("Bu Eskiz dan test")
-    const testMessage =
-      locale === "ru" ? "Это тест от Eskiz" : "Bu Eskiz dan test";
+    // 3. Dispatch SMS using approved service template
     const realMessage = buildOtpMessage(code, locale);
-    const primaryMessage = this.isExplicitTestMode ? testMessage : realMessage;
 
     try {
-      let result = await this.dispatchSms(token, eskizPhone, primaryMessage);
+      let result = await this.dispatchSms(token, eskizPhone, realMessage);
 
       // If 401 Unauthorized, refresh token once and retry
       if (result.status === 401) {
@@ -338,7 +330,7 @@ class EskizSmsService {
         const refreshedToken = await this.login();
         if (refreshedToken) {
           token = refreshedToken;
-          result = await this.dispatchSms(token, eskizPhone, primaryMessage);
+          result = await this.dispatchSms(token, eskizPhone, realMessage);
         }
       }
 
@@ -355,49 +347,28 @@ class EskizSmsService {
           success: true,
           requestId: String(result.data.id || ""),
           status: String(result.data.status || "waiting"),
-          isTestMode: this.isExplicitTestMode,
-          devCode: this.isExplicitTestMode ? code : undefined,
-        };
-      }
-
-      // 4. If template is still in Moderation ("Moderatsiyada") on my.eskiz.uz,
-      // Eskiz returns 400. Automatically fallback to "Bu Eskiz dan test" so real SMS
-      // connectivity works and provide devCode so user can complete authentication.
-      if (!this.isExplicitTestMode && result.status === 400) {
-        console.warn(
-          `[Eskiz] Shablon hali moderatsiyada bo'lishi mumkin (${JSON.stringify(
-            result.data
-          )}). Standart test matni yuborilmoqda...`
-        );
-        const testFallback = await this.dispatchSms(
-          token,
-          eskizPhone,
-          testMessage
-        );
-        return {
-          success: true,
-          requestId: String(testFallback.data?.id || ""),
-          status: "moderation_fallback",
-          isTestMode: true,
-          devCode: code,
         };
       }
 
       // Balance exhausted (402) or other Eskiz error
       console.error("[Eskiz] SMS send error:", result.status, result.data);
       return {
-        success: true,
-        status: "fallback_test",
-        isTestMode: true,
-        devCode: code,
+        success: false,
+        error:
+          typeof result.data?.message === "string"
+            ? (result.data.message as string)
+            : locale === "uz"
+            ? "SMS yuborishda xatolik yuz berdi"
+            : "Ошибка при отправке СМС",
       };
     } catch (err) {
       console.error("[Eskiz] Exception while sending SMS:", err);
       return {
-        success: true,
-        status: "network_fallback",
-        isTestMode: true,
-        devCode: code,
+        success: false,
+        error:
+          locale === "uz"
+            ? "Tarmoq xatoligi. Iltimos, qaytadan urinib ko'ring."
+            : "Сетевая ошибка. Пожалуйста, попробуйте снова.",
       };
     }
   }

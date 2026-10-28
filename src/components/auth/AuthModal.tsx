@@ -78,7 +78,6 @@ export function AuthModal({ locale = "uz" }: AuthModalProps) {
   ]);
   const [verifiedToken, setVerifiedToken] = useState("");
   const [cooldown, setCooldown] = useState(0);
-  const [devCodeHint, setDevCodeHint] = useState<string | undefined>(undefined);
 
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
@@ -237,7 +236,6 @@ export function AuthModal({ locale = "uz" }: AuthModalProps) {
 
     reachGoal("OTP_SENT", { type: modalType });
     setCooldown(res.cooldown ?? 60);
-    setDevCodeHint(res.devCode);
     setOtpDigits(["", "", "", ""]);
     setStep("otp");
 
@@ -537,37 +535,6 @@ export function AuthModal({ locale = "uz" }: AuthModalProps) {
           {step === "otp" && (
             /* --- STEP 2: 4-DIGIT OTP PIN INPUT --- */
             <div className="space-y-5">
-              {/* Test / Pending Moderation Helper Banner */}
-              {devCodeHint && (
-                <div className="p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/70 flex items-center justify-between gap-2 text-xs text-amber-900 dark:text-amber-200">
-                  <div className="flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-amber-600 shrink-0" />
-                    <span>
-                      {isUz ? "Test rejimi kodi:" : "Тестовый код:"}{" "}
-                      <strong className="font-mono text-sm tracking-wider">
-                        {devCodeHint}
-                      </strong>
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const chars = devCodeHint.split("") as [
-                        string,
-                        string,
-                        string,
-                        string
-                      ];
-                      setOtpDigits(chars);
-                      void submitOtpCode(devCodeHint);
-                    }}
-                    className="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-bold text-[11px] transition-colors cursor-pointer shrink-0"
-                  >
-                    {isUz ? "Avto-kiritish" : "Вставить"}
-                  </button>
-                </div>
-              )}
-
               {/* 4 Pin Boxes */}
               <div className="flex items-center justify-center gap-3 sm:gap-4 py-1">
                 {[0, 1, 2, 3].map((idx) => (

@@ -119,8 +119,6 @@ export async function POST(request: NextRequest) {
       phone: normPhone,
       cooldown: challenge.cooldown,
       expiresIn: challenge.expiresIn,
-      isTestMode: smsResult.isTestMode || false,
-      devCode: smsResult.devCode,
     });
   } catch (err) {
     return NextResponse.json(
