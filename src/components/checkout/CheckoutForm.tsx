@@ -20,10 +20,12 @@ import {
   Smartphone,
   ShieldCheck,
   CheckCircle,
+  CheckCircle2,
   Clock,
   ArrowRight,
   AlertCircle,
   Navigation,
+  Sparkles,
 } from "lucide-react";
 import {
   LocationPickerModal,
@@ -111,9 +113,48 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
   const deliveryFee = isFreeDelivery ? 0 : 30000;
   const total = subtotal + deliveryFee;
 
+  const handleSelectOrderType = (type: "B2C" | "B2B") => {
+    setOrderType(type);
+    if (type === "B2B") {
+      setPaymentMethod("b2b");
+    } else if (type === "B2C" && paymentMethod === "b2b") {
+      setPaymentMethod("cash");
+    }
+  };
+
+  const handleSelectPaymentMethod = (method: "cash" | "payme" | "click" | "card" | "b2b") => {
+    setPaymentMethod(method);
+    if (method === "b2b") {
+      setOrderType("B2B");
+    }
+  };
+
   const handleSubmitOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!phone || phone.trim().length < 9 || !fullName.trim()) return;
+
+    const finalCustomerType =
+      orderType === "B2B" || paymentMethod === "b2b" ? "B2B" : "B2C";
+
+    if (finalCustomerType === "B2B") {
+      if (!companyName.trim()) {
+        setSubmitError(
+          locale === "uz"
+            ? "Tashkilot nomi kiritilishi shart!"
+            : "Название организации обязательно!"
+        );
+        return;
+      }
+      const cleanInn = companyInn.replace(/\D/g, "");
+      if (cleanInn.length !== 9) {
+        setSubmitError(
+          locale === "uz"
+            ? "Tashkilotning 9 xonali STIR (INN) raqami kiritilishi shart!"
+            : "ИНН организации должен состоять ровно из 9 цифр!"
+        );
+        return;
+      }
+    }
 
     hasSubmittedRef.current = true;
     setIsSubmitting(true);
@@ -126,21 +167,21 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          customerType: orderType,
+          customerType: finalCustomerType,
           fullName,
           phone,
-          altPhone,
-          email,
+          altPhone: altPhone || undefined,
+          email: email || undefined,
           deliveryMethod,
-          region,
-          district,
-          address,
-          landmark,
-          geolocation,
-          orderComment,
+          region: deliveryMethod === "courier" ? region : undefined,
+          district: deliveryMethod === "courier" ? district : undefined,
+          address: deliveryMethod === "courier" ? address : undefined,
+          landmark: landmark || undefined,
+          geolocation: deliveryMethod === "courier" ? geolocation : "",
+          orderComment: orderComment || undefined,
           paymentMethod,
-          companyName,
-          companyInn,
+          companyName: finalCustomerType === "B2B" ? companyName.trim() : undefined,
+          companyInn: finalCustomerType === "B2B" ? companyInn.trim() : undefined,
           items: items.map((i) => ({
             id: i.id,
             name: i.name,
@@ -290,7 +331,7 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
           <div className="flex gap-2.5">
             <button
               type="button"
-              onClick={() => setOrderType("B2C")}
+              onClick={() => handleSelectOrderType("B2C")}
               className={`flex-1 py-2 px-3 rounded-xl text-xs font-semibold border flex items-center justify-center gap-2 transition-all cursor-pointer ${
                 orderType === "B2C"
                   ? "border-sora-500 bg-sora-50/70 dark:bg-sora-950/40 text-sora-700 dark:text-sora-300 font-bold"
@@ -302,10 +343,7 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
             </button>
             <button
               type="button"
-              onClick={() => {
-                setOrderType("B2B");
-                setPaymentMethod("b2b");
-              }}
+              onClick={() => handleSelectOrderType("B2B")}
               className={`flex-1 py-2 px-3 rounded-xl text-xs font-semibold border flex items-center justify-center gap-2 transition-all cursor-pointer ${
                 orderType === "B2B"
                   ? "border-amber-500 bg-amber-50/70 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 font-bold"
@@ -459,13 +497,27 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
                 onChange={() => setDeliveryMethod("courier")}
                 className="mt-1"
               />
-              <div className="space-y-1">
+              <div className="space-y-1.5 flex-1">
                 <div className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-1.5">
                   <Truck className="w-4 h-4 text-sora-600 dark:text-sora-400" />
                   <span>{t("deliveryCourier")}</span>
                 </div>
-                <div className="text-xs text-slate-500 dark:text-slate-400">
-                  {isFreeDelivery ? t("freeDelivery") : `30 000 ${common("currency")}`}
+                <div>
+                  {isFreeDelivery ? (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      <span>{t("freeDelivery")}</span>
+                    </span>
+                  ) : (
+                    <div className="flex flex-wrap items-center gap-1.5 text-xs text-slate-600 dark:text-slate-300">
+                      <span className="font-bold text-slate-900 dark:text-white">
+                        {t("paidDelivery")}
+                      </span>
+                      <span className="text-[11px] text-slate-400 dark:text-slate-500">
+                        ({t("freeDeliveryThreshold")})
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
             </label>
@@ -484,13 +536,16 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
                 onChange={() => setDeliveryMethod("pickup")}
                 className="mt-1"
               />
-              <div className="space-y-1">
+              <div className="space-y-1.5 flex-1">
                 <div className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-1.5">
                   <Building2 className="w-4 h-4 text-emerald-600" />
                   <span>{t("deliveryPickup")}</span>
                 </div>
-                <div className="text-xs text-emerald-600 font-semibold">
-                  {t("freeDelivery")}
+                <div>
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <span>{t("alwaysFree")}</span>
+                  </span>
                 </div>
               </div>
             </label>
@@ -532,36 +587,71 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
                 </div>
               </div>
 
-              <div>
-                <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5">
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
-                    {t("address")} *
-                  </label>
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      type="button"
-                      onClick={() => setIsMapModalOpen(true)}
-                      className={`inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-lg border transition-colors cursor-pointer ${
+              {/* HERO INTERACTIVE MAP PICKER CARD */}
+              <div
+                onClick={() => setIsMapModalOpen(true)}
+                className={`p-4 sm:p-5 rounded-2xl border-2 transition-all cursor-pointer group ${
+                  geolocation
+                    ? "bg-emerald-50/80 dark:bg-emerald-950/30 border-emerald-500 shadow-xs"
+                    : "bg-linear-to-r from-sora-50/80 via-white to-blue-50/60 dark:from-sora-950/30 dark:via-slate-900 dark:to-blue-950/30 border-sora-300 dark:border-sora-700 hover:border-sora-500 hover:shadow-md"
+                }`}
+              >
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5">
+                  <div className="flex items-start gap-3.5">
+                    <div
+                      className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-105 ${
                         geolocation
-                          ? "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300"
-                          : "bg-sora-600 hover:bg-sora-700 border-sora-600 text-white shadow-2xs"
+                          ? "bg-emerald-600 text-white shadow-emerald-500/25 shadow-md"
+                          : "bg-sora-600 text-white shadow-sora-500/25 shadow-md"
                       }`}
                     >
-                      <MapPin className="w-3.5 h-3.5" />
-                      <span>
+                      <MapPin className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h4 className="font-bold text-sm sm:text-base text-slate-900 dark:text-white">
+                          {geolocation
+                            ? t("mapPickerSelectedTitle")
+                            : t("mapPickerTitle")}
+                        </h4>
+                        {geolocation && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300">
+                            <CheckCircle2 className="w-3 h-3" />
+                            <span>{locale === "uz" ? "Aniq nuqta saqlandi" : "Точка сохранена"}</span>
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 leading-relaxed">
                         {geolocation
-                          ? locale === "uz"
-                            ? "Xaritada belgilandi ✓ (O'zgartirish)"
-                            : "Выбрано на карте ✓ (Изменить)"
-                          : locale === "uz"
-                          ? "Xaritadan belgilash"
-                          : "Указать на карте"}
+                          ? (address || (locale === "uz" ? "Koordinatalar biriktirildi" : "Координаты привязаны"))
+                          : t("mapPickerSubtitle")}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsMapModalOpen(true);
+                      }}
+                      className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition-all cursor-pointer ${
+                        geolocation
+                          ? "bg-white dark:bg-slate-800 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 hover:bg-emerald-50 shadow-2xs"
+                          : "bg-sora-600 hover:bg-sora-700 text-white shadow-md shadow-sora-600/30 active:scale-[0.98]"
+                      }`}
+                    >
+                      <MapPin className="w-4 h-4" />
+                      <span>
+                        {geolocation ? t("mapPickerChangeBtn") : t("mapPickerOpenBtn")}
                       </span>
                     </button>
 
                     <button
                       type="button"
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.stopPropagation();
                         if (typeof navigator === "undefined" || !navigator.geolocation) {
                           setIsMapModalOpen(true);
                           return;
@@ -589,19 +679,19 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
                           ? "Joriy GPS joylashuvni aniqlash"
                           : "Определить текущую GPS-локацию"
                       }
-                      className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-1 rounded-lg border bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 transition-colors cursor-pointer"
+                      className="px-3 py-2.5 rounded-xl text-xs font-bold border bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 transition-all flex items-center gap-1.5 cursor-pointer"
                     >
-                      <Navigation className="w-3 h-3 text-sora-600" />
-                      <span>
-                        {isLocating
-                          ? locale === "uz"
-                            ? "GPS..."
-                            : "GPS..."
-                          : "GPS"}
-                      </span>
+                      <Navigation className={`w-3.5 h-3.5 text-sora-600 ${isLocating ? "animate-spin" : ""}`} />
+                      <span>{isLocating ? "GPS..." : "GPS"}</span>
                     </button>
                   </div>
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                  {t("address")} *
+                </label>
                 <div className="relative">
                   <MapPin className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                   <input
@@ -679,7 +769,7 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
                 type="radio"
                 name="paymentMethod"
                 checked={paymentMethod === "cash"}
-                onChange={() => setPaymentMethod("cash")}
+                onChange={() => handleSelectPaymentMethod("cash")}
                 className="mt-1"
               />
               <div>
@@ -705,7 +795,7 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
                 type="radio"
                 name="paymentMethod"
                 checked={paymentMethod === "payme"}
-                onChange={() => setPaymentMethod("payme")}
+                onChange={() => handleSelectPaymentMethod("payme")}
                 className="mt-1"
               />
               <div>
@@ -733,7 +823,7 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
                 type="radio"
                 name="paymentMethod"
                 checked={paymentMethod === "click"}
-                onChange={() => setPaymentMethod("click")}
+                onChange={() => handleSelectPaymentMethod("click")}
                 className="mt-1"
               />
               <div>
@@ -759,7 +849,7 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
                 type="radio"
                 name="paymentMethod"
                 checked={paymentMethod === "card"}
-                onChange={() => setPaymentMethod("card")}
+                onChange={() => handleSelectPaymentMethod("card")}
                 className="mt-1"
               />
               <div>
@@ -777,7 +867,7 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
             <label
               className={`p-4 rounded-2xl border-2 cursor-pointer transition-all flex items-start gap-3.5 ${
                 paymentMethod === "b2b"
-                  ? "border-sora-600 bg-sora-50/40 dark:bg-sora-950/20"
+                  ? "border-amber-500 bg-amber-50/40 dark:bg-amber-950/20"
                   : "border-slate-200 dark:border-slate-800 hover:border-slate-300"
               }`}
             >
@@ -785,7 +875,7 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
                 type="radio"
                 name="paymentMethod"
                 checked={paymentMethod === "b2b"}
-                onChange={() => setPaymentMethod("b2b")}
+                onChange={() => handleSelectPaymentMethod("b2b")}
                 className="mt-1"
               />
               <div className="flex-1">
@@ -799,6 +889,10 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
 
                 {paymentMethod === "b2b" && (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3 pt-3 border-t border-slate-200 dark:border-slate-800">
+                    <div className="sm:col-span-2 flex items-center gap-1.5 text-xs font-semibold text-amber-700 dark:text-amber-400 bg-amber-50/70 dark:bg-amber-950/40 p-2 rounded-lg border border-amber-200/50 dark:border-amber-900/30">
+                      <Sparkles className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                      <span>{t("b2bAutoSwitched")}</span>
+                    </div>
                     <div>
                       <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">
                         {t("companyName")} *
@@ -808,13 +902,13 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
                         required={paymentMethod === "b2b"}
                         value={companyName}
                         onChange={(e) => setCompanyName(e.target.value)}
-                        placeholder='OOO "SORA ENTERPRISE"'
-                        className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs"
+                        placeholder='«Navruz International» MCHJ'
+                        className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs dark:text-white"
                       />
                     </div>
                     <div>
                       <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                        {t("companyInn")} *
+                        {t("companyInn")} (9 xonali STIR) *
                       </label>
                       <input
                         type="text"
@@ -824,8 +918,8 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
                         required={paymentMethod === "b2b"}
                         value={companyInn}
                         onChange={(e) => setCompanyInn(e.target.value)}
-                        placeholder="123456789"
-                        className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs"
+                        placeholder="204393073"
+                        className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-mono dark:text-white"
                       />
                     </div>
                   </div>
@@ -949,7 +1043,7 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
           if (detectedDistrict && !district.trim()) {
             setDistrict(detectedDistrict);
           }
-          if (detectedAddress && !address.trim()) {
+          if (detectedAddress) {
             setAddress(detectedAddress);
           }
         }}

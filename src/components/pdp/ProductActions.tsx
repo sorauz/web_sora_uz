@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import {
@@ -18,10 +18,13 @@ import {
   Heart,
   Scale,
   Send,
+  Loader2,
+  Sparkles,
 } from "lucide-react";
 import { useCartStore } from "@/lib/store/cart";
 import { useFavoritesStore } from "@/lib/store/favorites";
 import { useCompareStore } from "@/lib/store/compare";
+import { useAuthStore } from "@/lib/store/auth";
 import { Product, getProductLocalized } from "@/lib/schemas/product";
 import { calculateProductPrice } from "@/lib/utils/price";
 import { reachGoal, sendEcommerceEvent } from "@/lib/analytics/yandex";
@@ -47,9 +50,12 @@ export function ProductActions({ product, locale }: ProductActionsProps) {
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [fastOrderSubmitted, setFastOrderSubmitted] = useState(false);
-  const [customerName, setCustomerName] = useState("");
-  const [customerPhone, setCustomerPhone] = useState("+998 ");
+  const [fastComment, setFastComment] = useState("");
+  const [pendingFastOrder, setPendingFastOrder] = useState(false);
+
+  const { user, openModal } = useAuthStore();
 
   const addItem = useCartStore((state) => state.addItem);
   const { toggleFavorite, isFavorite } = useFavoritesStore();
@@ -57,6 +63,14 @@ export function ProductActions({ product, locale }: ProductActionsProps) {
 
   const isFav = isFavorite(product.id);
   const inCompare = isInCompare(product.id);
+
+  // Automatically reopen fast order modal once guest successfully verifies via AuthModal
+  useEffect(() => {
+    if (user && pendingFastOrder) {
+      setIsModalOpen(true);
+      setPendingFastOrder(false);
+    }
+  }, [user, pendingFastOrder]);
 
   const handleAddToCart = () => {
     if (!canAddToCart) return;
@@ -104,8 +118,14 @@ export function ProductActions({ product, locale }: ProductActionsProps) {
 
   const handleFastOrderSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!customerPhone || customerPhone.length < 9) return;
-    setFastOrderSubmitted(true);
+    if (!user) {
+      setPendingFastOrder(true);
+      setIsModalOpen(false);
+      openModal({ tab: "register" });
+      return;
+    }
+
+    setIsSubmitting(true);
 
     reachGoal("ONE_CLICK_SUBMIT", {
       id: product.id,
@@ -115,17 +135,20 @@ export function ProductActions({ product, locale }: ProductActionsProps) {
     });
 
     try {
-      await fetch("/api/order/create", {
+      const res = await fetch("/api/order/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          customerType: "B2C",
-          fullName:
-            customerName.trim().length >= 2 ? customerName.trim() : "1-Klik Xaridor",
-          phone: customerPhone,
+          customerType: user.type || "B2C",
+          fullName: user.name || "1-Klik Xaridor",
+          phone: user.phone || "+998 90 000 00 00",
+          companyName: user.type === "B2B" ? user.name : undefined,
+          companyInn: user.type === "B2B" ? user.inn : undefined,
           deliveryMethod: "pickup",
-          paymentMethod: "cash",
-          orderComment: "1-Klik orqali tezkor buyurtma",
+          paymentMethod: user.type === "B2B" ? "b2b" : "cash",
+          orderComment: fastComment.trim()
+            ? `1-Klik tezkor buyurtma: ${fastComment.trim()}`
+            : "1-Klik orqali tezkor buyurtma",
           items: [
             {
               id: product.id,
@@ -137,16 +160,25 @@ export function ProductActions({ product, locale }: ProductActionsProps) {
           ],
         }),
       });
+
+      if (res.ok) {
+        setFastOrderSubmitted(true);
+        setTimeout(() => {
+          setFastOrderSubmitted(false);
+          setIsModalOpen(false);
+          setFastComment("");
+        }, 2500);
+      }
     } catch {
       // Resilient fallback
+      setFastOrderSubmitted(true);
+      setTimeout(() => {
+        setFastOrderSubmitted(false);
+        setIsModalOpen(false);
+      }, 2500);
+    } finally {
+      setIsSubmitting(false);
     }
-
-    setTimeout(() => {
-      setFastOrderSubmitted(false);
-      setIsModalOpen(false);
-      setCustomerName("");
-      setCustomerPhone("+998 ");
-    }, 2500);
   };
 
   return (
@@ -417,73 +449,147 @@ export function ProductActions({ product, locale }: ProductActionsProps) {
                   {t("fastOrderSuccess")}
                 </p>
               </div>
+            ) : !user ? (
+              /* GUEST: Needs SMS verification / Login first */
+              <div className="py-2 text-center space-y-4">
+                <div className="w-14 h-14 mx-auto rounded-2xl bg-amber-100 dark:bg-amber-950/50 text-amber-600 flex items-center justify-center shadow-xs">
+                  <ShieldCheck className="w-8 h-8 text-amber-600 dark:text-amber-400" />
+                </div>
+
+                <div className="space-y-1.5 px-2">
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                    {locale === "uz"
+                      ? "1-klikda xarid qilish"
+                      : "Быстрая покупка в 1 клик"}
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed max-w-sm mx-auto">
+                    {locale === "uz"
+                      ? "Buyurtmani bir zumda rasmiylashtirish uchun telefon raqamingiz orqali tizimga kiring. Bu buyurtmangiz 1C ERP tizimida xavfsiz saqlanishini ta'minlaydi."
+                      : "Для мгновенного оформления заказа войдите по номеру телефона. Это обеспечит надежное сохранение заказа в 1C ERP."}
+                  </p>
+                </div>
+
+                <div className="p-3.5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl flex items-center justify-between text-xs border border-slate-200/60 dark:border-slate-700/60">
+                  <span className="text-slate-500">
+                    {t("quantity")}: {quantity} {loc.unit}
+                  </span>
+                  <span className="font-bold text-slate-900 dark:text-white text-sm">
+                    {(priceVal * quantity).toLocaleString("ru-RU")} {common("currency")}
+                  </span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsModalOpen(false);
+                    setPendingFastOrder(true);
+                    openModal({ tab: "register" });
+                  }}
+                  className="w-full py-3.5 bg-sora-600 hover:bg-sora-700 active:scale-[0.98] text-white font-bold text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <Phone className="w-4 h-4" />
+                  <span>
+                    {locale === "uz"
+                      ? "Telefon orqali kirish (SMS kod)"
+                      : "Войти по номеру (СМС код)"}
+                  </span>
+                </button>
+              </div>
             ) : (
+              /* LOGGED-IN: Instant 1-Click with Verified Profile */
               <form onSubmit={handleFastOrderSubmit} className="space-y-4">
                 <div className="space-y-1">
-                  <h3 className="text-xl font-black text-slate-900 dark:text-white">
-                    {t("buyNow")}
-                  </h3>
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                    <h3 className="text-lg font-black text-slate-900 dark:text-white">
+                      {t("buyNow")}
+                    </h3>
+                  </div>
                   <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1">
                     {loc.name}
                   </p>
                 </div>
 
+                {/* Verified Customer Card (NO PHONE/NAME INPUT REQUIRED!) */}
+                <div className="p-3.5 bg-emerald-50/80 dark:bg-emerald-950/40 rounded-2xl border border-emerald-200 dark:border-emerald-800 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-9 h-9 rounded-full bg-emerald-600 text-white font-bold text-sm flex items-center justify-center shrink-0">
+                        {user.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <div className="font-bold text-sm text-slate-900 dark:text-white leading-tight">
+                          {user.name}
+                        </div>
+                        <div className="text-xs text-slate-500 dark:text-slate-400 font-mono">
+                          {user.phone || (user.type === "B2B" ? `STIR: ${user.inn}` : "")}
+                        </div>
+                      </div>
+                    </div>
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300">
+                      <ShieldCheck className="w-3.5 h-3.5" />
+                      <span>{locale === "uz" ? "Hisob tasdiqlangan" : "Подтвержден"}</span>
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-emerald-700/80 dark:text-emerald-400">
+                    {locale === "uz"
+                      ? "Buyurtma ushbu hisobingizga 1C tizimida avtomatik biriktiriladi."
+                      : "Заказ будет автоматически привязан к вашей учетной записи в 1C."}
+                  </p>
+                </div>
+
                 <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl flex items-center justify-between text-sm">
-                  <span className="text-slate-500">{t("quantity")}: {quantity} {loc.unit}</span>
+                  <span className="text-slate-500">
+                    {t("quantity")}: {quantity} {loc.unit}
+                  </span>
                   <span className="font-bold text-slate-900 dark:text-white">
                     {(priceVal * quantity).toLocaleString("ru-RU")} {common("currency")}
                   </span>
                 </div>
 
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                      {locale === "uz" ? "Ismingiz" : "Ваше имя"}
-                    </label>
-                    <div className="relative">
-                      <User className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                      <input
-                        type="text"
-                        required
-                        value={customerName}
-                        onChange={(e) => setCustomerName(e.target.value)}
-                        placeholder={locale === "uz" ? "Masalan: Jasur" : "Например: Жасур"}
-                        data-metrika-noindex="true"
-                        className="w-full pl-9 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sora-500 dark:text-white ym-disable-keys"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                      {locale === "uz" ? "Telefon raqamingiz" : "Ваш телефон"}
-                    </label>
-                    <div className="relative">
-                      <Phone className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                      <input
-                        type="tel"
-                        required
-                        value={customerPhone}
-                        onChange={(e) => setCustomerPhone(e.target.value)}
-                        placeholder="+998 90 123 45 67"
-                        data-metrika-noindex="true"
-                        className="w-full pl-9 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sora-500 dark:text-white ym-disable-keys"
-                      />
-                    </div>
-                  </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                    {locale === "uz"
+                      ? "Yetkazish manzili yoki izoh (ixtiyoriy)"
+                      : "Адрес доставки или примечание"}
+                  </label>
+                  <input
+                    type="text"
+                    value={fastComment}
+                    onChange={(e) => setFastComment(e.target.value)}
+                    placeholder={
+                      locale === "uz"
+                        ? "Masalan: Toshkent, Chilonzor 9"
+                        : "Например: Ташкент, Чиланзар 9"
+                    }
+                    className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm dark:text-white focus:outline-none focus:ring-2 focus:ring-sora-500"
+                  />
                 </div>
-
-                <p className="text-[11px] text-slate-400 dark:text-slate-500 leading-tight">
-                  {locale === "uz"
-                    ? "Tugmani bosish orqali siz shaxsiy ma'lumotlarni qayta ishlash shartlariga rozilik bildirasiz."
-                    : "Нажимая кнопку, вы соглашаетесь на обработку персональных данных."}
-                </p>
 
                 <button
                   type="submit"
-                  className="w-full py-3 bg-sora-600 hover:bg-sora-700 text-white font-bold rounded-xl shadow-md transition-colors"
+                  disabled={isSubmitting}
+                  className="w-full py-3.5 bg-amber-400 hover:bg-amber-500 active:scale-[0.98] text-slate-900 font-bold text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                 >
-                  {locale === "uz" ? "Buyurtmani tasdiqlash" : "Подтвердить заказ"}
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>
+                        {locale === "uz"
+                          ? "Buyurtma yuborilmoqda..."
+                          : "Оформление заказа..."}
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <Zap className="w-4 h-4 fill-current" />
+                      <span>
+                        {locale === "uz"
+                          ? "Buyurtmani tasdiqlash ⚡️"
+                          : "Подтвердить заказ ⚡️"}
+                      </span>
+                    </>
+                  )}
                 </button>
               </form>
             )}

@@ -1,0 +1,104 @@
+API: Buyurtmalarni qabul qilish va holatini ko'rish
+1. POST /SORA/hs/for_msp/order (Yangi buyurtma yaratish)
+Ushbu so'rov orqali veb-saytdagi savatcha 1C dagi "Реализация товаров" (Sotuv) hujjatiga aylanadi.
+
+So'rov tanasi (JSON):
+
+B2C (Jismoniy shaxs) namunasi:
+
+JSON
+{
+  "type": "B2C",
+  "contact_id": "79d1f6cb-3178-11e8-812c-d43d7e011714",
+  "without_delivery": false,
+  "geolocation": "https://maps.google.com/maps?q=41.351791,69.240149&ll=41.351791,69.240149&z=16",
+  "comment": "Eshik oldiga kelganda qo'ng'iroq qiling",
+  "products": [
+    {
+      "product_id": "8a3b5c21-1234-5678-9abc-def012345678",
+      "quantity": 2,
+      "price": 150000
+    },
+    {
+      "product_id": "9b4c6d32-2345-6789-0bcd-ef0123456789",
+      "quantity": 1,
+      "price": 45000
+    }
+  ]
+}
+B2B (Yuridik shaxs) namunasi (Qo'shimcha client_id talab qilinadi):
+
+JSON
+{
+  "type": "B2B",
+  "contact_id": "79d1f6cb-3178-11e8-812c-d43d7e011714",
+  "client_id": "123e4567-e89b-12d3-a456-426614174000",
+  "without_delivery": true,
+  "geolocation": "",
+  "comment": "Ofisga yetkazib berish, ishonchnoma tayyor",
+  "products": [
+    {
+      "product_id": "8a3b5c21-1234-5678-9abc-def012345678",
+      "quantity": 10,
+      "price": 140000
+    }
+  ]
+}
+Javoblar (Responses):
+
+201 Created (Muvaffaqiyatli saqlandi va O'tkazildi / Проведен):
+
+JSON
+{
+  "message": "Buyurtma muvaffaqiyatli qabul qilindi",
+  "order_number": "000000015",
+  "order_id": "a1b2c3d4-e5f6-7a8b-9c0d-e1f2a3b4c5d6"
+}
+400 Bad Request: Majburiy parametrlar yetishmasa, JSON formati xato bo'lsa yoki narx/miqdor formatida muammo bo'lsa.
+
+JSON
+{
+  "error": "Savatcha bo'sh! 'products' massivi yuborilmadi."
+}
+404 Not Found (Bog'liqlik xatosi): Yuborilgan mijoz, korxona yoki mahsulot IDsi 1C bazasidan topilmasa.
+
+JSON
+{
+  "error": "Yuborilgan 'contact_id' bazada topilmadi!"
+}
+500 Internal Server Error: Hujjat saqlandi, lekin 1C da "O'tkazish" (Проведение) jarayonida qoldiq yetishmovchiligi yoki boshqa ichki xato yuzaga kelsa.
+
+2. GET /SORA/hs/for_msp/order (Buyurtma holatini tekshirish)
+Mijoz shaxsiy kabinetida o'z buyurtmalarining joriy holatini (Status) ko'rishi uchun ishlatiladi.
+
+So'rov parametrlari (URL Query):
+
+?order_id=a1b2c3d4-e5f6-7a8b-9c0d-e1f2a3b4c5d6 (POST dan qaytgan order_id majburiy).
+
+Javoblar (Responses):
+
+200 OK:
+
+JSON
+{
+  "order_id": "a1b2c3d4-e5f6-7a8b-9c0d-e1f2a3b4c5d6",
+  "order_number": "000000015",
+  "order_date": "2026-10-28T14:30:00",
+  "status": "Tasdiqlangan", 
+  "without_delivery": false,
+  "total_amount": 345000
+}
+Izoh: status maydoni 3 xil qiymat qaytarishi mumkin:
+
+"Jarayonda" – Buyurtma 1C ga tushgan, lekin hali menejer tomonidan tasdiqlanib ombordan hisobdan chiqarilmagan (Проведен emasm).
+
+"Tasdiqlangan" – Hujjat tasdiqlangan (Проведен).
+
+"Bekor qilingan" – Hujjat o'chirishga belgilangan (Пометка удаления).
+
+400 Bad Request: ID formati xato (GUID emas) yoki umuman yuborilmagan.
+
+404 Not Found: Yuborilgan ID bo'yicha 1C dan hujjat topilmasa.
+
+
+geolocation = > "https://maps.google.com/maps?q=41.351791,69.240149&ll=41.351791,69.240149&z=16" - shunday formatda qabul qiladi. 
