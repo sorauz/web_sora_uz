@@ -26,6 +26,7 @@ import {
   AlertCircle,
   Navigation,
   Sparkles,
+  QrCode,
 } from "lucide-react";
 import {
   LocationPickerModal,
@@ -64,7 +65,7 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
   const [isMapModalOpen, setIsMapModalOpen] = useState(false);
   const [orderComment, setOrderComment] = useState("");
 
-  const [paymentMethod, setPaymentMethod] = useState<"cash" | "payme" | "click" | "card" | "b2b">("cash");
+  const [paymentMethod, setPaymentMethod] = useState<"cash" | "uzqr" | "payme" | "click" | "card" | "b2b">("cash");
   const [orderType, setOrderType] = useState<"B2C" | "B2B">("B2C");
   const [companyName, setCompanyName] = useState("");
   const [companyInn, setCompanyInn] = useState("");
@@ -122,7 +123,8 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
     }
   };
 
-  const handleSelectPaymentMethod = (method: "cash" | "payme" | "click" | "card" | "b2b") => {
+  const handleSelectPaymentMethod = (method: "cash" | "uzqr" | "payme" | "click" | "card" | "b2b") => {
+    if (method === "payme" || method === "click") return;
     setPaymentMethod(method);
     if (method === "b2b") {
       setOrderType("B2B");
@@ -783,57 +785,42 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
               </div>
             </label>
 
-            {/* Payme */}
+            {/* UzQR Universal QR Payment */}
             <label
               className={`p-4 rounded-2xl border-2 cursor-pointer transition-all flex items-start gap-3.5 ${
-                paymentMethod === "payme"
-                  ? "border-sora-600 bg-sora-50/40 dark:bg-sora-950/20"
+                paymentMethod === "uzqr"
+                  ? "border-emerald-600 bg-emerald-50/40 dark:bg-emerald-950/20 shadow-xs"
                   : "border-slate-200 dark:border-slate-800 hover:border-slate-300"
               }`}
             >
               <input
                 type="radio"
                 name="paymentMethod"
-                checked={paymentMethod === "payme"}
-                onChange={() => handleSelectPaymentMethod("payme")}
+                checked={paymentMethod === "uzqr"}
+                onChange={() => handleSelectPaymentMethod("uzqr")}
                 className="mt-1"
               />
-              <div>
-                <div className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
-                  <span className="w-4 h-4 rounded-full bg-cyan-500 flex items-center justify-center text-white text-[10px] font-black">
-                    P
+              <div className="flex-1">
+                <div className="font-bold text-sm text-slate-900 dark:text-white flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-5 h-5 rounded-md bg-emerald-600 text-white flex items-center justify-center shrink-0">
+                      <QrCode className="w-3.5 h-3.5" />
+                    </div>
+                    <span>{t("payUzQR")}</span>
+                  </div>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300">
+                    {t("badgeUzQR")}
                   </span>
-                  <span>{t("payPayme")}</span>
                 </div>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  {t("payPaymeDesc")}
+                  {t("payUzQRDesc")}
                 </p>
-              </div>
-            </label>
-
-            {/* Click Up */}
-            <label
-              className={`p-4 rounded-2xl border-2 cursor-pointer transition-all flex items-start gap-3.5 ${
-                paymentMethod === "click"
-                  ? "border-sora-600 bg-sora-50/40 dark:bg-sora-950/20"
-                  : "border-slate-200 dark:border-slate-800 hover:border-slate-300"
-              }`}
-            >
-              <input
-                type="radio"
-                name="paymentMethod"
-                checked={paymentMethod === "click"}
-                onChange={() => handleSelectPaymentMethod("click")}
-                className="mt-1"
-              />
-              <div>
-                <div className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
-                  <Zap className="w-4 h-4 text-blue-500 fill-current" />
-                  <span>{t("payClick")}</span>
-                </div>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  {t("payClickDesc")}
-                </p>
+                {paymentMethod === "uzqr" && (
+                  <div className="mt-2.5 p-2.5 rounded-xl bg-white dark:bg-slate-800/80 border border-emerald-200/60 dark:border-emerald-800/50 text-xs text-emerald-800 dark:text-emerald-300 flex items-center gap-2">
+                    <QrCode className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span>{t("payUzQRNote")}</span>
+                  </div>
+                )}
               </div>
             </label>
 
@@ -862,6 +849,62 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
                 </p>
               </div>
             </label>
+
+            {/* Payme (Vaqtincha o'chirilgan) */}
+            <div
+              className="p-4 rounded-2xl border-2 border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/40 opacity-60 cursor-not-allowed transition-all flex items-start gap-3.5 select-none"
+            >
+              <input
+                type="radio"
+                name="paymentMethodDisabledPayme"
+                disabled
+                checked={false}
+                className="mt-1 cursor-not-allowed opacity-40"
+              />
+              <div className="flex-1">
+                <div className="font-bold text-sm text-slate-600 dark:text-slate-400 flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="w-4 h-4 rounded-full bg-slate-400 flex items-center justify-center text-white text-[10px] font-black">
+                      P
+                    </span>
+                    <span>{t("payPayme")}</span>
+                  </div>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                    {t("comingSoon")}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
+                  {t("payPaymeDesc")} <span className="font-medium text-amber-600 dark:text-amber-400">({t("integrationInProgress")})</span>
+                </p>
+              </div>
+            </div>
+
+            {/* Click Up (Vaqtincha o'chirilgan) */}
+            <div
+              className="p-4 rounded-2xl border-2 border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/40 opacity-60 cursor-not-allowed transition-all flex items-start gap-3.5 select-none"
+            >
+              <input
+                type="radio"
+                name="paymentMethodDisabledClick"
+                disabled
+                checked={false}
+                className="mt-1 cursor-not-allowed opacity-40"
+              />
+              <div className="flex-1">
+                <div className="font-bold text-sm text-slate-600 dark:text-slate-400 flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <Zap className="w-4 h-4 text-slate-400 fill-current" />
+                    <span>{t("payClick")}</span>
+                  </div>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                    {t("comingSoon")}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
+                  {t("payClickDesc")} <span className="font-medium text-amber-600 dark:text-amber-400">({t("integrationInProgress")})</span>
+                </p>
+              </div>
+            </div>
 
             {/* B2B Invoicing */}
             <label
