@@ -622,7 +622,7 @@ class SoraApiClient {
   /**
    * Register new customer in 1C ERP via POST /register
    * - B2C: { type: "B2C", name, phone1, phone2, password }
-   * - B2B: { type: "B2B", name, inn, password }
+   * - B2B: { type: "B2B", name, inn, phone1, password }
    */
   async registerUser(payload: {
     type: "B2C" | "B2B";
@@ -634,6 +634,7 @@ class SoraApiClient {
   }): Promise<{
     success: boolean;
     id?: string;
+    name?: string;
     error?: string;
     statusCode: number;
     isConflict?: boolean;
@@ -664,6 +665,7 @@ class SoraApiClient {
         return {
           success: true,
           id: String(data.id || ""),
+          name: typeof data.name === "string" ? data.name.trim() : undefined,
           statusCode: 201,
         };
       }
@@ -672,6 +674,7 @@ class SoraApiClient {
         return {
           success: false,
           id: String(data.id || ""),
+          name: typeof data.name === "string" ? data.name.trim() : undefined,
           error:
             (typeof data.error === "string" && data.error) ||
             "Ushbu ma'lumotlar bilan foydalanuvchi allaqachon mavjud!",

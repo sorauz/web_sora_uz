@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import crypto from "crypto";
 import { api } from "@/lib/api";
 import { OtpCompleteInputSchema, normalizePhone } from "@/lib/schemas/auth";
-import { verifyPhoneToken } from "@/lib/sms/otp-store";
+import { deriveOneCPassword, verifyPhoneToken } from "@/lib/sms/otp-store";
 
 export async function POST(request: NextRequest) {
   try {
@@ -41,24 +41,33 @@ export async function POST(request: NextRequest) {
     const finalInn = (inn || tokenPayload.inn || "").trim();
     const normPhone2 = phone2 ? normalizePhone(phone2) : "";
 
+    const derivedPassword = deriveOneCPassword(
+      finalType === "B2B" && finalInn ? finalInn : verifiedPhone
+    );
+
     const registerPayload =
       finalType === "B2B"
         ? {
             type: "B2B" as const,
             name: name.trim(),
             inn: finalInn,
+            phone1: verifiedPhone,
+            password: derivedPassword,
           }
         : {
             type: "B2C" as const,
             name: name.trim(),
             phone1: verifiedPhone,
             phone2: normPhone2,
+            password: derivedPassword,
           };
 
     const result = await api.registerUser(registerPayload);
 
-    // 1C returns 201 Created (result.success) or 409 Conflict with existing UUID (result.isConflict && result.id)
+    // 1C returns 201 Created (result.success) or 409 Conflict with existing UUID and name (result.isConflict && result.id)
     let userId = result.id || "";
+    const resolvedName =
+      result.isConflict && result.name ? result.name.trim() : name.trim();
 
     if (!result.success && !result.isConflict) {
       // If 1C server is temporarily unreachable, provide resilient fallback UUID so verified customer is not blocked
@@ -81,7 +90,7 @@ export async function POST(request: NextRequest) {
 
     const sessionUser = {
       id: userId,
-      name: name.trim(),
+      name: resolvedName,
       type: finalType,
       phone: verifiedPhone,
       inn: finalType === "B2B" ? finalInn : undefined,

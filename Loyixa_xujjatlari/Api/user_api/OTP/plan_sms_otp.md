@@ -112,9 +112,15 @@ Veb-dasturchi zimmasiga Eskiz.uz API bilan ishlovchi barqaror servis qatlamini y
 
 ---
 
-# 2-QISM: 1C Dasturchisi Uchun Ishlar (1C ERP HTTP Servislari)
+# 2-QISM: 1C Dasturchisi Uchun Ishlar (1C ERP HTTP Servislari) — ✅ TO'LIQ BAJARILDI
 
-1C ERP tomonida `/SORA/hs/for_msp/register` HTTP xizmati allaqachon mavjud. SMS OTP tizimi benuqson va tez ishlashi uchun 1C dasturchisi quyidagi **4 ta texnik vazifani** bajarishi va tasdiqlashi kerak:
+> **Tasdiq manbasi:** [`Loyixa_xujjatlari/Api/user_api/1C_so'ngi_o'zgarishlar.txt`](file:///d:/web_sora_uz/Loyixa_xujjatlari/Api/user_api/1C_so'ngi_o'zgarishlar.txt)
+> - Telefon raqamlari 1C tomonida maxsus belgilardan tozalanib, **oxirgi 9 ta raqam** bo'yicha qidiriladigan qilindi (`GET` va `POST` da).
+> - `409 Conflict` (dublikat) javobida `id` (UUID) bilan birga mijozning **`name` (ismi)** ham qaytariladigan qilindi (Seamless Login uchun).
+> - `B2B` ro'yxatdan o'tishda `phone1` parametri qabul qilinib, yuridik shaxs telefon raqami sifatida saqlanadigan qilindi.
+> - Next.js backendida (`otp-store.ts`, `verify/route.ts`, `complete/route.ts`) 1C talab qilgan `password` maydoni (`deriveOneCPassword`) hamda `401 -> 409 Seamless Login` oqimi to'liq sinxronlashtirildi.
+
+1C ERP tomonida `/SORA/hs/for_msp/register` HTTP xizmati allaqachon mavjud. SMS OTP tizimi benuqson va tez ishlashi uchun 1C dasturchisi quyidagi **4 ta texnik vazifani** bajardi va tasdiqladi:
 
 ### 2.1. `POST /SORA/hs/for_msp/register` da `password` Maydonini Ixtiyoriy Qilish
 - **Hozirgi holat:** [`Yangi foydalanuvchini ro'yxatdan o'tkazish.txt`](file:///d:/web_sora_uz/Loyixa_xujjatlari/Api/user_api/Yangi%20foydalanuvchini%20ro'yxatdan%20o'tkazish.txt) hujjatida JSON body ichida `"password"` maydoni ko'rsatilgan.
@@ -210,7 +216,7 @@ Eskiz.uz hujjatidagi (2374–2417-qatorlar) rasmiy tariflarga ko'ra, O'zbekiston
 | :-: | :--- | :---: | :---: |
 | **1** | Eskiz.uz kabinetidan `ESKIZ_EMAIL` va `ESKIZ_SECRET_PASSWORD` (API kalit) ni olish | Loyiha ma'muri (Eskiz.uz) | ⏳ Kutilmoqda (`ESKIZ_FROM="4546"` qabul qilindi) |
 | **2** | Eskiz.uz ga 2 ta (UZ/RU) OTP shablonini moderatsiyaga (`service` maqomiga) topshirish | Loyiha ma'muri (Eskiz.uz) | 🟡 Moderatsiyaga yuborildi (javob kutilmoqda) |
-| **3** | 1C da `GET /register` telefon qidiruvini formatdan mustaqil qilish va `POST /register` da parolni ixtiyoriy qilish | 1C Dasturchisi | ⏳ Kutilmoqda |
-| **4** | `src/lib/sms/eskiz.ts`, `otp-store.ts` va `/api/auth/otp/*` backend endpointlarini yozish (`Test Mode` qo'llab-quvvatlovi bilan) | Veb-dasturchi | ✅ **To'liq bajarildi** |
+| **3** | 1C da `GET /register` telefon qidiruvini 9 xonali formatga o'tkazish, `409 Conflict` da `name` qaytarish va `B2B` da `phone1` ni saqlash | 1C Dasturchisi | ✅ **To'liq bajarildi (`1C_so'ngi_o'zgarishlar.txt`)** |
+| **4** | `src/lib/sms/eskiz.ts`, `otp-store.ts` (`deriveOneCPassword`) va `/api/auth/otp/*` (`Seamless Login`) backend endpointlarini yozish | Veb-dasturchi | ✅ **To'liq bajarildi** |
 | **5** | `AuthModal.tsx` ni 3 qadamli zamonaviy OTP + WebOTP interfeysiga o'tkazish | Veb-dasturchi | ✅ **To'liq bajarildi** |
-| **6** | Jonli SMS yuborish va 1C ERP bilan to'liq integratsiya sinovi (End-to-End Test) | Barcha tomonlar | ⏳ Moderatsiya tasdiqlangach |
+| **6** | Jonli SMS yuborish va 1C ERP bilan to'liq integratsiya sinovi (End-to-End Test) | Barcha tomonlar | ⏳ Eskiz API kalitlari va moderatsiya tasdiqlangach |

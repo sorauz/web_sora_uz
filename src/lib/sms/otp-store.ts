@@ -89,6 +89,22 @@ export function hashOtpCode(phone: string, code: string): string {
 }
 
 /**
+ * Generates a deterministic server-side secret password for 1C ERP `/register`
+ * (Required by 1C rule: `Если ПустаяСтрока(Пароль) Тогда...`)
+ * Normalizes phone/INN to last 9 digits so formatting never changes the derived key.
+ */
+export function deriveOneCPassword(identifier: string): string {
+  const digits = identifier.replace(/\D/g, "");
+  const canonicalKey =
+    digits.length >= 9 ? digits.slice(-9) : identifier.trim();
+  return crypto
+    .createHmac("sha256", getSecret())
+    .update(`1c-erp-auth:${canonicalKey}`)
+    .digest("hex")
+    .slice(0, 16);
+}
+
+/**
  * Signs any JSON payload with HMAC-SHA256 for stateless serverless verification
  */
 function signPayload(payload: object): string {

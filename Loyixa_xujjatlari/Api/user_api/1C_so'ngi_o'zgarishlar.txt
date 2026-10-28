@@ -1,0 +1,132 @@
+1C dagi /SORA/hs/for_msp/register xizmatiga barcha so'ralgan o'zgarishlar kiritildi. Asosiy yangiliklar:
+
+Telefon raqamlar qat'iy formatdan ozod qilindi. Frontend'dan raqam qanday formatda kelsa ham (+998901234567, 90 123-45-67 va h.k.), 1C o'zi maxsus belgilarni tozalab, oxirgi 9 ta raqam orqali eski/yangi mijozlarni bexato topadi (B2C uchun GET va POST da ishlangan).
+
+409 Conflict (dublikat) holatida endi foydalanuvchining ismi (name) ham qaytadi. Shunda orqa fonda avtomatik "Seamless Login" qilib yuborishingiz osonlashadi.
+
+B2B yo'nalishida ham ro'yxatdan o'tish jarayonida phone1 parametri qabul qilinadi va 1C da yuridik shaxsning telefon raqami sifatida saqlanadi.
+
+Quyida yangilangan API hujjatlari (API Doc):
+
+API: Mijozlarni ro'yxatdan o'tkazish va tasdiqlash
+1. POST /SORA/hs/for_msp/register (Ro'yxatdan o'tish)
+Ushbu so'rov orqali yangi mijoz (B2C yoki B2B) 1C bazasiga kiritiladi.
+
+So'rov tanasi (JSON):
+
+B2C (Jismoniy shaxs) uchun:
+JSON
+{
+  "type": "B2C",
+  "name": "Tohir Arislonov",
+  "phone1": "+998901234567",
+  "phone2": "",
+  "password": "hashed_otp_or_secret"
+}
+B2B (Yuridik shaxs) uchun:
+
+JSON
+{
+  "type": "B2B",
+  "name": "OOO NAVRUZ",
+  "inn": "204393073",
+  "phone1": "+998901234567", 
+  "password": "hashed_otp_or_secret"
+}
+Javoblar (Responses):
+
+201 Created (Muvaffaqiyatli saqlandi):
+
+JSON
+{
+  "message": "Muvaffaqiyatli ro'yxatdan o'tdi",
+  "id": "79d1f6cb-3178-11e8-812c-d43d7e011714"
+}
+409 Conflict (Mijoz bazada oldindan bor - Yangi!):
+Agar phone1 (B2C) yoki inn (B2B) bazadan topilsa, UUID bilan birga ismi ham qaytariladi. Frontend ushbu ma'lumotlar orqali mijozni avtomatik tizimga kiritib yuborishi (login) mumkin.
+
+JSON
+{
+  "error": "Bu raqam bazada mavjud! Iltimos, tizimga kiring.",
+  "id": "79d1f6cb-3178-11e8-812c-d43d7e011714",
+  "name": "Tohir Arislonov"
+}
+400 Bad Request (Xatolik):type, password yoki majburiy maydonlar yuborilmasa.
+
+2. GET /SORA/hs/for_msp/register (Avtorizatsiya / Login)
+Ushbu so'rov mijoz bazada bor yoki yo'qligini tekshirish va tizimga kiritish uchun ishlatiladi.
+
+So'rov parametrlari (URL Query):
+
+B2C qidiruv: ?type=B2C&phone=+998901234567&password=secret
+
+B2B qidiruv: ?type=B2B&inn=204393073&password=secret
+
+(Izoh: phone parametrida belgilarni tozalash shart emas, 1C buni o'z tomonida hal qiladi).
+
+Javoblar (Responses):
+
+200 OK (Muvaffaqiyatli topildi va parol mos tushdi):
+
+JSON
+{
+  "id": "79d1f6cb-3178-11e8-812c-d43d7e011714",
+  "name": "Tohir Arislonov",
+  "type": "B2C"
+}
+404 Not Found: Mijoz (telefon yoki INN bo'yicha) bazada topilmasa.
+
+401 Unauthorized: Mijoz topildi, lekin password xato bo'lsa.
+
+400 Bad Request: Majburiy parametrlar yetishmasa.
+
+
+POST /SORA/hs/for_msp/register (Ro'yxatdan o'tish) uchun
+
+Ro'yxatdan o'tishda mijozning turiga (Jismoniy yoki Yuridik shaxs) qarab JSON tanasida (body) yuboriladigan maydonlar o'zgaradi.
+
+Barcha uchun majburiy (B2C va B2B):
+
+type: Faqat "B2C" yoki "B2B" qiymatini qabul qiladi. Busiz tizim qaysi baza (КонтактныйЛицо yoki Контрагент) bilan ishlashni bilmaydi. Noto'g'ri yuborilsa, 400 Bad Request qaytadi.
+
+name: Mijozning ism-sharifi (B2C) yoki korxona nomi (B2B). 1C bazasida kartochka ochishda Наименование maydonini to'ldirish uchun kerak.
+
+password: SMS OTP orqali tasdiqlangan maxfiy kalit yoki parol. Kodda uning bo'sh emasligi qat'iy tekshiriladi (Если ПустаяСтрока(Пароль) Тогда...). Busiz ro'yxatdan o'tkazilmaydi.
+
+B2C (Jismoniy shaxslar) uchun:
+
+phone1 (Majburiy): Jismoniy shaxslar bazada faqat telefon raqami orqali identifikatsiya qilinadi. Dublikat bor-yo'qligi aynan shu raqam asosida qidiriladi.
+
+phone2 (Ixtiyoriy): Qo'shimcha telefon raqami. Agar veb-saytda kiritilmasa (bo'sh kelsa), 1C xatolik bermaydi, shunchaki e'tiborsiz qoldiradi.
+
+inn (Kerak emas): B2C yuborganda INN kerak bo'lmaydi, yuborilsa ham 1C uni o'qimaydi.
+
+B2B (Yuridik shaxslar) uchun:
+
+inn (Majburiy): Yuridik shaxslar 1C bazasida qat'iy ravishda STIR (INN) orqali tekshiriladi. Raqamli qiymat bo'lishi va dublikat nazoratidan o'tishi shart.
+
+phone1 (Ixtiyoriy): B2B mijozlar uchun SMS OTP qo'shilgani sababli, telefon raqamini saqlab qo'yish uchun xizmat qiladi. Lekin u kelmay qolsa, 1C xatolik bermaydi (kodda Если Данные.Свойство("phone1") orqali xavfsiz tekshirilgan).
+
+phone2 (Kerak emas): B2B blokida bu parametr o'qilmaydi.
+
+GET /SORA/hs/for_msp/register (Tizimga kirish / Avtorizatsiya) uchun
+
+Avtorizatsiyada ma'lumotlar URL manzilida (Query params) yuboriladi. Bu yerda qidiruv faqat "kalit" maydonlar orqali amalga oshadi.
+
+Barcha uchun majburiy (B2C va B2B):
+
+type: "B2C" yoki "B2B". 1C qaysi spravochnikdan qidirishni (КонтактныеЛица yoki Контрагенты) shu orqali hal qiladi.
+
+password: Bazadan topilgan foydalanuvchining paroli bilan solishtirish uchun majburiy talab etiladi.
+
+B2C (Jismoniy shaxslar) qidiruvi uchun:
+
+phone (Majburiy): Aynan ro'yxatdan o'tgan telefon raqami bo'yicha bazadan qidiriladi. Bo'sh bo'lsa 400 Bad Request qaytaradi.
+
+inn (Kerak emas): B2C qidiruvda ishlatilmaydi.
+
+B2B (Yuridik shaxslar) qidiruvi uchun:
+
+inn (Majburiy): Korxona STIRi bo'yicha bazadan qidiriladi. Agar inn parametri yuborilmasa, darhol 400 xatoligi beriladi.
+
+phone (Kerak emas): Hozirgi GET logikasiga ko'ra, B2B tizimga kirishi faqat INN ga bog'langan. Telefon raqami qidiruv qismida qatnashmaydi.

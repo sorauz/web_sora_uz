@@ -4,6 +4,7 @@ import { api } from "@/lib/api";
 import { OtpVerifyInputSchema, normalizePhone } from "@/lib/schemas/auth";
 import {
   createVerifiedPhoneToken,
+  deriveOneCPassword,
   OTP_TTL_SECONDS,
   verifyOtpChallenge,
 } from "@/lib/sms/otp-store";
@@ -79,23 +80,51 @@ export async function POST(request: NextRequest) {
 
     // Step 3: Check if customer already exists in 1C ERP
     const cleanInn = inn?.trim() || "";
+    const lookupType: "B2C" | "B2B" =
+      type === "B2B" && cleanInn.length === 9 ? "B2B" : "B2C";
+    const lookupIdentifier = lookupType === "B2B" ? cleanInn : normPhone;
+    const derivedPassword = deriveOneCPassword(lookupIdentifier);
+
     let lookupResult = await api.loginUser({
-      type: type === "B2B" && cleanInn.length === 9 ? "B2B" : "B2C",
-      identifier:
-        type === "B2B" && cleanInn.length === 9 ? cleanInn : normPhone,
+      type: lookupType,
+      identifier: lookupIdentifier,
+      password: derivedPassword,
     });
 
-    // Fallback check without '+' prefix in case 1C stored phone as 998XXXXXXXXX
-    if (
-      !lookupResult.success &&
-      lookupResult.statusCode === 404 &&
-      type === "B2C" &&
-      normPhone.startsWith("+")
-    ) {
-      lookupResult = await api.loginUser({
-        type: "B2C",
-        identifier: normPhone.slice(1),
-      });
+    // If customer exists in 1C (e.g. created offline/legacy with a different password in 1C -> 401),
+    // use 1C's POST /register 409 Conflict response ({ id, name }) for Seamless Login!
+    if (!lookupResult.success && lookupResult.statusCode === 401) {
+      const conflictProbe = await api.registerUser(
+        lookupType === "B2B"
+          ? {
+              type: "B2B",
+              name: "Tashkilot",
+              inn: cleanInn,
+              phone1: normPhone,
+              password: derivedPassword,
+            }
+          : {
+              type: "B2C",
+              name: "Xaridor",
+              phone1: normPhone,
+              phone2: "",
+              password: derivedPassword,
+            }
+      );
+
+      if ((conflictProbe.isConflict || conflictProbe.success) && conflictProbe.id) {
+        lookupResult = {
+          success: true,
+          statusCode: 200,
+          user: {
+            id: conflictProbe.id,
+            name:
+              conflictProbe.name ||
+              (lookupType === "B2C" ? "Xaridor" : "Tashkilot"),
+            type: lookupType,
+          },
+        };
+      }
     }
 
     // Existing customer found in 1C ERP -> Log in immediately!
