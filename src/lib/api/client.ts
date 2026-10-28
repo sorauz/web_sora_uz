@@ -547,7 +547,7 @@ class SoraApiClient {
       const errorMatch = text.match(/"error"\s*:\s*"([^"]+)"/);
       const msgMatch = text.match(/"message"\s*:\s*"([^"]+)"/);
       const nameMatch = text.match(
-        /"name"\s*:\s*"(.*?)"\s*(?:,\s*"(?:type|id|error|message)"|\s*\})/s
+        /"name"\s*:\s*"([\s\S]*?)"\s*(?:,\s*"(?:type|id|error|message)"|\s*\})/
       );
       if (idMatch || errorMatch || msgMatch || nameMatch) {
         return {
