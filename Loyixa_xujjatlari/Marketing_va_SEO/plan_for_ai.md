@@ -71,7 +71,7 @@ Mahsulot sahifasini keraksiz tugmalar bilan to'ldirmaslik va xaridor e'tiborini 
 | **1** | **ChatGPT** | **Majburiy (#1)** | `https://chatgpt.com/?q={ENCODED_PROMPT}` | O'zbekistonda eng ommabop AI (#1). `ChatGPT-User` boti orqali saytga real vaqtda (Direct Fetch) kirib, hatto 5 daqiqa oldin 1C dan qo'shilgan yangi tovarni ham o'qiy oladi. |
 | **2** | **Google AI Mode** | **Majburiy (#2)** | `https://www.google.com/search?udm=50&q={ENCODED_PROMPT}` | `gemini.google.com` URL orqali prompt qabul qilmaydi. Ammo `udm=50` parametri foydalanuvchini to'g'ridan-to'g'ri Google'ning yangi **AI Mode** oynasiga olib kiradi va Login so'ramasdan, Enter bosmasdan avtomatik tahlilni boshlaydi. |
 | **3** | **Perplexity** | **Tavsiya (#3)** | `https://www.perplexity.ai/search?q={ENCODED_PROMPT}` | Eng kuchli AI-qidiruv tizimi. Login talab qilmaydi. Javobda `Sora.uz` saytiga kliklanadigan manba (citation link) qoldiradi va saytning GEO-obro'sini keskin oshiradi. |
-| **4** | **Claude** | **Opsional (B2B/Texnika)** | `https://claude.ai/new?q={ENCODED_PROMPT}` | Faqat murakkab ofis va bank texnikalari (seyflar, banknota sanagichlar, shrederlar, interaktiv doskalar) uchun ko'rsatiladi. *(Avtomatik clipboard fallback bilan himoyalangan).* |
+| **4** | **Claude** | **Opsional (100k+ / Texnika / B2B)** | `https://claude.ai/new?q={ENCODED_PROMPT}` | Ofis texnikalari, B2B uskunalar va narxi 100 000 so'mdan yuqori tovarlar uchun ko'rsatiladi. *(Avtomatik clipboard fallback bilan himoyalangan).* |
 | ❌ | **Grok (X.ai)** | **Olib tashlanadi** | — | O'zbekistonda xarid (e-commerce) uchun deyarli ishlatilmaydi, interfeysni ortiqcha yuklaydi. |
 
 ---
@@ -118,7 +118,7 @@ const TECH_CATEGORY_KEYWORDS = [
 3. **Shart 2 (B2B / So'rov bo'yicha uskunalar):** `priceInfo.price <= 0` (narxi kelishiladigan yirik korporativ uskunalar).
 4. **Shart 3 (Texnik kategoriya + o'rta narx):** Tovar kategoriyasi (`product.uz.category_slug_uz` yoki `product.ru.category_slug_ru`) `TECH_CATEGORY_KEYWORDS` dan birini o'z ichiga olsa **YOKI** `product.attributes.length >= 3` bo'lsa (va narxi kamida `>= 100_000 so'm` bo'lsa).
 
-*(Shuningdek, **Claude** tugmasi faqat `isTechProduct === true` yoki `priceInfo.price >= 1_000_000` yoki `priceInfo.price <= 0` bo'lgandagina 4-tugma sifatida qo'shiladi; standart tovarlarda faqat 3 ta tugma: ChatGPT, Google AI, Perplexity chiqadi).*
+*(Shuningdek, **Claude** tugmasi: `isTechProduct === true` yoki `priceInfo.price >= 100_000` (100 000 so'm va undan yuqori barcha tovarlar) yoki `priceInfo.price <= 0` (B2B kelishilgan narx) bo'lganda 4-tugma sifatida ko'rsatiladi).*
 
 ---
 

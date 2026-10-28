@@ -167,8 +167,8 @@ export function ProductAiAssistant({
 
   const encodedPrompt = encodeURIComponent(promptText);
 
-  // Show Claude as 4th option specifically for B2B / Tech / High-ticket items
-  const showClaude = isTechProduct || priceVal >= 1_000_000 || priceVal <= 0;
+  // Show Claude as 4th option: Tech items, B2B/negotiable (price <= 0), or price >= 100,000 UZS
+  const showClaude = isTechProduct || priceVal >= 100_000 || priceVal <= 0;
 
   const providers = [
     {
