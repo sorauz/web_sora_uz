@@ -23,7 +23,12 @@ import {
   Clock,
   ArrowRight,
   AlertCircle,
+  Navigation,
 } from "lucide-react";
+import {
+  LocationPickerModal,
+  formatOneCGeolocationUrl,
+} from "@/components/checkout/LocationPickerModal";
 
 interface CheckoutFormProps {
   locale: "uz" | "ru";
@@ -54,6 +59,7 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
   const [landmark, setLandmark] = useState("");
   const [geolocation, setGeolocation] = useState("");
   const [isLocating, setIsLocating] = useState(false);
+  const [isMapModalOpen, setIsMapModalOpen] = useState(false);
   const [orderComment, setOrderComment] = useState("");
 
   const [paymentMethod, setPaymentMethod] = useState<"cash" | "payme" | "click" | "card" | "b2b">("cash");
@@ -527,51 +533,74 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
               </div>
 
               <div>
-                <div className="flex items-center justify-between mb-1.5">
+                <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5">
                   <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
                     {t("address")} *
                   </label>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (typeof navigator === "undefined" || !navigator.geolocation) return;
-                      setIsLocating(true);
-                      navigator.geolocation.getCurrentPosition(
-                        (pos) => {
-                          const lat = pos.coords.latitude.toFixed(6);
-                          const lng = pos.coords.longitude.toFixed(6);
-                          setGeolocation(
-                            `https://maps.google.com/maps?q=${lat},${lng}&ll=${lat},${lng}&z=16`
-                          );
-                          setIsLocating(false);
-                        },
-                        () => {
-                          setIsLocating(false);
-                        },
-                        { enableHighAccuracy: true, timeout: 8000 }
-                      );
-                    }}
-                    className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-lg border transition-colors cursor-pointer ${
-                      geolocation
-                        ? "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300"
-                        : "bg-sora-50 dark:bg-sora-950/40 border-sora-200 dark:border-sora-800 text-sora-600 dark:text-sora-400 hover:bg-sora-100"
-                    }`}
-                  >
-                    <MapPin className="w-3 h-3" />
-                    <span>
-                      {isLocating
-                        ? locale === "uz"
-                          ? "Aniqlanmoqda..."
-                          : "Определение..."
-                        : geolocation
-                        ? locale === "uz"
-                          ? "GPS biriktirildi ✓"
-                          : "GPS прикреплен ✓"
-                        : locale === "uz"
-                        ? "GPS joylashuvni ulash"
-                        : "Прикрепить GPS-локацию"}
-                    </span>
-                  </button>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setIsMapModalOpen(true)}
+                      className={`inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-lg border transition-colors cursor-pointer ${
+                        geolocation
+                          ? "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300"
+                          : "bg-sora-600 hover:bg-sora-700 border-sora-600 text-white shadow-2xs"
+                      }`}
+                    >
+                      <MapPin className="w-3.5 h-3.5" />
+                      <span>
+                        {geolocation
+                          ? locale === "uz"
+                            ? "Xaritada belgilandi ✓ (O'zgartirish)"
+                            : "Выбрано на карте ✓ (Изменить)"
+                          : locale === "uz"
+                          ? "Xaritadan belgilash"
+                          : "Указать на карте"}
+                      </span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (typeof navigator === "undefined" || !navigator.geolocation) {
+                          setIsMapModalOpen(true);
+                          return;
+                        }
+                        setIsLocating(true);
+                        navigator.geolocation.getCurrentPosition(
+                          (pos) => {
+                            setGeolocation(
+                              formatOneCGeolocationUrl(
+                                pos.coords.latitude,
+                                pos.coords.longitude
+                              )
+                            );
+                            setIsLocating(false);
+                          },
+                          () => {
+                            setIsLocating(false);
+                            setIsMapModalOpen(true);
+                          },
+                          { enableHighAccuracy: true, timeout: 8000 }
+                        );
+                      }}
+                      title={
+                        locale === "uz"
+                          ? "Joriy GPS joylashuvni aniqlash"
+                          : "Определить текущую GPS-локацию"
+                      }
+                      className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-1 rounded-lg border bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 transition-colors cursor-pointer"
+                    >
+                      <Navigation className="w-3 h-3 text-sora-600" />
+                      <span>
+                        {isLocating
+                          ? locale === "uz"
+                            ? "GPS..."
+                            : "GPS..."
+                          : "GPS"}
+                      </span>
+                    </button>
+                  </div>
                 </div>
                 <div className="relative">
                   <MapPin className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -907,6 +936,24 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
           </div>
         </div>
       </div>
+
+      {/* Interactive Map Picker Modal (Works on Desktop & Mobile without GPS) */}
+      <LocationPickerModal
+        isOpen={isMapModalOpen}
+        onClose={() => setIsMapModalOpen(false)}
+        locale={locale}
+        initialRegion={region}
+        initialGeolocation={geolocation}
+        onConfirm={({ geolocationUrl, detectedDistrict, detectedAddress }) => {
+          setGeolocation(geolocationUrl);
+          if (detectedDistrict && !district.trim()) {
+            setDistrict(detectedDistrict);
+          }
+          if (detectedAddress && !address.trim()) {
+            setAddress(detectedAddress);
+          }
+        }}
+      />
     </form>
   );
 }
