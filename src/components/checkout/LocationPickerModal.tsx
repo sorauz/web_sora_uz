@@ -271,8 +271,7 @@ export function LocationPickerModal({
 
       L.control.zoom({ position: "bottomright" }).addTo(map);
 
-      const streetUrl =
-        "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
+      const streetUrl = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
       const layer = L.tileLayer(streetUrl, {
         maxZoom: 19,
         attribution: "&copy; OpenStreetMap",
@@ -338,7 +337,7 @@ export function LocationPickerModal({
     const tileUrl =
       nextStyle === "satellite"
         ? "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-        : "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
+        : "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
 
     tileLayerRef.current = L.tileLayer(tileUrl, {
       maxZoom: 19,
