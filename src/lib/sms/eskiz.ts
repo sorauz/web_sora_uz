@@ -63,7 +63,7 @@ export function buildOtpMessage(code: string, locale: "uz" | "ru" = "uz"): strin
     if (customRu && customRu.includes("{code}")) {
       return customRu.replace("{code}", code);
     }
-    return `Код подтверждения для входа на сайт Sora.uz: ${code}`;
+    return `Никому не сообщайте! Код подтверждения для входа на сайт Sora.uz: ${code}`;
   }
 
   const customUz = process.env.ESKIZ_TEMPLATE_UZ;

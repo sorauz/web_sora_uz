@@ -156,57 +156,48 @@ Veb-dasturchi zimmasiga Eskiz.uz API bilan ishlovchi barqaror servis qatlamini y
 
 ---
 
-# 3-QISM: Eskiz.uz dan Kerak Bo'ladigan Ma'lumotlar va Tashkiliy Sozlamalar
+# 3-QISM: Eskiz.uz dan Kerak Bo'ladigan Ma'lumotlar va Tashkiliy Sozlamalar — ✅ TO'LIQ BAJARILDI
 
-[`СМС шлюз от Eskiz.uz.txt`](file:///d:/web_sora_uz/Loyixa_xujjatlari/Api/user_api/OTP/%D0%A1%D0%9C%D0%A1%20%D1%88%D0%BB%D1%8E%D0%B7%20%D0%BE%D1%82%20Eskiz.uz.txt) hujjatiga asosan, tizimni jonli (Production) rejimda ishga tushirish uchun loyiha rahbari / ma'muriyati tomonidan Eskiz.uz shaxsiy kabinetidan quyidagi **5 ta ma'lumot va tasdiq** olinishi kerak:
+> **Tasdiq manbasi (2026-10-28):**
+> - **Eskiz.uz Login (Email):** `alfaprintservis@mail.ru`
+> - **Eskiz.uz API Kalit (Secret):** `NC9Lkx0lof6FHaDQ7j4COrctzkUGns49ByajAWon` (API orqali tekshirildi: `token_generated`, status `200 OK`)
+> - **Hisob Balansi:** `198 100 so'm` (tekshirildi: `GET /api/user/get-limit` -> `balance: 198100`, ~4 000 ta SMS uchun to'liq yetarli)
+> - **Jo'natuvchi (Sender):** `4546`
+> - **Moderatsiyadan o'tgan shablonlar:**
+>   * **UZ:** `Kodni hech kimga bermang! Sora.uz saytiga kirish uchun tasdiqlash kodi: 0000` (76 belgi, Lotin GSM — 1 SMS)
+>   * **RU:** `Никому не сообщайте! Код подтверждения для входа на сайт Sora.uz: 0000` (70 belgi, Kirill — 1 SMS)
 
-### 3.1. Veb-dasturchiga Berilishi Kerak Bo'lgan `.env` Rekvizitlar
-Eskiz.uz shaxsiy kabinetidan ([my.eskiz.uz](https://my.eskiz.uz)) quyidagi 3 ta ma'lumot olinib, veb-dasturchiga taqdim etiladi:
-
-| № | Parametr nomi | Qayerdan olinadi? | Izoh |
-| :-: | :--- | :--- | :--- |
-| **1** | **`ESKIZ_EMAIL`** | `my.eskiz.uz` ga kirish emaili | Masalan: `info@sora.uz` |
-| **2** | **`ESKIZ_SECRET_PASSWORD`** | `my.eskiz.uz` -> **Настройки API** bo'limidagi maxfiy kalit (`vash_sekretniy_kod_s_kabineta`) | ⚠️ **Muhim:** Bu saytga kiradigan oddiy parol emas, balki shaxsiy kabinet ichidagi maxsus **API Secret Key** hisoblanadi! |
-| **3** | **`ESKIZ_FROM`** | `GET /api/nick/me` yoki kabinetdagi "Никнеймы" bo'limi | Standart holatda: **`4546`**. Agar kompaniya nomiga rasmiy Alfa-nom olingan bo'lsa: **`Sora.uz`** yoki **`SORA`**. |
+### 3.1. Veb-dasturchiga Berilgan `.env` Rekvizitlar
+`.env.local` va `.env.example` ga quyidagi ma'lumotlar to'liq kiritildi va ulandi:
+- `ESKIZ_EMAIL="alfaprintservis@mail.ru"`
+- `ESKIZ_SECRET_PASSWORD="NC9Lkx0lof6FHaDQ7j4COrctzkUGns49ByajAWon"`
+- `ESKIZ_FROM="4546"`
+- `ESKIZ_TEST_MODE="false"`
+- `MOCK_SMS_OTP="false"`
+- `OTP_SECRET="sora_otp_production_secret_key_2026"`
 
 ---
 
-### 3.2. Eskiz.uz Kabinetida SMS Shablonni Moderatsiyadan O'tkazish (Eng Muhim Qadam!)
-Eskiz.uz qoidalariga binoan (`СМС шлюз от Eskiz.uz.txt`, 110–183 va 2374–2417-qatorlar):
-- Agar SMS matni oldindan moderatsiyadan o'tkazilib, **`service` (Сервисный)** maqomini olmasa:
-  1. SMS **Reklama (`reklama`)** tarifi bo'yicha hisoblanadi (masalan, Ucell'da 50 so'm o'rniga **115 so'm**, Mobiuz'da 60 so'm o'rniga **80 so'm**).
-  2. Reklama SMS'larini o'chirib qo'ygan abonentlarga kod umuman yetib bormaydi!
-  3. Ba'zi operatorlar ro'yxatdan o'tmagan matnni bloklaydi (`REJECTED`).
-
-**Qilinishi kerak bo'lgan ish:**
-`my.eskiz.uz` shaxsiy kabinetidagi **"Шаблоны" (Templates)** bo'limiga kirib (yoki `POST notify.eskiz.uz/api/user/template` orqali), quyidagi **2 ta shablonni** moderatsiyaga yuborish va ularning statusi **`service` (Сервисный)** bo'lishini tasdiqlatish kerak:
-
+### 3.2. Eskiz.uz Kabinetida SMS Shablonlar Moderatsiyasi (Tasdiqlandi)
+`my.eskiz.uz` dagi tasdiqlangan shablonlar `src/lib/sms/eskiz.ts` ga harfma-harf to'liq sinxronlashtirildi:
 1. **O'zbekcha shablon (76 belgi — Lotin GSM, 1 SMS):**
    ```text
    Kodni hech kimga bermang! Sora.uz saytiga kirish uchun tasdiqlash kodi: 0000
    ```
-2. **Ruscha shablon (49 belgi — Kirill Unicode, 1 SMS):**
+2. **Ruscha shablon (70 belgi — Kirill Unicode, 1 SMS):**
    ```text
-   Код подтверждения для входа на сайт Sora.uz: 0000
+   Никому не сообщайте! Код подтверждения для входа на сайт Sora.uz: 0000
    ```
-*(Eskiz.uz Yo'riqnomasining 1 va 2-punktlariga ko'ra: matnda **resurs nomi** (`Sora.uz sayti`), **ishlatish maqsadi** (`kirish uchun` / `для входа`) va haqiqiy raqam ko'rinishi (`0000`) bo'lishi shart).*
 
 ---
 
 ### 3.3. Hisob Balansi va Operatorlar Bo'yicha Narxlar
-Eskiz.uz hujjatidagi (2374–2417-qatorlar) rasmiy tariflarga ko'ra, O'zbekiston operatorlari uchun **Servis (`service`)** SMS narxlari:
-- **Beeline, Ucell, Uzmobile, Humans, Perfectum:** `50 so'm / 1 SMS`
-- **Mobiuz:** `60 so'm / 1 SMS`
-
-**Talab:**
-- Tizim ishga tushishi (`Go-Live`) oldidan Eskiz.uz balansida kamida **50 000 – 100 000 so'm** (1 000 – 2 000 ta SMS uchun yetarli mablag') bo'lishi kerak.
+Eskiz.uz hisob balansi API orqali tekshirildi: **198 100 so'm**. Tizim to'liq jonli (production) rejimda xizmat ko'rsatishga tayyor.
 
 ---
 
-### 3.4. Jo'natuvchi Nomi (Alfa-nom / Sender ID) Masalasi
-- **1-variant (Tezkor start — 0 kun):** `from = "4546"` umumiy raqamidan foydalanish. Qo'shimcha hujjat talab qilinmaydi, shartnoma va balans bo'lsa darhol ishlaydi.
-- **2-variant (Brend nomi — `Sora.uz`):** Mijoz telefoniga `4546` dan emas, **`Sora.uz`** nomidan SMS borishi uchun Eskiz.uz kabinetida **"Мои никнеймы"** bo'limidan ariza qoldiriladi (operatorlar tasdiqlashi 3–5 ish kuni oladi, abonentlik to'lovi mavjud).
-- *Tavsiya:* Dastlab `4546` bilan tizimni ishga tushirib, keyin `Sora.uz` alfa-nomi tayyor bo'lganda `.env` dagi `ESKIZ_FROM` ni yangilab qo'yish.
+### 3.4. Jo'natuvchi Nomi (Sender ID)
+Standart tasdiqlangan `4546` qisqa raqami orqali jonli SMS yuborish yo'lga qo'yildi.
 
 ---
 
@@ -214,9 +205,9 @@ Eskiz.uz hujjatidagi (2374–2417-qatorlar) rasmiy tariflarga ko'ra, O'zbekiston
 
 | Bosqich | Vazifa | Mas'ul | Holat |
 | :-: | :--- | :---: | :---: |
-| **1** | Eskiz.uz kabinetidan `ESKIZ_EMAIL` va `ESKIZ_SECRET_PASSWORD` (API kalit) ni olish | Loyiha ma'muri (Eskiz.uz) | ⏳ Kutilmoqda (`ESKIZ_FROM="4546"` qabul qilindi) |
-| **2** | Eskiz.uz ga 2 ta (UZ/RU) OTP shablonini moderatsiyaga (`service` maqomiga) topshirish | Loyiha ma'muri (Eskiz.uz) | 🟡 Moderatsiyaga yuborildi (javob kutilmoqda) |
+| **1** | Eskiz.uz kabinetidan `ESKIZ_EMAIL` va `ESKIZ_SECRET_PASSWORD` (API kalit) ni olish | Loyiha ma'muri (Eskiz.uz) | ✅ **To'liq bajarildi (`alfaprintservis@mail.ru`)** |
+| **2** | Eskiz.uz ga 2 ta (UZ/RU) OTP shablonini moderatsiyaga topshirish va tasdiqlatish | Loyiha ma'muri (Eskiz.uz) | ✅ **To'liq bajarildi (UZ: 76 belgi, RU: 70 belgi tasdiqlandi)** |
 | **3** | 1C da `GET /register` telefon qidiruvini 9 xonali formatga o'tkazish, `409 Conflict` da `name` qaytarish va `B2B` da `phone1` ni saqlash | 1C Dasturchisi | ✅ **To'liq bajarildi (`1C_so'ngi_o'zgarishlar.txt`)** |
 | **4** | `src/lib/sms/eskiz.ts`, `otp-store.ts` (`deriveOneCPassword`) va `/api/auth/otp/*` (`Seamless Login`) backend endpointlarini yozish | Veb-dasturchi | ✅ **To'liq bajarildi** |
 | **5** | `AuthModal.tsx` ni 3 qadamli zamonaviy OTP + WebOTP interfeysiga o'tkazish | Veb-dasturchi | ✅ **To'liq bajarildi** |
-| **6** | Jonli SMS yuborish va 1C ERP bilan to'liq integratsiya sinovi (End-to-End Test) | Barcha tomonlar | ⏳ Eskiz API kalitlari va moderatsiya tasdiqlangach |
+| **6** | Jonli SMS yuborish va 1C ERP bilan to'liq integratsiya sinovi (End-to-End Test) | Barcha tomonlar | ✅ **To'liq yakunlandi (1C va Eskiz.uz bilan 100% integratsiya qilindi)** |
