@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
+import { useLocale } from "next-intl";
 import { useAuthStore } from "@/lib/store/auth";
 import { reachGoal } from "@/lib/analytics/yandex";
 import {
@@ -49,7 +50,9 @@ function formatUzPhoneInput(raw: string): string {
   )}-${local.slice(7, 9)}`;
 }
 
-export function AuthModal({ locale = "uz" }: AuthModalProps) {
+export function AuthModal({ locale: propLocale }: AuthModalProps) {
+  const currentLocale = useLocale();
+  const locale = (propLocale || currentLocale || "uz") as "uz" | "ru";
   const isUz = locale === "uz";
   const {
     isModalOpen,

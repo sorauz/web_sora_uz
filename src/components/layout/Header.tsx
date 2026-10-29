@@ -251,10 +251,11 @@ export function Header({ tree, categories, brands, products = [] }: HeaderProps)
       </div>
 
       {/* Auth Modal */}
-      <AuthModal />
+      <AuthModal locale={locale as "uz" | "ru"} />
 
       {/* Order Tracker Modal */}
       <OrderTrackerModal
+        locale={locale as "uz" | "ru"}
         isOpen={trackerOpen}
         onClose={() => setTrackerOpen(false)}
       />
