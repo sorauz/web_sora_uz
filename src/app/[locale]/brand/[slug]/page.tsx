@@ -64,6 +64,18 @@ export async function generateMetadata({
         : `Каталог оригинальной продукции ${brandName} в Ташкенте.`,
       url: canonicalUrl,
       type: "website",
+      images: [
+        {
+          url: "https://sora.uz/og-image.jpg",
+          width: 1200,
+          height: 630,
+          alt: "Sora.uz",
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      images: ["https://sora.uz/og-image.jpg"],
     },
     // Crawl budget & index protection: noindex for deep pagination (?page > 1) and faceted filters
     robots:

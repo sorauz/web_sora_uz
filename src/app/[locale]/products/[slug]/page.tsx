@@ -73,6 +73,20 @@ export async function generateMetadata({
         "text/markdown": `https://sora.uz/${locale}/products/${expectedSlug}.md`,
       },
     },
+    openGraph: {
+      title,
+      description,
+      url: `https://sora.uz/${locale}/products/${expectedSlug}`,
+      siteName: "Sora.uz",
+      locale: isUz ? "uz_UZ" : "ru_RU",
+      type: "website",
+      images: [
+        {
+          url: product.main_picture || "https://sora.uz/og-image.jpg",
+          alt: loc.name,
+        },
+      ],
+    },
     twitter: {
       card: "summary_large_image",
       title,

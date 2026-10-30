@@ -66,6 +66,37 @@ export async function generateMetadata({
       shortcut: "/for_web_logo_icon.ico",
       apple: "/for_web_logo_icon.ico",
     },
+    openGraph: {
+      title: isUz
+        ? "Sora.uz — Kanselyariya va Elektronika Internet Do'koni"
+        : "Sora.uz — Интернет-магазин канцелярии и электроники",
+      description: isUz
+        ? "Sora.uz — 1C ERP integratsiyali zamonaviy internet do'koni. Ofis anjomlari, kanselyariya va elektronika mahsulotlari arzon narxlarda."
+        : "Sora.uz — современный интернет-магазин с интеграцией 1С ERP. Офисные товары, канцелярия и электроника по доступным ценам.",
+      url: `https://sora.uz/${locale}`,
+      siteName: "Sora.uz",
+      locale: isUz ? "uz_UZ" : "ru_RU",
+      type: "website",
+      images: [
+        {
+          url: "https://sora.uz/og-image.jpg",
+          width: 1200,
+          height: 630,
+          alt: "Sora.uz",
+          type: "image/jpeg",
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: isUz
+        ? "Sora.uz — Kanselyariya va Elektronika Internet Do'koni"
+        : "Sora.uz — Интернет-магазин канцелярии и электроники",
+      description: isUz
+        ? "Sora.uz — 1C ERP integratsiyali zamonaviy internet do'koni. Ofis anjomlari, kanselyariya va elektronika mahsulotlari arzon narxlarda."
+        : "Sora.uz — современный интернет-магазин с интеграцией 1С ERP. Офисные товары, канцелярия и электроника по доступным ценам.",
+      images: ["https://sora.uz/og-image.jpg"],
+    },
     verification: {
       yandex: "def7fffc020ea8fe",
     },
