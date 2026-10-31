@@ -18,6 +18,7 @@ import { Link } from "@/i18n/routing";
 import { Pagination } from "@/components/discovery/Pagination";
 import { SubcategoryChips } from "@/components/discovery/SubcategoryChips";
 import { Metadata } from "next";
+import { getCategoryOgImage } from "@/lib/seo/category-og";
 import { Folder, HelpCircle, BookOpen } from "lucide-react";
 
 interface CategoryPageProps {
@@ -33,12 +34,14 @@ export async function generateMetadata({
   const sParams = await searchParams;
   const isUz = locale === "uz";
 
-  const { tree } = await api.getCategories();
+  const { tree, categories } = await api.getCategories();
   const category = findCategoryBySlug(tree, slug, isUz ? "uz" : "ru");
 
   if (!category) {
     return { title: isUz ? "Kategoriya topilmadi" : "Категория не найдена" };
   }
+
+  const ogImage = getCategoryOgImage(category, categories, isUz ? "uz" : "ru");
 
   const canonicalSlug = isUz ? category.group_slug_uz : category.group_slug_ru;
   const name = isUz ? category.group_uz : category.group_ru;
@@ -77,16 +80,21 @@ export async function generateMetadata({
       type: "website",
       images: [
         {
-          url: "https://sora.uz/og-image.jpg",
-          width: 1200,
-          height: 630,
-          alt: "Sora.uz",
+          url: ogImage.url,
+          width: ogImage.width,
+          height: ogImage.height,
+          alt: ogImage.alt,
+          type: ogImage.type,
         },
       ],
     },
     twitter: {
       card: "summary_large_image",
-      images: ["https://sora.uz/og-image.jpg"],
+      title: isUz ? `${name}${pageTitleSuffix} — internet do'koni` : `${name}${pageTitleSuffix} — интернет-магазин`,
+      description: isUz
+        ? `${name} mahsulotlari arzon narxlarda Sora.uz do'konida.`
+        : `Товары ${name} по доступным ценам в магазине Sora.uz.`,
+      images: [ogImage.url],
     },
     // Crawl budget & index protection: noindex for deep pagination (?page > 1) and faceted filters
     robots:

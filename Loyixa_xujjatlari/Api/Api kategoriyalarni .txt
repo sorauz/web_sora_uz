@@ -2,7 +2,7 @@ API: Barcha kategoriyalarni olish (Get All Categories)
 
 Ushbu endpoint 1C bazasidagi barcha aktiv (o'chirishga belgilanmagan) nomenklatura guruhlarini (kategoriyalarni) ro'yxat shaklida qaytaradi. U ko'p tillilikni (UZ va RU) qo'llab-quvvatlaydi hamda kategoriyalar o'rtasidagi iyerarxiyani (ota-bola bog'liqligini) parent_id orqali ta'minlaydi.
 
-URL: http://sora.uz:777/SORA/hs/for_msp/all_product
+URL: http://1cloud.uz:777/SORA/hs/for_msp/all_product
 Avtorizatsiya:	Basic Auth (Login va Parol)
 Content-Type:	application/json; charset=utf-8
 
@@ -10,7 +10,7 @@ Kod,Holat,Sabab / Qaytariladigan xabar
 200,OK,Muvaffaqiyatli so'rov. Kategoriyalar ro'yxati JSON obyekt ichidagi massiv ko'rinishida qaytariladi.
 
 
-Namuna (json): GET:http://sora.uz:777/SORA/hs/for_msp/categories
+Namuna (json): GET:http://1cloud.uz:777/SORA/hs/for_msp/categories
 Muvaffaqiyatli javob namunasi (200 OK):
 ```
 {
