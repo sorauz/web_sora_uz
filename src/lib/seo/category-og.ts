@@ -14,7 +14,7 @@ export interface CategoryOgConfig {
 
 /**
  * 1-darajali (Root) kategoriyalar uchun Open Graph (og:image) reyestri.
- * Hozirda 6 ta kategoriya rasmi faol. Qolgan 6 tasi tayyor bo'lgach shu ro'yxatga qo'shiladi.
+ * Hozirda 9 ta kategoriya rasmi faol. Qolgan 3 tasi tayyor bo'lgach shu ro'yxatga qo'shiladi.
  */
 export const ROOT_CATEGORY_OG_MAP: CategoryOgConfig[] = [
   {
@@ -98,6 +98,45 @@ export const ROOT_CATEGORY_OG_MAP: CategoryOgConfig[] = [
     imageFileName: "maktab-va-oqish-uchun.jpg",
     altUz: "Maktab va o'qish uchun tovarlar — Sora.uz internet do'koni",
     altRu: "Товары для школы и творчества — интернет-магазин Sora.uz",
+  },
+  {
+    id: "chizmachilik",
+    oneCId: "96d08e2f-acef-11f1-a5ce-00155d78c303",
+    slugs: [
+      "chizmachilik-qurollari",
+      "chertezhnye-prinadlezhnosti",
+    ],
+    titleUz: "Chizmachilik qurollari",
+    titleRu: "Чертежные принадлежности",
+    imageFileName: "chizmachilik-qurollari.jpg",
+    altUz: "Chizmachilik qurollari va anjomlari — Sora.uz internet do'koni",
+    altRu: "Чертежные принадлежности и инструменты — интернет-магазин Sora.uz",
+  },
+  {
+    id: "muhrlar",
+    oneCId: "acb36662-acef-11f1-a5ce-00155d78c303",
+    slugs: [
+      "muhr-va-shtamplar",
+      "pechati-i-shtampy",
+    ],
+    titleUz: "Muhr va shtamplar",
+    titleRu: "Печати и штампы",
+    imageFileName: "muhr-va-shtamplar.jpg",
+    altUz: "Muhr va shtamplar, daterlar — Sora.uz internet do'koni",
+    altRu: "Печати и штампы, датеры — интернет-магазин Sora.uz",
+  },
+  {
+    id: "savdo",
+    oneCId: "ef1aac74-acef-11f1-a5ce-00155d78c303",
+    slugs: [
+      "savdo-uchun-uskunalar",
+      "oborudovanie-dlya-torgovli",
+    ],
+    titleUz: "Savdo va ofis uskunalari",
+    titleRu: "Оборудование для торговли",
+    imageFileName: "savdo-uchun-uskunalar.jpg",
+    altUz: "Savdo va ofis uskunalari (kalkulyatorlar, laminatorlar, hisoblagichlar) — Sora.uz",
+    altRu: "Оборудование для торговли и офиса (калькуляторы, ламинаторы, счетчики) — Sora.uz",
   },
 ];
 
