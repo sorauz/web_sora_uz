@@ -14,7 +14,7 @@ export interface CategoryOgConfig {
 
 /**
  * 1-darajali (Root) kategoriyalar uchun Open Graph (og:image) reyestri.
- * Hozirda 9 ta kategoriya rasmi faol. Qolgan 3 tasi tayyor bo'lgach shu ro'yxatga qo'shiladi.
+ * Hozirda 11 ta kategoriya rasmi faol. Qolgan 1 tasi (Xo'jalik buyumlari) tayyor bo'lgach shu ro'yxatga qo'shiladi.
  */
 export const ROOT_CATEGORY_OG_MAP: CategoryOgConfig[] = [
   {
@@ -137,6 +137,34 @@ export const ROOT_CATEGORY_OG_MAP: CategoryOgConfig[] = [
     imageFileName: "savdo-uchun-uskunalar.jpg",
     altUz: "Savdo va ofis uskunalari (kalkulyatorlar, laminatorlar, hisoblagichlar) — Sora.uz",
     altRu: "Оборудование для торговли и офиса (калькуляторы, ламинаторы, счетчики) — Sora.uz",
+  },
+  {
+    id: "kompyuter",
+    oneCId: "08f6f83f-b1b9-11f1-a5ce-00155d78c303",
+    slugs: [
+      "kompyuter-aksessuarlari",
+      "aksessuary-dlya-kompyuterov",
+      "kompyuternye-aksessuary",
+    ],
+    titleUz: "Kompyuter aksessuarlari",
+    titleRu: "Компьютерные аксессуары",
+    imageFileName: "kompyuter-aksessuarlari.jpg",
+    altUz: "Kompyuter aksessuarlari (sichqonchalar, klaviaturalar, USB fleshkalar) — Sora.uz",
+    altRu: "Компьютерные аксессуары (мыши, клавиатуры, USB флешки) — Sora.uz",
+  },
+  {
+    id: "smartfon",
+    oneCId: "014ea677-b1bb-11f1-a5ce-00155d78c303",
+    slugs: [
+      "smartfon-aksessuarlari",
+      "aksessuary-dlya-smartfonov",
+      "aksessuary-dlya-telefonov",
+    ],
+    titleUz: "Smartfon aksessuarlari",
+    titleRu: "Аксессуары для смартфонов",
+    imageFileName: "smartfon-aksessuarlari.jpg",
+    altUz: "Smartfon aksessuarlari (kabellar, zaryadlovchilar, ushlagichlar) — Sora.uz",
+    altRu: "Аксессуары для смартфонов (кабели, зарядные устройства, держатели) — Sora.uz",
   },
 ];
 
