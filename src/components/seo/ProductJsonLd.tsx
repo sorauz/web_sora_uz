@@ -1,6 +1,11 @@
 import { Product, getProductLocalized } from "@/lib/schemas/product";
 import { calculateProductPrice } from "@/lib/utils/price";
-import { Review, ReviewStats } from "@/lib/schemas/review";
+import {
+  Review,
+  ReviewStats,
+  DEFAULT_BEST_RATING,
+  DEFAULT_WORST_RATING,
+} from "@/lib/schemas/review";
 
 interface ProductJsonLdProps {
   product: Product;
@@ -163,8 +168,8 @@ export function ProductJsonLd({
             "@type": "AggregateRating",
             ratingValue: stats.averageRating.toString(),
             reviewCount: stats.reviewCount.toString(),
-            bestRating: "5",
-            worstRating: "1",
+            bestRating: DEFAULT_BEST_RATING.toString(),
+            worstRating: DEFAULT_WORST_RATING.toString(),
           },
         }
       : {}),
@@ -181,8 +186,8 @@ export function ProductJsonLd({
             reviewRating: {
               "@type": "Rating",
               ratingValue: r.ratingValue.toString(),
-              bestRating: (r.bestRating || 5).toString(),
-              worstRating: "1",
+              bestRating: (r.bestRating ?? DEFAULT_BEST_RATING).toString(),
+              worstRating: (r.worstRating ?? DEFAULT_WORST_RATING).toString(),
             },
           })),
         }

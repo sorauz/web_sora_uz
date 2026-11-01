@@ -1,7 +1,16 @@
 import { z } from "zod";
 
 /**
+ * Baholash tizimining o'zgarmas doimiy standart chegaralari (1 dan 5 gacha).
+ * 1C ERP dan bestRating / worstRating kelmasa ham, Next.js da doim 1 va 5 deb olinadi.
+ */
+export const DEFAULT_BEST_RATING = 5;
+export const DEFAULT_WORST_RATING = 1;
+
+/**
  * Zod schema for a single Product Review from 1C ERP (/SORA/hs/for_msp/review).
+ * 1C endpointidan bestRating maydoni olib tashlangan bo'lsa ham,
+ * schema uni ixtiyoriy (optional / nullish) qabul qiladi va xatolik bermaydi.
  */
 export const ReviewSchema = z.object({
   time_of_comment: z.string().default(""),
@@ -23,8 +32,14 @@ export const ReviewSchema = z.object({
       );
     })
     .default(true),
-  ratingValue: z.number().int().min(1).max(5).default(5),
-  bestRating: z.number().int().default(5),
+  ratingValue: z
+    .number()
+    .int()
+    .min(DEFAULT_WORST_RATING)
+    .max(DEFAULT_BEST_RATING)
+    .default(DEFAULT_BEST_RATING),
+  bestRating: z.number().int().nullish(),
+  worstRating: z.number().int().nullish(),
   reviewBody: z.string().default(""),
   pic_url: z.string().optional().default(""),
 });
