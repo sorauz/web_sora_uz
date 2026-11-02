@@ -14,7 +14,7 @@ export interface CategoryOgConfig {
 
 /**
  * 1-darajali (Root) kategoriyalar uchun Open Graph (og:image) reyestri.
- * Hozirda 11 ta kategoriya rasmi faol. Qolgan 1 tasi (Xo'jalik buyumlari) tayyor bo'lgach shu ro'yxatga qo'shiladi.
+ * Barcha 12 ta asosiy kategoriya rasmlari to'liq ulandi va faol (12/12 — 100%).
  */
 export const ROOT_CATEGORY_OG_MAP: CategoryOgConfig[] = [
   {
@@ -165,6 +165,21 @@ export const ROOT_CATEGORY_OG_MAP: CategoryOgConfig[] = [
     imageFileName: "smartfon-aksessuarlari.jpg",
     altUz: "Smartfon aksessuarlari (kabellar, zaryadlovchilar, ushlagichlar) — Sora.uz",
     altRu: "Аксессуары для смартфонов (кабели, зарядные устройства, держатели) — Sora.uz",
+  },
+  {
+    id: "xojalik",
+    oneCId: "bbfad7af-b1bb-11f1-a5ce-00155d78c303",
+    slugs: [
+      "xo-jalik-buyumlari",
+      "xojalik-buyumlari",
+      "xoz-tovary",
+      "hozyajstvennye-tovary",
+    ],
+    titleUz: "Xo‘jalik buyumlari",
+    titleRu: "Хоз товары",
+    imageFileName: "xo-jalik-buyumlari.jpg",
+    altUz: "Xo'jalik buyumlari (tozalash vositalari, qoplar, salfetkalar) — Sora.uz",
+    altRu: "Хозяйственные товары (чистящие средства, мешки, салфетки) — Sora.uz",
   },
 ];
 
