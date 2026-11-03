@@ -22,7 +22,7 @@ export const TOP_CATEGORIES_DATA: CategoryVisual[] = [
     id: "qogoz",
     oneCId: "fedb5849-aade-11f1-a5cd-00155d78c303",
     slugUz: "qogoz-mahsulotlari",
-    slugRu: "bumazhnaya-produkciya",
+    slugRu: "bumazhnaya-produktsiya",
     titleUz: "Qog‘oz mahsulotlari",
     titleRu: "Бумажная продукция",
     image: "/categories/qogoz.webp",

@@ -91,7 +91,7 @@ test.describe("Homepage Redesign & Special Offers Layout", () => {
     expect(await ruCards.count()).toBe(8);
     const ruFirstCard = ruCards.first();
     await expect(ruFirstCard).toContainText("Бумажная продукция");
-    await expect(ruFirstCard).toHaveAttribute("href", "/ru/category/bumazhnaya-produkciya");
+    await expect(ruFirstCard).toHaveAttribute("href", "/ru/category/bumazhnaya-produktsiya");
   });
 
   test("2. 4 Distinct Showcase Sections: 5 columns layout with 10 unique items per section (40 total)", async ({

@@ -33,36 +33,97 @@ export function buildCategoryTree(categories: Category[]): CategoryTreeNode[] {
 }
 
 /**
+ * Known legacy slugs, transliteration aliases, and fixture mappings to 1C canonical slugs.
+ * Ensures backward compatibility, external backlink stability, and SEO preservation.
+ */
+export const CATEGORY_SLUG_ALIASES: Record<string, string> = {
+  // Paper products: transliteration variation & legacy slugs
+  "bumazhnaya-produkciya": "bumazhnaya-produktsiya",
+  "bumaga-i-bloknoty": "bumazhnaya-produktsiya",
+
+  // Office supplies legacy slugs
+  "ofis-jihozlari-va-kanselyariya": "ofis-buyumlari",
+  "ofisnaya-tekhnika-i-kancelyariya": "ofisnye-prinadlezhnosti",
+
+  // Binding machines legacy slug
+  "boglash-mashinalari": "perepletnye-mashiny",
+
+  // Computer accessories transliteration variation
+  "kompyuternye-aksessuary": "aksessuary-dlya-kompyuterov",
+
+  // Smartphone accessories variation
+  "aksessuary-dlya-telefonov": "aksessuary-dlya-smartfonov",
+
+  // Household goods transliteration variations
+  "xojalik-buyumlari": "xo-jalik-buyumlari",
+  "hozyajstvennye-tovary": "xoz-tovary",
+  "hoz-tovary": "xoz-tovary",
+};
+
+/**
  * Searches the category tree for a node matching a given slug in either uz or ru.
+ * Includes support for slug aliases and transliteration fallbacks.
  */
 export function findCategoryBySlug(
   tree: CategoryTreeNode[],
   slug: string,
   locale: "uz" | "ru" = "uz"
 ): CategoryTreeNode | null {
-  // 1. Try matching the exact requested locale slug
-  for (const node of tree) {
-    const nodeSlug = locale === "uz" ? node.group_slug_uz : node.group_slug_ru;
-    if (nodeSlug === slug) {
-      return node;
+  const normalizedSlug = CATEGORY_SLUG_ALIASES[slug] || slug;
+
+  function search(nodes: CategoryTreeNode[], targetSlug: string, loc: "uz" | "ru"): CategoryTreeNode | null {
+    for (const node of nodes) {
+      const nodeSlug = loc === "uz" ? node.group_slug_uz : node.group_slug_ru;
+      if (nodeSlug === targetSlug) {
+        return node;
+      }
+      const foundInChild = search(node.children, targetSlug, loc);
+      if (foundInChild) {
+        return foundInChild;
+      }
     }
-    const foundInChild = findCategoryBySlug(node.children, slug, locale);
-    if (foundInChild) {
-      return foundInChild;
+    return null;
+  }
+
+  function searchAny(nodes: CategoryTreeNode[], targetSlug: string): CategoryTreeNode | null {
+    for (const node of nodes) {
+      if (node.group_slug_uz === targetSlug || node.group_slug_ru === targetSlug) {
+        return node;
+      }
+      const foundInChild = searchAny(node.children, targetSlug);
+      if (foundInChild) {
+        return foundInChild;
+      }
     }
+    return null;
+  }
+
+  // 1. Try matching normalized slug in requested locale
+  const exactNormalized = search(tree, normalizedSlug, locale);
+  if (exactNormalized) return exactNormalized;
+
+  // 1b. If slug was aliased, try raw slug in requested locale
+  if (normalizedSlug !== slug) {
+    const exactRaw = search(tree, slug, locale);
+    if (exactRaw) return exactRaw;
   }
 
   // 2. Fallback: match across any locale slug (e.g. after language switcher URL transition)
-  for (const node of tree) {
-    if (node.group_slug_uz === slug || node.group_slug_ru === slug) {
-      return node;
-    }
-    for (const child of node.children) {
-      const foundInAny = findCategoryBySlug([child], slug, locale === "uz" ? "ru" : "uz");
-      if (foundInAny) {
-        return foundInAny;
-      }
-    }
+  const anyNormalized = searchAny(tree, normalizedSlug);
+  if (anyNormalized) return anyNormalized;
+
+  if (normalizedSlug !== slug) {
+    const anyRaw = searchAny(tree, slug);
+    if (anyRaw) return anyRaw;
+  }
+
+  // 3. Fallback: automatic transliteration variant (c <-> ts)
+  if (slug.includes("c") || slug.includes("ts")) {
+    const tsVariant = slug.includes("ts")
+      ? slug.replace(/ts/g, "c")
+      : slug.replace(/c/g, "ts");
+    const translitMatch = searchAny(tree, tsVariant);
+    if (translitMatch) return translitMatch;
   }
 
   return null;

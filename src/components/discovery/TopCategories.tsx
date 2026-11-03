@@ -35,18 +35,44 @@ export function TopCategories({ categories = [], locale }: TopCategoriesProps) {
     return map;
   }, [categories]);
 
+  // Map 1C Category Tree by ID for real-time slug synchronization with 1C ERP
+  const liveNodesMap = useMemo(() => {
+    const map = new Map<string, CategoryTreeNode>();
+    function traverse(node: CategoryTreeNode) {
+      map.set(node.id, node);
+      if (node.children && node.children.length > 0) {
+        for (const child of node.children) {
+          traverse(child);
+        }
+      }
+    }
+    for (const root of categories) {
+      traverse(root);
+    }
+    return map;
+  }, [categories]);
+
   return (
     <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5 sm:gap-5">
       {TOP_CATEGORIES_DATA.map((cat) => {
+        const liveNode = liveNodesMap.get(cat.oneCId);
         const dynamicCount =
           countsMap.get(cat.oneCId) ||
           countsMap.get(cat.slugUz) ||
           countsMap.get(cat.slugRu);
 
+        const categoryWithLiveSlugs = liveNode
+          ? {
+              ...cat,
+              slugUz: liveNode.group_slug_uz || cat.slugUz,
+              slugRu: liveNode.group_slug_ru || cat.slugRu,
+            }
+          : cat;
+
         return (
           <CategoryVisualCard
             key={cat.id}
-            category={cat}
+            category={categoryWithLiveSlugs}
             locale={locale}
             count={dynamicCount && dynamicCount > 0 ? dynamicCount : cat.defaultCount}
           />
