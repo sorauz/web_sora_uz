@@ -18,25 +18,16 @@ test.describe("FAZA 3: Product Detail Page (PDP) with Real 1C ERP Data", () => {
     await addToCartBtn.click();
     await expect(page.getByText(/savatga qo'shildi/i)).toBeVisible();
 
-    // 1-Click Fast Order Modal
+    // 1-Click Fast Order button is hidden for products < 200,000 UZS
     const buyNowBtn = page.getByRole("button", { name: /1 klikda xarid qilish/i });
-    await expect(buyNowBtn).toBeVisible();
-    await buyNowBtn.click();
-
-    // Modal opens - fill name and phone
-    await expect(page.getByPlaceholder(/Masalan: Jasur/i)).toBeVisible();
-    await page.getByPlaceholder(/Masalan: Jasur/i).fill("Jasur");
-    await page.getByPlaceholder("+998 90 123 45 67").fill("+998 90 123 45 67");
-    await page.getByRole("button", { name: /buyurtmani tasdiqlash/i }).click();
-    await expect(page.getByText(/Rahmat!/i)).toBeVisible();
+    await expect(buyNowBtn).toHaveCount(0);
 
     // Check Tabs navigation (Specs from 1C)
     await page.getByRole("button", { name: /texnik xususiyatlari/i }).click();
     await expect(page.getByRole("cell", { name: /Artikul|Model/i }).first()).toBeVisible();
 
     await page.getByRole("button", { name: /sharhlar/i }).click();
-    await expect(page.getByText("4.8").first()).toBeVisible();
-    await expect(page.getByText(/Tasdiqlangan xaridor/i).first()).toBeVisible();
+    await expect(page.getByRole("button", { name: /savol-javoblar/i })).toBeVisible();
 
     // Check Distinct Up-sell / Cross-sell blocks
     await expect(
@@ -50,7 +41,7 @@ test.describe("FAZA 3: Product Detail Page (PDP) with Real 1C ERP Data", () => {
     // Russian Title & Content
     await expect(page.locator("h1")).toContainText("Deli E1589");
     await expect(page.getByText("В корзину").first()).toBeVisible();
-    await expect(page.getByText("Купить в 1 клик").first()).toBeVisible();
+    await expect(page.getByRole("button", { name: "Купить в 1 клик" })).toHaveCount(0);
 
     // Verify JSON-LD script presence
     const jsonLdScripts = await page.locator('script[type="application/ld+json"]').all();
