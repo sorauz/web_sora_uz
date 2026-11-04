@@ -119,9 +119,8 @@ test.describe("1C ERP Order Placement & Status Checking Flow", () => {
     await page.getByPlaceholder(/Jasur Alimov/i).fill("Rustam Qodirov");
     await page.getByPlaceholder("+998 90 123 45 67").fill("+998 90 123 45 67");
 
-    // 4. Fill address details
-    await page.getByPlaceholder(/Mirzo Ulug'bek tumani/i).fill("Chilonzor tumani");
-    await page.getByPlaceholder(/Mustaqillik shoh ko'chasi/i).fill("Bunyodkor shoh ko'chasi, 42-uy");
+    // 4. Fill address details (only street/house address is needed; Region and District removed)
+    await page.getByPlaceholder(/Mustaqillik shoh ko'chasi/i).fill("Chilonzor tumani, Bunyodkor shoh ko'chasi, 42-uy");
 
     // 5. Submit order
     const confirmBtn = page.getByRole("button", { name: /buyurtmani tasdiqlash/i });

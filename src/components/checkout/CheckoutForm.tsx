@@ -175,8 +175,11 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
           altPhone: altPhone || undefined,
           email: email || undefined,
           deliveryMethod,
-          region: deliveryMethod === "courier" ? region : undefined,
-          district: deliveryMethod === "courier" ? district : undefined,
+          region: undefined,
+          district:
+            deliveryMethod === "courier" && district && !address.includes(district)
+              ? district
+              : undefined,
           address: deliveryMethod === "courier" ? address : undefined,
           landmark: landmark || undefined,
           geolocation: deliveryMethod === "courier" ? geolocation : "",
@@ -263,23 +266,6 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
       setIsSubmitting(false);
     }
   };
-
-  const regionsList = [
-    locale === "uz" ? "Toshkent shahri" : "г. Ташкент",
-    locale === "uz" ? "Toshkent viloyati" : "Ташкентская область",
-    locale === "uz" ? "Samarqand viloyati" : "Самаркандская область",
-    locale === "uz" ? "Buxoro viloyati" : "Бухарская область",
-    locale === "uz" ? "Andijon viloyati" : "Андижанская область",
-    locale === "uz" ? "Farg'ona viloyati" : "Ферганская область",
-    locale === "uz" ? "Namangan viloyati" : "Наманганская область",
-    locale === "uz" ? "Qashqadaryo viloyati" : "Кашкадарьинская область",
-    locale === "uz" ? "Surxondaryo viloyati" : "Сурхандарьинская область",
-    locale === "uz" ? "Xorazm viloyati" : "Хорезмская область",
-    locale === "uz" ? "Navoiy viloyati" : "Навоийская область",
-    locale === "uz" ? "Jizzax viloyati" : "Джизакская область",
-    locale === "uz" ? "Sirdaryo viloyati" : "Сырдарьинская область",
-    locale === "uz" ? "Qoraqalpog'iston Respublikasi" : "Республика Каракалпакстан",
-  ];
 
   return (
     <form onSubmit={handleSubmitOrder} className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -556,39 +542,6 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
           {/* Conditional Delivery Inputs */}
           {deliveryMethod === "courier" ? (
             <div className="space-y-4 pt-2">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                    {t("region")} *
-                  </label>
-                  <select
-                    value={region}
-                    onChange={(e) => setRegion(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sora-500 dark:text-white"
-                  >
-                    {regionsList.map((r, idx) => (
-                      <option key={idx} value={r}>
-                        {r}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                    {t("district")} *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={district}
-                    onChange={(e) => setDistrict(e.target.value)}
-                    placeholder={t("districtPlaceholder")}
-                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sora-500 dark:text-white"
-                  />
-                </div>
-              </div>
-
               {/* HERO INTERACTIVE MAP PICKER CARD */}
               <div
                 onClick={() => setIsMapModalOpen(true)}
@@ -1083,11 +1036,14 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
         initialGeolocation={geolocation}
         onConfirm={({ geolocationUrl, detectedDistrict, detectedAddress }) => {
           setGeolocation(geolocationUrl);
-          if (detectedDistrict && !district.trim()) {
+          if (detectedDistrict) {
             setDistrict(detectedDistrict);
           }
-          if (detectedAddress) {
-            setAddress(detectedAddress);
+          const fullAddress = [detectedDistrict, detectedAddress]
+            .filter(Boolean)
+            .join(", ");
+          if (fullAddress) {
+            setAddress(fullAddress);
           }
         }}
       />

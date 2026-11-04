@@ -37,9 +37,8 @@ test.describe("FAZA 4: Cart and Checkout Flow", () => {
     await page.getByPlaceholder(/Masalan: Jasur Alimov/i).fill("Jasur Alimov");
     await page.getByPlaceholder("+998 90 123 45 67").fill("+998 90 123 45 67");
 
-    // Fill address details
-    await page.getByPlaceholder(/Masalan: Mirzo Ulug'bek tumani/i).fill("Chilonzor tumani");
-    await page.getByPlaceholder(/Masalan: Mustaqillik shoh ko'chasi/i).fill("Bunyodkor shoh ko'chasi, 42-uy");
+    // Fill address details (only street/house address is needed; Region and District removed)
+    await page.getByPlaceholder(/Masalan: Mustaqillik shoh ko'chasi/i).fill("Chilonzor tumani, Bunyodkor shoh ko'chasi, 42-uy");
 
     // Submit order
     const confirmBtn = page.getByRole("button", { name: /buyurtmani tasdiqlash/i });
