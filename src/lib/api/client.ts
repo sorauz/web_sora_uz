@@ -1,4 +1,6 @@
 import "server-only";
+import http from "node:http";
+import https from "node:https";
 import {
   Category,
   CategoriesResponseSchema,
@@ -14,6 +16,7 @@ import {
   Product,
   ProductSchema,
   AllProductsResponseSchema,
+  SubProductCard,
 } from "../schemas/product";
 import { OfferItem, OfferListResponseSchema } from "../schemas/offer";
 import {
@@ -57,6 +60,16 @@ class SoraApiClient {
   private baseUrl: string;
   private authHeader: string;
   private timeoutMs: number;
+  private inFlightRelationsPromise: Promise<{
+    relationsMap: Record<
+      string,
+      {
+        related_products: SubProductCard[];
+        recommended_products: SubProductCard[];
+      }
+    >;
+    isFallback: boolean;
+  }> | null = null;
 
   constructor() {
     this.baseUrl =
@@ -233,7 +246,9 @@ class SoraApiClient {
     options?: FetchOptions
   ): Promise<{ products: Product[]; isFallback: boolean }> {
     const res = await this.request<unknown[]>("/all_product", {
-      tags: options?.noCache ? undefined : (options?.tags ?? ["products"]),
+      tags: options?.noCache
+        ? undefined
+        : (options?.tags ?? ["products", "all-products"]),
       revalidate: options?.revalidate,
       noCache: options?.noCache,
     });
@@ -303,6 +318,161 @@ class SoraApiClient {
     }
 
     return { product: null, isFallback: true };
+  }
+
+  /**
+   * Fetches compact related_products and recommended_products for a list of product IDs
+   * in parallel using a native Node HTTP Keep-Alive Agent (~3.2s for all 1,532 products).
+   * Bypasses Next.js patched globalThis.fetch overhead and deduplicates concurrent in-flight scans.
+   */
+  async fetchAllProductRelations(
+    productIds: string[],
+    options?: { concurrency?: number }
+  ): Promise<{
+    relationsMap: Record<
+      string,
+      {
+        related_products: SubProductCard[];
+        recommended_products: SubProductCard[];
+      }
+    >;
+    isFallback: boolean;
+  }> {
+    if (this.inFlightRelationsPromise) {
+      return this.inFlightRelationsPromise;
+    }
+
+    this.inFlightRelationsPromise = this.executeFetchAllProductRelations(
+      productIds,
+      options?.concurrency ?? 64
+    ).finally(() => {
+      this.inFlightRelationsPromise = null;
+    });
+
+    return this.inFlightRelationsPromise;
+  }
+
+  private async executeFetchAllProductRelations(
+    productIds: string[],
+    maxSockets: number
+  ): Promise<{
+    relationsMap: Record<
+      string,
+      {
+        related_products: SubProductCard[];
+        recommended_products: SubProductCard[];
+      }
+    >;
+    isFallback: boolean;
+  }> {
+    const parsedBase = new URL(this.baseUrl);
+    const isHttps = parsedBase.protocol === "https:";
+    const transport = isHttps ? https : http;
+    const agent = isHttps
+      ? new https.Agent({ keepAlive: true, maxSockets })
+      : new http.Agent({ keepAlive: true, maxSockets });
+
+    const basePath = parsedBase.pathname.endsWith("/")
+      ? parsedBase.pathname.slice(0, -1)
+      : parsedBase.pathname;
+
+    const fetchSingleRelation = (
+      id: string
+    ): Promise<{
+      id: string;
+      related_products: SubProductCard[];
+      recommended_products: SubProductCard[];
+    } | null> =>
+      new Promise((resolve) => {
+        const req = transport.get(
+          {
+            hostname: parsedBase.hostname,
+            port: parsedBase.port || (isHttps ? 443 : 80),
+            path: `${basePath}/product?id=${encodeURIComponent(id)}`,
+            headers: {
+              Authorization: this.authHeader,
+              Accept: "application/json",
+            },
+            agent,
+            timeout: this.timeoutMs,
+          },
+          (res) => {
+            if (res.statusCode !== 200) {
+              res.resume();
+              return resolve(null);
+            }
+            const chunks: Buffer[] = [];
+            res.on("data", (chunk: Buffer) => chunks.push(chunk));
+            res.on("end", () => {
+              try {
+                const raw = JSON.parse(
+                  Buffer.concat(chunks).toString("utf8")
+                ) as {
+                  related_products?: SubProductCard[];
+                  recommended_products?: SubProductCard[];
+                };
+                resolve({
+                  id,
+                  related_products: (raw.related_products || []).map((r) => ({
+                    id: r.id,
+                    related_products_id: r.related_products_id,
+                    slug_uz: r.slug_uz,
+                    slug_ru: r.slug_ru,
+                  })),
+                  recommended_products: (raw.recommended_products || []).map(
+                    (rec) => ({
+                      id: rec.id,
+                      recommended_products_id: rec.recommended_products_id,
+                      slug_uz: rec.slug_uz,
+                      slug_ru: rec.slug_ru,
+                    })
+                  ),
+                });
+              } catch {
+                resolve(null);
+              }
+            });
+          }
+        );
+
+        req.on("error", () => resolve(null));
+        req.on("timeout", () => {
+          req.destroy();
+          resolve(null);
+        });
+      });
+
+    try {
+      const results = await Promise.all(
+        productIds.map((id) => fetchSingleRelation(id))
+      );
+
+      const relationsMap: Record<
+        string,
+        {
+          related_products: SubProductCard[];
+          recommended_products: SubProductCard[];
+        }
+      > = {};
+      let successCount = 0;
+
+      for (const item of results) {
+        if (item) {
+          successCount++;
+          relationsMap[item.id] = {
+            related_products: item.related_products,
+            recommended_products: item.recommended_products,
+          };
+        }
+      }
+
+      return {
+        relationsMap,
+        isFallback: productIds.length > 0 && successCount === 0,
+      };
+    } finally {
+      agent.destroy();
+    }
   }
 
   /**

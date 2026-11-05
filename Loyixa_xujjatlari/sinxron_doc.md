@@ -29,8 +29,9 @@ veb-saytda bu o‘zgarishlar **24 soat kutmasdan, 0 soniyada (zudlik bilan)** pa
 
 ### 3.0. Smart Diff / Delta Revalidation (⭐️⭐️⭐️ ENG AVZAL VA ENG TEJAMKOR USUL)
 Saytdagi mavjud kesh bilan 1C ERP dagi yangi ma'lumotlarni solishtiradi (Diff) va faqatgina o‘zgargan qismlarnigina yangilaydi:
+* **Tekshiriladigan maydonlar:** Har bir mahsulotning narxi (`retail_price`, `wholesale_price`, `dealer_price`), ombor qoldig‘i (`stock`, `quantity`), nomi va slug'lari (`UZ/RU`), rasmi (`main_picture`), brendi, kategoriyasi, `updated_at` sanasi **hamda har bir mahsulotning `related_products` (O‘xshash mahsulotlar) va `recommended_products` (Tavsiya etiladigan mahsulotlar) ro‘yxatlari!**
 * **O‘zgarish bo‘lmaganda:** Kesh va sitemap tegilmaydi (**0 ISR Writes** — Vercel limiti 100% tejaladi).
-* **Faqat ayrim tovarlar (narx, qoldiq, tavsif) o‘zgarganda:** Faqat o‘sha tovarlarning shaxsiy tegi (`product-[ID]`), narxlar (`prices`) va `/sitemap.xml` yangilanadi (95% xarajat tejaladi).
+* **Faqat ayrim tovarlar (narx, qoldiq, tavsif yoki `related_products` / `recommended_products`) o‘zgarganda:** Faqat o‘sha o‘zgargan tovarlarning shaxsiy tegi (`product-[ID]`), bog‘langan tovarlar snapshot tegi (`product-relations`), narxlar (`prices`) va `/sitemap.xml` yangilanadi (95% xarajat tejaladi).
 * **Yangi tovar qo‘shilganda yoki o‘chirilganda:** Katalog, toifalar va `/sitemap.xml` avtomatik yangilanadi.
 * **Qidiruv tizimlari (IndexNow & Sitemap):** Har qanday aniqlangan o‘zgarishda `/sitemap.xml` avtomatik yangilanadi va o‘zgargan havolalar IndexNow (Yandex/Bing) tizimiga yuboriladi.
 
@@ -38,6 +39,23 @@ Saytdagi mavjud kesh bilan 1C ERP dagi yangi ma'lumotlarni solishtiradi (Diff) v
 GET https://sora.uz/api/revalidate?secret=sora_revalidate_secret_2026&mode=smart-diff
 ```
 *(Yoki qisqacha: `&tag=smart-diff`)*
+
+### 3.0.1. Faqat `related_products` va `recommended_products` o‘zgarishlarini tekshirish va sinxronlash (`mode=relations-diff`)
+Agar 1C da mahsulotlarning faqat **"O‘xshash mahsulotlar" (`related_products`)** yoki **"Tavsiya etiladigan mahsulotlar" (`recommended_products`)** biriktirmalari o‘zgartirilgan bo‘lsa va barcha mahsulotlarni tekshirib, **faqatgina o‘zgarish bo‘lgan mahsulotlarni** qayta sinxronlash kerak bo‘lsa:
+
+```http
+GET https://sora.uz/api/revalidate?secret=sora_revalidate_secret_2026&mode=relations-diff
+```
+*(Yoki: `GET https://sora.uz/api/revalidate?secret=sora_revalidate_secret_2026&mode=smart-diff&scope=relations`)*
+
+* **Qanday ishlaydi:** 1C ERP `/product?id={ID}` orqali barcha mahsulotlarning joriy `related_products` va `recommended_products` ro‘yxatlarini parallel ravishda (~4 soniyada) keshdagi holat bilan solishtiradi.
+* **Natija:** Qaysi mahsulotda `related_products` yoki `recommended_products` qo‘shilgan, o‘chirilgan yoki tartibi o‘zgargan bo‘lsa, faqat o‘sha mahsulotning `product-{ID}` keshini va sahifasini yangilaydi. O‘zgarmagan mahsulotlar keshiga tegilmaydi (**0 ortiqcha ISR Write**).
+
+### 3.0.2. Tezkor Katalog va Narxlar Smart Diff (`fast=true`)
+Agar `related_products` / `recommended_products` tekshiruvini o‘tkazmasdan, faqat `/all_product` va `/price` (narx, qoldiq, nom, yangi/o‘chirilgan tovarlar) bo‘yicha 0.3 soniyalik tezkor diff bajarish kerak bo‘lsa:
+```http
+GET https://sora.uz/api/revalidate?secret=sora_revalidate_secret_2026&mode=smart-diff&fast=true
+```
 
 ### 3.1. Narxlar o‘zgarganda
 Barcha tovarlarning narxlari va chegirmalar keshini yangilaydi:
@@ -115,7 +133,7 @@ Agar 1C yoki oraliq backend tizimi `POST` orqali ma'lumot yuborishni ma'qul ko�
   "mode": "smart-diff"
 }
 ```
-*(yoki `"tag": "smart-diff"`)*
+*(yoki faqat `related_products` va `recommended_products` tekshiruvi uchun: `"mode": "relations-diff"` yoki `"mode": "smart-diff", "scope": "relations"`)*
 
 ### 4.1. Tag bo‘yicha yangilash:
 ```json
@@ -198,7 +216,7 @@ Agar 1C yoki oraliq backend tizimi `POST` orqali ma'lumot yuborishni ma'qul ko�
 }
 ```
 
-### 6.2. Smart Diff — O‘zgarishlar aniqlanganda (Avtomatik Sitemap va IndexNow):
+### 6.2. Smart Diff — O‘zgarishlar aniqlanganda (Narx, Qoldiq, `related_products` va `recommended_products`):
 ```json
 {
   "revalidated": true,
@@ -206,12 +224,13 @@ Agar 1C yoki oraliq backend tizimi `POST` orqali ma'lumot yuborishni ma'qul ko�
   "sitemapRevalidated": true,
   "message": "3 ta o'zgarish aniqlandi va faqat ta'sir ko'rgan keshlar yangilandi.",
   "summary": {
-    "totalCached": 540,
-    "totalFresh": 540,
+    "totalCached": 1532,
+    "totalFresh": 1532,
     "addedCount": 0,
     "deletedCount": 0,
     "modifiedCount": 3,
-    "changedCount": 3
+    "changedCount": 3,
+    "relationsModifiedCount": 1
   },
   "details": {
     "addedIds": [],
@@ -221,10 +240,15 @@ Agar 1C yoki oraliq backend tizimi `POST` orqali ma'lumot yuborishni ma'qul ko�
         "id": "E1589",
         "name": "Deli Ruchka 0.5mm",
         "slug": "deli-ruchka-05mm",
-        "changes": ["retail_price: 12000 -> 14000", "stock: InStock -> OutOfStock"]
+        "changes": [
+          "retail_price: 12000 -> 14000",
+          "stock: InStock -> OutOfStock",
+          "related_products: 4 -> 8 ta (+4)",
+          "recommended_products: 2 -> 4 ta (+2)"
+        ]
       }
     ],
-    "revalidatedTags": ["product-E1589", "prices"],
+    "revalidatedTags": ["product-E1589", "product-relations", "prices"],
     "revalidatedPaths": ["/sitemap.xml", "/[locale]/products/[slug]"]
   },
   "indexnow": {

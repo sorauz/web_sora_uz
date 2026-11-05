@@ -8,6 +8,8 @@ function performRevalidation(tag?: string, path?: string) {
     if (tag === "all") {
       const allTags = [
         "products",
+        "all-products",
+        "product-relations",
         "prices",
         "categories",
         "brands",
@@ -107,10 +109,25 @@ export async function GET(request: NextRequest) {
   }
 
   const mode = searchParams.get("mode");
-  const isSmartDiff = mode === "smart-diff" || tag === "smart-diff";
+  const scope = searchParams.get("scope");
+  const fast = searchParams.get("fast");
+  const isSmartDiff =
+    mode === "smart-diff" ||
+    tag === "smart-diff" ||
+    mode === "relations-diff" ||
+    tag === "relations-diff";
 
   if (isSmartDiff) {
-    const result = await runSmartDiffRevalidation();
+    const onlyRelations =
+      mode === "relations-diff" ||
+      tag === "relations-diff" ||
+      scope === "relations";
+    const skipRelations = !onlyRelations && fast === "true";
+
+    const result = await runSmartDiffRevalidation({
+      onlyRelations,
+      skipRelations,
+    });
     return NextResponse.json(result, {
       status: result.error && !result.summary ? 500 : 200,
     });
@@ -165,6 +182,8 @@ export async function POST(request: NextRequest) {
   let body: {
     secret?: string;
     mode?: string;
+    scope?: string;
+    fast?: boolean | string;
     tag?: string;
     path?: string;
     urls?: string | string[];
@@ -179,6 +198,8 @@ export async function POST(request: NextRequest) {
     body = {
       secret: searchParams.get("secret") || undefined,
       mode: searchParams.get("mode") || undefined,
+      scope: searchParams.get("scope") || undefined,
+      fast: searchParams.get("fast") || undefined,
       tag: searchParams.get("tag") || undefined,
       path: searchParams.get("path") || undefined,
       url: searchParams.get("url") || undefined,
@@ -195,10 +216,24 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const isSmartDiff = body.mode === "smart-diff" || body.tag === "smart-diff";
+  const isSmartDiff =
+    body.mode === "smart-diff" ||
+    body.tag === "smart-diff" ||
+    body.mode === "relations-diff" ||
+    body.tag === "relations-diff";
 
   if (isSmartDiff) {
-    const result = await runSmartDiffRevalidation();
+    const onlyRelations =
+      body.mode === "relations-diff" ||
+      body.tag === "relations-diff" ||
+      body.scope === "relations";
+    const skipRelations =
+      !onlyRelations && (body.fast === true || body.fast === "true");
+
+    const result = await runSmartDiffRevalidation({
+      onlyRelations,
+      skipRelations,
+    });
     return NextResponse.json(result, {
       status: result.error && !result.summary ? 500 : 200,
     });

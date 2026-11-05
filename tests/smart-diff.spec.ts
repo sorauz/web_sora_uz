@@ -131,4 +131,83 @@ test.describe("Smart Diff / Delta Revalidation Suite", () => {
     expect(body.tag).toBe("prices");
     expect(body.indexnow.dispatched).toBe(true);
   });
+
+  test("7. computeProductDiff detects related_products and recommended_products changes", () => {
+    const cached: Product[] = [
+      {
+        ...baseProduct,
+        related_products: [
+          { related_products_id: "REL-1", slug_uz: "rel-1" },
+          { related_products_id: "REL-2", slug_uz: "rel-2" },
+        ],
+        recommended_products: [
+          { recommended_products_id: "REC-1", slug_uz: "rec-1" },
+        ],
+      },
+    ];
+
+    const fresh: Product[] = [
+      {
+        ...baseProduct,
+        related_products: [
+          { related_products_id: "REL-1", slug_uz: "rel-1" },
+          { related_products_id: "REL-2", slug_uz: "rel-2" },
+          { related_products_id: "REL-3", slug_uz: "rel-3" },
+        ],
+        recommended_products: [
+          { recommended_products_id: "REC-2", slug_uz: "rec-2" },
+        ],
+      },
+    ];
+
+    const diff = computeProductDiff(cached, fresh);
+    expect(diff.hasChanges).toBe(true);
+    expect(diff.relationsChanged).toBe(true);
+    expect(diff.summary.relationsModifiedCount).toBe(1);
+    expect(diff.modified).toHaveLength(1);
+    expect(
+      diff.modified[0].changes.some((c) =>
+        c.includes("related_products: 2 -> 3 ta (+1)")
+      )
+    ).toBe(true);
+    expect(
+      diff.modified[0].changes.some((c) =>
+        c.includes("recommended_products: 1 -> 1 ta (+1, -1)")
+      )
+    ).toBe(true);
+  });
+
+  test("8. computeProductDiff with onlyRelations=true filters out non-relation changes", () => {
+    const cached: Product[] = [{ ...baseProduct, related_products: [] }];
+    const fresh: Product[] = [
+      {
+        ...baseProduct,
+        price: {
+          ...baseProduct.price!,
+          retail_price: 99000,
+        },
+        related_products: [{ related_products_id: "REL-99", slug_uz: "rel-99" }],
+      },
+    ];
+
+    const diff = computeProductDiff(cached, fresh, { onlyRelations: true });
+    expect(diff.hasChanges).toBe(true);
+    expect(diff.relationsChanged).toBe(true);
+    expect(diff.priceChanged).toBe(false);
+    expect(diff.modified[0].changes).toHaveLength(1);
+    expect(diff.modified[0].changes[0]).toContain("related_products: 0 -> 1 ta (+1)");
+  });
+
+  test("9. /api/revalidate?mode=relations-diff checks product relations", async ({
+    request,
+  }) => {
+    const res = await request.get(
+      "/api/revalidate?secret=sora_revalidate_secret_2026&mode=relations-diff"
+    );
+    expect(res.status()).toBe(200);
+    const body = await res.json();
+    expect(body.mode).toBe("relations-diff");
+    expect(body.summary).toBeDefined();
+    expect(typeof body.summary.relationsModifiedCount).toBe("number");
+  });
 });
