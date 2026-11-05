@@ -127,18 +127,18 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
   const allProducts = allProdsRes.products;
   const { reviews, stats } = reviewsRes;
 
-  // 1. Related Products (Up-sell / Down-sell: prefer 1C explicit related_products if present)
+  // 1. O'xshash mahsulotlar (Up-sell / Down-sell: 1C recommended_products ichida xuddi shu toifadagi o'xshash mahsulotlar keladi)
   let relatedProducts: typeof allProducts = [];
-  if (product.related_products && product.related_products.length > 0) {
+  if (product.recommended_products && product.recommended_products.length > 0) {
     const matchedList: typeof allProducts = [];
-    for (const r of product.related_products) {
-      const targetId = r.related_products_id || r.id;
+    for (const rec of product.recommended_products) {
+      const targetId = rec.recommended_products_id || rec.id;
       const found = allProducts.find(
         (p) =>
           (targetId && p.id === targetId) ||
-          (r.slug_uz && p.uz?.slug_uz === r.slug_uz) ||
-          (r.slug_ru && p.ru?.slug_ru === r.slug_ru) ||
-          (r.name_uz && p.uz?.name_uz === r.name_uz)
+          (rec.slug_uz && p.uz?.slug_uz === rec.slug_uz) ||
+          (rec.slug_ru && p.ru?.slug_ru === rec.slug_ru) ||
+          (rec.name_uz && p.uz?.name_uz === rec.name_uz)
       );
       if (
         found &&
@@ -163,18 +163,18 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
         : allProducts.filter((p) => p.id !== product.id).slice(0, 4);
   }
 
-  // 2. Recommended Products (Cross-sell: prefer 1C explicit recommended_products if present)
+  // 2. Bilan birga xarid qilinadi (Cross-sell: 1C related_products ichida birga xarid qilinadigan yondosh mahsulotlar keladi)
   let recommendedProducts: typeof allProducts = [];
-  if (product.recommended_products && product.recommended_products.length > 0) {
+  if (product.related_products && product.related_products.length > 0) {
     const matchedList: typeof allProducts = [];
-    for (const rec of product.recommended_products) {
-      const targetId = rec.recommended_products_id || rec.id;
+    for (const r of product.related_products) {
+      const targetId = r.related_products_id || r.id;
       const found = allProducts.find(
         (p) =>
           (targetId && p.id === targetId) ||
-          (rec.slug_uz && p.uz?.slug_uz === rec.slug_uz) ||
-          (rec.slug_ru && p.ru?.slug_ru === rec.slug_ru) ||
-          (rec.name_uz && p.uz?.name_uz === rec.name_uz)
+          (r.slug_uz && p.uz?.slug_uz === r.slug_uz) ||
+          (r.slug_ru && p.ru?.slug_ru === r.slug_ru) ||
+          (r.name_uz && p.uz?.name_uz === r.name_uz)
       );
       if (
         found &&
