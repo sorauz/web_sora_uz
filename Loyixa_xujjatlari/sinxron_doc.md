@@ -295,3 +295,42 @@ Agar 1C yoki oraliq backend tizimi `POST` orqali ma'lumot yuborishni ma'qul ko�
    Agar 1C da 500 ta tovar narxi birdan o‘zgarsa, 500 marta `tag=prices` yubormang. O‘zgarishlar 1C bazasiga to‘liq yozilib bo‘lgach, jarayon oxirida **faqat 1 marta** `mode=smart-diff` yoki `tag=prices` so‘rovini yuborish kifoya.
 3. **Yagona tovar tahrirlanganda tovar ID'sini yuboring:**
    Faqat bitta mahsulot rasm yoki tavsifi o‘zgarsa, `tag=products` emas, `tag=product-[ID]` yuboring. Bu Vercel'da yuzlab sahifalar qayta hisoblanishining oldini oladi.
+
+---
+
+## 8. Cloudflare R2 / CDN Rasmlari Sinxronizatsiyasi va Savdo Feedlari (Google Merchant & Yandex Market)
+
+1C ERP dagi mahsulot rasmlari `https://cdn.sora.uz/products/{kod}_1.jpg` (`1500 × 1500 px`) ga o‘tkazilganda sinxronizatsiya tizimining ishlash tartibi:
+
+### 8.1. Rasm o‘zgarishini Smart Diff orqali aniqlash
+`src/lib/sync/diff-utils.ts` keshdagi `main_picture` bilan 1C ERP dan kelayotgan yangi `main_picture` qiymatini solishtiradi:
+```ts
+if (cached.main_picture !== fresh.main_picture) {
+  diffs.push(`main_picture changed`);
+}
+```
+Agar mahsulot rasmi o‘zgarsa:
+1. O‘sha mahsulotning shaxsiy sahifasi (`product-{ID}`) va URL manzili (`/uz/products/{slug}`, `/ru/products/{slug}`) yangilanadi;
+2. Qidiruv tizimlariga (Yandex va Bing) **IndexNow** protokoli orqali tezkor qayta indekslash xabari yuboriladi;
+3. Savdo feedlari (`/api/feeds/google-merchant`, `/api/feeds/yandex-market`) va `/sitemap.xml` bir zumda keshdan tozalanadi.
+
+### 8.2. Ommaviy yangilashda Feedlar va Sayt keshini tozalash (`tag=all`)
+Rasmlar ommaviy ko‘chirilganda butun sayt, vitrinalar va XML savdo feedlarini 1 soniyada yangilash so‘rovi:
+```http
+GET https://sora.uz/api/revalidate?secret=sora_revalidate_secret_2026&tag=all
+```
+**Yangilanadigan keshlar ro‘yxati:**
+* Barcha 1 760 ta tovar sahifalari va kategoriyalar;
+* 4 ta asosiy vitrina (`/low_price_guarantee`, `/new_products`, `/popular`, `/promotions`);
+* **Google Merchant Center Feed:** `https://sora.uz/api/feeds/google-merchant` (Google talabi bo‘yicha 1500×1500 px yangi rasmlar);
+* **Yandex Market YML Feed:** `https://sora.uz/api/feeds/yandex-market`;
+* **Sitemap XML:** `https://sora.uz/sitemap.xml` (`<image:loc>` havolalari);
+* **AI Katalog:** `https://sora.uz/llms-full.txt`.
+
+### 8.3. Ishlab Chiqarish Serveri (Production) Tekshiruv Hisoboti (2026-11-10)
+* `tag=all` ijro tezligi: **718 ms** (200 OK);
+* `mode=smart-diff` tekshiruv vaqti: **9.6 soniya** (Barcha 1 760 ta tovar xotirada 0 farq bilan to‘liq sinxron holatga keltirildi);
+* `https://sora.uz/api/feeds/google-merchant`: **1 126 ta tovar** yangi `cdn.sora.uz` rasmiga o‘tdi (0 ta `i.ibb.co`);
+* `https://sora.uz/api/feeds/yandex-market`: **1 126 ta tovar** yangi `cdn.sora.uz` rasmiga o‘tdi (0 ta `i.ibb.co`);
+* Mahsulot sahifalari (PDP): `cdn.sora.uz` rasmlari bilan 200 OK ochilmoqda.
+
