@@ -240,9 +240,17 @@ export async function runSmartDiffRevalidation(
     const revalidatedPaths: string[] = [];
     const indexNowUrls: string[] = [];
 
-    // Always revalidate sitemap when products or prices change
+    // Always revalidate sitemap and public product feeds when catalog changes
     revalidatePath("/sitemap.xml");
-    revalidatedPaths.push("/sitemap.xml");
+    revalidatePath("/api/feeds/google-merchant");
+    revalidatePath("/api/feeds/yandex-market");
+    revalidatePath("/llms-full.txt");
+    revalidatedPaths.push(
+      "/sitemap.xml",
+      "/api/feeds/google-merchant",
+      "/api/feeds/yandex-market",
+      "/llms-full.txt"
+    );
     indexNowUrls.push("https://sora.uz/sitemap.xml");
 
     if (diff.added.length > 0 || diff.deleted.length > 0) {

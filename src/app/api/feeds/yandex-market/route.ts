@@ -52,6 +52,9 @@ export async function GET() {
     const priceInfo = calculateProductPrice(p.price);
     if (priceInfo.price <= 0) continue;
 
+    // Yandex Market requires a valid product image in <picture>
+    if (!p.main_picture || !p.main_picture.trim()) continue;
+
     const available = p.price?.stock !== "OutOfStock";
     const desc = p.uz?.short_description_uz || p.uz?.meta_description_uz || name;
     const picture = p.main_picture.startsWith("http")

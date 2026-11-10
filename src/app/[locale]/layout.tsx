@@ -130,6 +130,8 @@ export default async function LocaleLayout({
         {/* Preconnect to external image servers and 1C API to reduce LCP */}
         <link rel="preconnect" href="https://mc.yandex.ru" />
         <link rel="dns-prefetch" href="https://mc.yandex.ru" />
+        <link rel="preconnect" href="https://cdn.sora.uz" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://cdn.sora.uz" />
         <link rel="preconnect" href="https://i.ibb.co" />
         <link rel="dns-prefetch" href="https://i.ibb.co" />
         <link rel="preconnect" href="http://1cloud.uz:777" />

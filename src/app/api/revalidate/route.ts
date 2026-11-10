@@ -21,6 +21,10 @@ function performRevalidation(tag?: string, path?: string) {
         revalidateTag(t, { expire: 0 });
       }
       revalidatePath("/", "layout");
+      revalidatePath("/sitemap.xml");
+      revalidatePath("/api/feeds/google-merchant");
+      revalidatePath("/api/feeds/yandex-market");
+      revalidatePath("/llms-full.txt");
     } else {
       revalidateTag(tag, { expire: 0 });
 
@@ -28,6 +32,7 @@ function performRevalidation(tag?: string, path?: string) {
       // flush the product page and discovery routes as well
       if (
         tag === "products" ||
+        tag === "all-products" ||
         tag === "prices" ||
         tag.startsWith("product-")
       ) {
@@ -35,11 +40,17 @@ function performRevalidation(tag?: string, path?: string) {
         revalidatePath("/[locale]/catalog", "page");
         revalidatePath("/[locale]/category/[slug]", "page");
         revalidatePath("/[locale]", "layout");
+        revalidatePath("/sitemap.xml");
+        revalidatePath("/api/feeds/google-merchant");
+        revalidatePath("/api/feeds/yandex-market");
+        revalidatePath("/llms-full.txt");
       }
       if (tag === "categories") {
         revalidatePath("/[locale]/catalog", "page");
         revalidatePath("/[locale]/category/[slug]", "page");
         revalidatePath("/[locale]", "layout");
+        revalidatePath("/sitemap.xml");
+        revalidatePath("/api/feeds/yandex-market");
       }
       if (tag === "reviews" || tag.startsWith("reviews-")) {
         revalidatePath("/[locale]/products/[slug]", "page");

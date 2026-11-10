@@ -34,6 +34,9 @@ export async function GET() {
     const priceInfo = calculateProductPrice(p.price);
     if (priceInfo.price <= 0) continue; // Google Merchant requires valid price > 0
 
+    // Google Merchant requires a valid product image URL (skip products without an image)
+    if (!p.main_picture || !p.main_picture.trim()) continue;
+
     const inStock = p.price?.stock !== "OutOfStock";
     const picture = p.main_picture.startsWith("http")
       ? p.main_picture
