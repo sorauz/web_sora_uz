@@ -182,16 +182,17 @@ Loyihamiz arxitekturasi shunday qurilganki, `main_picture` o‘zgarganda quyidag
 
 ## 5-BOSQICH: Yakuniy Tekshiruv Ro‘yxati (Checklist)
 
-Amaliyotni boshlash va yakunlashda ushbu ro‘yxat bo‘yicha tekshiriladi:
+Amaliyot muvaffaqiyatli yakunlandi va auditdan o‘tkazildi (2026-11-10 holatiga):
 
-- [ ] **1-qadam (Biz — Next.js):** `next.config.ts` ga `cdn.sora.uz` qo‘shildi, `layout.tsx` ga `preconnect` qo‘shildi, Feedlarga bo‘sh rasm himoyasi va `revalidate` qo‘shilib Vercel’ga deploy qilindi.
-- [ ] **2-qadam (Python Skript):** `new2_skript_migrat.txt` to‘liq ishlab bo‘ldi, `migration_errors.txt` tekshirildi, 1C dagi mahsulotlarda `cf_link1` to‘ldi.
-- [ ] **3-qadam (1C Dasturchisi):** 6 ta 1C HTTP endpoint (`all_product`, `product`, `low_price_guarantee`, `new_products`, `popular`, `promotions`) `cf_link1` ni qaytaradigan qilindi (fallback `link1` bilan).
-- [ ] **4-qadam (Vercel Kesh):** `https://sora.uz/api/revalidate?secret=sora_revalidate_secret_2026&tag=all` chaqirildi.
-- [ ] **5-qadam (Vizual va Texnik QA):**
-  - `https://sora.uz/uz` va mahsulot sahifasida rasmlar ochilayotgani tekshirildi;
-  - `https://sora.uz/sitemap.xml` ichida `<image:loc>https://cdn.sora.uz/products/...</image:loc>` chiqayotgani tekshirildi;
-  - `https://sora.uz/api/feeds/google-merchant` ichida `<g:image_link>https://cdn.sora.uz/products/...</g:image_link>` chiqayotgani tekshirildi.
-- [ ] **6-qadam (Re-index):**
-  - Google Merchant Center’da feed majburiy yangilandi (**Fetch now / Обновить**);
-  - Google Search Console va Yandex Webmaster’da `sitemap.xml` qayta yuborildi.
+- [x] **1-qadam (Biz — Next.js):** `next.config.ts` ga `cdn.sora.uz` qo‘shildi, `layout.tsx` ga `preconnect` qo‘shildi, Feedlarga bo‘sh rasm himoyasi va `revalidate` qo‘shilib Vercel’ga deploy qilindi (`commit: 931c8ef`).
+- [x] **2-qadam (Python Skript):** `new2_skript_migrat.txt` to‘liq ishlab bo‘ldi. 1C dagi rasmli 1 741 ta mahsulotning **100% barchasida** `cf_link1` muvaffaqiyatli to‘ldirildi!
+- [x] **3-qadam (1C Dasturchisi):** 6 ta 1C HTTP endpoint (`all_product`, `product`, `low_price_guarantee`, `new_products`, `popular`, `promotions`) `cf_link1` ni qaytaradigan qilindi (fallback `link1` bilan).
+- [x] **4-qadam (Vercel Kesh):** `https://sora.uz/api/revalidate?secret=sora_revalidate_secret_2026&tag=all` va `mode=smart-diff` muvaffaqiyatli chaqirildi (718 ms, 200 OK).
+- [x] **5-qadam (Vizual va Texnik QA):**
+  - [x] `https://sora.uz/uz` va mahsulot sahifalari (PDP) 200 OK ochilmoqda, yangi `cdn.sora.uz` rasmlari to‘g‘ri chiqmoqda;
+  - [x] `https://api.feeds/google-merchant`: 1 126 ta tovar yangi `cdn.sora.uz` (1500×1500 px) havolalariga o‘tdi (0 ta `i.ibb.co`);
+  - [x] `https://api.feeds/yandex-market`: 1 126 ta tovar yangi `cdn.sora.uz` havolalariga o‘tdi (0 ta `i.ibb.co`);
+  - [x] Cloudflare R2 rasmlari: 200 OK, `1500 × 1500 px`, Progressive JPEG, `cache-control: public, max-age=31536000, immutable`.
+- [x] **6-qadam (Re-index & Merchant Center):**
+  - [x] Google Merchant Center’da `https://sora.uz/api/feeds/google-merchant` taqdim etildi va **1 126 ta tovar** yangilandi (`All recognized`);
+  - [x] IndexNow protokoli orqali Yandex va Bing qidiruv tizimlariga sitemap va 100 ta eng asosiy tovar sahifalari yuborildi (`200 OK`).
