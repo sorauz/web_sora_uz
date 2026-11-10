@@ -115,6 +115,7 @@ export function ProductJsonLd({
       url: canonicalUrl,
       priceCurrency: "UZS",
       price: priceVal,
+      valueAddedTaxIncluded: true,
       priceValidUntil: "2027-12-31",
       availability: inStock
         ? "https://schema.org/InStock"

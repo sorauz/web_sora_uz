@@ -983,13 +983,18 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
               </span>
             </div>
 
-            <div className="pt-3 border-t border-slate-200 dark:border-slate-800 flex items-baseline justify-between">
-              <span className="text-sm font-bold text-slate-900 dark:text-white">
-                {cartT("total")}
-              </span>
-              <span className="text-2xl font-black text-sora-600 dark:text-sora-400">
-                {total.toLocaleString("ru-RU")} {common("currency")}
-              </span>
+            <div className="pt-3 border-t border-slate-200 dark:border-slate-800 space-y-1">
+              <div className="flex items-baseline justify-between">
+                <span className="text-sm font-bold text-slate-900 dark:text-white">
+                  {cartT("total")}
+                </span>
+                <span className="text-2xl font-black text-sora-600 dark:text-sora-400">
+                  {total.toLocaleString("ru-RU")} {common("currency")}
+                </span>
+              </div>
+              <p className="text-[11px] text-right text-emerald-600 dark:text-emerald-400 font-medium">
+                {cartT("vatIncluded")}
+              </p>
             </div>
           </div>
 

@@ -99,15 +99,20 @@ export function CartSummary({ subtotal }: CartSummaryProps) {
           </span>
         </div>
 
-        <div className="pt-3 border-t border-slate-200 dark:border-slate-800 flex items-baseline justify-between">
-          <span className="text-base font-bold text-slate-900 dark:text-white">
-            {t("total")}
-          </span>
-          <div className="text-right">
-            <span className="text-2xl font-black text-sora-600 dark:text-sora-400 tracking-tight">
-              {total.toLocaleString("ru-RU")} {common("currency")}
+        <div className="pt-3 border-t border-slate-200 dark:border-slate-800 space-y-1">
+          <div className="flex items-baseline justify-between">
+            <span className="text-base font-bold text-slate-900 dark:text-white">
+              {t("total")}
             </span>
+            <div className="text-right">
+              <span className="text-2xl font-black text-sora-600 dark:text-sora-400 tracking-tight">
+                {total.toLocaleString("ru-RU")} {common("currency")}
+              </span>
+            </div>
           </div>
+          <p className="text-[11px] text-right text-emerald-600 dark:text-emerald-400 font-medium">
+            {t("vatIncluded")}
+          </p>
         </div>
       </div>
 
