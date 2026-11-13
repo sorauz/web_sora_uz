@@ -7,6 +7,7 @@ import { Footer } from "@/components/layout/Footer";
 import { MobileNav } from "@/components/layout/MobileNav";
 import { TopCategories } from "@/components/discovery/TopCategories";
 import { ProductCard } from "@/components/discovery/ProductCard";
+import { Product } from "@/lib/schemas/product";
 import { buildFeaturedTabGroups } from "@/lib/utils/featured-products";
 import { BrandMarquee } from "@/components/discovery/BrandMarquee";
 import { HeroSlider } from "@/components/home/HeroSlider";
@@ -81,6 +82,54 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
+/**
+ * Trims heavy 1C fields (HTML descriptions, attributes, sub-product arrays)
+ * before passing products into Client Components (ProductCard).
+ * Keeps strictly what ProductCard, Cart, Favorites, Compare, and Analytics require.
+ */
+function toCardProduct(p: Product): Product {
+  return {
+    id: p.id,
+    product_sku: p.product_sku,
+    package: p.package,
+    barcode: p.barcode,
+    brand: p.brand || "",
+    manufacturer: p.manufacturer || "",
+    country: p.country || "",
+    video_url: "",
+    main_picture: p.main_picture,
+    updated_at: "",
+    uz: {
+      unit_uz: p.uz?.unit_uz || "dona",
+      category_uz: p.uz?.category_uz || "",
+      category_slug_uz: p.uz?.category_slug_uz || "",
+      alt_picture_uz: p.uz?.alt_picture_uz || "",
+      name_uz: p.uz?.name_uz || "",
+      slug_uz: p.uz?.slug_uz || "",
+      title_uz: p.uz?.title_uz || "",
+      meta_description_uz: "",
+      short_description_uz: "",
+      product_description_uz: "",
+    },
+    ru: {
+      unit_ru: p.ru?.unit_ru || "шт",
+      category_ru: p.ru?.category_ru || "",
+      category_slug_ru: p.ru?.category_slug_ru || "",
+      alt_picture_ru: p.ru?.alt_picture_ru || "",
+      name_ru: p.ru?.name_ru || "",
+      slug_ru: p.ru?.slug_ru || "",
+      title_ru: p.ru?.title_ru || "",
+      meta_description_ru: "",
+      short_description_ru: "",
+      product_description_ru: "",
+    },
+    attributes: [],
+    related_products: [],
+    recommended_products: [],
+    price: p.price,
+  };
+}
+
 export default async function HomePage({ params }: PageProps) {
   const { locale } = await params;
   setRequestLocale(locale);
@@ -103,6 +152,10 @@ export default async function HomePage({ params }: PageProps) {
 
   // Real 1C Special Offers with intelligent deduplication across 4 tabs
   const featuredGroups = buildFeaturedTabGroups(products, specialOffers);
+  const promoProducts = featuredGroups.promo.map(toCardProduct);
+  const lowPriceProducts = featuredGroups.lowPrice.map(toCardProduct);
+  const popularProducts = featuredGroups.popular.map(toCardProduct);
+  const newProducts = featuredGroups.newProducts.map(toCardProduct);
 
   return (
     <div className="min-h-screen bg-white text-slate-900 flex flex-col">
@@ -139,7 +192,7 @@ export default async function HomePage({ params }: PageProps) {
         </section>
 
         {/* 5. Aksiyalar va Chegirmalar (/promotions) - 5 ustun, 2 qator */}
-        {featuredGroups.promo.length > 0 && (
+        {promoProducts.length > 0 && (
           <section id="promotions" className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
@@ -161,7 +214,7 @@ export default async function HomePage({ params }: PageProps) {
               </Link>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5 sm:gap-4">
-              {featuredGroups.promo.map((p) => (
+              {promoProducts.map((p) => (
                 <ProductCard
                   key={p.id}
                   product={p}
@@ -173,7 +226,7 @@ export default async function HomePage({ params }: PageProps) {
         )}
 
         {/* 6. Eng Arzon Narx Kafolati (/low_price_guarantee) - 5 ustun, 2 qator */}
-        {featuredGroups.lowPrice.length > 0 && (
+        {lowPriceProducts.length > 0 && (
           <section id="low-price" className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
@@ -195,7 +248,7 @@ export default async function HomePage({ params }: PageProps) {
               </Link>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5 sm:gap-4">
-              {featuredGroups.lowPrice.map((p) => (
+              {lowPriceProducts.map((p) => (
                 <ProductCard
                   key={p.id}
                   product={p}
@@ -207,7 +260,7 @@ export default async function HomePage({ params }: PageProps) {
         )}
 
         {/* 7. Ommabop Mahsulotlar - Xit Savdo (/popular) - 5 ustun, 2 qator */}
-        {featuredGroups.popular.length > 0 && (
+        {popularProducts.length > 0 && (
           <section id="popular" className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
@@ -229,7 +282,7 @@ export default async function HomePage({ params }: PageProps) {
               </Link>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5 sm:gap-4">
-              {featuredGroups.popular.map((p) => (
+              {popularProducts.map((p) => (
                 <ProductCard
                   key={p.id}
                   product={p}
@@ -241,7 +294,7 @@ export default async function HomePage({ params }: PageProps) {
         )}
 
         {/* 8. Yangi Mahsulotlar - Novinki (/new_products) - 5 ustun, 2 qator */}
-        {featuredGroups.newProducts.length > 0 && (
+        {newProducts.length > 0 && (
           <section id="new-products" className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
@@ -263,7 +316,7 @@ export default async function HomePage({ params }: PageProps) {
               </Link>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5 sm:gap-4">
-              {featuredGroups.newProducts.map((p) => (
+              {newProducts.map((p) => (
                 <ProductCard
                   key={p.id}
                   product={p}

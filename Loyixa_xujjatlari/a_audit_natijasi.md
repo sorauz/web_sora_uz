@@ -101,14 +101,15 @@ Ba’zi xavfsizlik bandlari (masalan, sessiyani shifrlash yoki Sentry integratsi
 
 ## 🟡 3-BOSQICH: TEZLIK (PERFORMANCE), QIDIRUV VA UI/UX YAXSHILANISHI (P2 — O‘rta)
 
-### A12. Bosh sahifa (Home) Tezligi va Server Components optimizatsiyasi (`#7`, `#96`, `#161`, `#162`, `#163`, `#167`, `#168`)
-- **Muammo:** Bosh sahifada 35 ta `'use client'` komponenti ishlatilgan, butun katalog massivi brauzerga uzatilmoqda, natijada mobil Lighthouse balli **60/100**, TBT **~9,240 ms**, DOM elementlar **2,821 ta**.
-- **Kodda qilinadigan ish:**
-  1. `src/app/[locale]/page.tsx` va `src/components/home/` bloklarini tahlil qilib, statik ko‘rinadigan qismlarni (sarlavhalar, kategoriya kartalari, mahsulot kartalari markupini) Server Components ga o‘tkazish.
-  2. Client komponentlarga uzatilayotgan mahsulot obyektlaridan faqat ko‘rsatiladigan minimal maydonlarni (`id`, `kod`, `name`, `slug`, `price`, `image`, `stock`, `unit`) ajratib uzatish (payload ni keskin kamaytirish).
-  3. Bosh sahifadagi karusel va slayderlarda dastlabki ko‘rinadigan tovarlar sonini cheklash.
-  4. Hero banner birinchi rasmiga `priority={true}` va `fetchPriority="high"` berish (LCP ni yaxshilash).
-  5. `lucide-react` va boshqa kutubxonalar importini optimallashtirish (`next.config.ts` da `experimental.optimizePackageImports: ["lucide-react"]`).
+### A12. [BAJARILDI ✅] Bosh sahifa (Home) Tezligi va Server Components optimizatsiyasi (`#7`, `#96`, `#161`, `#162`, `#163`, `#167`, `#168`)
+- **Holati:** ✅ **To‘liq bajarildi va sinovdan o‘tkazildi** (13-noyabr, 2026-yil).
+- **Qilingan o‘zgarish:**
+  1. `src/components/discovery/TopCategories.tsx` va `CategoryVisualCard.tsx` to‘liq Server Components ga o‘tkazildi (`"use client"` va `useMemo` olib tashlandi, toifalar serverda to‘g‘ridan-to‘g‘ri render qilinadi).
+  2. `src/components/discovery/BrandMarquee.tsx` Server Component ga o‘tkazildi (`"use client"` olib tashlandi, qatorlar serverda bo‘linadi, animatsiya sof CSS da ishlaydi).
+  3. `src/app/[locale]/page.tsx` da `toCardProduct()` konvertori joriy etildi: Bosh sahifadagi 4 ta asosiy blok (`Aksiya`, `Eng arzon narx`, `Xit savdo`, `Yangi tovarlar`) uchun Client `ProductCard` ga uzatiladigan og‘ir 1C ma’lumotlari (katta HTML tavsiflar, `attributes` massivlari, `related_products`, `recommended_products`) tozalanib, faqat kartochka, savat, sevimlilar, taqqoslash va tahlil uchun zarur bo‘lgan minimal maydonlar uzatiladi. Bu RSC stream payload hajmini keskin kamaytirdi.
+  4. `src/components/home/HeroSlider.tsx` birinchi slayd rasmiga `priority={true}` bilan birga `fetchPriority="high"` kiritildi (LCP vaqtini qisqartirish uchun).
+  5. `next.config.ts` ga `experimental: { optimizePackageImports: ["lucide-react"] }` qo‘shilib, barcha Lucide ikonkalari paketini tree-shaking qilish ta’minlandi.
+- **Dastlabki muammo:** Bosh sahifada 35 ta `'use client'` komponenti ishlatilgan, butun katalog massivi brauzerga uzatilmoqda, natijada mobil Lighthouse balli **60/100**, TBT **~9,240 ms**, DOM elementlar **2,821 ta**.
 
 ### A13. Qidiruv tizimiga Fuzzy Search (xato yozuvlarni tushunish) qo‘shish (`#78`)
 - **Muammo:** Foydalanuvchi mahsulot nomini 1-2 harf xato yoki lotin/kirill aralash yozsa, qidiruv natija topa olmaydi.

@@ -237,6 +237,7 @@ export function HeroSlider() {
                       sizes="(max-width: 640px) 192px, (max-width: 1024px) 320px, 384px"
                       className="object-contain p-1 sm:p-2 drop-shadow-[0_25px_35px_rgba(0,0,0,0.45)] transition-transform duration-500 group-hover:scale-103"
                       priority={idx === 0}
+                      fetchPriority={idx === 0 ? "high" : undefined}
                       loading={idx === 0 ? undefined : "lazy"}
                     />
                   </div>

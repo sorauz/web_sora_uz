@@ -1,9 +1,6 @@
-"use client";
-
 import { Brand } from "@/lib/schemas/brand";
 import { Link } from "@/i18n/routing";
 import { Award } from "lucide-react";
-import { useMemo } from "react";
 
 interface BrandMarqueeProps {
   brands: Brand[];
@@ -41,26 +38,22 @@ function BrandMarqueeItem({ brand }: { brand: Brand }) {
 }
 
 export function BrandMarquee({ brands }: BrandMarqueeProps) {
+  if (!brands || brands.length === 0) return null;
+
   // Partition into 3 balanced rows
-  const { row1, row2, row3 } = useMemo(() => {
-    const r1: Brand[] = [];
-    const r2: Brand[] = [];
-    const r3: Brand[] = [];
+  const r1: Brand[] = [];
+  const r2: Brand[] = [];
+  const r3: Brand[] = [];
 
-    brands.forEach((brand, idx) => {
-      if (idx % 3 === 0) r1.push(brand);
-      else if (idx % 3 === 1) r2.push(brand);
-      else r3.push(brand);
-    });
+  brands.forEach((brand, idx) => {
+    if (idx % 3 === 0) r1.push(brand);
+    else if (idx % 3 === 1) r2.push(brand);
+    else r3.push(brand);
+  });
 
-    return {
-      row1: prepareRow(r1),
-      row2: prepareRow(r2),
-      row3: prepareRow(r3),
-    };
-  }, [brands]);
-
-  if (brands.length === 0) return null;
+  const row1 = prepareRow(r1);
+  const row2 = prepareRow(r2);
+  const row3 = prepareRow(r3);
 
   return (
     <div className="relative w-full overflow-hidden py-2 space-y-3">
