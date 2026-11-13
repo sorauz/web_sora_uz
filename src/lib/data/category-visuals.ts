@@ -80,7 +80,7 @@ export const TOP_CATEGORIES_DATA: CategoryVisual[] = [
     image: "/categories/ofis.webp",
     tagsUz: ["Steplerlar", "Skrepkalar", "Skoch", "Qaychilar"],
     tagsRu: ["Степлеры", "Скрепки", "Скотч", "Ножницы"],
-    badgeUz: "500+ tovar",
+    badgeUz: "500+ mahsulot",
     badgeRu: "500+ товаров",
     bgGradient: "from-purple-50/70 via-fuchsia-50/30 to-white",
     borderHover: "hover:border-purple-300",

@@ -188,7 +188,11 @@ export default async function HomePage({ params }: PageProps) {
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
-          <TopCategories categories={tree} locale={locale as "uz" | "ru"} />
+          <TopCategories
+            categories={tree}
+            products={products}
+            locale={locale as "uz" | "ru"}
+          />
         </section>
 
         {/* 5. Aksiyalar va Chegirmalar (/promotions) - 5 ustun, 2 qator */}

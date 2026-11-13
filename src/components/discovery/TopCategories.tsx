@@ -1,33 +1,20 @@
 import { CategoryTreeNode } from "@/lib/schemas/category";
 import { TOP_CATEGORIES_DATA } from "@/lib/data/category-visuals";
 import { CategoryVisualCard } from "./CategoryVisualCard";
+import { Product } from "@/lib/schemas/product";
+import { findCategoryBySlug, getAllCategorySlugs } from "@/lib/utils/category-tree";
 
 interface TopCategoriesProps {
   categories?: CategoryTreeNode[];
+  products?: Product[];
   locale: "uz" | "ru";
 }
 
-export function TopCategories({ categories = [], locale }: TopCategoriesProps) {
-  // Map 1C Category Tree to find real-time product counts if available
-  const countsMap = new Map<string, number>();
-
-  function traverseCounts(node: CategoryTreeNode): number {
-    let total = 0;
-    if (node.children && node.children.length > 0) {
-      for (const child of node.children) {
-        total += traverseCounts(child);
-      }
-    }
-    countsMap.set(node.id, total);
-    if (node.group_slug_uz) countsMap.set(node.group_slug_uz, total);
-    if (node.group_slug_ru) countsMap.set(node.group_slug_ru, total);
-    return total;
-  }
-
-  for (const root of categories) {
-    traverseCounts(root);
-  }
-
+export function TopCategories({
+  categories = [],
+  products = [],
+  locale,
+}: TopCategoriesProps) {
   // Map 1C Category Tree by ID for real-time slug synchronization with 1C ERP
   const liveNodesMap = new Map<string, CategoryTreeNode>();
   function traverseNodes(node: CategoryTreeNode) {
@@ -42,14 +29,49 @@ export function TopCategories({ categories = [], locale }: TopCategoriesProps) {
     traverseNodes(root);
   }
 
+  // Pre-calculate real-time dynamic product counts from 1C products list
+  const dynamicCountsMap = new Map<string, number>();
+
+  if (products && products.length > 0) {
+    for (const cat of TOP_CATEGORIES_DATA) {
+      const liveNode =
+        liveNodesMap.get(cat.oneCId) ||
+        findCategoryBySlug(categories, cat.slugUz, "uz") ||
+        findCategoryBySlug(categories, cat.slugRu, "ru");
+
+      const matchingSlugs = liveNode
+        ? getAllCategorySlugs(liveNode)
+        : new Set<string>([cat.slugUz, cat.slugRu]);
+
+      let count = 0;
+      for (const p of products) {
+        const slugUz = p.uz?.category_slug_uz;
+        const slugRu = p.ru?.category_slug_ru;
+        if (
+          (slugUz && matchingSlugs.has(slugUz)) ||
+          (slugRu && matchingSlugs.has(slugRu))
+        ) {
+          count++;
+        }
+      }
+
+      if (count > 0) {
+        dynamicCountsMap.set(cat.id, count);
+      }
+    }
+  }
+
   return (
     <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5 sm:gap-5">
       {TOP_CATEGORIES_DATA.map((cat) => {
-        const liveNode = liveNodesMap.get(cat.oneCId);
-        const dynamicCount =
-          countsMap.get(cat.oneCId) ||
-          countsMap.get(cat.slugUz) ||
-          countsMap.get(cat.slugRu);
+        const liveNode =
+          liveNodesMap.get(cat.oneCId) ||
+          findCategoryBySlug(categories, cat.slugUz, "uz") ||
+          findCategoryBySlug(categories, cat.slugRu, "ru");
+
+        const dynamicCount = dynamicCountsMap.get(cat.id);
+        const finalCount =
+          dynamicCount && dynamicCount > 0 ? dynamicCount : cat.defaultCount;
 
         const categoryWithLiveSlugs = liveNode
           ? {
@@ -64,7 +86,7 @@ export function TopCategories({ categories = [], locale }: TopCategoriesProps) {
             key={cat.id}
             category={categoryWithLiveSlugs}
             locale={locale}
-            count={dynamicCount && dynamicCount > 0 ? dynamicCount : cat.defaultCount}
+            count={finalCount}
           />
         );
       })}

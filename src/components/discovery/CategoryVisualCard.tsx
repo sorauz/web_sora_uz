@@ -46,7 +46,7 @@ export function CategoryVisualCard({
           </h3>
           <p className="text-xs font-medium text-slate-500">
             {isUz
-              ? `${itemCount} xil tovar`
+              ? `${itemCount} xil mahsulot`
               : `${itemCount} товаров`}
           </p>
         </div>
