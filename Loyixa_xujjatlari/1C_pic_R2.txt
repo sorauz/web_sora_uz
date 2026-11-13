@@ -1,0 +1,388 @@
+Skript:
+
+``
+import json
+import time
+from pathlib import Path
+import requests
+import boto3
+
+# =====================================================================
+# 1. CLOUDFLARE R2 VA 1C KONFIGURATSIYASI
+# =====================================================================
+S3_ENDPOINT = "https://<ACCOUNT_ID>.r2.cloudflarestorage.com"
+S3_ACCESS_KEY = "<SIZNING_ACCESS_KEY_ID>"
+S3_SECRET_KEY = "<SIZNING_SECRET_ACCESS_KEY>"
+BUCKET_NAME = "sorauz-media"
+PUBLIC_DOMAIN = "https://cdn.sora.uz" 
+
+# 1C HTTP Servis manzillari
+GET_URL = "http://<domen.uz>/<baza>/hs/<http_servis>/"
+POST_URL = "http://<domen.uz>/<baza>/hs/<http_servis>/"
+API_LOGIN = "sizning_loginingiz"
+API_PASSWORD = "sizning_parolingiz"
+
+# =====================================================================
+# 2. BOTO3 (S3) CLIENT ULANISHI
+# =====================================================================
+s3_client = boto3.client(
+    's3',
+    endpoint_url=S3_ENDPOINT,
+    aws_access_key_id=S3_ACCESS_KEY,
+    aws_secret_access_key=S3_SECRET_KEY,
+    region_name="auto" 
+)
+
+PROGRESS_FILE = "migration_progress_r2_compact.json"
+
+def load_progress() -> dict:
+    if Path(PROGRESS_FILE).exists():
+        with open(PROGRESS_FILE, "r", encoding="utf-8") as f:
+            try:
+                return json.load(f)
+            except json.JSONDecodeError:
+                return {}
+    return {}
+
+def save_progress(kod: str, data: dict):
+    progress = load_progress()
+    progress[kod] = data
+    with open(PROGRESS_FILE, "w", encoding="utf-8") as f:
+        json.dump(progress, f, indent=4, ensure_ascii=False)
+
+def get_all_data() -> list:
+    print("⏳ [1/3] 1C tizimidan rasmlar ro'yxati yuklab olinmoqda (GET)...")
+    try:
+        response = requests.get(GET_URL, auth=(API_LOGIN, API_PASSWORD), timeout=60)
+        response.raise_for_status()
+        data = response.json()
+        print(f"✅ [MUVAFFAQIYATLI] Ro'yxat olindi. Jami elementlar: {len(data)} ta.\n")
+        return data
+    except Exception as e:
+        print(f"🔴 GET so'rovida xatolik yuz berdi: {str(e)}")
+        return []
+
+def get_candidates_for_link1(item: dict) -> list:
+    """Faqat 1-link (link1 va cloudinary_link1) uchun potensial linklarni ro'yxat qilib yig'adi"""
+    cands = []
+    l1 = item.get("link1")
+    cl1 = item.get("cloudinary_link1")
+    
+    if l1 and isinstance(l1, str) and l1.strip().startswith("http"):
+        cands.append(l1.strip())
+    if cl1 and isinstance(cl1, str) and cl1.strip().startswith("http") and cl1.strip() not in cands:
+        cands.append(cl1.strip())
+        
+    return cands
+
+def process_and_upload(candidates: list, kod_mahsulot: str) -> str:
+    """Kandidat linklar orqali rasmni tortib ko'radi va birinchisi o'xshasa R2 ga yuklaydi"""
+    for url in candidates:
+        try:
+            print(f"   ↳ Sinab ko'rilmoqda: {url}")
+            # 40 soniya qat'iy timeout (10s ulanish, 30s yuklash)
+            img_response = requests.get(url, stream=True, timeout=(10, 30))
+            img_response.raise_for_status()
+            
+            ext = url.split('?')[0].split('.')[-1][:4].lower()
+            if ext not in ['jpg', 'jpeg', 'png', 'webp']:
+                ext = 'jpg'
+                
+            r2_file_key = f"products/{kod_mahsulot}_1.{ext}"
+            content_type = img_response.headers.get('Content-Type', 'image/jpeg')
+
+            s3_client.put_object(
+                Bucket=BUCKET_NAME,
+                Key=r2_file_key,
+                Body=img_response.content,
+                ContentType=content_type
+            )
+            
+            print(f"     ✅ R2 ga yuklandi!")
+            return f"{PUBLIC_DOMAIN}/{r2_file_key}"
+            
+        except requests.exceptions.Timeout:
+            print(f"     ⚠️ Timeout (40s): Ushbu manbadan rasm kelmadi.")
+        except requests.exceptions.RequestException as e:
+            print(f"     ⚠️ Tarmoq xatosi: {type(e).__name__}")
+        except Exception as e:
+            print(f"     ⚠️ Kutilmagan xatolik: {str(e)}")
+            
+    return ""
+
+def post_1c_data(payload: dict) -> bool:
+    try:
+        response = requests.post(
+            POST_URL,
+            json=payload,
+            headers={"Content-Type": "application/json"},
+            auth=(API_LOGIN, API_PASSWORD),
+            timeout=30
+        )
+        if response.status_code in [200, 201]:
+            return True
+        else:
+            print(f"   ⚠️ POST xatoligi! Status: {response.status_code}, Javob: {response.text}")
+            return False
+    except Exception as e:
+        print(f"   🔴 POST so'rovida tarmoq xatoligi: {str(e)}")
+        return False
+
+def main():
+    print("🚀 IMGBB/CLOUDINARY -> CLOUDFLARE R2 IXCHAM MIGRATSIYA BOSHLANDI 🚀\n")
+
+    items = get_all_data()
+    if not items:
+        return
+
+    completed_progress = load_progress()
+    total_items = len(items)
+    already_done = len(completed_progress)
+
+    print(f"📊 Jami elementlar: {total_items} ta.")
+    print(f"⏩ Oldin bajarilganlar: {already_done} ta. Qolganlari qayta ishlanmoqda...\n")
+
+    processed_count = 0
+
+    for index, item in enumerate(items, 1):
+        kod = item.get("Код")
+        if not kod:
+            continue
+
+        if str(kod) in completed_progress:
+            continue
+
+        print(f"\n⚙️ [{index}/{total_items}] Kod: {kod} qayta ishlanmoqda...")
+
+        # 1-QADAM: Faqat link1/cloudinary_link1 borligini aniqlash
+        candidates = get_candidates_for_link1(item)
+                
+        if not candidates:
+            print(f"   ℹ️ Rasm 1-linklari mutlaqo yo'q. Bo'sh holatda saqlandi.")
+            save_progress(str(kod), {"status": "empty", "Код": kod})
+            continue
+
+        # 2-QADAM: Ixcham Payload
+        payload = {
+            "Код": kod,
+            "cf_link1": ""
+        }
+
+        print(f"   🔹 Asosiy link uchun {len(candidates)} ta manba topildi.")
+        
+        # 3-QADAM: R2 ga yuklash
+        new_url = process_and_upload(candidates, kod_mahsulot=kod)
+        
+        # 4-QADAM: Agar yuklash muvaffaqiyatli bo'lsa, 1C ga POST yuborish
+        if new_url:
+            payload["cf_link1"] = new_url
+            print(f"   🚀 Yangi R2 link 1C serveriga yuborilmoqda...")
+            
+            if post_1c_data(payload):
+                print(f"   🟢 [MUVAFFAQIYATLI] 1C bazaga yozildi!")
+                save_progress(str(kod), payload)
+                processed_count += 1
+            else:
+                print(f"   🔴 1C qabul qilmadi. Kod {kod} keyingi safarga qoldi.")
+        else:
+            print(f"   ⚠️ Hech qaysi manbadan rasm yuklab bo'lmadi. Progressga yozilmaydi.")
+
+        # Rate Limit himoyasi
+        if processed_count > 0 and processed_count % 50 == 0:
+            print("\n🛡️ Serverlar havo olishi uchun 5 soniya tanaffus...\n")
+            time.sleep(5)
+
+    print("\n🎉 BARCHA JARAYONLAR MUVAFFAQIYATLI YAKUNLANDI!")
+
+if __name__ == "__main__":
+    main()
+``
+
+
+1C 8.3.20 da http servis GET va POST sorovi uchun kodlar:
+`` 
+ //http://1cloud.uz:777/SORA/hs/pic
+Функция get_picGET(Запрос)
+	
+	// 1. Ma'lumotlarni so'rov orqali bazadan olish
+	ЗапросБД = Новый Запрос;
+	ЗапросБД.Текст = 
+		"ВЫБРАТЬ
+		|	Файлы.Код КАК Код,
+		|	Файлы.link1 КАК link1,
+		|	Файлы.link2 КАК link2,
+		|	Файлы.link3 КАК link3,
+		|	Файлы.link4 КАК link4,
+		|	Файлы.cloudinary_link1 КАК cloudinary_link1,
+		|	Файлы.cloudinary_link2 КАК cloudinary_link2,
+		|	Файлы.cloudinary_link3 КАК cloudinary_link3,
+		|	Файлы.cloudinary_link4 КАК cloudinary_link4
+		|ИЗ
+		|	Справочник.Файлы КАК Файлы
+		|ГДЕ
+		|	НЕ Файлы.ПометкаУдаления";
+	
+	Выборка = ЗапросБД.Выполнить().Выбрать();
+	
+	// 2. Olingan ma'lumotларни JSON uchun massivga joylash
+	МассивДанных = Новый Массив;
+	
+	Пока Выборка.Следующий() Цикл
+		
+		ЭлементДанных = Новый Структура;
+		
+		// 1C dagi "ЗначениеЗаполнено" funksiyasi qiymat rostdan ham bo'sh emasligini
+		// (turidan qat'i nazar: satr, havola yoki raqam) qo'shimcha tekshiradi.
+		Если ЗначениеЗаполнено(Выборка.Код) Тогда
+			ЭлементДанных.Вставить("Код", Выборка.Код);
+		КонецЕсли;
+		
+		Если ЗначениеЗаполнено(Выборка.link1) Тогда
+			ЭлементДанных.Вставить("link1", Выборка.link1);
+		КонецЕсли;
+		
+		Если ЗначениеЗаполнено(Выборка.link2) Тогда
+			ЭлементДанных.Вставить("link2", Выборка.link2);
+		КонецЕсли;
+		
+		Если ЗначениеЗаполнено(Выборка.link3) Тогда
+			ЭлементДанных.Вставить("link3", Выборка.link3);
+		КонецЕсли;
+		
+		Если ЗначениеЗаполнено(Выборка.link4) Тогда
+			ЭлементДанных.Вставить("link4", Выборка.link4);
+		КонецЕсли;
+		
+		
+				Если ЗначениеЗаполнено(Выборка.cloudinary_link1) Тогда
+			ЭлементДанных.Вставить("cloudinary_link1", Выборка.cloudinary_link1);
+		КонецЕсли;
+
+				Если ЗначениеЗаполнено(Выборка.cloudinary_link2) Тогда
+			ЭлементДанных.Вставить("cloudinary_link2", Выборка.cloudinary_link2);
+		КонецЕсли;
+
+				Если ЗначениеЗаполнено(Выборка.cloudinary_link3) Тогда
+			ЭлементДанных.Вставить("cloudinary_link3", Выборка.cloudinary_link3);
+		КонецЕсли;
+
+				Если ЗначениеЗаполнено(Выборка.cloudinary_link4) Тогда
+			ЭлементДанных.Вставить("cloudinary_link4", Выборка.cloudinary_link4);
+		КонецЕсли;
+
+		
+		// Agar strukturada kamida bitta rekvizit bo'lsa, massivga qo'shamiz
+		Если ЭлементДанных.Количество() > 0 Тогда
+			МассивДанных.Добавить(ЭлементДанных);
+		КонецЕсли;
+		
+	КонецЦикла;
+	
+	// 3. Massivni JSON satriga o'girish (Сериализация)
+	ЗаписьJSON = Новый ЗаписьJSON;
+	ЗаписьJSON.УстановитьСтроку();
+	
+	ЗаписатьJSON(ЗаписьJSON, МассивДанных);
+	СтрокаJSON = ЗаписьJSON.Закрыть();
+	
+	// 4. HTTP javobni shakllantirish (Status 200 OK va JSON header bilan)
+	Ответ = Новый HTTPСервисОтвет(200);
+	Ответ.Заголовки.Вставить("Content-Type", "application/json; charset=utf-8");
+	Ответ.УстановитьТелоИзСтроки(СтрокаJSON, КодировкаТекста.UTF8, ИспользованиеByteOrderMark.НеИспользовать);
+	
+	Возврат Ответ;
+	
+КонецФункции
+
+Функция get_picPOST(Запрос)
+	
+	// 1. So'rov tanasidan (body) kelgan JSON satrni o'qib olish
+	ТелоЗапроса = Запрос.ПолучитьТелоКакСтроку(КодировкаТекста.UTF8);
+	
+	Если ПустаяСтрока(ТелоЗапроса) Тогда
+		Ответ = Новый HTTPСервисОтвет(400); // 400 - Bad Request (Yomon so'rov)
+		Ответ.УстановитьТелоИзСтроки("{(error): ""So'rov tanasi (body) bo'sh bo'lmasligi kerak""}");
+		Возврат Ответ;
+	КонецЕсли;
+	
+	// 2. JSON satrni 1C strukturaga o'girish
+	Попытка
+		ЧтениеJSON = Новый ЧтениеJSON;
+		ЧтениеJSON.УстановитьСтроку(ТелоЗапроса);
+		ДанныеJSON = ПрочитатьJSON(ЧтениеJSON);
+		ЧтениеJSON.Закрыть();
+	Исключение
+		Ответ = Новый HTTPСервисОтвет(400);
+		Ответ.УстановитьТелоИзСтроки("{(error): ""JSON formatida xatolik: "" + ОписаниеОшибки() + """"}");
+		Возврат Ответ;
+	КонецПопытки;
+	
+	// 3. "Код" rekviziti borligini tekshirish
+	Если НЕ ДанныеJSON.Свойство("Код") ИЛИ НЕ ЗначениеЗаполнено(ДанныеJSON.Код) Тогда
+		Ответ = Новый HTTPСервисОтвет(400);
+		Ответ.УстановитьТелоИзСтроки("{(error): ""JSON ichida 'Код' parametresi bo'lishi shart""}");
+		Возврат Ответ;
+	КонецЕсли;
+	
+	// 4. Ma'lumotlar bazasidan "Код" bo'yicha elementni qidirish
+	КодЭлемента = Строка(ДанныеJSON.Код);
+	СсылкаНаФайл = Справочники.Файлы.НайтиПоКоду(КодЭлемента);
+	
+	Если СсылкаНаФайл.Пустая() Тогда
+		// Agar topilmasa — YANGI element yaratamiz
+		ОбъектФайл = Справочники.Файлы.СоздатьЭлемент();
+		ОбъектФайл.Код = КодЭлемента;
+		ОбъектФайл.Наименование = "Cloudflare R2 file (" + КодЭлемента + ")"; 
+	Иначе 
+		// Agar topilsa — TAYYOR elementni tahrirlash uchun ochamiz
+		ОбъектФайл = СсылкаНаФайл.ПолучитьОбъект();
+	КонецЕсли;
+	
+	// 5. Eski Cloudinary linklarini agar JSON ichida kelgan bo'lsa yangilash (xavfsizlik uchun qoldirildi)
+	Если ДанныеJSON.Свойство("cloudinary_link1") Тогда
+		ОбъектФайл.cloudinary_link1 = ДанныеJSON.cloudinary_link1;
+	КонецЕсли;
+	Если ДанныеJSON.Свойство("cloudinary_link2") Тогда
+		ОбъектФайл.cloudinary_link2 = ДанныеJSON.cloudinary_link2;
+	КонецЕсли;
+	Если ДанныеJSON.Свойство("cloudinary_link3") Тогда
+		ОбъектФайл.cloudinary_link3 = ДанныеJSON.cloudinary_link3;
+	КонецЕсли;
+	Если ДанныеJSON.Свойство("cloudinary_link4") Тогда
+		ОбъектФайл.cloudinary_link4 = ДанныеJSON.cloudinary_link4;
+	КонецЕсли;
+	
+	// 6. YANGI Cloudflare R2 linklarini yangilash
+	Если ДанныеJSON.Свойство("cf_link1") Тогда
+		ОбъектФайл.cf_link1 = ДанныеJSON.cf_link1;
+	КонецЕсли;
+	Если ДанныеJSON.Свойство("cf_link2") Тогда
+		ОбъектФайл.cf_link2 = ДанныеJSON.cf_link2;
+	КонецЕсли;
+	Если ДанныеJSON.Свойство("cf_link3") Тогда
+		ОбъектФайл.cf_link3 = ДанныеJSON.cf_link3;
+	КонецЕсли;
+	Если ДанныеJSON.Свойство("cf_link4") Тогда
+		ОбъектФайл.cf_link4 = ДанныеJSON.cf_link4;
+	КонецЕсли;
+	
+	// 7. Elementni bazaga saqlash
+	Попытка
+		ОбъектФайл.Записать();
+		
+		Ответ = Новый HTTPСервисОтвет(200);
+		Ответ.Заголовки.Вставить("Content-Type", "application/json; charset=utf-8");
+		
+		JavobMatni = "{""status"": ""success"", ""message"": ""Ma'lumot muvaffaqiyatli saqlandi"", ""Код"": """ + КодЭлемента + """}";
+		Ответ.УстановитьТелоИзСтроки(JavobMatni, КодировкаТекста.UTF8);
+		
+	Исключение
+		Ответ = Новый HTTPСервисОтвет(500); // 500 - Internal Server Error
+		Ответ.УстановитьТелоИзСтроки("{""error"": ""Bazaga saqlashda xatolik: "" + ОписаниеОшибки() + """"}");
+	КонецПопытки;
+	
+	Возврат Ответ;
+	
+КонецФункции
+
+``

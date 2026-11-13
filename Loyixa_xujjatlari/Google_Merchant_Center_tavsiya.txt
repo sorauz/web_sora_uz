@@ -1,0 +1,26 @@
+Google Merchant Center tizimida rasmlarning maksimal o‘lchami (maximum piksel) uchun aniq cheklov yo‘q.
+Google talabi: kamida 500 x 500 px)
+Biroq, bu yerda piksellar sonidan ko‘ra faylning hajmi (megabayti) va piksellar nisbati bo‘yicha qat'iy cheklovlar mavjud:
+• Fayl hajmi cheklovi: Mahsulot rasmining hajmi maksimal 64 Megabayt (MB) bo‘lishi mumkin. Undan katta hajmdagi rasmlarni tizim yuklamaydi.
+• Tavsiya etilgan eng optimal o‘lcham: Google mutaxassislari rasmlarni 1500 x 1500 piksel o‘lchamda yuklashni maslahat berishadi. Bu o‘lcham xaridor mahsulotni yaqinlashtirib (zoom) ko‘rganda ham sifatini yo‘qotmasligi uchun eng ideal hisoblanadi.
+• Proportsiya (Nisbat): Rasmlar kvadrat shaklida (1:1 nisbatda) bo‘lishi tavsiya etiladi. Maksimal rasm yuklamoqchi bo‘lsangiz ham, uning bo‘yi va eni mutanosib bo‘lishiga e'tibor bering.
+Xulosa: Maksimal piksellar soniga cheklov yo‘q, asosiysi rasmning hajmi 64 MBdan oshib ketmasligi va formati JPEG, PNG, WebP yoki GIF bo‘lishi kerak.
+
+Sora.uz internet-do‘koni uchun tavsiyam: 1500 × 1500 px.
+
+O‘lchamlar bo‘yicha tavsiyam:
+Maqsad	Rasm o‘lchami
+Minimal talab	500 × 500 px
+Sayt va Merchant Center uchun optimal	1500 × 1500 px
+Kuchli zoom va yuqori detal	2000 × 2000 px
+Google ruxsat bergan maksimal chegara	64 megapiksel
+
+Muhim tuzatish: Google Merchant Center uchun rasm faylining maksimal hajmi 64 MB emas, 16 MB. Piksel bo‘yicha maksimal chegara esa 64 megapiksel. Kvadrat rasmda bu taxminan 8000 × 8000 px ga teng.
+
+Sora.uz uchun yakuniy konfiguratsiya
+- Asosiy mahsulot rasmi: 1500 × 1500 px.
+- Format: WebP yoki JPEG.
+- Merchant Center uchun fayl hajmi: 16 MB dan kam.
+- Mahsulot kadrning 75–90% qismini egallasin.
+- Mahsulotning tabiiy proporsiyasini buzib, majburan kvadratga cho‘zmang.
+Mening tanlovim: 1500 × 1500 px. 2000 px ham ishlatish mumkin, lekin 1500 px aksariyat mahsulotlar uchun sifat va fayl hajmi o‘rtasidagi yaxshi muvozanatdir.

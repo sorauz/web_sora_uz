@@ -1,0 +1,225 @@
+
+
+1. Loyihaning umumiy arxitekturasi:
+1. Loyihaning umumiy arxitekturasi aniq belgilanganmi?
+2. Frontend, backend, API va ma’lumotlar manbalari vazifalari bir-biridan ajratilganmi?
+3. Loyiha komponentlari o‘rtasidagi bog‘liqlik va ma’lumotlar oqimi hujjatlashtirilganmi?
+4. Loyiha yangi funksiyalar qo‘shilganda mavjud funksiyalarni buzmasdan kengaytirilishi mumkinmi?
+5. Kod strukturasi katta loyihani boshqarish uchun to‘g‘ri tashkil etilganmi?
+6. Takrorlanadigan kodlar umumiy komponentlar yoki servislar orqali boshqariladimi?
+7. Frontend va server tomonidagi vazifalar to‘g‘ri taqsimlanganmi?
+8. Loyihada foydalanilmayotgan, ortiqcha yoki takroriy kodlar mavjud emasmi?
+9. Barcha muhim texnik qarorlar va integratsiyalar hujjatlashtirilganmi?
+2. GitHub va source code auditi:
+10. GitHub repository strukturasi tartibli va tushunarli tashkil etilganmi?
+11. main yoki production branch faqat tekshirilgan kodlarni qabul qiladimi?
+12. Muhim branchlarda Branch Protection sozlamalari mavjudmi?
+13. Production kodiga o‘zgarishlar Pull Request orqali kiritiladimi?
+14. Pull Request birlashtirilishidan oldin build va testlar muvaffaqiyatli bajarilishi talab qilinadimi?
+15. GitHub Actions orqali avtomatik tekshiruvlar (CI) yo‘lga qo‘yilganmi?
+16. Kod sifati ESLint, TypeScript va boshqa zarur statik tekshiruvlar bilan nazorat qilinadimi?
+17. package.json va lock fayllari bir-biriga mosmi?
+18. Ishlatilayotgan npm paketlari yangilanib turadimi?
+19. Eskirgan yoki zaifligi aniqlangan dependency'lar nazorat qilinadimi?
+20. .gitignore orqali maxfiy va vaqtinchalik fayllarning repository'ga tushishi cheklanganmi?
+21. GitHub repository'da API kalitlari, parollar yoki boshqa maxfiy ma’lumotlar mavjud emasmi?
+22. Production versiyasiga qaytish (rollback) uchun oldingi barqaror commit va deployment'lar saqlanganmi?
+3. Xavfsizlik auditi — Security:
+23. API kalitlari va maxfiy ma’lumotlar faqat server muhitida saqlanadimi?
+24. NEXT_PUBLIC_ prefiksli environment variable'larda maxfiy ma’lumotlar mavjud emasmi?
+25. Production, Preview va Development muhitlari uchun alohida environment variable'lar ishlatiladimi?
+26. Foydalanuvchi autentifikatsiyasi xavfsiz mexanizm orqali amalga oshiriladimi?
+27. Sessiya va tokenlar xavfsiz saqlanadimi?
+28. Cookie'larda HttpOnly, Secure va kerakli SameSite atributlari ishlatiladimi?
+29. Foydalanuvchi huquqlari server tomonida tekshiriladimi?
+30. Oddiy foydalanuvchi administrator funksiyalaridan foydalana olmaydimi?
+31. API orqali kelayotgan barcha ma’lumotlar serverda validatsiya qilinadimi?
+32. SQL Injection va boshqa injection hujumlariga qarshi himoya mavjudmi?
+33. XSS hujumlarining oldini olish choralari mavjudmi?
+34. CSRF xavfi baholangan va kerakli himoya qo‘llanganmi?
+35. API endpoint'lariga so‘rovlar sonini cheklash (Rate Limiting) mavjudmi?
+36. Login, ro‘yxatdan o‘tish, qidiruv va sharh yuborish kabi endpoint'lar abuse holatlaridan himoyalanganmi?
+37. CORS faqat kerakli domenlarga ruxsat beradigan tarzda sozlanganmi?
+38. Saytda HTTPS majburiy ishlatiladimi?
+39. Security Headers, jumladan CSP va HSTS kerakli darajada sozlanganmi?
+40. Xatolik javoblarida serverning ichki ma’lumotlari, tokenlari yoki stack trace foydalanuvchiga ko‘rsatilmaydimi?
+41. Foydalanuvchilarning shaxsiy ma’lumotlari ruxsatsiz ko‘rish va o‘zgartirishdan himoyalanganmi?
+4. Vercel va deployment auditi:
+42. GitHub repository Vercel bilan to‘g‘ri bog‘langanmi?
+43. Production branch to‘g‘ri belgilanganmi?
+44. Har bir yangi commit uchun Preview Deployment avtomatik yaratiladimi?
+45. Production va Preview Deployment'lar uchun alohida environment variable'lar ishlatiladimi?
+46. Preview Deployment'lar qidiruv tizimlari tomonidan indekslanishdan himoyalanganmi?
+47. Production domeni HTTPS orqali ishlaydimi?
+48. DNS va domen sozlamalari to‘g‘ri ishlayaptimi?
+49. Production build vaqtida TypeScript va boshqa zarur tekshiruvlar bajariladimi?
+50. Build xatolari production deployment'ni to‘xtatadimi?
+51. Serverless Functions bajarilish vaqti va resurs cheklovlari loyihaga mosmi?
+52. API so‘rovlari uchun Vercel Function region'i backend yoki ma’lumotlar manbasiga mos tanlanganmi?
+53. Server va Edge Runtime'lar kerakli joylarda to‘g‘ri tanlanganmi?
+54. Vercel loglari orqali API xatolari va serverdagi muammolarni aniqlash mumkinmi?
+55. Muvaffaqiyatsiz deployment'dan oldingi barqaror versiyaga tez qaytish mumkinmi?
+5. Cloudflare R2 — fayllar va rasmlar auditi:
+56. Mahsulot rasmlari va boshqa media fayllar Cloudflare R2'da tartibli saqlanadimi?
+57. R2 ichidagi fayllar uchun katalog yoki object key nomlash standartlari mavjudmi?
+58. Bir xil mahsulot rasmi takroran yuklanishining oldini olish mexanizmi mavjudmi?
+59. Fayllar uchun to‘g‘ri MIME type va Content-Type belgilanadimi?
+60. Rasmlarning haqiqiy formati va fayl hajmi yuklash vaqtida tekshiriladimi?
+61. Foydalanuvchi yuklaydigan fayllar zararli yoki ruxsat etilmagan formatlardan tekshiriladimi?
+62. R2'ga fayl yuklash jarayoni maxfiy API kalitlarini frontend'ga chiqarmasdan amalga oshiriladimi?
+63. Fayl yuklash uchun kerak bo‘lganda vaqtinchalik, cheklangan muddatli Signed URL ishlatiladimi?
+64. R2 bucket ichida ommaviy ko‘rinishi mumkin bo‘lmagan fayllar himoyalanganmi?
+65. Public media fayllar uchun alohida domen yoki custom domain sozlanganmi?
+66. R2 CORS siyosati faqat kerakli domenlarga ruxsat beradimi?
+67. Fayllar uchun Cache-Control va boshqa HTTP cache header'lari to‘g‘ri belgilanganmi?
+68. Eski rasm yangilanganda CDN'da eski versiya uzoq vaqt ko‘rinib qolmasligi ta’minlanganmi?
+69. Next.js Image Optimization R2'dan keladigan rasmlar bilan to‘g‘ri ishlaydimi?
+70. Rasmlar kerakli o‘lcham va formatlarda (masalan, WebP yoki AVIF) yetkazib beriladimi?
+71. Katta hajmdagi rasmlar mobil qurilmalarda ortiqcha trafik sarflamayaptimi?
+72. R2'dagi muhim fayllar uchun zaxira nusxa yoki tiklash strategiyasi mavjudmi?
+6. Frontend va foydalanuvchi interfeysi — UI/UX:
+73. Sayt mobil, planshet va desktop ekranlarida to‘g‘ri ko‘rinadimi?
+74. Barcha sahifalarda responsive dizayn to‘liq ishlaydimi?
+75. Header, navigatsiya va footer sahifalar bo‘ylab bir xil ishlaydimi?
+76. Katalog, kategoriya va mahsulot sahifalari uchun qulay navigatsiya mavjudmi?
+77. Foydalanuvchi kerakli mahsulotni ortiqcha bosqichlarsiz topa oladimi?
+78. Qidiruv tizimi foydalanuvchi xatosi yoki turli yozilish shakllarini hisobga oladimi?
+79. Filtrlash va saralash funksiyalari to‘g‘ri ishlaydimi?
+80. Loading, Empty, Error va Success holatlari foydalanuvchiga tushunarli ko‘rsatiladimi?
+81. API sekin javob berganda sahifa yoki interfeys ishlamay qolmaydimi?
+82. Internet uzilganda foydalanuvchiga tushunarli xabar ko‘rsatiladimi?
+83. Tugmalar, inputlar va navigatsiya elementlari klaviatura orqali boshqariladimi?
+84. Rang kontrasti, shrift va element o‘lchamlari accessibility talablariga mosmi?
+7. Mahsulotlar va katalog tizimi:
+85. Har bir mahsulotning yagona va o‘zgarmas identifikatori mavjudmi?
+86. Mahsulot URL manzillari SEO uchun tushunarli slug asosida yaratilganmi?
+87. Mahsulot nomi, tavsifi, rasmi va texnik xususiyatlari to‘g‘ri ko‘rsatiladimi?
+88. Mahsulot kategoriyalari va ichki kategoriyalar ierarxiyasi to‘g‘ri tashkil etilganmi?
+89. Mahsulotning asosiy va qo‘shimcha rasmlari to‘g‘ri bog‘langanmi?
+90. Narxlar va mavjudlik ma’lumotlari ishonchli manbadan olinadimi?
+91. Mahsulot narxi o‘zgarganda sayt yangilangan narxni to‘g‘ri ko‘rsatadimi?
+92. Omborda mavjud bo‘lmagan mahsulotlar to‘g‘ri belgilanganmi?
+93. Bir xil mahsulotning takroriy yozuvlari nazorat qilinadimi?
+94. Mahsulot parametrlarini (brend, model, artikul, rang, o‘lcham va boshqalar) filtrlash mumkinmi?
+95. Katta katalogda sahifalash (Pagination) yoki samarali Infinite Scroll ishlatiladimi?
+96. Kategoriya sahifalarida mahsulotlar soni ko‘payganda server va brauzerga ortiqcha yuk tushmaydimi?
+8. Backend va API auditi:
+97. API endpoint'lari yagona standart asosida tashkil etilganmi?
+98. API javoblarining JSON strukturasi barcha endpoint'larda bir xil va tushunarlimi?
+99. API muvaffaqiyatli va muvaffaqiyatsiz so‘rovlar uchun tegishli HTTP status code qaytaradimi?
+100. API xatoliklari standartlashtirilgan formatda qaytariladimi?
+101. API so‘rovlarida kiruvchi parametrlar validatsiya qilinadimi?
+102. API server tomonida autentifikatsiya va avtorizatsiya tekshiruvlari mavjudmi?
+103. Uzoq davom etuvchi API so‘rovlariga timeout belgilanganmi?
+104. Tashqi API vaqtincha ishlamasa, retry va backoff mexanizmi mavjudmi?
+105. Takroriy so‘rovlar bir xil buyurtma yoki yozuvni qayta-qayta yaratib yubormaydimi?
+106. API versiyalarini boshqarish strategiyasi mavjudmi?
+107. Backend loglarida xatolarni aniqlash va muammoli so‘rovlarni topish mumkinmi?
+108. API ortiqcha ma’lumotlarni qaytarmasdan, faqat zarur maydonlarni taqdim etadimi?
+9. 1C yoki ERP bilan integratsiya auditi:
+Agar mahsulot, narx, qoldiq va buyurtmalar 1C orqali boshqarilsa, quyidagi savollar majburiy tekshirilishi kerak.
+109. Sayt va 1C o‘rtasidagi ma’lumotlar almashinuvi uchun aniq integratsiya arxitekturasi mavjudmi?
+110. Mahsulotlar identifikatori 1C va sayt o‘rtasida to‘g‘ri moslashtirilganmi?
+111. Mahsulot nomi, tavsifi, kategoriyasi va texnik xususiyatlari to‘g‘ri sinxronlanadimi?
+112. Narxlar 1C'dagi tegishli registrdan olinadimi?
+113. Ombordagi qoldiqlar 1C'dagi haqiqiy qoldiq ma’lumotlari asosida hisoblanadimi?
+114. Narx va qoldiq ma’lumotlari mahsulotning asosiy ma’lumotlaridan mustaqil yangilanadimi?
+115. Saytda eski narx yoki noto‘g‘ri qoldiq ko‘rsatilishining oldini olish mexanizmi mavjudmi?
+116. 1C vaqtincha ishlamasa, saytning mahsulot katalogi ishlashda davom etadimi?
+117. 1C va sayt o‘rtasidagi sinxronizatsiya xatolari qayd etiladimi?
+118. Sinxronizatsiyada muvaffaqiyatsiz bo‘lgan ma’lumotlarni qayta yuborish mumkinmi?
+119. Buyurtma 1C'ga yuborilganda takroriy buyurtma yaratilishining oldi olinadimi?
+120. Buyurtma holatlari 1C va saytda o‘zaro to‘g‘ri sinxronlanadimi?
+121. Narx, chegirma, valyuta va yaxlitlash qoidalari ikki tizimda bir xilmi?
+122. 1C API bilan ishlashda autentifikatsiya va ma’lumotlar xavfsizligi ta’minlanganmi?
+10. Savatcha, buyurtma va to‘lov tizimi:
+123. Foydalanuvchi mahsulotni savatchaga to‘g‘ri qo‘sha oladimi?
+124. Mahsulot miqdorini o‘zgartirish va savatchadan o‘chirish to‘g‘ri ishlaydimi?
+125. Savatcha ma’lumotlari foydalanuvchi sessiyasi yoki akkaunti bilan to‘g‘ri bog‘langanmi?
+126. Sahifa yangilanganda savatcha ma’lumotlari yo‘qolib qolmaydimi?
+127. Savatchadagi narx server tomonidan qayta tekshiriladimi?
+128. Buyurtma berish vaqtida mahsulotning haqiqiy mavjudligi qayta tekshiriladimi?
+129. Bir vaqtning o‘zida oxirgi mahsulotni bir nechta foydalanuvchi sotib olishga uringanda qoldiq to‘g‘ri boshqariladimi?
+130. Buyurtma yuborish jarayonida foydalanuvchining ma’lumotlari to‘g‘ri validatsiya qilinadimi?
+131. Buyurtma muvaffaqiyatli yaratilgandan keyin foydalanuvchiga aniq buyurtma raqami beriladimi?
+132. Buyurtma ikki marta yuborilishidan himoya mavjudmi?
+133. To‘lov integratsiyasi mavjud bo‘lsa, to‘lov holati server tomonida tekshiriladimi?
+134. To‘lov provayderidan keladigan callback yoki webhook xabarlari imzosi tekshiriladimi?
+135. To‘lov muvaffaqiyatsiz bo‘lganda buyurtma holati to‘g‘ri yangilanadimi?
+136. Buyurtma holatlari (yangi, tasdiqlangan, tayyorlanmoqda, yetkazilmoqda, yakunlangan, bekor qilingan) aniq boshqariladimi?
+137. Buyurtma bo‘yicha foydalanuvchiga SMS, email yoki boshqa bildirishnoma yuborish mexanizmi mavjudmi?
+11. SEO auditi — Google, Yandex va boshqa qidiruv tizimlari:
+138. Har bir muhim sahifaning yagona va to‘g‘ri title tegi bormi?
+139. Har bir sahifada mazmuniga mos meta_description mavjudmi?
+140. Har bir sahifada to‘g‘ri H1 sarlavhasi bormi?
+141. H1, H2 va H3 sarlavhalar ierarxiyasi to‘g‘ri tashkil etilganmi?
+142. Mahsulot URL manzillari qisqa, tushunarli va barqarormi?
+143. Bir mahsulotga bir nechta URL orqali kirish mumkin bo‘lsa, canonical manzili to‘g‘ri belgilanadimi?
+144. Til versiyalari uchun hreflang atributlari to‘g‘ri ishlatiladimi?
+145. Har bir til versiyasi uchun tegishli canonical URL ko‘rsatiladimi?
+146. sitemap.xml avtomatik shakllantirilib, yangilanib turadimi?
+147. robots.txt qidiruv tizimlariga to‘g‘ri ko‘rsatmalar beradimi?
+148. Savatcha, login, profil va texnik sahifalar indekslanishdan himoyalanganmi?
+149. Preview va test domenlarining Google tomonidan indekslanishi cheklanganmi?
+150. Mahsulot sahifalarida server tomonidan render qilingan asosiy matnli kontent mavjudmi?
+151. JavaScript ishlamagan holatda ham asosiy mahsulot ma’lumotlarini qidiruv tizimi ko‘ra oladimi?
+152. Mahsulotlarda Product va Offer Schema.org structured data mavjudmi?
+153. Kategoriya sahifalarida BreadcrumbList structured data ishlatiladimi?
+154. Mahsulot rasmi uchun to‘g‘ri ALT matnlar yoziladimi?
+155. Structured data ichidagi narx, valyuta va mavjudlik haqiqiy ma’lumotlar bilan mos keladimi?
+156. Filtr va saralash URL'lari duplicate content hosil qilmaydimi?
+157. O‘chirilgan mahsulotlar uchun 404, 410 yoki tegishli redirect strategiyasi mavjudmi?
+158. Mahsulot nomi, tavsifi, texnik xususiyatlari va SEO matnlari takrorlanmaydimi?
+159. Google Search Console va Yandex Webmaster orqali indeksatsiya xatolari nazorat qilinadimi?
+12. Tezlik va samaradorlik auditi — Performance:
+160. Sayt Google PageSpeed Insights orqali mobil va desktop rejimlarida tekshirilganmi?
+161. Core Web Vitals ko‘rsatkichlari — LCP, INP va CLS — yaxshi darajadami?
+162. Eng katta kontent elementi (LCP) imkon qadar tez yuklanadimi?
+163. Foydalanuvchi harakatlariga javob berish tezligi (INP) qoniqarli darajadami?
+164. Sahifa yuklanayotganda elementlarning kutilmagan siljishi (CLS) oldi olinganmi?
+165. Rasmlar optimallashtirilganmi va kerakli o‘lchamda yetkazib beriladimi?
+166. Lazy Loading kerakli rasmlar uchun to‘g‘ri ishlatiladimi?
+167. Keraksiz JavaScript va CSS fayllari yuklanmayaptimi?
+168. Keraksiz client-side JavaScript va hydration hajmi minimallashtirilganmi?
+169. Server va brauzer cache strategiyasi to‘g‘ri tashkil etilganmi?
+170. Takroriy API so‘rovlarini kamaytirish uchun caching qo‘llanilganmi?
+171. Kategoriya va mahsulot sahifalari uchun cache invalidation mexanizmi mavjudmi?
+172. Foydalanuvchining shaxsiy ma’lumotlari yoki savatchasi umumiy cache'ga tushib qolmayaptimi?
+173. Katta katalogda ma’lumotlar bazasi va API so‘rovlari samarali ishlaydimi?
+174. Bir vaqtning o‘zida ko‘p foydalanuvchi kirganda sayt tezligi keskin pasaymaydimi?
+175. Sayt xalqaro yoki uzoq hududlardan kirilganda ham maqbul tezlikda ishlaydimi?
+13. Testlash va sifat nazorati — QA:
+176. Loyihada unit testlar mavjudmi?
+177. API endpoint'lari uchun integration testlar mavjudmi?
+178. Muhim foydalanuvchi jarayonlari uchun end-to-end testlar mavjudmi?
+179. Ro‘yxatdan o‘tish va login jarayonlari testdan o‘tkazilganmi?
+180. Mahsulot qidirish, filtrlash va saralash testdan o‘tkazilganmi?
+181. Savatcha va buyurtma yaratish jarayonlari testdan o‘tkazilganmi?
+182. To‘lov integratsiyasi test muhiti orqali tekshirilganmi?
+183. 1C yoki boshqa tashqi API ishlamay qolganda tizim xatti-harakati test qilinganmi?
+184. Turli ekran o‘lchamlari va brauzerlarda sayt tekshirilganmi?
+185. Production'ga chiqarishdan oldin muhim funksiyalar avtomatik testdan o‘tadimi?
+186. Regression testlar yangi o‘zgarishlar avvalgi funksiyalarni buzmaganini aniqlaydimi?
+14. Monitoring, loglar va zaxiralash:
+187. Production sayti ishlash holatini doimiy kuzatish mexanizmi mavjudmi?
+188. Server/API xatolari alohida qayd etiladimi?
+189. 404, 500 va boshqa HTTP xatolar monitoring qilinadimi?
+190. API javob berish vaqti va muvaffaqiyatsiz so‘rovlar ulushi kuzatiladimi?
+191. Sayt ishlamay qolsa yoki muhim xatolik yuz bersa, mas’ul shaxsga bildirishnoma yuboriladimi?
+192. Foydalanuvchi xatolarini aniqlash uchun frontend error monitoring mavjudmi?
+193. Buyurtmalar va boshqa muhim ma’lumotlar muntazam zaxiralanadimi?
+194. Zaxira nusxalarni tiklash (restore) amaliyoti test qilinganmi?
+195. Cloudflare R2 va boshqa muhim xizmatlar uchun foydalanish hajmi hamda xarajatlar kuzatiladimi?
+196. Vercel va Cloudflare xizmatlari cheklovlariga yaqinlashish nazorat qilinadimi?
+197. Production muhitida kritik xatolar yuz bersa, ularni tez aniqlash va bartaraf etish tartibi mavjudmi?
+15. Huquqiy va biznes talablariga muvofiqlik:
+198. Saytda kompaniya haqida to‘liq va ishonchli ma’lumotlar mavjudmi?
+199. Foydalanuvchi uchun foydalanish shartlari sahifasi mavjudmi?
+200. Maxfiylik siyosati (Privacy Policy) mavjudmi?
+201. Shaxsiy ma’lumotlarni yig‘ish va qayta ishlash tartibi aniq belgilanganmi?
+202. Cookie va kuzatuv texnologiyalaridan foydalanish tartibi tushunarli ko‘rsatilganmi?
+203. Mahsulot narxi, chegirma va mavjudlik haqida noto‘g‘ri ma’lumot berilishining oldi olinganmi?
+204. Yetkazib berish shartlari, muddati va narxlari aniq ko‘rsatilganmi?
+205. To‘lov, qaytarish va bekor qilish shartlari mavjudmi?
+206. Foydalanuvchi buyurtma berishdan oldin barcha muhim shartlarni ko‘ra oladimi?
+207. Saytdagi ma’lumotlar O‘zbekiston qonunchiligi va tegishli shaxsiy ma’lumotlarni himoya qilish talablariga mosmi?

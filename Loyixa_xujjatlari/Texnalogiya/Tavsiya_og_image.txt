@@ -1,0 +1,15 @@
+E-commerce loyihasining asosiy sahifasi uchun Open Graph (og:image) — bu sayt havolasi Telegram, WhatsApp, Facebook yoki LinkedIn orqali ulashilganda ko'rinadigan raqamli vizitka (banner) hisoblanadi. O'zbekiston sharoitida havolalarning asosiy qismi Telegram orqali yuborilishini hisobga olsak, bu rasm foydalanuvchida 1–2 soniya ichida ishonch uyg'otishi va saytda nima sotilishini so'zsiz tushuntirib berishi shart.
+
+Quyida sora.uz (kanselyariya, ofis qog'ozlari va ofis texnikasi onlayn-do'koni) misolida ideal og:image qanday bo'lishi kerakligi bo'yicha to'liq texnik va vizual tasvir keltirilgan.
+
+1. Texnik standartlar (Telegram va ijtimoiy tarmoqlar uchun)
+Parametr,Qiymat,Izoh
+Optimal o'lcham,1200 × 630 piksel,"Barcha platformalar (Telegram katta prevyu, Facebook, LinkedIn) uchun oltin standart."
+Tomonlar nisbati,1.91 : 1,Gorizontal banner formati.
+Fayl formati,JPG yoki PNG,"Telegram va eski mobil ilovalarda muammosiz ochilishi uchun .webp emas, .jpg yoki .png tavsiya etiladi."
+Fayl hajmi,150 KB – 300 KB gacha,Mobil internetda (3G/4G) Telegram prevyusi darhol yuklanishi uchun hajm 300 KB dan oshmasligi kerak.
+
+Ko'p uchraydigan xatolar (Nimalardan qochish kerak?)
+Juda kichik shriftlar: Telegram-da rasm kichraytirilgan holatda (~320px kenglikda) ko'rinadi. Agar shrift o'lchami 1200px xoltda 32px dan kichik bo'lsa, telefonda uni o'qib bo'lmaydi. Asosiy sarlavha kamida 56–72px bo'lishi kerak.
+
+Katta rasm o'rniga kichik kvadrat chiqib qolishi: Telegram-da rasm kichik kvadrat emas, balki xabar ostida katta banner bo'lib chiqishi uchun HTML-da twitter:card tegi summary_large_image qilib belgilanishi shart.

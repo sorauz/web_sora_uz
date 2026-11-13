@@ -1,0 +1,236 @@
+``
+import json
+import time
+from pathlib import Path
+from io import BytesIO
+import requests
+import boto3
+from PIL import Image, ImageFilter, ImageOps
+
+# =====================================================================
+# 1. CLOUDFLARE R2 VA 1C KONFIGURATSIYASI
+# =====================================================================
+S3_ENDPOINT = "https://<ACCOUNT_ID>.r2.cloudflarestorage.com"
+S3_ACCESS_KEY = "<SIZNING_ACCESS_KEY_ID>"
+S3_SECRET_KEY = "<SIZNING_SECRET_ACCESS_KEY>"
+BUCKET_NAME = "sorauz-media"
+PUBLIC_DOMAIN = "https://cdn.sora.uz" 
+
+# 1C HTTP Servis manzillari
+GET_URL = "http://<domen.uz>/<baza>/hs/<http_servis>/"
+POST_URL = "http://<domen.uz>/<baza>/hs/<http_servis>/"
+API_LOGIN = "sizning_loginingiz"
+API_PASSWORD = "sizning_parolingiz"
+
+# =====================================================================
+# 2. BOTO3 (S3) CLIENT ULANISHI
+# =====================================================================
+s3_client = boto3.client(
+    's3',
+    endpoint_url=S3_ENDPOINT,
+    aws_access_key_id=S3_ACCESS_KEY,
+    aws_secret_access_key=S3_SECRET_KEY,
+    region_name="auto" 
+)
+
+PROGRESS_FILE = "migration_progress_r2_compact.json"
+
+def load_progress() -> dict:
+    if Path(PROGRESS_FILE).exists():
+        with open(PROGRESS_FILE, "r", encoding="utf-8") as f:
+            try:
+                return json.load(f)
+            except json.JSONDecodeError:
+                return {}
+    return {}
+
+def save_progress(kod: str, data: dict, completed_progress: dict):
+    """Progress xotirada saqlanadi va biryo'la diskka yoziladi, disk tezligi oshadi"""
+    completed_progress[kod] = data
+    with open(PROGRESS_FILE, "w", encoding="utf-8") as f:
+        json.dump(completed_progress, f, indent=4, ensure_ascii=False)
+
+def get_all_data() -> list:
+    print("⏳ [1/3] 1C tizimidan rasmlar ro'yxati yuklab olinmoqda (GET)...")
+    try:
+        response = requests.get(GET_URL, auth=(API_LOGIN, API_PASSWORD), timeout=60)
+        response.raise_for_status()
+        data = response.json()
+        print(f"✅ [MUVAFFAQIYATLI] Ro'yxat olindi. Jami elementlar: {len(data)} ta.\n")
+        return data
+    except Exception as e:
+        print(f"🔴 GET so'rovida xatolik yuz berdi: {str(e)}")
+        return []
+
+def get_candidates_for_link1(item: dict) -> list:
+    """Manba ustuvorligi: 1-o'rinda Cloudinary, 2-o'rinda ImgBB"""
+    cands = []
+    cl1 = item.get("cloudinary_link1")
+    l1 = item.get("link1")
+    
+    # 1. Cloudinary ustuvor
+    if cl1 and isinstance(cl1, str) and cl1.strip().startswith("http"):
+        cands.append(cl1.strip())
+    # 2. ImgBB zaxira sifatida
+    if l1 and isinstance(l1, str) and l1.strip().startswith("http") and l1.strip() not in cands:
+        cands.append(l1.strip())
+        
+    return cands
+
+def process_image_to_1500px(image_bytes: bytes) -> bytes:
+    """Rasmni o'qiydi, proporsiyani buzmay 1500x1500 oq fonga joylaydi va tiniqlashtiradi"""
+    try:
+        with Image.open(BytesIO(image_bytes)) as img:
+            img.verify()
+            
+        with Image.open(BytesIO(image_bytes)) as img:
+            # EXIF ma'lumotlari bo'yicha to'g'ri o'qqa burish
+            img = ImageOps.exif_transpose(img)
+
+            # PNG shaffofligini oq fonga almashtirish (To'g'rilangan P va RGBA mantiq)
+            if img.mode in ('RGBA', 'LA') or (img.mode == 'P' and 'transparency' in img.info):
+                img = img.convert('RGBA')
+                bg = Image.new("RGB", img.size, (255, 255, 255))
+                bg.paste(img, mask=img.split()[-1])
+                img = bg
+            else:
+                img = img.convert('RGB')
+                
+            # 1500x1500 proporsional kattalashtirish yoki kichraytirish (resize orqali)
+            target_size = 1500
+            scale = target_size / max(img.width, img.height)
+            new_size = (round(img.width * scale), round(img.height * scale))
+            img = img.resize(new_size, Image.Resampling.LANCZOS)
+            
+            # Yengil tiniqlashtirish filtri
+            img = img.filter(ImageFilter.UnsharpMask(radius=1.5, percent=100, threshold=3))
+            
+            # Markazga oq fonga joylash (1500x1500 xolst)
+            new_img = Image.new("RGB", (target_size, target_size), (255, 255, 255))
+            x_offset = (target_size - img.width) // 2
+            y_offset = (target_size - img.height) // 2
+            new_img.paste(img, (x_offset, y_offset))
+            
+            output_buffer = BytesIO()
+            new_img.save(output_buffer, format="JPEG", quality=90, optimize=True, progressive=True)
+            return output_buffer.getvalue()
+    except Exception as e:
+        raise Exception(f"Fayl rasm formatida emas yoki buzilgan: {str(e)}")
+
+def process_and_upload(candidates: list, kod_mahsulot: str) -> str:
+    """Kandidat linklardan tortib, 1500px qilib R2 ga yuklaydi"""
+    for url in candidates:
+        try:
+            print(f"   ↳ Sinab ko'rilmoqda: {url}")
+            img_response = requests.get(url, stream=True, timeout=(10, 30))
+            img_response.raise_for_status()
+            
+            # Xotirada 1500x1500 ga o'zgartirish
+            processed_bytes = process_image_to_1500px(img_response.content)
+            
+            r2_file_key = f"products/{kod_mahsulot}_1.jpg"
+            
+            # R2 ga yuklash (Cache-Control kiritilgan)
+            s3_client.put_object(
+                Bucket=BUCKET_NAME,
+                Key=r2_file_key,
+                Body=processed_bytes,
+                ContentType="image/jpeg",
+                CacheControl="public, max-age=31536000, immutable"
+            )
+            
+            size_kb = round(len(processed_bytes) / 1024, 1)
+            print(f"     ✅ R2 ga yuklandi! (Hajmi: {size_kb} KB)")
+            return f"{PUBLIC_DOMAIN}/{r2_file_key}"
+            
+        except requests.exceptions.Timeout:
+            print(f"     ⚠️ Timeout (40s): Ushbu manbadan javob kelmadi.")
+        except Exception as e:
+            print(f"     ⚠️ Xatolik yoki yaroqsiz fayl: {str(e)[:60]}...")
+            
+    return ""
+
+def post_1c_data(payload: dict) -> bool:
+    try:
+        response = requests.post(
+            POST_URL,
+            json=payload,
+            headers={"Content-Type": "application/json"},
+            auth=(API_LOGIN, API_PASSWORD),
+            timeout=30
+        )
+        if response.status_code in [200, 201]:
+            return True
+        else:
+            print(f"   ⚠️ POST xatoligi! Status: {response.status_code}, Javob: {response.text}")
+            return False
+    except Exception as e:
+        print(f"   🔴 POST so'rovida tarmoq xatoligi: {str(e)}")
+        return False
+
+def main():
+    print("🚀 IMGBB/CLOUDINARY -> 1500px -> CLOUDFLARE R2 IXCHAM MIGRATSIYA BOSHLANDI 🚀\n")
+
+    items = get_all_data()
+    if not items:
+        return
+
+    # Progress fayl xotiraga 1 marta yuklanadi
+    completed_progress = load_progress()
+    total_items = len(items)
+    already_done = len(completed_progress)
+
+    print(f"📊 Jami elementlar: {total_items} ta.")
+    print(f"⏩ Oldin bajarilganlar: {already_done} ta. Qolganlari qayta ishlanmoqda...\n")
+
+    processed_count = 0
+
+    for index, item in enumerate(items, 1):
+        kod = item.get("Код")
+        if not kod:
+            continue
+
+        if str(kod) in completed_progress:
+            continue
+
+        print(f"\n⚙️ [{index}/{total_items}] Kod: {kod} qayta ishlanmoqda...")
+
+        candidates = get_candidates_for_link1(item)
+                
+        if not candidates:
+            print(f"   ℹ️ Rasm 1-linklari mutlaqo yo'q. Bo'sh holatda saqlandi.")
+            # completed_progress lug'ati funksiyaga uzatiladi
+            save_progress(str(kod), {"status": "empty", "Код": kod}, completed_progress)
+            continue
+
+        payload = {
+            "Код": kod,
+            "cf_link1": ""
+        }
+
+        print(f"   🔹 Asosiy link uchun {len(candidates)} ta manba topildi.")
+        
+        new_url = process_and_upload(candidates, kod_mahsulot=kod)
+        
+        if new_url:
+            payload["cf_link1"] = new_url
+            print(f"   🚀 Yangi R2 link 1C serveriga yuborilmoqda...")
+            
+            if post_1c_data(payload):
+                print(f"   🟢 [MUVAFFAQIYATLI] 1C bazaga yozildi!")
+                save_progress(str(kod), payload, completed_progress)
+                processed_count += 1
+            else:
+                print(f"   🔴 1C qabul qilmadi. Kod {kod} keyingi safarga qoldi.")
+        else:
+            print(f"   ⚠️ Hech qaysi manbadan rasm yuklab bo'lmadi. Progressga yozilmaydi.")
+
+        if processed_count > 0 and processed_count % 50 == 0:
+            print("\n🛡️ Serverlar havo olishi uchun 5 soniya tanaffus...\n")
+            time.sleep(5)
+
+    print("\n🎉 BARCHA JARAYONLAR MUVAFFAQIYATLI YAKUNLANDI!")
+
+if __name__ == "__main__":
+    main()
+``

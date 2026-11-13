@@ -1,0 +1,42 @@
+
+-Yakuniy audit baholash mezoni
+Audit yakunida har bir bo‘lim bo‘yicha natijalarni quyidagicha baholash mumkin:
+Natija	Baho	Talqin
+Ha	2 ball	Talab bajarilgan
+Qisman	1 ball	Kamchilik mavjud
+Yo‘q	0 ball	Talab bajarilmagan
+Tekshirilmagan	—	Dalil yetarli emas
+
+Muhim: bu ballar dastlabki ichki audit uchun. Xavfsizlik, to‘lov, buyurtma va ma’lumotlar yaxlitligiga taalluqli kritik kamchiliklarni umumiy ball yuqori bo‘lsa ham alohida bartaraf etish kerak.
+
+Audit ustuvorligi:
+1. Kritik
+    Xavfsizlik, maxfiy ma’lumotlar, to‘lovlar, buyurtmalar va narxlarning to‘g‘riligi.
+2. Yuqori
+    API, 1C integratsiyasi, Vercel deployment, R2 va ma’lumotlar sinxronizatsiyasi.
+3. O‘rta
+    SEO, Core Web Vitals, mobil moslashuv va UX.
+4. Past
+    Kodni optimallashtirish, texnik hujjatlar va ikkilamchi qulayliklar.
+
+Tavsiya: auditni qanday amalga oshirish kerak?
+Men auditni quyidagi ketma-ketlikda o‘tkazishni tavsiya qilaman:
+1. GitHub
+   
+   Source code, papkalar strukturasi, dependency'lar, xavfsizlik va kod sifatini tekshirish.
+2. Vercel
+   
+   Deployment, environment variable, serverless functions, caching va loglarni tekshirish.
+3. Cloudflare R2
+   
+   Fayllar saqlanishi, public/private access, rasmlar optimizatsiyasi va xavfsizlikni tekshirish.
+4. Ishlayotgan sayt
+   
+   Mobil/desktop interfeys, foydalanuvchi ssenariylari, SEO va tezlikni tekshirish.
+5. API va 1C
+   
+   Ma’lumotlar almashinuvi, narx, qoldiq, buyurtma va xatoliklarni boshqarishni tekshirish.
+6. Yakuniy hisobot
+   
+   Aniqlangan muammolar, xavf darajasi, ta’siri va ularni bartaraf etish bo‘yicha texnik vazifalarni shakllantirish.
+Mening tavsiyam: ushbu 207 ta savolni auditning asosiy nazorat ro‘yxati sifatida ishlating. Har bir «Yo‘q» va «Qisman» javob uchun GitHub fayl yo‘li, API endpoint, Vercel yoki Cloudflare sozlamasi kabi aniq dalil talab qiling. Shunda audit subyektiv fikrga emas, tekshiriladigan texnik natijalarga asoslanadi.
