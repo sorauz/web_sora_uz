@@ -7,11 +7,24 @@ import { Filter, X, RotateCcw, Search, ChevronDown, Loader2 } from "lucide-react
 import { useState, useMemo, useTransition, useEffect } from "react";
 import { SortSelect } from "./SortSelect";
 
+export interface FilterBrandItem {
+  id: string;
+  name: string;
+  count?: number;
+}
+
+export interface PricePresetItem {
+  label: string;
+  min: string;
+  max: string;
+}
+
 interface FacetedFilterProps {
-  brands: Brand[];
+  brands: FilterBrandItem[];
   minPossiblePrice?: number;
   maxPossiblePrice?: number;
   totalMatchedCount?: number;
+  pricePresets?: PricePresetItem[];
 }
 
 export function FacetedFilter({
@@ -19,6 +32,7 @@ export function FacetedFilter({
   minPossiblePrice = 0,
   maxPossiblePrice = 20000000,
   totalMatchedCount,
+  pricePresets,
 }: FacetedFilterProps) {
   const t = useTranslations("filter");
   const common = useTranslations("common");
@@ -119,7 +133,7 @@ export function FacetedFilter({
     activeBrands.length + (minPrice || maxPrice ? 1 : 0) + (inStock === "1" ? 1 : 0);
 
   // Quick price presets to avoid opening virtual keyboard on mobile
-  const pricePresets = [
+  const defaultPricePresets: PricePresetItem[] = [
     {
       label: isUz ? "50 minggacha" : "До 50 тыс.",
       min: "",
@@ -141,6 +155,8 @@ export function FacetedFilter({
       max: "",
     },
   ];
+
+  const activePresets = pricePresets && pricePresets.length > 0 ? pricePresets : defaultPricePresets;
 
   const handlePricePreset = (minVal: string, maxVal: string) => {
     const isSame = (minPrice || "") === minVal && (maxPrice || "") === maxVal;
@@ -305,17 +321,22 @@ export function FacetedFilter({
                       key={brand.id}
                       className="flex items-center justify-between py-1.5 px-1.5 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60 hover:text-sora-600 dark:hover:text-sora-400 cursor-pointer select-none transition-colors"
                     >
-                      <div className="flex items-center gap-2.5">
+                      <div className="flex items-center gap-2.5 min-w-0">
                         <input
                           type="checkbox"
                           checked={checked}
                           onChange={() => toggleBrand(brand.name)}
-                          className="w-4 h-4 rounded-md text-sora-600 focus:ring-sora-500 border-slate-300 dark:border-slate-700 cursor-pointer accent-sora-600"
+                          className="w-4 h-4 rounded-md text-sora-600 focus:ring-sora-500 border-slate-300 dark:border-slate-700 cursor-pointer accent-sora-600 shrink-0"
                         />
-                        <span className={checked ? "font-bold text-sora-600 dark:text-sora-400" : ""}>
+                        <span className={`truncate ${checked ? "font-bold text-sora-600 dark:text-sora-400" : ""}`}>
                           {brand.name}
                         </span>
                       </div>
+                      {typeof brand.count === "number" && (
+                        <span className="text-[11px] font-mono text-slate-400 dark:text-slate-500 ml-1 shrink-0">
+                          ({brand.count})
+                        </span>
+                      )}
                     </label>
                   );
                 })
@@ -344,7 +365,7 @@ export function FacetedFilter({
           <div className="mt-3 space-y-3">
             {/* Quick Price Preset Chips */}
             <div className="flex flex-wrap gap-1.5">
-              {pricePresets.map((preset, idx) => {
+              {activePresets.map((preset, idx) => {
                 const isActive =
                   (minPrice || "") === preset.min && (maxPrice || "") === preset.max;
                 return (
@@ -511,7 +532,7 @@ export function FacetedFilter({
                   <span>
                     {typeof totalMatchedCount === "number"
                       ? isUz
-                        ? `${totalMatchedCount} ta tovarni ko'rish`
+                        ? `${totalMatchedCount} ta mahsulotni ko'rish`
                         : `Показать (${totalMatchedCount} товаров)`
                       : isUz
                       ? "Ko'rish (Qo'llash)"

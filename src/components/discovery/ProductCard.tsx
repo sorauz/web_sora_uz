@@ -5,7 +5,7 @@ import { calculateProductPrice } from "@/lib/utils/price";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import Image from "next/image";
-import { Heart, ShoppingCart, Check, Star, Scale, PhoneCall } from "lucide-react";
+import { Heart, ShoppingCart, Check, Star, Scale, PhoneCall, Plus, Minus } from "lucide-react";
 import { useCartStore } from "@/lib/store/cart";
 import { useFavoritesStore } from "@/lib/store/favorites";
 import { useCompareStore } from "@/lib/store/compare";
@@ -30,7 +30,7 @@ export function ProductCard({
   const locale = useLocale() as "uz" | "ru";
   const t = useTranslations("common");
 
-  const { addItem, hasItem } = useCartStore();
+  const { addItem, removeItem, updateQuantity, hasItem, items } = useCartStore();
   const { toggleFavorite, isFavorite } = useFavoritesStore();
   const { toggleCompare, isInCompare } = useCompareStore();
 
@@ -43,6 +43,8 @@ export function ProductCard({
 
   const loc = getProductLocalized(product, locale);
   const inCart = hasItem(product.id);
+  const cartItem = items.find((i) => i.id === product.id);
+  const currentQuantity = cartItem?.quantity || 0;
   const isFav = isFavorite(product.id);
   const inCompare = isInCompare(product.id);
 
@@ -94,6 +96,22 @@ export function ProductCard({
         },
       ],
     });
+  };
+
+  const handleIncreaseQuantity = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    updateQuantity(product.id, currentQuantity + 1);
+  };
+
+  const handleDecreaseQuantity = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (currentQuantity <= 1) {
+      removeItem(product.id);
+    } else {
+      updateQuantity(product.id, currentQuantity - 1);
+    }
   };
 
   const handleFavorite = (e: React.MouseEvent) => {
@@ -268,28 +286,43 @@ export function ProductCard({
               <ShoppingCart className="w-4 h-4" />
               <span className="hidden sm:inline">{t("outOfStock")}</span>
             </button>
+          ) : inCart && currentQuantity > 0 ? (
+            <div
+              className="flex items-center border border-emerald-600 dark:border-emerald-500 rounded-xl bg-emerald-50/80 dark:bg-emerald-950/50 overflow-hidden shadow-2xs h-10 select-none animate-in fade-in zoom-in-95 duration-150"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
+            >
+              <button
+                type="button"
+                onClick={handleDecreaseQuantity}
+                aria-label="Kamaytirish"
+                className="w-8 sm:w-8.5 h-full flex items-center justify-center text-emerald-700 dark:text-emerald-300 hover:bg-emerald-200/60 dark:hover:bg-emerald-900/60 transition-colors cursor-pointer"
+              >
+                <Minus className="w-3.5 h-3.5" />
+              </button>
+              <span className="min-w-6 px-1 text-center font-bold text-xs sm:text-sm text-emerald-900 dark:text-emerald-100">
+                {currentQuantity}
+              </span>
+              <button
+                type="button"
+                onClick={handleIncreaseQuantity}
+                aria-label="Ko'paytirish"
+                className="w-8 sm:w-8.5 h-full flex items-center justify-center text-emerald-700 dark:text-emerald-300 hover:bg-emerald-200/60 dark:hover:bg-emerald-900/60 transition-colors cursor-pointer"
+              >
+                <Plus className="w-3.5 h-3.5" />
+              </button>
+            </div>
           ) : (
             <button
               type="button"
               onClick={handleAddToCart}
-              aria-label={inCart ? t("inCart") : t("addToCart")}
-              className={`min-h-[40px] min-w-[44px] px-3.5 rounded-xl flex items-center justify-center gap-1.5 text-xs font-semibold transition-all duration-200 shadow-xs cursor-pointer ${
-                inCart || addedAnim
-                  ? "bg-emerald-600 hover:bg-emerald-700 text-white"
-                  : "bg-sora-600 hover:bg-sora-700 text-white active:scale-95"
-              }`}
+              aria-label={t("addToCart")}
+              className="min-h-[40px] min-w-[44px] px-3.5 rounded-xl flex items-center justify-center gap-1.5 text-xs font-semibold bg-sora-600 hover:bg-sora-700 text-white active:scale-95 transition-all duration-200 shadow-xs cursor-pointer"
             >
-              {addedAnim || inCart ? (
-                <>
-                  <Check className="w-4 h-4" />
-                  <span className="hidden sm:inline">{t("inCart")}</span>
-                </>
-              ) : (
-                <>
-                  <ShoppingCart className="w-4 h-4" />
-                  <span className="hidden sm:inline">{t("addToCart")}</span>
-                </>
-              )}
+              <ShoppingCart className="w-4 h-4" />
+              <span className="hidden sm:inline">{t("addToCart")}</span>
             </button>
           )}
         </div>

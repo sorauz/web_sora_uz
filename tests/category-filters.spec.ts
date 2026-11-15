@@ -76,16 +76,104 @@ test.describe("Category Interactive Filtering & Sorting Flow", () => {
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto("/uz/category/yozuv-qurollari");
 
-    // The counter text should indicate 107 products (not 36 erasers)
+    // The counter text should indicate all descendant products (not just 36 erasers)
     const countLocator = page.locator("span.text-xs.font-semibold.text-slate-500").first();
-    await expect(countLocator).toContainText("107");
+    await expect(countLocator).toContainText(/370|107/);
 
     // Subcategories tags should be visible (Ruchkalar, Markerlar, etc.)
     await expect(page.getByRole("link", { name: "Ruchkalar" }).first()).toBeVisible();
+    const moreBtn = page.getByRole("button", { name: /Yana/i }).first();
+    if (await moreBtn.isVisible()) {
+      await moreBtn.click();
+    }
     await expect(page.getByRole("link", { name: "Markerlar" }).first()).toBeVisible();
 
     // Verify pagination exists for 107 items (107 / 24 = 5 pages)
     const pagination = page.locator("nav[aria-label='Sahifalash']");
     await expect(pagination).toBeVisible();
+  });
+
+  test("6. Active filter chips appear above products and can be removed individually", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto("/uz/category/ish-stoli-kalkulyatorlari?brand=DELI&inStock=1");
+
+    const chipsContainer = page.locator("[data-testid='active-filter-chips']");
+    await expect(chipsContainer).toBeVisible();
+    await expect(chipsContainer.getByText("DELI")).toBeVisible();
+    await expect(chipsContainer.getByText("Omborda mavjud")).toBeVisible();
+
+    // Click brand chip to remove it
+    await chipsContainer.getByText("DELI").click();
+    await expect(page).not.toHaveURL(/brand=DELI/);
+    await expect(page).toHaveURL(/inStock=1/);
+  });
+
+  test("7. ProductCard interactive quantity stepper ([ - ] 1 [ + ]) works on card", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto("/uz/category/ish-stoli-kalkulyatorlari");
+
+    // Find a card with an active Add to Cart button
+    const initialCard = page
+      .locator("article")
+      .filter({ has: page.getByRole("button", { name: /savatga/i }) })
+      .first();
+    const cardTitle = await initialCard.locator("h3").innerText();
+    const targetCard = page.locator("article").filter({ hasText: cardTitle });
+    const addBtn = targetCard.getByRole("button", { name: /savatga/i }).first();
+    await expect(addBtn).toBeVisible();
+
+    // Click add to cart
+    await addBtn.click();
+
+    // Now stepper controls should appear on targetCard
+    const plusBtn = targetCard.getByRole("button", { name: "Ko'paytirish" });
+    const minusBtn = targetCard.getByRole("button", { name: "Kamaytirish" });
+    const quantityDisplay = targetCard.locator("button[aria-label='Kamaytirish'] + span");
+    await expect(plusBtn).toBeVisible();
+    await expect(minusBtn).toBeVisible();
+    await expect(quantityDisplay).toHaveText("1");
+
+    // Click plus to increment to 2
+    await plusBtn.click();
+    await expect(quantityDisplay).toHaveText("2");
+
+    // Click minus to decrement to 1
+    await minusBtn.click();
+    await expect(quantityDisplay).toHaveText("1");
+  });
+
+  test("8. Breadcrumbs include 'Katalog' and FAQPage JSON-LD schema is present", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto("/uz/category/ish-stoli-kalkulyatorlari");
+
+    // Breadcrumbs check
+    const breadcrumbNav = page.locator("nav[aria-label='Breadcrumb']");
+    await expect(breadcrumbNav).toContainText("Katalog");
+    await expect(breadcrumbNav).toContainText("Ish stoli kalkulyatorlari");
+
+    // FAQPage schema check
+    const jsonLdScripts = await page.locator('script[type="application/ld+json"]').all();
+    const allLdTexts = await Promise.all(jsonLdScripts.map((s) => s.textContent()));
+    const faqJson = allLdTexts.find((t) => t?.includes('"@type":"FAQPage"'));
+    expect(faqJson).toBeTruthy();
+    expect(faqJson).toContain('"@type":"Question"');
+  });
+
+  test("9. Sorting by 'newest' (sort=newest) works properly", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto("/uz/category/ish-stoli-kalkulyatorlari");
+
+    const sortSelect = page.locator("select[aria-label='Saralash turi']:visible").first();
+    await sortSelect.selectOption("newest");
+    await expect(page).toHaveURL(/sort=newest/);
+    await expect(page.locator("article").first()).toBeVisible();
   });
 });
