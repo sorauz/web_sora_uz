@@ -158,11 +158,13 @@ export function ProductTabs({
       {/* Tab Contents */}
       <div className="p-4 sm:p-8">
         {/* Description Tab */}
-        {activeTab === "desc" && (
-          <div className="space-y-6">
-            <h3 className="text-xl font-bold text-slate-900 dark:text-white">
-              {loc.title || loc.name}
-            </h3>
+        <div
+          role="tabpanel"
+          className={`space-y-6 ${activeTab === "desc" ? "block" : "hidden"}`}
+        >
+          <h3 className="text-xl font-bold text-slate-900 dark:text-white">
+            {loc.title || loc.name}
+          </h3>
 
             {loc.product_description ? (
               // 1. Agar 1C dan to'liq tavsif (product_description) mavjud bo'lsa:
@@ -255,14 +257,15 @@ export function ProductTabs({
               </div>
             )}
           </div>
-        )}
 
         {/* Specs / Attributes Tab */}
-        {activeTab === "specs" && (
-          <div className="space-y-6">
-            <h3 className="text-xl font-bold text-slate-900 dark:text-white">
-              {t("specsTab")}
-            </h3>
+        <div
+          role="tabpanel"
+          className={`space-y-6 ${activeTab === "specs" ? "block" : "hidden"}`}
+        >
+          <h3 className="text-xl font-bold text-slate-900 dark:text-white">
+            {t("specsTab")}
+          </h3>
             <div className="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800">
               <table className="w-full text-left text-sm">
                 <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
@@ -333,64 +336,66 @@ export function ProductTabs({
                 </tbody>
               </table>
             </div>
-          </div>
-        )}
+        </div>
 
         {/* Delivery & Payment Tab */}
-        {activeTab === "delivery" && (
-          <div className="space-y-6">
-            <h3 className="text-xl font-bold text-slate-900 dark:text-white">
-              {t("deliveryTab")}
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-              {/* Card 1: Yetkazib berish xizmati */}
-              <div className="p-5 rounded-2xl bg-sora-50/50 dark:bg-sora-950/20 border border-sora-100 dark:border-sora-900/40 space-y-3">
-                <div className="flex items-center gap-2 text-sora-600 dark:text-sora-400 font-bold">
-                  <Truck className="w-5 h-5 shrink-0" />
-                  <span>{locale === "uz" ? "Yetkazib berish xizmati" : "Служба доставки"}</span>
-                </div>
-                <ul className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 space-y-2 list-disc list-inside leading-relaxed">
-                  <li>{locale === "uz" ? "Toshkent shahri: 24 soat ichida eshikkacha yetkazib berish." : "Город Ташкент: доставка до двери в течение 24 часов."}</li>
-                  <li>{locale === "uz" ? "Toshkentda 500 000 so'mdan yuqori xaridga bepul yetkazish." : "По Ташкенту от 500 000 сум бесплатная доставка."}</li>
-                  <li>{locale === "uz" ? "O'zbekiston viloyatlari: BTS, Fargo yoki pochta orqali 1-3 ish kunida." : "Регионы Узбекистана: через курьерские службы BTS, Fargo в течение 1–3 дней."}</li>
-                  <li>{locale === "uz" ? "Katta hajmli yuklar uchun maxsus transport va yuk tushirish xizmati." : "Спецтранспорт для крупногабаритных заказов."}</li>
-                </ul>
+        <div
+          role="tabpanel"
+          className={`space-y-6 ${activeTab === "delivery" ? "block" : "hidden"}`}
+        >
+          <h3 className="text-xl font-bold text-slate-900 dark:text-white">
+            {t("deliveryTab")}
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {/* Card 1: Yetkazib berish xizmati */}
+            <div className="p-5 rounded-2xl bg-sora-50/50 dark:bg-sora-950/20 border border-sora-100 dark:border-sora-900/40 space-y-3">
+              <div className="flex items-center gap-2 text-sora-600 dark:text-sora-400 font-bold">
+                <Truck className="w-5 h-5 shrink-0" />
+                <span>{locale === "uz" ? "Yetkazib berish xizmati" : "Служба доставки"}</span>
               </div>
+              <ul className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 space-y-2 list-disc list-inside leading-relaxed">
+                <li>{locale === "uz" ? "Toshkent shahri: 24 soat ichida eshikkacha yetkazib berish." : "Город Ташкент: доставка до двери в течение 24 часов."}</li>
+                <li>{locale === "uz" ? "Toshkentda 500 000 so'mdan yuqori xaridga bepul yetkazish." : "По Ташкенту от 500 000 сум бесплатная доставка."}</li>
+                <li>{locale === "uz" ? "O'zbekiston viloyatlari: BTS, Fargo yoki pochta orqali 1-3 ish kunida." : "Регионы Узбекистана: через курьерские службы BTS, Fargo в течение 1–3 дней."}</li>
+                <li>{locale === "uz" ? "Katta hajmli yuklar uchun maxsus transport va yuk tushirish xizmati." : "Спецтранспорт для крупногабаритных заказов."}</li>
+              </ul>
+            </div>
 
-              {/* Card 2: To'lov turlari */}
-              <div className="p-5 rounded-2xl bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/40 space-y-3">
-                <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-bold">
-                  <CreditCard className="w-5 h-5 shrink-0" />
-                  <span>{locale === "uz" ? "To'lov usullari" : "Способы оплаты"}</span>
-                </div>
-                <ul className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 space-y-2 list-disc list-inside leading-relaxed">
-                  <li>{locale === "uz" ? "Onlayn: Uzcard, Humo, Payme, Click (0% komissiya)." : "Онлайн: Uzcard, Humo, Payme, Click (без комиссии)."}</li>
-                  <li>{locale === "uz" ? "Naqd pul yoki tovar qabul qilinganda terminal orqali." : "Наличными или картой при получении товара."}</li>
-                  <li>{locale === "uz" ? "Yuridik shaxslar uchun: QQS bilan bank shartnomasi va elektron hisob-faktura (ESF)." : "Для юридических лиц: безналичный расчет с НДС (ЭСФ)."}</li>
-                  <li>{locale === "uz" ? "Barcha to'lovlar fiskal chek bilan taqdim etiladi." : "Все расчеты сопровождаются официальными чеками."}</li>
-                </ul>
+            {/* Card 2: To'lov turlari */}
+            <div className="p-5 rounded-2xl bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/40 space-y-3">
+              <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-bold">
+                <CreditCard className="w-5 h-5 shrink-0" />
+                <span>{locale === "uz" ? "To'lov usullari" : "Способы оплаты"}</span>
               </div>
+              <ul className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 space-y-2 list-disc list-inside leading-relaxed">
+                <li>{locale === "uz" ? "Onlayn: Uzcard, Humo, Payme, Click (0% komissiya)." : "Онлайн: Uzcard, Humo, Payme, Click (без комиссии)."}</li>
+                <li>{locale === "uz" ? "Naqd pul yoki tovar qabul qilinganda terminal orqali." : "Наличными или картой при получении товара."}</li>
+                <li>{locale === "uz" ? "Yuridik shaxslar uchun: QQS bilan bank shartnomasi va elektron hisob-faktura (ESF)." : "Для юридических лиц: безналичный расчет с НДС (ЭСФ)."}</li>
+                <li>{locale === "uz" ? "Barcha to'lovlar fiskal chek bilan taqdim etiladi." : "Все расчеты сопровождаются официальными чеками."}</li>
+              </ul>
+            </div>
 
-              {/* Card 3: Kafolat va Qaytarish */}
-              <div className="p-5 rounded-2xl bg-purple-50/50 dark:bg-purple-950/20 border border-purple-100 dark:border-purple-900/40 space-y-3">
-                <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400 font-bold">
-                  <ShieldCheck className="w-5 h-5 shrink-0" />
-                  <span>{locale === "uz" ? "Kafolat va Qaytarish" : "Гарантия и Возврат"}</span>
-                </div>
-                <ul className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 space-y-2 list-disc list-inside leading-relaxed">
-                  <li>{locale === "uz" ? "10 kunlik qaytarish: nuqson aniqlansa yoki mos kelmasa, qonuniy almashtirish kafolati." : "Гарантия обмена или возврата в течение 10 дней."}</li>
-                  <li>{locale === "uz" ? "Texnika va orgtexnikaga 1 yilgacha to'liq rasmiy kafolat." : "Официальная гарантия производителя до 1 года."}</li>
-                  <li>{locale === "uz" ? "100% original tovarlar va zavod sifat nazorati." : "100% оригинальная заводская продукция."}</li>
-                  <li>{locale === "uz" ? "1C ERP bilan to'liq sinxronlangan qoldiqlar." : "Синхронизация остатков в реальном времени с 1C ERP."}</li>
-                </ul>
+            {/* Card 3: Kafolat va Qaytarish */}
+            <div className="p-5 rounded-2xl bg-purple-50/50 dark:bg-purple-950/20 border border-purple-100 dark:border-purple-900/40 space-y-3">
+              <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400 font-bold">
+                <ShieldCheck className="w-5 h-5 shrink-0" />
+                <span>{locale === "uz" ? "Kafolat va Qaytarish" : "Гарантия и Возврат"}</span>
               </div>
+              <ul className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 space-y-2 list-disc list-inside leading-relaxed">
+                <li>{locale === "uz" ? "10 kunlik qaytarish: nuqson aniqlansa yoki mos kelmasa, qonuniy almashtirish kafolati." : "Гарантия обмена или возврата в течение 10 дней."}</li>
+                <li>{locale === "uz" ? "Texnika va orgtexnikaga 1 yilgacha to'liq rasmiy kafolat." : "Официальная гарантия производителя до 1 года."}</li>
+                <li>{locale === "uz" ? "100% original tovarlar va zavod sifat nazorati." : "100% оригинальная заводская продукция."}</li>
+                <li>{locale === "uz" ? "Rasmiy kafolat va original mahsulotlar." : "Официальная гарантия и оригинальная продукция."}</li>
+              </ul>
             </div>
           </div>
-        )}
+        </div>
 
         {/* Reviews Tab */}
-        {activeTab === "reviews" && (
-          <div className="space-y-8">
+        <div
+          role="tabpanel"
+          className={`space-y-8 ${activeTab === "reviews" ? "block" : "hidden"}`}
+        >
             {/* Rating Summary Card (Only when genuine reviews exist) */}
             {hasRealReviews && stats && stats.reviewCount > 0 ? (
               <div className="p-6 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center gap-8">
@@ -633,44 +638,46 @@ export function ProductTabs({
                 </div>
               </div>
             )}
-          </div>
-        )}
+        </div>
 
         {/* FAQ Tab */}
-        {activeTab === "faq" && (
-          <div className="space-y-4">
-            <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">
-              {t("faqTab")}
-            </h3>
-            {faqs.map((faq, index) => {
-              const isOpen = openFaq === index;
-              return (
-                <div
-                  key={index}
-                  className="rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden"
+        <div
+          role="tabpanel"
+          className={`space-y-4 ${activeTab === "faq" ? "block" : "hidden"}`}
+        >
+          <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">
+            {t("faqTab")}
+          </h3>
+          {faqs.map((faq, index) => {
+            const isOpen = openFaq === index;
+            return (
+              <div
+                key={index}
+                className="rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden"
+              >
+                <button
+                  type="button"
+                  onClick={() => setOpenFaq(isOpen ? null : index)}
+                  className="w-full flex items-center justify-between p-4 sm:p-5 text-left font-semibold text-slate-900 dark:text-white bg-slate-50/50 dark:bg-slate-900/50 hover:bg-slate-100/50 transition-colors"
                 >
-                  <button
-                    type="button"
-                    onClick={() => setOpenFaq(isOpen ? null : index)}
-                    className="w-full flex items-center justify-between p-4 sm:p-5 text-left font-semibold text-slate-900 dark:text-white bg-slate-50/50 dark:bg-slate-900/50 hover:bg-slate-100/50 transition-colors"
-                  >
-                    <span className="text-sm sm:text-base">{faq.q}</span>
-                    <ChevronDown
-                      className={`w-5 h-5 text-slate-400 transition-transform duration-200 ${
-                        isOpen ? "rotate-180 text-sora-600" : ""
-                      }`}
-                    />
-                  </button>
-                  {isOpen && (
-                    <div className="p-4 sm:p-5 text-sm text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 leading-relaxed">
-                      {faq.a}
-                    </div>
-                  )}
+                  <span className="text-sm sm:text-base">{faq.q}</span>
+                  <ChevronDown
+                    className={`w-5 h-5 text-slate-400 transition-transform duration-200 ${
+                      isOpen ? "rotate-180 text-sora-600" : ""
+                    }`}
+                  />
+                </button>
+                <div
+                  className={`p-4 sm:p-5 text-sm text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 leading-relaxed ${
+                    isOpen ? "block" : "hidden"
+                  }`}
+                >
+                  {faq.a}
                 </div>
-              );
-            })}
-          </div>
-        )}
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

@@ -22,6 +22,24 @@ test.describe("FAZA 3: Product Detail Page (PDP) with Real 1C ERP Data", () => {
     const buyNowBtn = page.getByRole("button", { name: /1 klikda xarid qilish/i });
     await expect(buyNowBtn).toHaveCount(0);
 
+    // 100% Original badge and absence of internal jargon (1C ERP, Up-sell / Down-sell) in main product area
+    await expect(page.locator("main").getByText("100% Original").first()).toBeVisible();
+    await expect(page.locator("main").getByText("1C ERP")).toHaveCount(0);
+    await expect(page.locator("main").getByText(/up-sell|down-sell/i)).toHaveCount(0);
+
+    // Breadcrumb hierarchy check
+    const breadcrumbNav = page.locator('nav[aria-label="Breadcrumb"]');
+    await expect(breadcrumbNav).toBeVisible();
+    await expect(breadcrumbNav).toContainText("Katalog");
+    await expect(breadcrumbNav).toContainText("Deli E1589");
+
+    // SEO Check: Verify that inactive tabs and FAQ contents are present in the DOM (crawlable by Googlebot)
+    const specsPanel = page.locator('div[role="tabpanel"]').filter({ hasText: /Artikul|Model|E1589/i }).first();
+    await expect(specsPanel).toBeAttached();
+
+    const faqPanel = page.locator('div[role="tabpanel"]').filter({ hasText: /savol/i }).first();
+    await expect(faqPanel).toBeAttached();
+
     // Check Tabs navigation (Specs from 1C)
     await page.getByRole("button", { name: /texnik xususiyatlari/i }).click();
     await expect(page.getByRole("cell", { name: /Artikul|Model/i }).first()).toBeVisible();

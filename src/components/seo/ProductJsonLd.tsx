@@ -13,6 +13,7 @@ interface ProductJsonLdProps {
   baseUrl?: string;
   reviews?: Review[];
   stats?: ReviewStats;
+  breadcrumbItems?: { name: string; href?: string }[];
 }
 
 export function ProductJsonLd({
@@ -21,6 +22,7 @@ export function ProductJsonLd({
   baseUrl = "https://sora.uz",
   reviews = [],
   stats,
+  breadcrumbItems,
 }: ProductJsonLdProps) {
   const loc = getProductLocalized(product, locale);
   const priceInfo = calculateProductPrice(product.price);
@@ -195,29 +197,51 @@ export function ProductJsonLd({
       : {}),
   };
 
+  const breadcrumbElements =
+    breadcrumbItems && breadcrumbItems.length > 0
+      ? [
+          {
+            "@type": "ListItem",
+            position: 1,
+            name: locale === "uz" ? "Bosh sahifa" : "Главная",
+            item: `${baseUrl}/${locale}`,
+          },
+          ...breadcrumbItems.map((b, idx) => ({
+            "@type": "ListItem",
+            position: idx + 2,
+            name: b.name,
+            item: b.href
+              ? b.href.startsWith("http")
+                ? b.href
+                : `${baseUrl}/${locale}${b.href}`
+              : canonicalUrl,
+          })),
+        ]
+      : [
+          {
+            "@type": "ListItem",
+            position: 1,
+            name: locale === "uz" ? "Bosh sahifa" : "Главная",
+            item: `${baseUrl}/${locale}`,
+          },
+          {
+            "@type": "ListItem",
+            position: 2,
+            name: loc.category,
+            item: `${baseUrl}/${locale}/category/${loc.category_slug}`,
+          },
+          {
+            "@type": "ListItem",
+            position: 3,
+            name: loc.name,
+            item: canonicalUrl,
+          },
+        ];
+
   const breadcrumbSchema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
-    itemListElement: [
-      {
-        "@type": "ListItem",
-        position: 1,
-        name: locale === "uz" ? "Bosh sahifa" : "Главная",
-        item: `${baseUrl}/${locale}`,
-      },
-      {
-        "@type": "ListItem",
-        position: 2,
-        name: loc.category,
-        item: `${baseUrl}/${locale}/category/${loc.category_slug}`,
-      },
-      {
-        "@type": "ListItem",
-        position: 3,
-        name: loc.name,
-        item: canonicalUrl,
-      },
-    ],
+    itemListElement: breadcrumbElements,
   };
 
   return (

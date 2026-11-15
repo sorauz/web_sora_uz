@@ -8,6 +8,7 @@ import { Header } from "@/components/layout/Header";
 import { PromoNav } from "@/components/layout/PromoNav";
 import { Footer } from "@/components/layout/Footer";
 import { Breadcrumbs } from "@/components/discovery/Breadcrumbs";
+import { findCategoryBySlug, getCategoryBreadcrumb } from "@/lib/utils/category-tree";
 import { ProductGallery } from "@/components/pdp/ProductGallery";
 import { ProductActions } from "@/components/pdp/ProductActions";
 import { ProductTabs } from "@/components/pdp/ProductTabs";
@@ -200,15 +201,38 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
         : allProducts.filter((p) => p.id !== product.id && !relatedProducts.some((r) => r.id === p.id)).slice(0, 4);
   }
 
+  // Resolve full category hierarchy breadcrumb (e.g. Katalog -> Qog'oz mahsulotlari -> Chop etish uchun qog'oz -> Mahsulot nomi)
+  const matchedCategory = loc.category_slug
+    ? findCategoryBySlug(tree, loc.category_slug, currentLocale) ||
+      findCategoryBySlug(tree, loc.category_slug, "uz") ||
+      findCategoryBySlug(tree, loc.category_slug, "ru")
+    : null;
+
+  const categoryPath = matchedCategory
+    ? getCategoryBreadcrumb(categories, matchedCategory.id)
+    : [];
+
+  const categoryBreadcrumbs =
+    categoryPath.length > 0
+      ? categoryPath.map((c) => ({
+          name: currentLocale === "uz" ? c.group_uz : c.group_ru,
+          href: `/category/${currentLocale === "uz" ? c.group_slug_uz : c.group_slug_ru}`,
+        }))
+      : loc.category
+      ? [
+          {
+            name: loc.category,
+            href: `/category/${loc.category_slug}`,
+          },
+        ]
+      : [];
+
   const breadcrumbItems = [
     {
       name: currentLocale === "uz" ? "Katalog" : "Каталог",
       href: "/catalog",
     },
-    {
-      name: loc.category,
-      href: `/category/${loc.category_slug}`,
-    },
+    ...categoryBreadcrumbs,
     {
       name: loc.name,
     },
@@ -233,6 +257,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
         locale={currentLocale}
         reviews={reviews}
         stats={stats}
+        breadcrumbItems={breadcrumbItems}
       />
       <Header
         tree={tree}
@@ -280,7 +305,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
                     </Link>
                     <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 text-xs font-semibold">
                       <ShieldCheck className="w-3.5 h-3.5" />
-                      <span>1C ERP</span>
+                      <span>{currentLocale === "uz" ? "100% Original" : "100% Оригинал"}</span>
                     </span>
                   </div>
 
@@ -340,7 +365,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
                 </h2>
                 <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
                   {currentLocale === "uz"
-                    ? "Xuddi shu toifadagi almashtiruvchi modellar (Up-sell / Down-sell)"
+                    ? "Ushbu toifadagi xaridorgir muqobil modellar"
                     : "Товары той же категории с аналогичными характеристиками"}
                 </p>
               </div>

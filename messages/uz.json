@@ -158,7 +158,7 @@
     "deliveryTitle": "Tezkor yetkazib berish",
     "deliveryDesc": "Toshkent bo'ylab 24 soat ichida, viloyatlarga 1-3 ish kunida yetkaziladi.",
     "warrantyTitle": "Rasmiy kafolat",
-    "warrantyDesc": "1C ERP bazasidagi seriyali raqam bilan to'liq rasmiy kafolat beriladi.",
+    "warrantyDesc": "Rasmiy ishlab chiqaruvchi kafolati va sifat nazorati taqdim etiladi.",
     "paymentTitle": "Qulay to'lov",
     "paymentDesc": "Qabul qilganda naqd, Humo/Uzcard, Payme, Click yoki QQS bilan korporativ shartnoma (Didox EHF).",
     "vatIncluded": "QQS 12% narx ichida",
@@ -171,7 +171,7 @@
     "writeReview": "Fikr bildirish",
     "verifiedBuyer": "Tasdiqlangan xaridor",
     "relatedTitle": "O'xshash mahsulotlar",
-    "relatedSubtitle": "Xuddi shu toifadagi almashtiruvchi modellar (Up-sell / Down-sell)",
+    "relatedSubtitle": "Ushbu toifadagi xaridorgir muqobil modellar",
     "recommendedTitle": "Bilan birga xarid qilinadi",
     "recommendedSubtitle": "Ushbu mahsulot bilan eng ko'p olinadigan foydali aksessuarlar",
     "fastOrderSuccess": "Buyurtmangiz qabul qilindi! Menejerimiz tez orada bog'lanadi."
