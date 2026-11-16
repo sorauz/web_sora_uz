@@ -10,8 +10,12 @@ test.describe("Category Interactive Filtering & Sorting Flow", () => {
     const filterAside = page.locator("aside").first();
     await expect(filterAside).toBeVisible();
 
-    // Find first brand checkbox
-    const firstBrandCheckbox = filterAside.locator("input[type='checkbox']").nth(1);
+    // Find brand checkbox
+    const firstBrandCheckbox = filterAside
+      .locator("label")
+      .filter({ hasText: /DELI|UFU/i })
+      .locator("input[type='checkbox']")
+      .first();
     await expect(firstBrandCheckbox).toBeVisible();
 
     // Initial count
@@ -175,5 +179,54 @@ test.describe("Category Interactive Filtering & Sorting Flow", () => {
     await sortSelect.selectOption("newest");
     await expect(page).toHaveURL(/sort=newest/);
     await expect(page.locator("article").first()).toBeVisible();
+  });
+
+  test("10. Dual-thumb range slider and discount filter are present and interactive", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto("/uz/category/ish-stoli-kalkulyatorlari");
+
+    // Dual-thumb range slider thumbs check
+    const minThumb = page.locator("input[aria-label='Minimal narx']");
+    const maxThumb = page.locator("input[aria-label='Maksimal narx']");
+    await expect(minThumb).toBeAttached();
+    await expect(maxThumb).toBeAttached();
+
+    // Discount filter toggle check
+    const discountCheckbox = page.getByRole("checkbox", { name: /chegirmadagi mahsulotlar/i });
+    if (await discountCheckbox.isVisible()) {
+      await discountCheckbox.click();
+      await expect(page).toHaveURL(/discount=1/);
+      const activeChips = page.locator("[data-testid='active-filter-chips']");
+      await expect(activeChips).toContainText("Chegirmada");
+    }
+  });
+
+  test("11. Search page has faceted filters, sorting and active chips", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto("/uz/search?q=deli");
+
+    // Check filter sidebar is visible on desktop search
+    const filterTitle = page.locator("h3", { hasText: /Filtrlar/i }).first();
+    await expect(filterTitle).toBeVisible();
+
+    // Check dual range slider thumbs exist on search
+    const minThumb = page.locator("input[aria-label='Minimal narx']");
+    await expect(minThumb).toBeAttached();
+
+    // Check sorting works on search
+    const sortSelect = page.locator("select[aria-label='Saralash turi']:visible").first();
+    await sortSelect.selectOption("newest");
+    await expect(page).toHaveURL(/sort=newest/);
+
+    // Check inStock filter on search
+    const inStockCheckbox = page.getByRole("checkbox", { name: /sotuvda borlari/i }).first();
+    await inStockCheckbox.click();
+    await expect(page).toHaveURL(/inStock=1/);
+    const activeChips = page.locator("[data-testid='active-filter-chips']");
+    await expect(activeChips).toContainText("Omborda mavjud");
   });
 });

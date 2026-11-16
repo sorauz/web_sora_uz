@@ -218,6 +218,53 @@ export default async function CategoryPage({
   const minCategoryPrice = validPrices.length > 0 ? Math.min(...validPrices) : 0;
   const maxCategoryPrice = validPrices.length > 0 ? Math.max(...validPrices) : 2000000;
 
+  // Counts for quick switches
+  const inStockCount = categoryProducts.filter((p) => p.price?.stock === "InStock").length;
+  const discountCount = categoryProducts.filter(
+    (p) => calculateProductPrice(p.price).hasDiscount
+  ).length;
+
+  // Extract dynamic attributes for this category
+  const attrMap = new Map<string, Map<string, number>>();
+  for (const p of categoryProducts) {
+    if (p.attributes && Array.isArray(p.attributes)) {
+      for (const attr of p.attributes) {
+        const propName =
+          (isUz ? attr.property_uz : attr.property_ru) ||
+          attr.property_uz ||
+          attr.property_ru;
+        const valName =
+          (isUz ? attr.value_uz : attr.value_ru) ||
+          attr.value_uz ||
+          attr.value_ru;
+        if (propName && propName.trim() && valName && valName.trim()) {
+          const pKey = propName.trim();
+          const vKey = valName.trim();
+          if (!attrMap.has(pKey)) {
+            attrMap.set(pKey, new Map<string, number>());
+          }
+          const valMap = attrMap.get(pKey)!;
+          valMap.set(vKey, (valMap.get(vKey) || 0) + 1);
+        }
+      }
+    }
+  }
+
+  const categoryAttributes = Array.from(attrMap.entries())
+    .map(([name, vals]) => ({
+      name,
+      values: Array.from(vals.entries())
+        .map(([value, count]) => ({ value, count }))
+        .sort((a, b) => b.count - a.count || a.value.localeCompare(b.value)),
+    }))
+    .filter((a) => a.values.length > 0)
+    .sort((a, b) => {
+      const sumA = a.values.reduce((s, v) => s + v.count, 0);
+      const sumB = b.values.reduce((s, v) => s + v.count, 0);
+      return sumB - sumA;
+    })
+    .slice(0, 5);
+
   // Generate dynamic, category-relevant presets
   let dynamicPricePresets: { label: string; min: string; max: string }[] = [];
   if (maxCategoryPrice <= 60000) {
@@ -274,6 +321,61 @@ export default async function CategoryPage({
 
   if (query.inStock === "1") {
     filtered = filtered.filter((p) => p.price?.stock === "InStock");
+  }
+
+  if (query.discount === "1") {
+    filtered = filtered.filter((p) => calculateProductPrice(p.price).hasDiscount);
+  }
+
+  // Parse and apply attrs filter (e.g. Format:A4;Rangi:Ko'k)
+  if (typeof query.attrs === "string" && query.attrs.trim()) {
+    const requiredAttrs = query.attrs
+      .split(";")
+      .map((item) => {
+        const idx = item.indexOf(":");
+        if (idx === -1) return null;
+        return {
+          prop: item.slice(0, idx).trim().toLowerCase(),
+          val: item.slice(idx + 1).trim().toLowerCase(),
+        };
+      })
+      .filter(
+        (item): item is { prop: string; val: string } =>
+          item !== null && !!item.prop && !!item.val
+      );
+
+    const propMap = new Map<string, string[]>();
+    for (const r of requiredAttrs) {
+      if (!propMap.has(r.prop)) {
+        propMap.set(r.prop, []);
+      }
+      propMap.get(r.prop)!.push(r.val);
+    }
+
+    if (propMap.size > 0) {
+      filtered = filtered.filter((p) => {
+        if (!p.attributes || !Array.isArray(p.attributes)) return false;
+        for (const [reqProp, reqVals] of propMap.entries()) {
+          const match = p.attributes.some((attr) => {
+            const pName = (
+              (isUz ? attr.property_uz : attr.property_ru) ||
+              attr.property_uz ||
+              attr.property_ru ||
+              ""
+            ).toLowerCase();
+            const vName = (
+              (isUz ? attr.value_uz : attr.value_ru) ||
+              attr.value_uz ||
+              attr.value_ru ||
+              ""
+            ).toLowerCase();
+            return pName === reqProp && reqVals.includes(vName);
+          });
+          if (!match) return false;
+        }
+        return true;
+      });
+    }
   }
 
   // Sorting
@@ -452,10 +554,13 @@ export default async function CategoryPage({
           {/* Faceted Filter Sidebar (Desktop) & 50/50 Filter+Sort Toolbar + Bottom Sheet (Mobile) */}
           <FacetedFilter
             brands={categoryBrands}
+            attributes={categoryAttributes}
             minPossiblePrice={minCategoryPrice}
             maxPossiblePrice={maxCategoryPrice}
             totalMatchedCount={totalMatchedCount}
             pricePresets={dynamicPricePresets}
+            discountCount={discountCount}
+            inStockCount={inStockCount}
           />
 
           {/* Products Column */}

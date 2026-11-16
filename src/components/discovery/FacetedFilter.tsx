@@ -2,15 +2,30 @@
 
 import { useQueryStates, parseAsString } from "nuqs";
 import { useTranslations, useLocale } from "next-intl";
-import { Brand } from "@/lib/schemas/brand";
 import { Filter, X, RotateCcw, Search, ChevronDown, Loader2 } from "lucide-react";
 import { useState, useMemo, useTransition, useEffect } from "react";
 import { SortSelect } from "./SortSelect";
+import { DualRangeSlider } from "./DualRangeSlider";
 
 export interface FilterBrandItem {
   id: string;
   name: string;
   count?: number;
+}
+
+export interface FilterCategoryItem {
+  id: string;
+  name: string;
+  slug: string;
+  count?: number;
+}
+
+export interface FilterAttributeItem {
+  name: string;
+  values: {
+    value: string;
+    count: number;
+  }[];
 }
 
 export interface PricePresetItem {
@@ -21,18 +36,49 @@ export interface PricePresetItem {
 
 interface FacetedFilterProps {
   brands: FilterBrandItem[];
+  categories?: FilterCategoryItem[];
+  attributes?: FilterAttributeItem[];
   minPossiblePrice?: number;
   maxPossiblePrice?: number;
   totalMatchedCount?: number;
   pricePresets?: PricePresetItem[];
+  discountCount?: number;
+  inStockCount?: number;
+}
+
+function parseAttrs(attrsStr: string): { prop: string; val: string }[] {
+  if (!attrsStr) return [];
+  return attrsStr
+    .split(";")
+    .map((item) => {
+      const idx = item.indexOf(":");
+      if (idx === -1) return null;
+      return {
+        prop: item.slice(0, idx).trim(),
+        val: item.slice(idx + 1).trim(),
+      };
+    })
+    .filter(
+      (item): item is { prop: string; val: string } =>
+        item !== null && !!item.prop && !!item.val
+    );
+}
+
+function stringifyAttrs(items: { prop: string; val: string }[]): string | null {
+  if (items.length === 0) return null;
+  return items.map((i) => `${i.prop}:${i.val}`).join(";");
 }
 
 export function FacetedFilter({
   brands,
+  categories,
+  attributes,
   minPossiblePrice = 0,
   maxPossiblePrice = 20000000,
   totalMatchedCount,
   pricePresets,
+  discountCount,
+  inStockCount,
 }: FacetedFilterProps) {
   const t = useTranslations("filter");
   const common = useTranslations("common");
@@ -43,10 +89,13 @@ export function FacetedFilter({
   // nuqs URL query states synchronized with Next.js Server Components
   const [filterState, setFilterState] = useQueryStates(
     {
+      category: parseAsString.withDefault(""),
       brand: parseAsString.withDefault(""),
       minPrice: parseAsString.withDefault(""),
       maxPrice: parseAsString.withDefault(""),
       inStock: parseAsString.withDefault(""),
+      discount: parseAsString.withDefault(""),
+      attrs: parseAsString.withDefault(""),
       page: parseAsString.withDefault(""),
     },
     {
@@ -55,12 +104,15 @@ export function FacetedFilter({
     }
   );
 
+  const selectedCategory = filterState.category;
   const selectedBrand = filterState.brand;
   const minPrice = filterState.minPrice;
   const maxPrice = filterState.maxPrice;
   const inStock = filterState.inStock;
+  const discount = filterState.discount;
+  const activeAttrs = parseAttrs(filterState.attrs);
 
-  // Local inputs state for custom prices to prevent high-frequency server calls while typing
+  // Local inputs state for custom prices
   const [localMin, setLocalMin] = useState(minPrice);
   const [localMax, setLocalMax] = useState(maxPrice);
 
@@ -88,13 +140,14 @@ export function FacetedFilter({
   const [brandSearch, setBrandSearch] = useState("");
 
   // Collapsible section states
-  const [openSections, setOpenSections] = useState({
-    stock: true,
-    brands: true,
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({
+    categories: true,
+    quick: true,
     price: true,
+    brands: true,
   });
 
-  const toggleSection = (section: "stock" | "brands" | "price") => {
+  const toggleSection = (section: string) => {
     setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }));
   };
 
@@ -113,26 +166,54 @@ export function FacetedFilter({
     });
   };
 
+  const toggleAttribute = (prop: string, val: string) => {
+    const exists = activeAttrs.some((a) => a.prop === prop && a.val === val);
+    let next: { prop: string; val: string }[];
+    if (exists) {
+      next = activeAttrs.filter((a) => !(a.prop === prop && a.val === val));
+    } else {
+      next = [...activeAttrs, { prop, val }];
+    }
+    setFilterState({
+      attrs: stringifyAttrs(next),
+      page: null,
+    });
+  };
+
   const resetAll = () => {
     setLocalMin("");
     setLocalMax("");
     setBrandSearch("");
     setFilterState({
+      category: null,
       brand: null,
       minPrice: null,
       maxPrice: null,
       inStock: null,
+      discount: null,
+      attrs: null,
       page: null,
     });
   };
 
   const hasActiveFilters =
-    activeBrands.length > 0 || !!minPrice || !!maxPrice || !!inStock;
+    !!selectedCategory ||
+    activeBrands.length > 0 ||
+    !!minPrice ||
+    !!maxPrice ||
+    !!inStock ||
+    !!discount ||
+    activeAttrs.length > 0;
 
   const activeFilterCount =
-    activeBrands.length + (minPrice || maxPrice ? 1 : 0) + (inStock === "1" ? 1 : 0);
+    (selectedCategory ? 1 : 0) +
+    activeBrands.length +
+    (minPrice || maxPrice ? 1 : 0) +
+    (inStock === "1" ? 1 : 0) +
+    (discount === "1" ? 1 : 0) +
+    activeAttrs.length;
 
-  // Quick price presets to avoid opening virtual keyboard on mobile
+  // Quick price presets
   const defaultPricePresets: PricePresetItem[] = [
     {
       label: isUz ? "50 minggacha" : "До 50 тыс.",
@@ -156,7 +237,8 @@ export function FacetedFilter({
     },
   ];
 
-  const activePresets = pricePresets && pricePresets.length > 0 ? pricePresets : defaultPricePresets;
+  const activePresets =
+    pricePresets && pricePresets.length > 0 ? pricePresets : defaultPricePresets;
 
   const handlePricePreset = (minVal: string, maxVal: string) => {
     const isSame = (minPrice || "") === minVal && (maxPrice || "") === maxVal;
@@ -179,12 +261,23 @@ export function FacetedFilter({
     }
   };
 
+  // Slider step sizing
+  const priceRange = Math.max(1, maxPossiblePrice - minPossiblePrice);
+  const sliderStep =
+    priceRange > 5000000
+      ? 50000
+      : priceRange > 1000000
+      ? 10000
+      : priceRange > 200000
+      ? 5000
+      : priceRange > 50000
+      ? 1000
+      : 500;
+
   // Filter and sort brands: active brands always top, matching brandSearch query
   const filteredBrands = useMemo(() => {
     const q = brandSearch.trim().toLowerCase();
-    const list = brands.filter((b) =>
-      b.name.toLowerCase().includes(q)
-    );
+    const list = brands.filter((b) => b.name.toLowerCase().includes(q));
 
     return [...list].sort((a, b) => {
       const aChecked = activeBrands.includes(a.name);
@@ -224,42 +317,252 @@ export function FacetedFilter({
         )}
       </div>
 
-      {/* 1. Availability Section (Collapsible) */}
+      {/* 0. Categories Section (Specifically for Search Page) */}
+      {categories && categories.length > 0 && (
+        <div className="border-b border-slate-100 dark:border-slate-800/80 pb-4">
+          <button
+            type="button"
+            onClick={() => toggleSection("categories")}
+            className="w-full flex items-center justify-between text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 py-1 cursor-pointer select-none"
+          >
+            <div className="flex items-center gap-2">
+              <span>{t("categories")}</span>
+              {selectedCategory && (
+                <span className="w-2 h-2 rounded-full bg-sora-600" />
+              )}
+            </div>
+            <ChevronDown
+              className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
+                openSections.categories ? "rotate-180" : ""
+              }`}
+            />
+          </button>
+
+          {openSections.categories && (
+            <div className="mt-3 space-y-1 max-h-48 overflow-y-auto pr-1 text-xs">
+              {categories.map((cat) => {
+                const isSelected = selectedCategory === cat.slug;
+                return (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    onClick={() => {
+                      setFilterState({
+                        category: isSelected ? null : cat.slug,
+                        page: null,
+                      });
+                    }}
+                    className={`w-full flex items-center justify-between py-1.5 px-2 rounded-lg text-left transition-colors cursor-pointer ${
+                      isSelected
+                        ? "bg-sora-50 dark:bg-sora-950/60 text-sora-600 dark:text-sora-400 font-bold"
+                        : "text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60"
+                    }`}
+                  >
+                    <span className="truncate">{cat.name}</span>
+                    {typeof cat.count === "number" && (
+                      <span className="text-[11px] font-mono text-slate-400 shrink-0 ml-1">
+                        ({cat.count})
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 1. Availability & Discount Quick Toggles (Collapsible) */}
       <div className="border-b border-slate-100 dark:border-slate-800/80 pb-4">
         <button
           type="button"
-          onClick={() => toggleSection("stock")}
+          onClick={() => toggleSection("quick")}
           className="w-full flex items-center justify-between text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 py-1 cursor-pointer select-none"
         >
           <span>{t("availability")}</span>
           <ChevronDown
             className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
-              openSections.stock ? "rotate-180" : ""
+              openSections.quick ? "rotate-180" : ""
             }`}
           />
         </button>
 
-        {openSections.stock && (
-          <div className="mt-3">
-            <label className="flex items-center gap-2.5 text-xs text-slate-700 dark:text-slate-300 cursor-pointer select-none py-1">
-              <input
-                type="checkbox"
-                checked={inStock === "1"}
-                onChange={(e) => {
-                  setFilterState({
-                    inStock: e.target.checked ? "1" : null,
-                    page: null,
-                  });
-                }}
-                className="w-4 h-4 rounded-md text-sora-600 focus:ring-sora-500 border-slate-300 dark:border-slate-700 cursor-pointer accent-sora-600"
-              />
-              <span className="font-medium">{t("onlyInStock")}</span>
+        {openSections.quick && (
+          <div className="mt-3 space-y-2">
+            {/* In-Stock Toggle */}
+            <label className="flex items-center justify-between text-xs text-slate-700 dark:text-slate-300 cursor-pointer select-none py-1 hover:text-sora-600 transition-colors">
+              <div className="flex items-center gap-2.5">
+                <input
+                  type="checkbox"
+                  checked={inStock === "1"}
+                  onChange={(e) => {
+                    setFilterState({
+                      inStock: e.target.checked ? "1" : null,
+                      page: null,
+                    });
+                  }}
+                  className="w-4 h-4 rounded-md text-sora-600 focus:ring-sora-500 border-slate-300 dark:border-slate-700 cursor-pointer accent-sora-600"
+                />
+                <span className="font-medium">{t("onlyInStock")}</span>
+              </div>
+              {typeof inStockCount === "number" && (
+                <span className="text-[11px] font-mono text-slate-400">
+                  ({inStockCount})
+                </span>
+              )}
+            </label>
+
+            {/* Discount / Promotions Toggle */}
+            <label className="flex items-center justify-between text-xs text-slate-700 dark:text-slate-300 cursor-pointer select-none py-1 hover:text-rose-600 transition-colors">
+              <div className="flex items-center gap-2.5">
+                <input
+                  type="checkbox"
+                  checked={discount === "1"}
+                  onChange={(e) => {
+                    setFilterState({
+                      discount: e.target.checked ? "1" : null,
+                      page: null,
+                    });
+                  }}
+                  className="w-4 h-4 rounded-md text-rose-600 focus:ring-rose-500 border-slate-300 dark:border-slate-700 cursor-pointer accent-rose-600"
+                />
+                <span className="font-medium flex items-center gap-1.5 text-rose-600 dark:text-rose-400">
+                  <span>🔥</span>
+                  <span>{t("discountOnly")}</span>
+                </span>
+              </div>
+              {typeof discountCount === "number" && (
+                <span className="text-[11px] font-mono text-rose-500 font-bold">
+                  ({discountCount})
+                </span>
+              )}
             </label>
           </div>
         )}
       </div>
 
-      {/* 2. Brands Section with Search (Collapsible) */}
+      {/* 2. Price Section with Dual-Thumb Slider, Quick Presets & Inputs (Collapsible) */}
+      <div className="border-b border-slate-100 dark:border-slate-800/80 pb-4">
+        <button
+          type="button"
+          onClick={() => toggleSection("price")}
+          className="w-full flex items-center justify-between text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 py-1 cursor-pointer select-none"
+        >
+          <span>{t("price")}</span>
+          <ChevronDown
+            className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
+              openSections.price ? "rotate-180" : ""
+            }`}
+          />
+        </button>
+
+        {openSections.price && (
+          <div className="mt-3 space-y-3.5">
+            {/* Quick Price Preset Chips */}
+            <div className="flex flex-wrap gap-1.5">
+              {activePresets.map((preset, idx) => {
+                const isActive =
+                  (minPrice || "") === preset.min &&
+                  (maxPrice || "") === preset.max;
+                return (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => handlePricePreset(preset.min, preset.max)}
+                    className={`px-2.5 py-1.5 rounded-lg text-[11px] font-semibold transition-all cursor-pointer border ${
+                      isActive
+                        ? "bg-sora-600 text-white border-sora-600 shadow-2xs"
+                        : "bg-slate-50 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-sora-400"
+                    }`}
+                  >
+                    {preset.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Dual-Thumb Range Slider */}
+            {maxPossiblePrice > minPossiblePrice && (
+              <div className="pt-1 pb-1">
+                <DualRangeSlider
+                  min={minPossiblePrice}
+                  max={maxPossiblePrice}
+                  step={sliderStep}
+                  value={[
+                    minPrice ? Number(minPrice) : minPossiblePrice,
+                    maxPrice ? Number(maxPrice) : maxPossiblePrice,
+                  ]}
+                  onValueChange={([val0, val1]) => {
+                    setLocalMin(val0 <= minPossiblePrice ? "" : String(val0));
+                    setLocalMax(val1 >= maxPossiblePrice ? "" : String(val1));
+                  }}
+                  onValueCommit={([val0, val1]) => {
+                    const isAtMin = val0 <= minPossiblePrice;
+                    const isAtMax = val1 >= maxPossiblePrice;
+                    const cleanMin = isAtMin ? null : String(val0);
+                    const cleanMax = isAtMax ? null : String(val1);
+                    setLocalMin(cleanMin || "");
+                    setLocalMax(cleanMax || "");
+                    setFilterState({
+                      minPrice: cleanMin,
+                      maxPrice: cleanMax,
+                      page: null,
+                    });
+                  }}
+                />
+              </div>
+            )}
+
+            {/* Custom Min / Max Numeric Inputs */}
+            <div className="flex items-center gap-2">
+              <div className="relative flex-1">
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  min={minPossiblePrice}
+                  max={maxPossiblePrice}
+                  placeholder={t("priceFrom")}
+                  value={localMin}
+                  onChange={(e) => setLocalMin(e.target.value)}
+                  onBlur={applyCustomPrice}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      applyCustomPrice();
+                    }
+                  }}
+                  className="w-full h-9 px-3 text-xs rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-hidden focus:border-sora-500"
+                />
+              </div>
+              <span className="text-slate-400 text-xs font-bold">—</span>
+              <div className="relative flex-1">
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  min={minPossiblePrice}
+                  max={maxPossiblePrice}
+                  placeholder={t("priceTo")}
+                  value={localMax}
+                  onChange={(e) => setLocalMax(e.target.value)}
+                  onBlur={applyCustomPrice}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      applyCustomPrice();
+                    }
+                  }}
+                  className="w-full h-9 px-3 text-xs rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-hidden focus:border-sora-500"
+                />
+              </div>
+            </div>
+            <p className="text-[11px] text-slate-400 text-right">
+              {common("currency")}
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* 3. Brands Section with Search (Collapsible) */}
       <div className="border-b border-slate-100 dark:border-slate-800/80 pb-4">
         <button
           type="button"
@@ -328,7 +631,13 @@ export function FacetedFilter({
                           onChange={() => toggleBrand(brand.name)}
                           className="w-4 h-4 rounded-md text-sora-600 focus:ring-sora-500 border-slate-300 dark:border-slate-700 cursor-pointer accent-sora-600 shrink-0"
                         />
-                        <span className={`truncate ${checked ? "font-bold text-sora-600 dark:text-sora-400" : ""}`}>
+                        <span
+                          className={`truncate ${
+                            checked
+                              ? "font-bold text-sora-600 dark:text-sora-400"
+                              : ""
+                          }`}
+                        >
                           {brand.name}
                         </span>
                       </div>
@@ -346,102 +655,91 @@ export function FacetedFilter({
         )}
       </div>
 
-      {/* 3. Price Range Section with Quick Preset Chips (Collapsible) */}
-      <div className="pb-1">
-        <button
-          type="button"
-          onClick={() => toggleSection("price")}
-          className="w-full flex items-center justify-between text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 py-1 cursor-pointer select-none"
-        >
-          <span>{t("price")}</span>
-          <ChevronDown
-            className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
-              openSections.price ? "rotate-180" : ""
-            }`}
-          />
-        </button>
+      {/* 4. Dynamic Attributes Sections (e.g. Format, Color, Density) */}
+      {attributes &&
+        attributes.length > 0 &&
+        attributes.map((attr) => {
+          const sectionKey = `attr_${attr.name}`;
+          const isOpen = openSections[sectionKey] !== false; // default true
+          const selectedVals = activeAttrs
+            .filter((a) => a.prop === attr.name)
+            .map((a) => a.val);
 
-        {openSections.price && (
-          <div className="mt-3 space-y-3">
-            {/* Quick Price Preset Chips */}
-            <div className="flex flex-wrap gap-1.5">
-              {activePresets.map((preset, idx) => {
-                const isActive =
-                  (minPrice || "") === preset.min && (maxPrice || "") === preset.max;
-                return (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => handlePricePreset(preset.min, preset.max)}
-                    className={`px-2.5 py-1.5 rounded-lg text-[11px] font-semibold transition-all cursor-pointer border ${
-                      isActive
-                        ? "bg-sora-600 text-white border-sora-600 shadow-2xs"
-                        : "bg-slate-50 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-sora-400"
-                    }`}
-                  >
-                    {preset.label}
-                  </button>
-                );
-              })}
-            </div>
+          return (
+            <div
+              key={attr.name}
+              className="border-b border-slate-100 dark:border-slate-800/80 pb-4"
+            >
+              <button
+                type="button"
+                onClick={() => toggleSection(sectionKey)}
+                className="w-full flex items-center justify-between text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 py-1 cursor-pointer select-none"
+              >
+                <div className="flex items-center gap-2">
+                  <span>{attr.name}</span>
+                  {selectedVals.length > 0 && (
+                    <span className="w-4 h-4 rounded-full bg-indigo-600 text-white text-[10px] flex items-center justify-center font-bold">
+                      {selectedVals.length}
+                    </span>
+                  )}
+                </div>
+                <ChevronDown
+                  className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
+                    isOpen ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
 
-            {/* Custom Min / Max Numeric Inputs */}
-            <div className="flex items-center gap-2">
-              <div className="relative flex-1">
-                <input
-                  type="number"
-                  inputMode="numeric"
-                  min={minPossiblePrice}
-                  max={maxPossiblePrice}
-                  placeholder={t("priceFrom")}
-                  value={localMin}
-                  onChange={(e) => setLocalMin(e.target.value)}
-                  onBlur={applyCustomPrice}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      applyCustomPrice();
-                    }
-                  }}
-                  className="w-full h-9 px-3 text-xs rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-hidden focus:border-sora-500"
-                />
-              </div>
-              <span className="text-slate-400 text-xs font-bold">—</span>
-              <div className="relative flex-1">
-                <input
-                  type="number"
-                  inputMode="numeric"
-                  min={minPossiblePrice}
-                  max={maxPossiblePrice}
-                  placeholder={t("priceTo")}
-                  value={localMax}
-                  onChange={(e) => setLocalMax(e.target.value)}
-                  onBlur={applyCustomPrice}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      applyCustomPrice();
-                    }
-                  }}
-                  className="w-full h-9 px-3 text-xs rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-hidden focus:border-sora-500"
-                />
-              </div>
+              {isOpen && (
+                <div className="mt-3 space-y-1 max-h-44 overflow-y-auto pr-1 text-xs">
+                  {attr.values.map((v) => {
+                    const isChecked = selectedVals.includes(v.value);
+                    return (
+                      <label
+                        key={v.value}
+                        className="flex items-center justify-between py-1.5 px-1.5 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer select-none transition-colors"
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            onChange={() =>
+                              toggleAttribute(attr.name, v.value)
+                            }
+                            className="w-4 h-4 rounded-md text-sora-600 focus:ring-sora-500 border-slate-300 dark:border-slate-700 cursor-pointer accent-sora-600 shrink-0"
+                          />
+                          <span
+                            className={`truncate ${
+                              isChecked
+                                ? "font-bold text-sora-600 dark:text-sora-400"
+                                : ""
+                            }`}
+                          >
+                            {v.value}
+                          </span>
+                        </div>
+                        <span className="text-[11px] font-mono text-slate-400 ml-1 shrink-0">
+                          ({v.count})
+                        </span>
+                      </label>
+                    );
+                  })}
+                </div>
+              )}
             </div>
-            <p className="text-[11px] text-slate-400 text-right">
-              {common("currency")}
-            </p>
-          </div>
-        )}
-      </div>
+          );
+        })}
     </div>
   );
 
   return (
     <>
       {/* Desktop Sidebar Filter (w-72 = 288px) */}
-      <aside className={`hidden lg:block w-72 shrink-0 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-xs h-fit sticky top-24 transition-opacity duration-200 ${
-        isPending ? "opacity-75" : "opacity-100"
-      }`}>
+      <aside
+        className={`hidden lg:block w-72 shrink-0 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-xs h-fit sticky top-24 transition-opacity duration-200 ${
+          isPending ? "opacity-75" : "opacity-100"
+        }`}
+      >
         {content}
       </aside>
 
@@ -528,7 +826,9 @@ export function FacetedFilter({
                   data-testid="mobile-filter-apply"
                   className="flex-1 h-11 bg-sora-600 hover:bg-sora-700 text-white font-bold text-sm rounded-xl active:scale-98 transition-transform shadow-md cursor-pointer flex items-center justify-center gap-2"
                 >
-                  {isPending && <Loader2 className="w-4 h-4 text-white animate-spin" />}
+                  {isPending && (
+                    <Loader2 className="w-4 h-4 text-white animate-spin" />
+                  )}
                   <span>
                     {typeof totalMatchedCount === "number"
                       ? isUz

@@ -7,19 +7,26 @@ import { useTransition } from "react";
 
 interface ActiveFilterChipsProps {
   className?: string;
+  categoryNameMap?: Record<string, string>;
 }
 
-export function ActiveFilterChips({ className = "" }: ActiveFilterChipsProps) {
+export function ActiveFilterChips({
+  className = "",
+  categoryNameMap = {},
+}: ActiveFilterChipsProps) {
   const locale = useLocale();
   const isUz = locale === "uz";
   const [, startTransition] = useTransition();
 
   const [filterState, setFilterState] = useQueryStates(
     {
+      category: parseAsString.withDefault(""),
       brand: parseAsString.withDefault(""),
       minPrice: parseAsString.withDefault(""),
       maxPrice: parseAsString.withDefault(""),
       inStock: parseAsString.withDefault(""),
+      discount: parseAsString.withDefault(""),
+      attrs: parseAsString.withDefault(""),
       page: parseAsString.withDefault(""),
     },
     {
@@ -28,19 +35,52 @@ export function ActiveFilterChips({ className = "" }: ActiveFilterChipsProps) {
     }
   );
 
+  const selectedCategory = filterState.category;
   const activeBrands = filterState.brand
     ? filterState.brand.split(",").filter(Boolean)
     : [];
   const minPrice = filterState.minPrice;
   const maxPrice = filterState.maxPrice;
   const inStock = filterState.inStock === "1";
+  const discount = filterState.discount === "1";
+
+  // Parse attrs string "Prop:Val;Prop2:Val2"
+  const activeAttrs: { prop: string; val: string }[] = filterState.attrs
+    ? filterState.attrs
+        .split(";")
+        .map((item) => {
+          const idx = item.indexOf(":");
+          if (idx === -1) return null;
+          return {
+            prop: item.slice(0, idx).trim(),
+            val: item.slice(idx + 1).trim(),
+          };
+        })
+        .filter(
+          (item): item is { prop: string; val: string } =>
+            item !== null && !!item.prop && !!item.val
+        )
+    : [];
 
   const hasAnyFilter =
-    activeBrands.length > 0 || !!minPrice || !!maxPrice || inStock;
+    !!selectedCategory ||
+    activeBrands.length > 0 ||
+    !!minPrice ||
+    !!maxPrice ||
+    inStock ||
+    discount ||
+    activeAttrs.length > 0;
 
   if (!hasAnyFilter) {
     return null;
   }
+
+  const removeCategory = () => {
+    setFilterState({
+      category: null,
+      page: null,
+    });
+  };
 
   const removeBrand = (brandToRemove: string) => {
     const updated = activeBrands.filter((b) => b !== brandToRemove);
@@ -65,12 +105,35 @@ export function ActiveFilterChips({ className = "" }: ActiveFilterChipsProps) {
     });
   };
 
+  const removeDiscount = () => {
+    setFilterState({
+      discount: null,
+      page: null,
+    });
+  };
+
+  const removeAttr = (prop: string, val: string) => {
+    const remaining = activeAttrs.filter(
+      (a) => !(a.prop === prop && a.val === val)
+    );
+    setFilterState({
+      attrs:
+        remaining.length > 0
+          ? remaining.map((a) => `${a.prop}:${a.val}`).join(";")
+          : null,
+      page: null,
+    });
+  };
+
   const resetAll = () => {
     setFilterState({
+      category: null,
       brand: null,
       minPrice: null,
       maxPrice: null,
       inStock: null,
+      discount: null,
+      attrs: null,
       page: null,
     });
   };
@@ -88,6 +151,21 @@ export function ActiveFilterChips({ className = "" }: ActiveFilterChipsProps) {
       <span className="text-xs font-semibold text-slate-500 mr-0.5">
         {isUz ? "Faol filtrlar:" : "Фильтры:"}
       </span>
+
+      {/* Category Chip (Search Page) */}
+      {selectedCategory && (
+        <button
+          type="button"
+          onClick={removeCategory}
+          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-semibold bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 hover:bg-blue-100 transition-colors cursor-pointer group"
+          title={isUz ? "Kategoriya filtrini o'chirish" : "Сбросить категорию"}
+        >
+          <span>
+            {categoryNameMap[selectedCategory] || selectedCategory}
+          </span>
+          <X className="w-3.5 h-3.5 text-blue-400 group-hover:text-blue-700 transition-colors" />
+        </button>
+      )}
 
       {/* Brand Chips */}
       {activeBrands.map((b) => (
@@ -134,6 +212,35 @@ export function ActiveFilterChips({ className = "" }: ActiveFilterChipsProps) {
           <X className="w-3.5 h-3.5 text-emerald-400 group-hover:text-emerald-700 transition-colors" />
         </button>
       )}
+
+      {/* Discount Chip */}
+      {discount && (
+        <button
+          type="button"
+          onClick={removeDiscount}
+          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-semibold bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800 hover:bg-rose-100 transition-colors cursor-pointer group"
+          title={isUz ? "Aksiya filtrini o'chirish" : "Удалить фильтр акции"}
+        >
+          <span>🔥 {isUz ? "Chegirmada" : "Со скидкой"}</span>
+          <X className="w-3.5 h-3.5 text-rose-400 group-hover:text-rose-700 transition-colors" />
+        </button>
+      )}
+
+      {/* Dynamic Attribute Chips */}
+      {activeAttrs.map((a) => (
+        <button
+          key={`${a.prop}:${a.val}`}
+          type="button"
+          onClick={() => removeAttr(a.prop, a.val)}
+          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-semibold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-100 transition-colors cursor-pointer group"
+          title={isUz ? `${a.prop} filtrini o'chirish` : `Удалить фильтр ${a.prop}`}
+        >
+          <span>
+            {a.prop}: {a.val}
+          </span>
+          <X className="w-3.5 h-3.5 text-indigo-400 group-hover:text-indigo-700 transition-colors" />
+        </button>
+      ))}
 
       {/* Reset all button */}
       <button

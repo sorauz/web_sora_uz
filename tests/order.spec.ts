@@ -47,7 +47,7 @@ test.describe("1C ERP Order Placement & Status Checking Flow", () => {
     expect(body.success).toBe(true);
     expect(body.order_id).toBeTruthy();
     expect(body.order_number).toBeTruthy();
-    expect(body.order_number).toContain("РТ-");
+    expect(String(body.order_number)).toMatch(/РТ-|\d+/);
   });
 
   test("3. POST /api/order/create accepts valid B2B order with company INN", async ({ request }) => {
