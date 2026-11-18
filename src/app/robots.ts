@@ -3,6 +3,9 @@ import { MetadataRoute } from "next";
 export default function robots(): MetadataRoute.Robots {
   const commonDisallow = [
     "/api/",
+    "/api/internal-audit/",
+    "/uz/internal-audit",
+    "/ru/internal-audit",
     "/uz/cart",
     "/ru/cart",
     "/uz/checkout",
