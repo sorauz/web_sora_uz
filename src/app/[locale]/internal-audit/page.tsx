@@ -68,8 +68,14 @@ export default async function InternalAuditPage({
     return <AuditLoginGate locale={currentLocale} />;
   }
 
-  const { products, isFallback } = await api.getAllProducts({ noCache: true });
-  const report = buildCatalogAuditReport(products, isFallback, currentLocale);
+  const { products, isFallback, checkedSeoIds } =
+    await api.getAllProductsWithAuditDetails({ noCache: true });
+  const report = buildCatalogAuditReport(
+    products,
+    isFallback,
+    currentLocale,
+    checkedSeoIds,
+  );
   const validKeyQuery =
     rawKey && verifyAuditAccessKey(rawKey) ? rawKey : undefined;
 

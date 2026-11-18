@@ -14,6 +14,7 @@ import {
 } from "../schemas/price";
 import {
   Product,
+  ProductAttribute,
   ProductSchema,
   AllProductsResponseSchema,
   SubProductCard,
@@ -58,6 +59,18 @@ export interface FetchOptions {
   noCache?: boolean;
 }
 
+export interface ProductSeoDetails {
+  title_uz: string;
+  meta_description_uz: string;
+  short_description_uz: string;
+  product_description_uz: string;
+  title_ru: string;
+  meta_description_ru: string;
+  short_description_ru: string;
+  product_description_ru: string;
+  attributes: ProductAttribute[];
+}
+
 class SoraApiClient {
   private baseUrl: string;
   private authHeader: string;
@@ -70,6 +83,10 @@ class SoraApiClient {
         recommended_products: SubProductCard[];
       }
     >;
+    isFallback: boolean;
+  }> | null = null;
+  private inFlightSeoDetailsPromise: Promise<{
+    seoMap: Record<string, ProductSeoDetails>;
     isFallback: boolean;
   }> | null = null;
 
@@ -344,29 +361,181 @@ class SoraApiClient {
       return this.inFlightRelationsPromise;
     }
 
-    this.inFlightRelationsPromise = this.executeFetchAllProductRelations(
+    this.inFlightRelationsPromise = this.fetchAllProductDetailsBatch(
       productIds,
-      options?.concurrency ?? 64
-    ).finally(() => {
-      this.inFlightRelationsPromise = null;
-    });
+      options?.concurrency ?? 48,
+      (raw) => {
+        const rels = Array.isArray(raw.related_products)
+          ? (raw.related_products as SubProductCard[])
+          : [];
+        const recs = Array.isArray(raw.recommended_products)
+          ? (raw.recommended_products as SubProductCard[])
+          : [];
+        return {
+          related_products: rels.map((r) => ({
+            id: r.id,
+            related_products_id: r.related_products_id,
+            slug_uz: r.slug_uz,
+            slug_ru: r.slug_ru,
+          })),
+          recommended_products: recs.map((rec) => ({
+            id: rec.id,
+            recommended_products_id: rec.recommended_products_id,
+            slug_uz: rec.slug_uz,
+            slug_ru: rec.slug_ru,
+          })),
+        };
+      }
+    )
+      .then(({ map, isFallback }) => ({ relationsMap: map, isFallback }))
+      .finally(() => {
+        this.inFlightRelationsPromise = null;
+      });
 
     return this.inFlightRelationsPromise;
   }
 
-  private async executeFetchAllProductRelations(
+  /**
+   * Fetches real SEO descriptions and attributes from `/product?id={ID}` across all products
+   * in parallel using the shared HTTP Keep-Alive batch scanner (~3.5-4.7s).
+   */
+  async fetchAllProductSeoDetails(
     productIds: string[],
-    maxSockets: number
+    options?: { concurrency?: number }
   ): Promise<{
-    relationsMap: Record<
-      string,
-      {
-        related_products: SubProductCard[];
-        recommended_products: SubProductCard[];
-      }
-    >;
+    seoMap: Record<string, ProductSeoDetails>;
     isFallback: boolean;
   }> {
+    if (this.inFlightSeoDetailsPromise) {
+      return this.inFlightSeoDetailsPromise;
+    }
+
+    this.inFlightSeoDetailsPromise = this.fetchAllProductDetailsBatch(
+      productIds,
+      options?.concurrency ?? 48,
+      (raw) => {
+        const uz = (raw.uz && typeof raw.uz === "object"
+          ? raw.uz
+          : {}) as Record<string, unknown>;
+        const ru = (raw.ru && typeof raw.ru === "object"
+          ? raw.ru
+          : {}) as Record<string, unknown>;
+        const attrs = Array.isArray(raw.attributes)
+          ? (raw.attributes as ProductAttribute[])
+          : [];
+        return {
+          title_uz: typeof uz.title_uz === "string" ? uz.title_uz : "",
+          meta_description_uz:
+            typeof uz.meta_description_uz === "string"
+              ? uz.meta_description_uz
+              : "",
+          short_description_uz:
+            typeof uz.short_description_uz === "string"
+              ? uz.short_description_uz
+              : "",
+          product_description_uz:
+            typeof uz.product_description_uz === "string"
+              ? uz.product_description_uz
+              : "",
+          title_ru: typeof ru.title_ru === "string" ? ru.title_ru : "",
+          meta_description_ru:
+            typeof ru.meta_description_ru === "string"
+              ? ru.meta_description_ru
+              : "",
+          short_description_ru:
+            typeof ru.short_description_ru === "string"
+              ? ru.short_description_ru
+              : "",
+          product_description_ru:
+            typeof ru.product_description_ru === "string"
+              ? ru.product_description_ru
+              : "",
+          attributes: attrs,
+        };
+      }
+    )
+      .then(({ map, isFallback }) => ({ seoMap: map, isFallback }))
+      .finally(() => {
+        this.inFlightSeoDetailsPromise = null;
+      });
+
+    return this.inFlightSeoDetailsPromise;
+  }
+
+  /**
+   * Fetches all live products enriched with real prices and deep `/product?id={ID}` SEO/attribute details.
+   * Intended strictly for the private internal-audit dashboard & CSV export.
+   */
+  async getAllProductsWithAuditDetails(
+    options?: FetchOptions
+  ): Promise<{
+    products: Product[];
+    isFallback: boolean;
+    checkedSeoIds: Set<string>;
+  }> {
+    const baseRes = await this.getAllProducts(options);
+    if (baseRes.isFallback || baseRes.products.length === 0) {
+      return {
+        products: baseRes.products,
+        isFallback: baseRes.isFallback,
+        checkedSeoIds: new Set<string>(),
+      };
+    }
+
+    const seoRes = await this.fetchAllProductSeoDetails(
+      baseRes.products.map((p) => p.id),
+      { concurrency: 48 }
+    );
+
+    if (seoRes.isFallback) {
+      return {
+        products: baseRes.products,
+        isFallback: false,
+        checkedSeoIds: new Set<string>(),
+      };
+    }
+
+    const checkedSeoIds = new Set<string>();
+    const enrichedProducts = baseRes.products.map((p) => {
+      const seo = seoRes.seoMap[p.id];
+      if (!seo) return p;
+      checkedSeoIds.add(p.id);
+      return {
+        ...p,
+        uz: {
+          ...p.uz,
+          title_uz: seo.title_uz || p.uz.title_uz,
+          meta_description_uz: seo.meta_description_uz || p.uz.meta_description_uz,
+          short_description_uz:
+            seo.short_description_uz || p.uz.short_description_uz,
+          product_description_uz:
+            seo.product_description_uz || p.uz.product_description_uz,
+        },
+        ru: {
+          ...p.ru,
+          title_ru: seo.title_ru || p.ru.title_ru,
+          meta_description_ru: seo.meta_description_ru || p.ru.meta_description_ru,
+          short_description_ru:
+            seo.short_description_ru || p.ru.short_description_ru,
+          product_description_ru:
+            seo.product_description_ru || p.ru.product_description_ru,
+        },
+        attributes: seo.attributes,
+      };
+    });
+
+    return {
+      products: enrichedProducts,
+      isFallback: false,
+      checkedSeoIds,
+    };
+  }
+
+  private async fetchAllProductDetailsBatch<T>(
+    productIds: string[],
+    maxSockets: number,
+    mapper: (raw: Record<string, unknown>) => T
+  ): Promise<{ map: Record<string, T>; isFallback: boolean }> {
     const parsedBase = new URL(this.baseUrl);
     const isHttps = parsedBase.protocol === "https:";
     const transport = isHttps ? https : http;
@@ -378,13 +547,7 @@ class SoraApiClient {
       ? parsedBase.pathname.slice(0, -1)
       : parsedBase.pathname;
 
-    const fetchSingleRelation = (
-      id: string
-    ): Promise<{
-      id: string;
-      related_products: SubProductCard[];
-      recommended_products: SubProductCard[];
-    } | null> =>
+    const fetchSingle = (id: string): Promise<{ id: string; value: T } | null> =>
       new Promise((resolve) => {
         const req = transport.get(
           {
@@ -409,27 +572,8 @@ class SoraApiClient {
               try {
                 const raw = JSON.parse(
                   Buffer.concat(chunks).toString("utf8")
-                ) as {
-                  related_products?: SubProductCard[];
-                  recommended_products?: SubProductCard[];
-                };
-                resolve({
-                  id,
-                  related_products: (raw.related_products || []).map((r) => ({
-                    id: r.id,
-                    related_products_id: r.related_products_id,
-                    slug_uz: r.slug_uz,
-                    slug_ru: r.slug_ru,
-                  })),
-                  recommended_products: (raw.recommended_products || []).map(
-                    (rec) => ({
-                      id: rec.id,
-                      recommended_products_id: rec.recommended_products_id,
-                      slug_uz: rec.slug_uz,
-                      slug_ru: rec.slug_ru,
-                    })
-                  ),
-                });
+                ) as Record<string, unknown>;
+                resolve({ id, value: mapper(raw) });
               } catch {
                 resolve(null);
               }
@@ -445,31 +589,33 @@ class SoraApiClient {
       });
 
     try {
-      const results = await Promise.all(
-        productIds.map((id) => fetchSingleRelation(id))
+      const results: Array<{ id: string; value: T } | null> = new Array(
+        productIds.length
+      ).fill(null);
+      let nextIndex = 0;
+      const workerCount = Math.max(1, Math.min(maxSockets, productIds.length));
+
+      await Promise.all(
+        Array.from({ length: workerCount }, async () => {
+          while (nextIndex < productIds.length) {
+            const idx = nextIndex++;
+            results[idx] = await fetchSingle(productIds[idx]);
+          }
+        })
       );
 
-      const relationsMap: Record<
-        string,
-        {
-          related_products: SubProductCard[];
-          recommended_products: SubProductCard[];
-        }
-      > = {};
+      const map: Record<string, T> = {};
       let successCount = 0;
 
       for (const item of results) {
         if (item) {
           successCount++;
-          relationsMap[item.id] = {
-            related_products: item.related_products,
-            recommended_products: item.recommended_products,
-          };
+          map[item.id] = item.value;
         }
       }
 
       return {
-        relationsMap,
+        map,
         isFallback: productIds.length > 0 && successCount === 0,
       };
     } finally {

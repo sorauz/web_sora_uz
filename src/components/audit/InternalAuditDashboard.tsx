@@ -822,15 +822,24 @@ export function InternalAuditDashboard({
                             </span>
                           ) : (
                             <div className="flex flex-wrap gap-1.5">
-                              {item.issues.map((issueKey) => (
-                                <span
-                                  key={issueKey}
-                                  className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium ${ISSUE_BADGE_STYLES[issueKey]}`}
-                                >
-                                  <AlertTriangle className="w-3 h-3 shrink-0" />
-                                  {AUDIT_ISSUE_LABELS[issueKey][locale]}
-                                </span>
-                              ))}
+                              {item.issues.map((issueKey) => {
+                                const seoDetail =
+                                  issueKey === "missing_seo" &&
+                                  item.seoMissingFields?.length
+                                    ? ` (${item.seoMissingFields.join(", ")})`
+                                    : "";
+                                return (
+                                  <span
+                                    key={issueKey}
+                                    title={`${AUDIT_ISSUE_LABELS[issueKey][locale]}${seoDetail}`}
+                                    className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium ${ISSUE_BADGE_STYLES[issueKey]}`}
+                                  >
+                                    <AlertTriangle className="w-3 h-3 shrink-0" />
+                                    {AUDIT_ISSUE_LABELS[issueKey][locale]}
+                                    {seoDetail}
+                                  </span>
+                                );
+                              })}
                             </div>
                           )}
                         </td>

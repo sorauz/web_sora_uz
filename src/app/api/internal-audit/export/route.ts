@@ -51,8 +51,14 @@ export async function GET(request: NextRequest) {
   const category = searchParams.get("category") || "";
   const q = searchParams.get("q") || "";
 
-  const { products, isFallback } = await api.getAllProducts({ noCache: true });
-  const report = buildCatalogAuditReport(products, isFallback, locale);
+  const { products, isFallback, checkedSeoIds } =
+    await api.getAllProductsWithAuditDetails({ noCache: true });
+  const report = buildCatalogAuditReport(
+    products,
+    isFallback,
+    locale,
+    checkedSeoIds,
+  );
   const filtered = filterAuditItems(
     report.items,
     { issue, brand, category, q },

@@ -39,6 +39,7 @@ export interface AuditProductRow {
   imageUrl: string;
   merchantApproved: boolean;
   issues: AuditIssueKey[];
+  seoMissingFields?: string[];
 }
 
 export interface CatalogAuditSummary {
@@ -79,7 +80,8 @@ export const AUDIT_ISSUE_LABELS: Record<
 export function buildCatalogAuditReport(
   products: Product[],
   isFallback: boolean,
-  locale: "uz" | "ru" = "uz"
+  locale: "uz" | "ru" = "uz",
+  checkedSeoIds?: Set<string>
 ): CatalogAuditReport {
   const summary: CatalogAuditSummary = {
     total: 0,
@@ -119,11 +121,20 @@ export function buildCatalogAuditReport(
     const hasInvalidMpn = !validMpn;
 
     const isOutOfStock = stock === "OutOfStock";
-    const missingSeo =
-      !p.uz?.short_description_uz?.trim() ||
-      !p.uz?.meta_description_uz?.trim() ||
-      !p.attributes ||
-      p.attributes.length === 0;
+    const seoVerified = !checkedSeoIds || checkedSeoIds.has(p.id);
+    const seoMissingFields: string[] = [];
+    if (seoVerified) {
+      if (!p.uz?.short_description_uz?.trim()) seoMissingFields.push("short_uz");
+      if (!p.uz?.meta_description_uz?.trim()) seoMissingFields.push("meta_uz");
+      if (!p.uz?.product_description_uz?.trim()) seoMissingFields.push("desc_uz");
+      if (!p.ru?.short_description_ru?.trim()) seoMissingFields.push("short_ru");
+      if (!p.ru?.meta_description_ru?.trim()) seoMissingFields.push("meta_ru");
+      if (!p.ru?.product_description_ru?.trim()) seoMissingFields.push("desc_ru");
+      if (!p.attributes || p.attributes.length === 0) {
+        seoMissingFields.push("attributes");
+      }
+    }
+    const missingSeo = seoVerified && seoMissingFields.length > 0;
 
     const noPrice = effectivePrice <= 0;
 
@@ -186,6 +197,7 @@ export function buildCatalogAuditReport(
       imageUrl,
       merchantApproved,
       issues,
+      ...(seoMissingFields.length > 0 ? { seoMissingFields } : {}),
     });
   }
 
@@ -299,7 +311,11 @@ export function buildAuditCsv(
     const issueText =
       item.issues.length > 0
         ? item.issues
-            .map((k) => AUDIT_ISSUE_LABELS[k][locale])
+            .map((k) =>
+              k === "missing_seo" && item.seoMissingFields?.length
+                ? `${AUDIT_ISSUE_LABELS[k][locale]} (${item.seoMissingFields.join(", ")})`
+                : AUDIT_ISSUE_LABELS[k][locale]
+            )
             .join("; ")
         : locale === "uz"
         ? "Muammo yo'q"
