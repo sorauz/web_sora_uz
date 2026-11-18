@@ -24,6 +24,7 @@ import {
   ReviewListResponseSchema,
   ReviewStats,
 } from "../schemas/review";
+import { FaqItem, FaqResponse, FaqResponseSchema } from "../schemas/faq";
 import {
   OneCUserResponse,
   OneCUserResponseSchema,
@@ -48,6 +49,7 @@ import {
   FIXTURE_NEW_PRODUCTS,
   FIXTURE_POPULAR,
   FIXTURE_PROMOTIONS,
+  FIXTURE_FAQS,
 } from "./fixtures";
 
 export interface FetchOptions {
@@ -701,6 +703,39 @@ class SoraApiClient {
       reviews: [],
       stats: calculateReviewStats([]),
       isFallback: res.isFallback,
+    };
+  }
+
+  /**
+   * Fetches all FAQ items and targeting rules from 1C ERP (/faq).
+   * Cached with 24-hour ISR and "faq" revalidation tag.
+   */
+  async getFaqs(options?: FetchOptions): Promise<{
+    faqs: FaqItem[];
+    updatedAt: string;
+    isFallback: boolean;
+  }> {
+    const res = await this.request<FaqResponse>("/faq", {
+      tags: options?.noCache ? undefined : (options?.tags ?? ["faq"]),
+      revalidate: options?.revalidate ?? 86400,
+      noCache: options?.noCache,
+    });
+
+    if (!res.isFallback && res.data) {
+      const parsed = FaqResponseSchema.safeParse(res.data);
+      if (parsed.success) {
+        return {
+          faqs: parsed.data.faqs,
+          updatedAt: parsed.data.updated_at,
+          isFallback: false,
+        };
+      }
+    }
+
+    return {
+      faqs: FIXTURE_FAQS,
+      updatedAt: "",
+      isFallback: true,
     };
   }
 

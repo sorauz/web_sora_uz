@@ -7,6 +7,10 @@ import { Footer } from "@/components/layout/Footer";
 import { MobileNav } from "@/components/layout/MobileNav";
 import { Breadcrumbs } from "@/components/discovery/Breadcrumbs";
 import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
+import { FaqAccordion } from "@/components/discovery/FaqAccordion";
+import { FaqJsonLd } from "@/components/seo/FaqJsonLd";
+import { resolvePageFaqs } from "@/lib/utils/faq-resolver";
+import { FIXTURE_FAQS } from "@/lib/api/fixtures";
 import { CreditCard, Banknote, Smartphone, Building2, ShieldCheck, CheckCircle2 } from "lucide-react";
 
 interface PaymentPageProps {
@@ -44,10 +48,18 @@ export default async function PaymentPage({ params }: PaymentPageProps) {
   const isUz = locale === "uz";
   setRequestLocale(locale);
 
-  const [categoriesData, brandsData] = await Promise.all([
+  const [categoriesData, brandsData, faqsData] = await Promise.all([
     api.getCategories(),
     api.getBrands(),
+    api.getFaqs(),
   ]);
+
+  const paymentFaqs = resolvePageFaqs(
+    faqsData.faqs,
+    "payment",
+    locale as "uz" | "ru",
+    { fallbackFaqs: FIXTURE_FAQS }
+  );
 
   const breadcrumbs = [
     {
@@ -160,6 +172,19 @@ export default async function PaymentPage({ params }: PaymentPageProps) {
             </p>
           </div>
         </div>
+
+        {/* Dynamic 1C Payment FAQ */}
+        <FaqJsonLd items={paymentFaqs} />
+        <FaqAccordion
+          items={paymentFaqs}
+          columns={1}
+          defaultOpenFirst
+          title={
+            isUz
+              ? "To‘lov va hujjatlar bo‘yicha ko‘p beriladigan savollar"
+              : "Частые вопросы об оплате и документах"
+          }
+        />
       </main>
 
       <Footer />

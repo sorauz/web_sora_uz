@@ -14,6 +14,8 @@ import { ProductActions } from "@/components/pdp/ProductActions";
 import { ProductTabs } from "@/components/pdp/ProductTabs";
 import { MobileStickyCTA } from "@/components/pdp/MobileStickyCTA";
 import { ProductJsonLd } from "@/components/seo/ProductJsonLd";
+import { FaqJsonLd } from "@/components/seo/FaqJsonLd";
+import { resolveProductFaqs } from "@/lib/utils/faq-resolver";
 import { ProductCard } from "@/components/discovery/ProductCard";
 import { Star, ShieldCheck, Layers } from "lucide-react";
 import { Link } from "@/i18n/routing";
@@ -117,13 +119,14 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
   const loc = getProductLocalized(product, currentLocale);
   const priceInfo = calculateProductPrice(product.price);
 
-  // Fetch categories, brands, all products, and live reviews
-  const [{ tree, categories }, brandsRes, allProdsRes, reviewsRes] =
+  // Fetch categories, brands, all products, live reviews, and FAQs
+  const [{ tree, categories }, brandsRes, allProdsRes, reviewsRes, faqsRes] =
     await Promise.all([
       api.getCategories(),
       api.getBrands(),
       api.getAllProducts(),
       api.getReviewsByProductId(product.id),
+      api.getFaqs(),
     ]);
   const allProducts = allProdsRes.products;
   const { reviews, stats } = reviewsRes;
@@ -238,6 +241,14 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
     },
   ];
 
+  const productFaqs = resolveProductFaqs(faqsRes.faqs, {
+    product,
+    categories,
+    brands: brandsRes.data.brands,
+    categoryId: matchedCategory?.id,
+    locale: currentLocale,
+  });
+
   return (
     <div className="min-h-screen flex flex-col bg-white text-slate-900 pb-20 md:pb-0">
       {/* OpenGraph E-Commerce Product Metadata */}
@@ -259,6 +270,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
         stats={stats}
         breadcrumbItems={breadcrumbItems}
       />
+      <FaqJsonLd items={productFaqs} />
       <Header
         tree={tree}
         categories={categories}
@@ -351,6 +363,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
           locale={currentLocale}
           reviews={reviews}
           stats={stats}
+          faqs={productFaqs}
         />
 
         {/* Distinct Section 1: Related Products (Substitute / Up-sell / Down-sell) */}

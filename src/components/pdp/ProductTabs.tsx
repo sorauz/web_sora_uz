@@ -10,19 +10,21 @@ import {
   HelpCircle,
   CheckCircle,
   ThumbsUp,
-  ChevronDown,
   MessageSquare,
   ShieldCheck,
   CreditCard,
 } from "lucide-react";
 import { Product, getProductLocalized } from "@/lib/schemas/product";
 import { Review, ReviewStats } from "@/lib/schemas/review";
+import { ResolvedFaqItem } from "@/lib/utils/faq-resolver";
+import { FaqAccordion } from "@/components/discovery/FaqAccordion";
 
 interface ProductTabsProps {
   product: Product;
   locale: "uz" | "ru";
   reviews?: Review[];
   stats?: ReviewStats;
+  faqs?: ResolvedFaqItem[];
 }
 
 type TabType = "desc" | "specs" | "delivery" | "reviews" | "faq";
@@ -32,11 +34,11 @@ export function ProductTabs({
   locale,
   reviews = [],
   stats,
+  faqs = [],
 }: ProductTabsProps) {
   const t = useTranslations("pdp");
   const common = useTranslations("common");
   const [activeTab, setActiveTab] = useState<TabType>("desc");
-  const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   const loc = getProductLocalized(product, locale);
 
@@ -57,7 +59,11 @@ export function ProductTabs({
       label: hasRealReviews && stats ? `${t("reviewsTab")} (${stats.reviewCount})` : t("reviewsTab"),
       icon: Star,
     },
-    { id: "faq", label: t("faqTab"), icon: HelpCircle },
+    {
+      id: "faq",
+      label: faqs.length > 0 ? `${t("faqTab")} (${faqs.length})` : t("faqTab"),
+      icon: HelpCircle,
+    },
   ];
 
   // Sample verified reviews
@@ -94,39 +100,6 @@ export function ProductTabs({
           ? "Mahsulot juda yaxshi, faqat yetkazib berish vaqti kechga surildi, ammo kuryer ogohlantirdi."
           : "Товар отличный, доставка немного задержалась к вечеру, но курьер предупредил заранее.",
       likes: 4,
-    },
-  ];
-
-  const faqs = [
-    {
-      q:
-        locale === "uz"
-          ? "Mahsulotning rasmiy kafolat muddati qancha?"
-          : "Каков официальный гарантийный срок товара?",
-      a:
-        locale === "uz"
-          ? "Ushbu mahsulotga rasmiy ishlab chiqaruvchi va Sora.uz tomonidan 12 oylik rasmiy kafolat beriladi."
-          : "На данный товар предоставляется официальная гарантия 12 месяцев от производителя и Sora.uz.",
-    },
-    {
-      q:
-        locale === "uz"
-          ? "Toshkent shahri va viloyatlarga yetkazib berish shartlari qanday?"
-          : "Каковы условия доставки по Ташкенту и в регионы?",
-      a:
-        locale === "uz"
-          ? "Toshkent shahri bo'ylab buyurtmalar 24 soat ichida yetkaziladi. Viloyat markazlariga esa 1-3 ish kunida kuryerlik xizmati orqali yetkazib beriladi."
-          : "По Ташкенту доставка осуществляется в течение 24 часов. В областные центры — в течение 1–3 рабочих дней курьерской службой.",
-    },
-    {
-      q:
-        locale === "uz"
-          ? "Yuridik shaxslar uchun to'lov va hisob-faktura (shartnoma) mumkinmi?"
-          : "Возможна ли оплата для юридических лиц по договору и счет-фактуре?",
-      a:
-        locale === "uz"
-          ? "Ha, albatta! Barcha tovarlarimiz uchun QQS (NDS) bilan elektron hisob-faktura rasmiylashtiriladi."
-          : "Да, конечно! Для юридических лиц оформляется полный пакет документов с НДС через ЭДО.",
     },
   ];
 
@@ -645,38 +618,26 @@ export function ProductTabs({
           role="tabpanel"
           className={`space-y-4 ${activeTab === "faq" ? "block" : "hidden"}`}
         >
-          <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">
-            {t("faqTab")}
-          </h3>
-          {faqs.map((faq, index) => {
-            const isOpen = openFaq === index;
-            return (
-              <div
-                key={index}
-                className="rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden"
-              >
-                <button
-                  type="button"
-                  onClick={() => setOpenFaq(isOpen ? null : index)}
-                  className="w-full flex items-center justify-between p-4 sm:p-5 text-left font-semibold text-slate-900 dark:text-white bg-slate-50/50 dark:bg-slate-900/50 hover:bg-slate-100/50 transition-colors"
-                >
-                  <span className="text-sm sm:text-base">{faq.q}</span>
-                  <ChevronDown
-                    className={`w-5 h-5 text-slate-400 transition-transform duration-200 ${
-                      isOpen ? "rotate-180 text-sora-600" : ""
-                    }`}
-                  />
-                </button>
-                <div
-                  className={`p-4 sm:p-5 text-sm text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 leading-relaxed ${
-                    isOpen ? "block" : "hidden"
-                  }`}
-                >
-                  {faq.a}
-                </div>
-              </div>
-            );
-          })}
+          {faqs.length > 0 ? (
+            <FaqAccordion
+              items={faqs}
+              columns={1}
+              defaultOpenFirst
+              variant="plain"
+              title={t("faqTab")}
+            />
+          ) : (
+            <div className="space-y-2">
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white">
+                {t("faqTab")}
+              </h3>
+              <p className="text-sm text-slate-500">
+                {locale === "uz"
+                  ? "Ushbu mahsulot bo‘yicha savollar hozircha mavjud emas."
+                  : "По данному товару пока нет добавленных вопросов."}
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>

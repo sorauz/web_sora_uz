@@ -4,6 +4,7 @@ import { BrandsResponse } from "../schemas/brand";
 import { ProductPriceStock } from "../schemas/price";
 import { Product } from "../schemas/product";
 import { OfferItem } from "../schemas/offer";
+import { FaqItem } from "../schemas/faq";
 
 export const FIXTURE_CATEGORIES: Category[] = [
   {
@@ -787,3 +788,156 @@ export const FIXTURE_SPECIAL_OFFERS = {
   popular: FIXTURE_POPULAR,
   promotions: FIXTURE_PROMOTIONS,
 };
+
+/**
+ * Zaxira (Fallback) FAQ ma'lumotlari — boshshaxifa_dizayni_va_strukturasi.md
+ * 9-bo'limida belgilangan 8 ta asosiy savol-javob.
+ * 1C ERP /faq servisi vaqtincha javob bermasa yoki Bosh sahifa savollari 8 tadan kam bo'lsa ishlatiladi.
+ */
+export const FIXTURE_FAQS: FaqItem[] = [
+  {
+    id: "00000001-0000-4000-8000-000000000001",
+    is_active: true,
+    sort_order: 10,
+    topic: "order",
+    question_uz: "Buyurtmani qanday rasmiylashtirish mumkin?",
+    question_ru: "Как можно оформить заказ на сайте?",
+    answer_uz:
+      "Kerakli mahsulotlarni savatga qo‘shib, telefon raqamingiz va yetkazib berish manzilini kiritgan holda bir necha soniyada buyurtma berishingiz mumkin.\n\nShuningdek, mahsulot sahifasidagi «1 klikda xarid qilish» tugmasi orqali yoki +998 (90) 326-47-57 raqamiga qo‘ng‘iroq qilib buyurtma rasmiylashtirishingiz mumkin.",
+    answer_ru:
+      "Добавьте нужные товары в корзину, укажите номер телефона и адрес доставки — оформление займёт всего несколько секунд.\n\nТакже вы можете воспользоваться кнопкой «Купить в 1 клик» на странице товара или позвонить нам по номеру +998 (90) 326-47-57.",
+    targets: [{ scope: "page", ref: "home", include_children: false }],
+    updated_at: "2026-11-17T10:00:00",
+  },
+  {
+    id: "00000001-0000-4000-8000-000000000002",
+    is_active: true,
+    sort_order: 20,
+    topic: "delivery",
+    question_uz:
+      "Toshkent shahri va viloyatlarga yetkazib berish muddati hamda narxi qanday?",
+    question_ru:
+      "Каковы сроки и стоимость доставки по Ташкенту и регионам Узбекистана?",
+    answer_uz:
+      "Toshkent shahri bo‘ylab buyurtmalar tasdiqlanganidan so‘ng 24 soat ichida (ish kunlari) eshikkacha yetkazib beriladi. 500 000 so‘mdan yuqori bo‘lgan xaridlarga Toshkentda kuryer xizmati mutlaqo bepul (500 000 so‘mgacha — 30 000 so‘m).\n\nO‘zbekistonning barcha viloyatlariga BTS, Fargo yoki pochta xizmatlari orqali 1–3 ish kunida yetkazib beriladi.",
+    answer_ru:
+      "По городу Ташкенту заказы доставляются до двери в течение 24 часов (в рабочие дни). При заказе от 500 000 сум курьерская доставка по Ташкенту бесплатная (до 500 000 сум — 30 000 сум).\n\nВ регионы Узбекистана доставка осуществляется через курьерские службы BTS и Fargo в течение 1–3 рабочих дней.",
+    targets: [
+      { scope: "page", ref: "home", include_children: false },
+      { scope: "page", ref: "delivery", include_children: false },
+      { scope: "category", ref: "*", include_children: false },
+    ],
+    updated_at: "2026-11-17T10:00:00",
+  },
+  {
+    id: "00000001-0000-4000-8000-000000000003",
+    is_active: true,
+    sort_order: 30,
+    topic: "b2b",
+    question_uz:
+      "Yuridik shaxslar (korxonalar) bilan shartnoma va Didox elektron hisob-faktura (EHF) orqali ishlaysizlarmi?",
+    question_ru:
+      "Работаете ли вы с юридическими лицами по договору и ЭСФ (Didox)?",
+    answer_uz:
+      "Ha, barcha korxonalar, banklar, o‘quv muassasalari va davlat tashkilotlari bilan rasmiy shartnoma asosida ishlaymiz.\n\nHar bir xarid bo‘yicha hisob-faktura va yuk xatlari Didox hamda Faktura.uz tizimlari orqali 12% QQS bilan elektron shaklda taqdim etiladi.",
+    answer_ru:
+      "Да, мы работаем с компаниями, банками, учебными заведениями и государственными организациями по официальному договору.\n\nВсе закрывающие документы (счёт-фактура и накладная) с НДС 12% выставляются в электронном виде через системы Didox и Faktura.uz.",
+    targets: [
+      { scope: "page", ref: "home", include_children: false },
+      { scope: "page", ref: "b2b", include_children: false },
+    ],
+    updated_at: "2026-11-17T10:00:00",
+  },
+  {
+    id: "00000001-0000-4000-8000-000000000004",
+    is_active: true,
+    sort_order: 40,
+    topic: "payment",
+    question_uz: "Qanday to‘lov usullari mavjud? QQS (NDS) bilan to‘lash mumkinmi?",
+    question_ru: "Какие способы оплаты доступны? Возможна ли оплата с НДС?",
+    answer_uz:
+      "Jismoniy shaxslar buyurtmani olganda naqd pul, Uzcard/Humo bank kartalari yoki Payme, Click va Uzum ilovalari orqali to‘lov qilishlari mumkin.\n\nYuridik shaxslar va YaTTlar uchun pul o‘tkazish (перечисление) orqali to‘lov mavjud — barcha narxlar 12% QQS (NDS) ni o‘z ichiga oladi.",
+    answer_ru:
+      "Физические лица могут оплатить заказ при получении наличными, картами Uzcard/Humo, а также через приложения Payme, Click и Uzum.\n\nДля юридических лиц и ИП доступна безналичная оплата перечислением — все цены включают НДС 12%.",
+    targets: [
+      { scope: "page", ref: "home", include_children: false },
+      { scope: "page", ref: "payment", include_children: false },
+    ],
+    updated_at: "2026-11-17T10:00:00",
+  },
+  {
+    id: "00000001-0000-4000-8000-000000000005",
+    is_active: true,
+    sort_order: 50,
+    topic: "b2b",
+    question_uz:
+      "Katta hajmdagi (ulgurji) xaridlar uchun maxsus chegirmalar bormi?",
+    question_ru:
+      "Предусмотрены ли специальные скидки при оптовых (крупных) закупках?",
+    answer_uz:
+      "Ha, ofislar, do‘konlar va korporativ mijozlar uchun ulgurji narxlar hamda buyurtma hajmiga qarab qo‘shimcha chegirmalar amal qiladi.\n\nDoimiy B2B hamkorlarga shaxsiy menejer biriktiriladi. Tijorat taklifi (KP) olish uchun B2B bo‘limi orqali murojaat qilishingiz mumkin.",
+    answer_ru:
+      "Да, для офисов, розничных точек и корпоративных клиентов действуют оптовые цены и дополнительные скидки в зависимости от объёма заказа.\n\nЗа постоянными B2B-партнёрами закрепляется персональный менеджер. Для получения коммерческого предложения (КП) оставьте заявку в разделе B2B.",
+    targets: [
+      { scope: "page", ref: "home", include_children: false },
+      { scope: "page", ref: "b2b", include_children: false },
+    ],
+    updated_at: "2026-11-17T10:00:00",
+  },
+  {
+    id: "00000001-0000-4000-8000-000000000006",
+    is_active: true,
+    sort_order: 60,
+    topic: "warranty",
+    question_uz:
+      "Mahsulotlar sifatiga kafolat bormi? Nuqsonli mahsulotni qaytarish yoki almashtirish tartibi qanday?",
+    question_ru:
+      "Есть ли гарантия качества? Как вернуть или обменять бракованный товар?",
+    answer_uz:
+      "Sora.uz do‘konidagi barcha mahsulotlar 100% original bo‘lib, ishlab chiqaruvchining rasmiy kafolati bilan taqdim etiladi (ofis texnikalariga 12 oygacha servis kafolati).\n\nAgar mahsulotda zavod nuqsoni aniqlansa, xarid kunidan boshlab 10 kun ichida qonuniy tartibda yangisiga almashtirib beriladi yoki to‘lov qaytariladi.",
+    answer_ru:
+      "Вся продукция на Sora.uz является 100% оригинальной и поставляется с официальной гарантией производителя (на оргтехнику действует сервисная гарантия до 12 месяцев).\n\nВ случае выявления заводского брака товар подлежит обмену на новый или возврату средств в течение 10 дней с момента покупки.",
+    targets: [
+      { scope: "page", ref: "home", include_children: false },
+      { scope: "page", ref: "warranty", include_children: false },
+      { scope: "product", ref: "*", include_children: false },
+    ],
+    updated_at: "2026-11-17T10:00:00",
+  },
+  {
+    id: "00000001-0000-4000-8000-000000000007",
+    is_active: true,
+    sort_order: 70,
+    topic: "product_info",
+    question_uz:
+      "Saytdagi narxlar va ombor qoldig‘i haqiqiy vaqtda yangilanadimi?",
+    question_ru:
+      "Обновляются ли цены и остатки на складе в реальном времени?",
+    answer_uz:
+      "Ha, saytdagi barcha narxlar, chegirmalar va ombor qoldiqlari to‘g‘ridan-to‘g‘ri markaziy ombor bazasi bilan avtomatik ravishda sinxronizatsiya qilinadi.\n\n«Omborda mavjud» belgisiga ega mahsulotlar har doim jo‘natishga tayyor turadi.",
+    answer_ru:
+      "Да, все цены, скидки и складские остатки на сайте автоматически синхронизируются с нашей центральной учётной системой.\n\nТовары со статусом «В наличии» всегда доступны на складе и готовы к отгрузке.",
+    targets: [{ scope: "page", ref: "home", include_children: false }],
+    updated_at: "2026-11-17T10:00:00",
+  },
+  {
+    id: "00000001-0000-4000-8000-000000000008",
+    is_active: true,
+    sort_order: 80,
+    topic: "delivery",
+    question_uz:
+      "Buyurtmani do‘kon yoki ombordan o‘zimiz olib ketsak (samovivoz) bo‘ladimi?",
+    question_ru:
+      "Можно ли забрать заказ самостоятельно со склада или из магазина (самовывоз)?",
+    answer_uz:
+      "Ha, albatta. Buyurtmangiz tasdiqlangandan so‘ng dushanbadan shanbagacha soat 09:00 dan 18:00 gacha Toshkent shahri, Olmazor tumani, Dilsaroy ko‘chasi, 1-uy manzilidan o‘zingiz bepul olib ketishingiz mumkin.\n\nOmborga kelishdan oldin buyurtma raqamini menejerga ma’lum qilsangiz, yukingiz tayyor holda kutib turadi.",
+    answer_ru:
+      "Да, конечно. После подтверждения заказа вы можете бесплатно забрать его с понедельника по субботу с 09:00 до 18:00 по адресу: г. Ташкент, Алмазарский район, ул. Дилсарой, дом 1.\n\nПредварительно сообщите номер заказа менеджеру, чтобы мы заранее подготовили товар к выдаче.",
+    targets: [
+      { scope: "page", ref: "home", include_children: false },
+      { scope: "page", ref: "delivery", include_children: false },
+      { scope: "page", ref: "contact", include_children: false },
+    ],
+    updated_at: "2026-11-17T10:00:00",
+  },
+];

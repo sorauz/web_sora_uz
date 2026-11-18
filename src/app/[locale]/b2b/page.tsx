@@ -7,6 +7,10 @@ import { Footer } from "@/components/layout/Footer";
 import { MobileNav } from "@/components/layout/MobileNav";
 import { Breadcrumbs } from "@/components/discovery/Breadcrumbs";
 import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
+import { FaqAccordion } from "@/components/discovery/FaqAccordion";
+import { FaqJsonLd } from "@/components/seo/FaqJsonLd";
+import { resolvePageFaqs } from "@/lib/utils/faq-resolver";
+import { FIXTURE_FAQS } from "@/lib/api/fixtures";
 import { Building2, FileText, CheckCircle2, Phone, Mail, Percent, Truck } from "lucide-react";
 
 interface B2BPageProps {
@@ -44,10 +48,18 @@ export default async function B2BPage({ params }: B2BPageProps) {
   const isUz = locale === "uz";
   setRequestLocale(locale);
 
-  const [categoriesData, brandsData] = await Promise.all([
+  const [categoriesData, brandsData, faqsData] = await Promise.all([
     api.getCategories(),
     api.getBrands(),
+    api.getFaqs(),
   ]);
+
+  const b2bFaqs = resolvePageFaqs(
+    faqsData.faqs,
+    "b2b",
+    locale as "uz" | "ru",
+    { fallbackFaqs: FIXTURE_FAQS }
+  );
 
   const breadcrumbs = [
     {
@@ -167,6 +179,19 @@ export default async function B2BPage({ params }: B2BPageProps) {
             </a>
           </div>
         </div>
+
+        {/* Dynamic 1C B2B FAQ */}
+        <FaqJsonLd items={b2bFaqs} />
+        <FaqAccordion
+          items={b2bFaqs}
+          columns={2}
+          defaultOpenFirst
+          title={
+            isUz
+              ? "Korporativ mijozlar (B2B) uchun ko‘p beriladigan savollar"
+              : "Частые вопросы для корпоративных клиентов (B2B)"
+          }
+        />
       </main>
 
       <Footer />

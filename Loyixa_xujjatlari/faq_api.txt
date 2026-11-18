@@ -1,0 +1,46 @@
+SORA 1C HTTP-Servis API Hujjati: FAQ (/faq)1. Umumiy ma'lumot va EndpointUshbu endpoint 1C tizimidagi (Справочник.web_faq) barcha faol va nofaol savol-javoblarni hamda ularning sayt sahifalariga biriktirilish qoidalarini (targets) tekis (flat) JSON ro'yxat ko'rinishida qaytaradi.Metod: GETBase URL: [http://1cloud.uz:777/SORA/hs/for_msp](http://1cloud.uz:777/SORA/hs/for_msp)Endpoint: /faqTo'liq URL: [http://1cloud.uz:777/SORA/hs/for_msp/faq](http://1cloud.uz:777/SORA/hs/for_msp/faq)Javob formati: application/json; charset=utf-8Keshlash tavsiyasi: Next.js ISR (revalidate: 86400 — 24 soat) va faq kesh tegi orqali on-demand revalidation.HTTP Status KodlariStatus kodTavsif200 OKSo'rov muvaffaqiyatli bajarildi. Bazada savollar bo'lmasa ham 200 OK bilan "count": 0 va "faqs": [] qaytadi.401 UnauthorizedBasic Auth login/parol noto'g'ri yoki yuborilmagan (agar IIS/1C da avtorizatsiya yoqilgan bo'lsa).500 Internal Server Error1C serverida ichki xatolik yuz berdi.2. Javob Strukturasi (Response Schema)Ildiz (Root) obyektiMaydonTurMajburiyTavsifupdated_atstring (ISO 8601)HaRo'yxatdagi eng oxirgi yangilangan savolning sanasi va vaqti (YYYY-MM-DDTHH:mm:ss).countnumberHafaqs massividagi elementlar soni.faqsarray<FAQItem>HaSavollar massivi (sort_order bo'yicha o'sish tartibida saralangan). Bo'sh bo'lsa [] qaytadi.FAQItem obyekti (faqs[] elementi)MaydonTurMajburiyTavsifidstring (UUID)Ha1C dagi elementning o'zgarmas GUID identifikatori.is_activebooleanHatrue — saytda ko'rsatiladi; false — saytda yashiriladi.sort_ordernumberHaSaralash tartibi (kichik raqamlar yuqorida chiqadi).topicstring (Enum)HaMavzu kodi: delivery, order, payment, b2b, warranty, product_info, usage.question_uzstringHaSavol matni (o'zbek tilida, HTML teglarsiz).question_rustringHaSavol matni (rus tilida, HTML teglarsiz).answer_uzstringHaJavob matni (o'zbek tilida). Abzatslar \n\n bilan ajratilgan.answer_rustringHaJavob matni (rus tilida). Abzatslar \n\n bilan ajratilgan.targetsarray<TargetItem>HaSavol qaysi sahifa yoki obyektlarda ko'rinishini belgilovchi massiv (kamida 1 ta element).updated_atstring (ISO 8601)HaUshbu savol oxirgi tahrirlangan sana va vaqt.TargetItem obyekti (targets[] elementi)MaydonTurMajburiyTavsifscopestring (Enum)HaBiriktirish turi: page, category, product, brand.refstringHaBog'langan obyekt identifikatori yoki kalit so'z (pastdagi jadvalga qarang).include_childrenbooleanYo'qFaqat scope = "category" va qiymat true bo'lganda JSON tarkibida keladi. Maydon kelmasa, standart qiymati false.scope va ref qiymatlari xaritasiscope qiymatiref qiymati turi1C manbasi / Mumkin bo'lgan qiymatlar"page"Sahifa kaliti (string)"home", "delivery", "payment", "b2b", "warranty", "contact""category"GUID yoki WildcardСправочник.НоменклатурнаяГруппа GUID-i yoki barcha kategoriyalar uchun "*""product"GUID yoki WildcardСправочник.Номенклатура GUID-i yoki barcha mahsulotlar uchun "*""brand"GUIDСправочник.Бренды GUID-i3. Javob NamunalariMuvaffaqiyatli javob (200 OK)JSON{
+  "updated_at": "2026-11-17T10:23:19",
+  "count": 2,
+  "faqs": [
+    {
+      "id": "ebbd0bed-e242-11f1-a5cf-00155d78c303",
+      "is_active": true,
+      "sort_order": 10,
+      "topic": "delivery",
+      "question_uz": "Toshkent shahri bo‘ylab yetkazib berish qancha vaqt oladi va narxi qancha?",
+      "question_ru": "Сколько времени занимает доставка по Ташкенту и какова её стоимость?",
+      "answer_uz": "Toshkent shahri bo‘ylab buyurtmalar tasdiqlanganidan so‘ng 24 soat ichida (ish kunlari) yetkazib beriladi.\n\n500 000 so‘mdan yuqori bo‘lgan buyurtmalar uchun yetkazib berish mutlaqo bepul. Kichikroq summadagi buyurtmalar uchun kuryer xizmati 30 000 so‘mni tashkil etadi.",
+      "answer_ru": "Доставка по Ташкенту осуществляется в течение 24 часов (в рабочие дни) после подтверждения заказа.\n\nПри заказе на сумму от 500 000 сум доставка бесплатная. Для заказов на меньшую сумму стоимость курьерской доставки составляет 30 000 сум.",
+      "targets": [
+        { "scope": "page", "ref": "home" },
+        { "scope": "page", "ref": "delivery" },
+        { "scope": "category", "ref": "*" }
+      ],
+      "updated_at": "2026-11-17T10:14:33"
+    },
+    {
+      "id": "6b538271-e246-11f1-a5cf-00155d78c303",
+      "is_active": true,
+      "sort_order": 10,
+      "topic": "product_info",
+      "question_uz": "Ofis printerlari uchun qaysi zichlikdagi A4 qog‘ozni tanlagan ma’qul?",
+      "question_ru": "Бумагу какой плотности лучше выбрать для стандартных офисных принтеров?",
+      "answer_uz": "Kundalik hujjatlar va ikki tomonlama chop etish uchun 80 g/m² zichlikdagi (C yoki B sinfdagi) A4 qog‘oz eng maqbul tanlov hisoblanadi — u printer roliklarida tiqilib qolmaydi.\n\nMuhim shartnomalar, taqdimotlar va rangli chop etish uchun esa 90–100 g/m² zichlikdagi (A sinf) oqligi yuqori qog‘ozlarni tavsiya qilamiz.",
+      "answer_ru": "Для повседневной печати документов и двустороннего копирования оптимальным выбором является бумага плотностью 80 г/м² (класса C или B) — она не застревает в роликах принтера.\n\nДля важных договоров, презентаций и цветной печати рекомендуем бумагу повышенной белизны плотностью 90–100 г/м² (класса A).",
+      "targets": [
+        {
+          "scope": "category",
+          "ref": "eda11551-ad1d-11f1-a5ce-00155d78c303",
+          "include_children": true
+        }
+      ],
+      "updated_at": "2026-11-17T10:19:23"
+    }
+  ]
+}
+Bo'sh javob (200 OK)JSON{
+  "updated_at": "2026-11-17T10:25:00",
+  "count": 0,
+  "faqs": []
+}
+4. Frontend (Sayt) uchun Integratsiya QoidalariFiltrlash:Faqat "is_active": true bo'lgan elementlarni indekslang (false bo'lganlarini e'tiborsiz qoldiring).Joriy tilga qarab question_uz/answer_uz yoki question_ru/answer_ru maydonlarini oling.Sahifalar bo'yicha ustuvorlik tartibi (Resolution Priority):Bosh sahifa (/): page:homeStatik sahifalar (/delivery, /b2b, ...): page:<kalit>Kategoriya sahifasi: category:<category_id> $\rightarrow$ ota-kategoriyalar (include_children: true bo'lsa) $\rightarrow$ category:*Mahsulot sahifasi: product:<product_id> $\rightarrow$ category:<product.category_id> (va ota-kategoriyalari) $\rightarrow$ brand:<product.brand_id> $\rightarrow$ product:*Brend sahifasi: brand:<brand_id>Dublikatlar va limit:Bitta savol bir nechta target orqali mos kelib qolsa, id bo'yicha dublikatlarni olib tashlang.Natijani sort_order bo'yicha o'sish tartibida saralang va sahifada 6–8 tagacha savol ko'rsating.Matnni render qilish va SEO:answer_uz / answer_ru ichidagi \n\n belgilarini <p> teglariga ajratib chiqaring (HTML teglar kelmaydi, shuning uchun dangerouslySetInnerHTML shart emas).Sahifadagi yakuniy FAQ ro'yxati asosida schema.org/FAQPage JSON-LD mikrobelgilashini generatsiya qiling.

@@ -20,6 +20,10 @@ export async function GET() {
       name: "Mahsulot Sharhlari (Namuna)",
       path: "/review?productId=f6d951a5-8dfd-11ea-81b6-50b7c370a30f",
     },
+    {
+      name: "Savol-Javoblar (FAQ)",
+      path: "/faq",
+    },
   ];
 
   const results = [];

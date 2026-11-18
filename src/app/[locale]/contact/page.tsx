@@ -7,6 +7,10 @@ import { Footer } from "@/components/layout/Footer";
 import { MobileNav } from "@/components/layout/MobileNav";
 import { Breadcrumbs } from "@/components/discovery/Breadcrumbs";
 import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
+import { FaqAccordion } from "@/components/discovery/FaqAccordion";
+import { FaqJsonLd } from "@/components/seo/FaqJsonLd";
+import { resolvePageFaqs } from "@/lib/utils/faq-resolver";
+import { FIXTURE_FAQS } from "@/lib/api/fixtures";
 import { Phone, Mail, MapPin, Clock, Building2, Send, ShieldCheck } from "lucide-react";
 
 interface ContactPageProps {
@@ -44,10 +48,18 @@ export default async function ContactPage({ params }: ContactPageProps) {
   const isUz = locale === "uz";
   setRequestLocale(locale);
 
-  const [categoriesData, brandsData] = await Promise.all([
+  const [categoriesData, brandsData, faqsData] = await Promise.all([
     api.getCategories(),
     api.getBrands(),
+    api.getFaqs(),
   ]);
+
+  const contactFaqs = resolvePageFaqs(
+    faqsData.faqs,
+    "contact",
+    locale as "uz" | "ru",
+    { fallbackFaqs: FIXTURE_FAQS }
+  );
 
   const breadcrumbs = [
     {
@@ -233,6 +245,19 @@ export default async function ContactPage({ params }: ContactPageProps) {
             </div>
           </div>
         </div>
+
+        {/* Dynamic 1C Contact / Pickup FAQ */}
+        <FaqJsonLd items={contactFaqs} />
+        <FaqAccordion
+          items={contactFaqs}
+          columns={1}
+          defaultOpenFirst
+          title={
+            isUz
+              ? "Bog‘lanish, o‘zi olib ketish va buyurtmalar bo‘yicha savollar"
+              : "Частые вопросы о контактах, самовывозе и заказах"
+          }
+        />
       </main>
 
       <Footer />

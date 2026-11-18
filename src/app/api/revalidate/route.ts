@@ -16,6 +16,7 @@ function performRevalidation(tag?: string, path?: string) {
         "offers",
         "reviews",
         "units",
+        "faq",
       ];
       for (const t of allTags) {
         revalidateTag(t, { expire: 0 });
@@ -54,6 +55,17 @@ function performRevalidation(tag?: string, path?: string) {
       }
       if (tag === "reviews" || tag.startsWith("reviews-")) {
         revalidatePath("/[locale]/products/[slug]", "page");
+      }
+      if (tag === "faq") {
+        revalidatePath("/[locale]", "page");
+        revalidatePath("/[locale]/category/[slug]", "page");
+        revalidatePath("/[locale]/products/[slug]", "page");
+        revalidatePath("/[locale]/brand/[slug]", "page");
+        revalidatePath("/[locale]/delivery", "page");
+        revalidatePath("/[locale]/payment", "page");
+        revalidatePath("/[locale]/b2b", "page");
+        revalidatePath("/[locale]/warranty", "page");
+        revalidatePath("/[locale]/contact", "page");
       }
     }
   }

@@ -11,6 +11,9 @@ import { ItemListJsonLd } from "@/components/seo/ItemListJsonLd";
 import { ProductCard } from "@/components/discovery/ProductCard";
 import { SortSelect } from "@/components/discovery/SortSelect";
 import { Pagination } from "@/components/discovery/Pagination";
+import { FaqAccordion } from "@/components/discovery/FaqAccordion";
+import { FaqJsonLd } from "@/components/seo/FaqJsonLd";
+import { resolveBrandFaqs } from "@/lib/utils/faq-resolver";
 import { calculateProductPrice } from "@/lib/utils/price";
 import { Metadata } from "next";
 import { Award, ShieldCheck, CheckCircle2 } from "lucide-react";
@@ -94,10 +97,11 @@ export default async function BrandDetailPage({
   setRequestLocale(locale);
   const isUz = locale === "uz";
 
-  const [categoriesData, brandsData, productsData] = await Promise.all([
+  const [categoriesData, brandsData, productsData, faqsData] = await Promise.all([
     api.getCategories(),
     api.getBrands(),
     api.getAllProducts(),
+    api.getFaqs(),
   ]);
 
   const { tree, categories } = categoriesData;
@@ -141,6 +145,13 @@ export default async function BrandDetailPage({
     (currentPage - 1) * PAGE_SIZE,
     currentPage * PAGE_SIZE
   );
+
+  const brandFaqs = currentBrand
+    ? resolveBrandFaqs(faqsData.faqs, {
+        brandId: currentBrand.id,
+        locale: locale as "uz" | "ru",
+      })
+    : [];
 
   return (
     <div className="min-h-screen bg-white text-slate-900 flex flex-col">
@@ -232,6 +243,19 @@ export default async function BrandDetailPage({
             pageSize={PAGE_SIZE}
           />
         </div>
+
+        {/* Brand FAQ (1C API) */}
+        <FaqJsonLd items={brandFaqs} />
+        <FaqAccordion
+          items={brandFaqs}
+          columns={1}
+          defaultOpenFirst
+          title={
+            isUz
+              ? `${brandName} bo‘yicha ko‘p beriladigan savollar`
+              : `Частые вопросы о бренде ${brandName}`
+          }
+        />
       </main>
 
       <Footer />

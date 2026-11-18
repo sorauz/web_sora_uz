@@ -7,6 +7,10 @@ import { Footer } from "@/components/layout/Footer";
 import { MobileNav } from "@/components/layout/MobileNav";
 import { Breadcrumbs } from "@/components/discovery/Breadcrumbs";
 import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
+import { FaqAccordion } from "@/components/discovery/FaqAccordion";
+import { FaqJsonLd } from "@/components/seo/FaqJsonLd";
+import { resolvePageFaqs } from "@/lib/utils/faq-resolver";
+import { FIXTURE_FAQS } from "@/lib/api/fixtures";
 import { Truck, Clock, ShieldCheck, MapPin, CheckCircle, Package } from "lucide-react";
 
 interface DeliveryPageProps {
@@ -44,10 +48,18 @@ export default async function DeliveryPage({ params }: DeliveryPageProps) {
   const isUz = locale === "uz";
   setRequestLocale(locale);
 
-  const [categoriesData, brandsData] = await Promise.all([
+  const [categoriesData, brandsData, faqsData] = await Promise.all([
     api.getCategories(),
     api.getBrands(),
+    api.getFaqs(),
   ]);
+
+  const deliveryFaqs = resolvePageFaqs(
+    faqsData.faqs,
+    "delivery",
+    locale as "uz" | "ru",
+    { fallbackFaqs: FIXTURE_FAQS }
+  );
 
   const breadcrumbs = [
     {
@@ -166,6 +178,19 @@ export default async function DeliveryPage({ params }: DeliveryPageProps) {
             </li>
           </ul>
         </div>
+
+        {/* Dynamic 1C Delivery FAQ */}
+        <FaqJsonLd items={deliveryFaqs} />
+        <FaqAccordion
+          items={deliveryFaqs}
+          columns={1}
+          defaultOpenFirst
+          title={
+            isUz
+              ? "Yetkazib berish bo‘yicha ko‘p beriladigan savollar"
+              : "Частые вопросы о доставке"
+          }
+        />
       </main>
 
       <Footer />

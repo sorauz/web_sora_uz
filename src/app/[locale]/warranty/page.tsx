@@ -7,6 +7,10 @@ import { Footer } from "@/components/layout/Footer";
 import { MobileNav } from "@/components/layout/MobileNav";
 import { Breadcrumbs } from "@/components/discovery/Breadcrumbs";
 import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
+import { FaqAccordion } from "@/components/discovery/FaqAccordion";
+import { FaqJsonLd } from "@/components/seo/FaqJsonLd";
+import { resolvePageFaqs } from "@/lib/utils/faq-resolver";
+import { FIXTURE_FAQS } from "@/lib/api/fixtures";
 import {
   ShieldCheck,
   RotateCcw,
@@ -61,10 +65,18 @@ export default async function WarrantyPage({ params }: WarrantyPageProps) {
   const isUz = locale === "uz";
   setRequestLocale(locale);
 
-  const [categoriesData, brandsData] = await Promise.all([
+  const [categoriesData, brandsData, faqsData] = await Promise.all([
     api.getCategories(),
     api.getBrands(),
+    api.getFaqs(),
   ]);
+
+  const warrantyFaqs = resolvePageFaqs(
+    faqsData.faqs,
+    "warranty",
+    locale as "uz" | "ru",
+    { fallbackFaqs: FIXTURE_FAQS }
+  );
 
   const breadcrumbs = [
     {
@@ -466,6 +478,19 @@ export default async function WarrantyPage({ params }: WarrantyPageProps) {
               : "«Продавец (изготовитель, исполнитель) освобождается от ответственности, если докажет, что вред возник вследствие нарушения потребителем установленных правил использования, хранения или транспортировки» (Закон Республики Узбекистан «О защите прав потребителей»)."}
           </p>
         </section>
+
+        {/* Dynamic 1C Warranty FAQ */}
+        <FaqJsonLd items={warrantyFaqs} />
+        <FaqAccordion
+          items={warrantyFaqs}
+          columns={1}
+          defaultOpenFirst
+          title={
+            isUz
+              ? "Kafolat va almashtirish bo‘yicha qo‘shimcha savollar"
+              : "Дополнительные вопросы по гарантии и обмену"
+          }
+        />
 
         {/* 7. BOG'LANISH VA MIJOZLAR XIZMATI (Support CTA) */}
         <section className="p-6 sm:p-8 rounded-3xl bg-linear-to-r from-slate-900 to-sora-950 text-white space-y-4">

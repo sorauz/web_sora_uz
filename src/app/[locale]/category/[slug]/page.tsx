@@ -20,7 +20,10 @@ import { Pagination } from "@/components/discovery/Pagination";
 import { SubcategoryChips } from "@/components/discovery/SubcategoryChips";
 import { Metadata } from "next";
 import { getCategoryOgImage } from "@/lib/seo/category-og";
-import { Folder, HelpCircle, BookOpen, PackageX } from "lucide-react";
+import { BookOpen, PackageX } from "lucide-react";
+import { FaqAccordion } from "@/components/discovery/FaqAccordion";
+import { FaqJsonLd } from "@/components/seo/FaqJsonLd";
+import { resolveCategoryFaqs } from "@/lib/utils/faq-resolver";
 
 interface CategoryPageProps {
   params: Promise<{ locale: string; slug: string }>;
@@ -116,10 +119,11 @@ export default async function CategoryPage({
   setRequestLocale(locale);
   const isUz = locale === "uz";
 
-  const [categoriesData, brandsData, productsData] = await Promise.all([
+  const [categoriesData, brandsData, productsData, faqsData] = await Promise.all([
     api.getCategories(),
     api.getBrands(),
     api.getAllProducts(),
+    api.getFaqs(),
   ]);
 
   const { tree, categories } = categoriesData;
@@ -457,32 +461,11 @@ export default async function CategoryPage({
     .slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
     .map(toCardProduct);
 
-  const categoryFaqs = [
-    {
-      q: isUz
-        ? `${categoryName} mahsulotlarini yetkazib berish qancha vaqt oladi?`
-        : `Сколько длится доставка товаров из категории ${categoryName}?`,
-      a: isUz
-        ? `Toshkent shahri bo'ylab buyurtmalar 24 soat ichida eshikkacha yetkazib beriladi. 500 000 so'mdan yuqori xaridlarga shahar ichida yetkazish bepul. O'zbekiston viloyatlariga esa 1-3 ish kunida yetkaziladi.`
-        : `Доставка по Ташкенту осуществляется в течение 24 часов до двери. При заказе от 500 000 сум доставка бесплатная. По регионам Узбекистана — от 1 до 3 рабочих дней.`,
-    },
-    {
-      q: isUz
-        ? `Tashkilotlar va yuridik shaxslar uchun shartnoma va hisob-faktura (QQS) beriladimi?`
-        : `Предоставляются ли счета-фактуры с НДС и договоры для юридических лиц?`,
-      a: isUz
-        ? `Ha, barcha mahsulotlar yuridik shaxslar uchun 12% QQS bilan rasmiy shartnoma va elektron hisob-faktura (Didox) orqali to'liq taqdim etiladi.`
-        : `Да, мы работаем с юридическими лицами по безналичному расчету с НДС 12% и оформляем электронные счета-фактуры через Didox.`,
-    },
-    {
-      q: isUz
-        ? `Mahsulot sifatiga kafolat bormi va nuqson aniqlansa almashtirish mumkinmi?`
-        : `Какая гарантия предоставляется на продукцию и можно ли вернуть товар?`,
-      a: isUz
-        ? `Sora.uz do'konidagi barcha mahsulotlar ishlab chiqaruvchining rasmiy sifati nazoratidan o'tgan. Agar mahsulotda nuqson aniqlansa, 10 kun ichida qonuniy tartibda almashtirib beriladi.`
-        : `Вся продукция сертифицирована и проходит заводской контроль качества. В случае обнаружения дефекта действует гарантия обмена или возврата в течение 10 дней.`,
-    },
-  ];
+  const categoryFaqs = resolveCategoryFaqs(faqsData.faqs, {
+    categoryId: currentCategory.id,
+    categories,
+    locale: locale as "uz" | "ru",
+  });
 
   return (
     <div className="min-h-screen bg-white text-slate-900 flex flex-col">
@@ -508,24 +491,8 @@ export default async function CategoryPage({
           currentPage={currentPage}
           pageSize={PAGE_SIZE}
         />
-        {/* FAQPage Structured Data */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "FAQPage",
-              mainEntity: categoryFaqs.map((faq) => ({
-                "@type": "Question",
-                name: faq.q,
-                acceptedAnswer: {
-                  "@type": "Answer",
-                  text: faq.a,
-                },
-              })),
-            }),
-          }}
-        />
+        {/* FAQPage Structured Data (1C /faq + Category Resolution) */}
+        <FaqJsonLd items={categoryFaqs} />
         <Breadcrumbs items={breadcrumbList} />
 
         {/* Category Header */}
@@ -663,27 +630,17 @@ export default async function CategoryPage({
               </p>
             </section>
 
-            {/* FAQ Accordion Section */}
-            <section className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 space-y-4">
-              <div className="flex items-center gap-2 text-amber-500">
-                <HelpCircle className="w-5 h-5" />
-                <h3 className="text-base sm:text-lg font-bold">
-                  {isUz ? "Tez-tez beriladigan savollar" : "Часто задаваемые вопросы"}
-                </h3>
-              </div>
-              <div className="space-y-3 text-xs sm:text-sm">
-                {categoryFaqs.map((faq, idx) => (
-                  <div key={idx} className="p-3.5 bg-slate-50 dark:bg-slate-800/40 rounded-xl space-y-1">
-                    <div className="font-bold text-slate-900 dark:text-slate-100">
-                      {faq.q}
-                    </div>
-                    <div className="text-slate-600 dark:text-slate-400 leading-relaxed">
-                      {faq.a}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
+            {/* FAQ Accordion Section (1C API) */}
+            <FaqAccordion
+              items={categoryFaqs}
+              columns={1}
+              defaultOpenFirst
+              title={
+                isUz
+                  ? "Tez-tez beriladigan savollar"
+                  : "Часто задаваемые вопросы"
+              }
+            />
           </div>
         </div>
       </main>

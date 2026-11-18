@@ -10,7 +10,10 @@ import { ProductCard } from "@/components/discovery/ProductCard";
 import { Product } from "@/lib/schemas/product";
 import { buildFeaturedTabGroups } from "@/lib/utils/featured-products";
 import { BrandMarquee } from "@/components/discovery/BrandMarquee";
+import { FaqAccordion } from "@/components/discovery/FaqAccordion";
+import { FaqJsonLd } from "@/components/seo/FaqJsonLd";
 import { HeroSlider } from "@/components/home/HeroSlider";
+import { resolveHomeFaqs } from "@/lib/utils/faq-resolver";
 import { Link } from "@/i18n/routing";
 import {
   Sparkles,
@@ -139,16 +142,19 @@ export default async function HomePage({ params }: PageProps) {
   const isUz = locale === "uz";
 
   // Fetch real data from 1C API layer (products enriched with prices)
-  const [categoriesData, brandsData, productsData, specialOffers] = await Promise.all([
-    api.getCategories(),
-    api.getBrands(),
-    api.getAllProducts(),
-    api.getSpecialOffers(),
-  ]);
+  const [categoriesData, brandsData, productsData, specialOffers, faqsData] =
+    await Promise.all([
+      api.getCategories(),
+      api.getBrands(),
+      api.getAllProducts(),
+      api.getSpecialOffers(),
+      api.getFaqs(),
+    ]);
 
   const { tree, categories } = categoriesData;
   const brands = brandsData.data.brands;
   const products = productsData.products;
+  const homeFaqs = resolveHomeFaqs(faqsData.faqs, locale as "uz" | "ru");
 
   // Real 1C Special Offers with intelligent deduplication across 4 tabs
   const featuredGroups = buildFeaturedTabGroups(products, specialOffers);
@@ -403,6 +409,24 @@ export default async function HomePage({ params }: PageProps) {
             </div>
           </div>
         </section>
+
+        {/* 9. Ko'p beriladigan savollar — FAQ (2 ustunli, 1C API + Zaxira) */}
+        <FaqJsonLd items={homeFaqs} />
+        <FaqAccordion
+          items={homeFaqs}
+          columns={2}
+          headerAlign="center"
+          title={
+            isUz
+              ? "Ko‘p beriladigan savollar (FAQ)"
+              : "Часто задаваемые вопросы (FAQ)"
+          }
+          subtitle={
+            isUz
+              ? "Buyurtma berish, yetkazib berish, korporativ hamkorlik va kafolat shartlari bo‘yicha eng muhim savollarga javoblar"
+              : "Ответы на популярные вопросы об оформлении заказов, доставке, работе с организациями и гарантии"
+          }
+        />
       </main>
 
       {/* 9. Footer */}
