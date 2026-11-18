@@ -1,204 +1,31 @@
-import { revalidateTag, revalidatePath } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
-import { submitToIndexNow } from "@/lib/seo/indexnow";
-import { runSmartDiffRevalidation } from "@/lib/sync/smart-diff";
+import { executeRevalidationRequest } from "@/lib/sync/revalidate-actions";
 
-function performRevalidation(tag?: string, path?: string) {
-  if (tag) {
-    if (tag === "all") {
-      const allTags = [
-        "products",
-        "all-products",
-        "product-relations",
-        "prices",
-        "categories",
-        "brands",
-        "offers",
-        "reviews",
-        "units",
-        "faq",
-      ];
-      for (const t of allTags) {
-        revalidateTag(t, { expire: 0 });
-      }
-      revalidatePath("/", "layout");
-      revalidatePath("/sitemap.xml");
-      revalidatePath("/api/feeds/google-merchant");
-      revalidatePath("/api/feeds/yandex-market");
-      revalidatePath("/llms-full.txt");
-    } else {
-      revalidateTag(tag, { expire: 0 });
-
-      // If products, prices, or individual product is revalidated,
-      // flush the product page and discovery routes as well
-      if (
-        tag === "products" ||
-        tag === "all-products" ||
-        tag === "prices" ||
-        tag.startsWith("product-")
-      ) {
-        revalidatePath("/[locale]/products/[slug]", "page");
-        revalidatePath("/[locale]/catalog", "page");
-        revalidatePath("/[locale]/category/[slug]", "page");
-        revalidatePath("/[locale]", "layout");
-        revalidatePath("/sitemap.xml");
-        revalidatePath("/api/feeds/google-merchant");
-        revalidatePath("/api/feeds/yandex-market");
-        revalidatePath("/llms-full.txt");
-      }
-      if (tag === "categories") {
-        revalidatePath("/[locale]/catalog", "page");
-        revalidatePath("/[locale]/category/[slug]", "page");
-        revalidatePath("/[locale]", "layout");
-        revalidatePath("/sitemap.xml");
-        revalidatePath("/api/feeds/yandex-market");
-      }
-      if (tag === "reviews" || tag.startsWith("reviews-")) {
-        revalidatePath("/[locale]/products/[slug]", "page");
-      }
-      if (tag === "faq") {
-        revalidatePath("/[locale]", "page");
-        revalidatePath("/[locale]/category/[slug]", "page");
-        revalidatePath("/[locale]/products/[slug]", "page");
-        revalidatePath("/[locale]/brand/[slug]", "page");
-        revalidatePath("/[locale]/delivery", "page");
-        revalidatePath("/[locale]/payment", "page");
-        revalidatePath("/[locale]/b2b", "page");
-        revalidatePath("/[locale]/warranty", "page");
-        revalidatePath("/[locale]/contact", "page");
-      }
-    }
-  }
-
-  if (path) {
-    revalidatePath(path);
-  }
-}
-
-/**
- * Resolves URLs to ping via IndexNow when tags or paths are revalidated
- */
-function resolveIndexNowUrls(
-  tag?: string,
-  path?: string,
-  customUrls?: string | string[]
-): string[] {
-  const urls: string[] = [];
-
-  if (path) {
-    if (path.startsWith("/uz/") || path.startsWith("/ru/")) {
-      urls.push(`https://sora.uz${path}`);
-    } else {
-      const cleanPath = path.startsWith("/") ? path : `/${path}`;
-      urls.push(`https://sora.uz/uz${cleanPath}`);
-      urls.push(`https://sora.uz/ru${cleanPath}`);
-    }
-  }
-
-  if (tag === "products" || tag === "prices" || tag === "all") {
-    urls.push(
-      "https://sora.uz/uz",
-      "https://sora.uz/ru",
-      "https://sora.uz/uz/catalog",
-      "https://sora.uz/ru/catalog"
-    );
-  } else if (tag === "categories") {
-    urls.push("https://sora.uz/uz/catalog", "https://sora.uz/ru/catalog");
-  }
-
-  if (customUrls) {
-    const list = Array.isArray(customUrls) ? customUrls : [customUrls];
-    urls.push(...list);
-  }
-
-  return urls;
+function getExpectedSecret(): string {
+  return process.env.REVALIDATION_SECRET || "sora_revalidate_secret_2026";
 }
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const secret = searchParams.get("secret");
-  const tag = searchParams.get("tag");
-  const path = searchParams.get("path");
-  const customUrl = searchParams.get("url");
 
-  const expectedSecret =
-    process.env.REVALIDATION_SECRET || "sora_revalidate_secret_2026";
-
-  if (secret !== expectedSecret) {
+  if (secret !== getExpectedSecret()) {
     return NextResponse.json(
       { revalidated: false, message: "Invalid secret token" },
-      { status: 401 }
+      { status: 401 },
     );
   }
 
-  const mode = searchParams.get("mode");
-  const scope = searchParams.get("scope");
-  const fast = searchParams.get("fast");
-  const isSmartDiff =
-    mode === "smart-diff" ||
-    tag === "smart-diff" ||
-    mode === "relations-diff" ||
-    tag === "relations-diff";
+  const { status, body } = await executeRevalidationRequest({
+    mode: searchParams.get("mode") || undefined,
+    scope: searchParams.get("scope") || undefined,
+    fast: searchParams.get("fast") || undefined,
+    tag: searchParams.get("tag") || undefined,
+    path: searchParams.get("path") || undefined,
+    customUrls: searchParams.get("url") || undefined,
+  });
 
-  if (isSmartDiff) {
-    const onlyRelations =
-      mode === "relations-diff" ||
-      tag === "relations-diff" ||
-      scope === "relations";
-    const skipRelations = !onlyRelations && fast === "true";
-
-    const result = await runSmartDiffRevalidation({
-      onlyRelations,
-      skipRelations,
-    });
-    return NextResponse.json(result, {
-      status: result.error && !result.summary ? 500 : 200,
-    });
-  }
-
-  if (!tag && !path && !customUrl) {
-    return NextResponse.json(
-      {
-        revalidated: false,
-        message: "Missing 'tag', 'path', 'mode', or 'url' query parameter to revalidate",
-      },
-      { status: 400 }
-    );
-  }
-
-  try {
-    performRevalidation(tag || undefined, path || undefined);
-
-    // Asynchronously dispatch changed URLs to IndexNow (Bing, Yandex, Naver)
-    const indexNowUrls = resolveIndexNowUrls(
-      tag || undefined,
-      path || undefined,
-      customUrl || undefined
-    );
-
-    if (indexNowUrls.length > 0) {
-      submitToIndexNow(indexNowUrls).catch((err) =>
-        console.warn("[IndexNow Webhook Dispatch Error]", err)
-      );
-    }
-
-    return NextResponse.json({
-      revalidated: true,
-      tag: tag || null,
-      path: path || null,
-      indexnow: {
-        dispatched: indexNowUrls.length > 0,
-        urlCount: indexNowUrls.length,
-      },
-      now: Date.now(),
-    });
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : String(err);
-    return NextResponse.json(
-      { revalidated: false, error: message },
-      { status: 500 }
-    );
-  }
+  return NextResponse.json(body, { status });
 }
 
 export async function POST(request: NextRequest) {
@@ -216,7 +43,6 @@ export async function POST(request: NextRequest) {
   try {
     body = await request.json();
   } catch {
-    // If not JSON body, read query params
     const searchParams = request.nextUrl.searchParams;
     body = {
       secret: searchParams.get("secret") || undefined,
@@ -229,82 +55,21 @@ export async function POST(request: NextRequest) {
     };
   }
 
-  const expectedSecret =
-    process.env.REVALIDATION_SECRET || "sora_revalidate_secret_2026";
-
-  if (body.secret !== expectedSecret) {
+  if (body.secret !== getExpectedSecret()) {
     return NextResponse.json(
       { revalidated: false, message: "Invalid secret token" },
-      { status: 401 }
+      { status: 401 },
     );
   }
 
-  const isSmartDiff =
-    body.mode === "smart-diff" ||
-    body.tag === "smart-diff" ||
-    body.mode === "relations-diff" ||
-    body.tag === "relations-diff";
+  const result = await executeRevalidationRequest({
+    mode: body.mode || undefined,
+    scope: body.scope || undefined,
+    fast: body.fast,
+    tag: body.tag || undefined,
+    path: body.path || undefined,
+    customUrls: body.urls || body.url || undefined,
+  });
 
-  if (isSmartDiff) {
-    const onlyRelations =
-      body.mode === "relations-diff" ||
-      body.tag === "relations-diff" ||
-      body.scope === "relations";
-    const skipRelations =
-      !onlyRelations && (body.fast === true || body.fast === "true");
-
-    const result = await runSmartDiffRevalidation({
-      onlyRelations,
-      skipRelations,
-    });
-    return NextResponse.json(result, {
-      status: result.error && !result.summary ? 500 : 200,
-    });
-  }
-
-  const customUrls = body.urls || body.url;
-
-  if (!body.tag && !body.path && !customUrls) {
-    return NextResponse.json(
-      {
-        revalidated: false,
-        message: "Missing 'tag', 'path', 'mode', or 'urls' parameter to revalidate",
-      },
-      { status: 400 }
-    );
-  }
-
-  try {
-    performRevalidation(body.tag || undefined, body.path || undefined);
-
-    // Asynchronously dispatch changed URLs to IndexNow
-    const indexNowUrls = resolveIndexNowUrls(
-      body.tag || undefined,
-      body.path || undefined,
-      customUrls || undefined
-    );
-
-    if (indexNowUrls.length > 0) {
-      submitToIndexNow(indexNowUrls).catch((err) =>
-        console.warn("[IndexNow Webhook Dispatch Error]", err)
-      );
-    }
-
-    return NextResponse.json({
-      revalidated: true,
-      tag: body.tag || null,
-      path: body.path || null,
-      indexnow: {
-        dispatched: indexNowUrls.length > 0,
-        urlCount: indexNowUrls.length,
-      },
-      now: Date.now(),
-    });
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : String(err);
-    return NextResponse.json(
-      { revalidated: false, error: message },
-      { status: 500 }
-    );
-  }
+  return NextResponse.json(result.body, { status: result.status });
 }

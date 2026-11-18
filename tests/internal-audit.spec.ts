@@ -52,10 +52,16 @@ test.describe("Internal Catalog & Google Merchant Audit Panel", () => {
     expect(html).not.toContain("1C LIVE");
     expect(html).not.toContain("Chakana_Narx");
 
-    // Export API rejects unauthenticated requests
+    // Export and Sync APIs reject unauthenticated requests
     const exportRes = await request.get("/api/internal-audit/export");
     expect(exportRes.status()).toBe(401);
     expect(exportRes.headers()["x-robots-tag"]).toContain("noindex");
+
+    const syncRes = await request.post("/api/internal-audit/sync", {
+      data: { tag: "offers" },
+    });
+    expect(syncRes.status()).toBe(401);
+    expect(syncRes.headers()["x-robots-tag"]).toContain("noindex");
   });
 
   test("2. robots.txt disallows internal-audit pages and API endpoints", async ({
@@ -123,6 +129,57 @@ test.describe("Internal Catalog & Google Merchant Audit Panel", () => {
 
     const csvText = csvBuf.toString("utf8");
     expect(csvText).toContain('"1C_ID","Artikul_SKU","Mahsulot_Nomi_UZ"');
+
+    // Row-level single product sync triggers /api/internal-audit/sync and shows notice
+    const firstRowSyncBtn = page
+      .locator("table tbody tr")
+      .first()
+      .getByRole("button", { name: /Sinxron/i });
+    await firstRowSyncBtn.click();
+    await expect(page.getByRole("status")).toBeVisible({ timeout: 15000 });
+
+    // Whitelist rejects disallowed tags with 400
+    const badSyncRes = await page.request.post("/api/internal-audit/sync", {
+      data: { tag: "arbitrary_disallowed_tag" },
+    });
+    expect(badSyncRes.status()).toBe(400);
+
+    // Switch to 1C Sinxronizatsiya tab
+    await page
+      .getByRole("button", { name: /1C Sinxronizatsiya va Kesh/i })
+      .click();
+    await expect(
+      page.getByRole("heading", { name: /A\. Aqlli va Tejamkor Rejimlar/i }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", {
+        name: /B\. Aniq Yo‘nalishli Kesh Tozalash/i,
+      }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: /C\. Favqulodda Global Kesh/i }),
+    ).toBeVisible();
+
+    // Global flush requires confirmation first
+    await page
+      .getByRole("button", { name: /Butun sayt \+ Feedlarni yangilash/i })
+      .click();
+    await expect(
+      page.getByRole("button", { name: /Ha, to‘liq yangilansin/i }),
+    ).toBeVisible();
+    await page.getByRole("button", { name: /Bekor qilish/i }).click();
+
+    // Execute targeted offers sync & verify result card + secret never leaked
+    await page.getByRole("button", { name: /Aksiyalar va vitrinalar/i }).click();
+    await expect(
+      page.getByRole("heading", { name: /Aksiyalar va vitrinalar/i }),
+    ).toBeVisible({ timeout: 15000 });
+    await expect(
+      page.getByText(/Joriy sessiyadagi sinxronizatsiya tarixi/i),
+    ).toBeVisible();
+
+    const dashboardHtml = await page.content();
+    expect(dashboardHtml).not.toContain("sora_revalidate_secret_2026");
 
     // Logout restores login gate
     await page.getByRole("button", { name: /Chiqish/i }).click();

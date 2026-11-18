@@ -22,7 +22,17 @@ import {
   FileText,
   ChevronLeft,
   ChevronRight,
+  Table2,
+  ServerCog,
+  Loader2,
+  X,
 } from "lucide-react";
+import {
+  SyncControlPanel,
+  type SyncCommandPayload,
+  type SyncExecutionResponse,
+  type SyncHistoryItem,
+} from "@/components/audit/SyncControlPanel";
 import {
   AUDIT_ISSUE_LABELS,
   filterAuditItems,
@@ -97,6 +107,84 @@ export function InternalAuditDashboard({
   const [page, setPage] = useState(1);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const [activeTab, setActiveTab] = useState<"audit" | "sync">("audit");
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [activeSyncCommandId, setActiveSyncCommandId] = useState<string | null>(
+    null,
+  );
+  const [syncHistory, setSyncHistory] = useState<SyncHistoryItem[]>([]);
+  const [rowSyncNotice, setRowSyncNotice] = useState<SyncHistoryItem | null>(
+    null,
+  );
+
+  async function executeSyncCommand(
+    commandId: string,
+    label: string,
+    payload: SyncCommandPayload,
+    showRowNotice = false,
+  ) {
+    if (isSyncing) return;
+    setIsSyncing(true);
+    setActiveSyncCommandId(commandId);
+
+    try {
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+      if (accessKeyQuery) {
+        headers["x-audit-key"] = accessKeyQuery;
+      }
+
+      const res = await fetch("/api/internal-audit/sync", {
+        method: "POST",
+        headers,
+        body: JSON.stringify(payload),
+      });
+
+      const data = (await res.json().catch(() => null)) as
+        | SyncExecutionResponse
+        | null;
+
+      const normalized: SyncExecutionResponse = data || {
+        revalidated: false,
+        error: isUz ? "Serverdan javob olinmadi" : "Нет ответа от сервера",
+      };
+
+      const entry: SyncHistoryItem = {
+        id: `${commandId}-${Date.now()}`,
+        label,
+        timestamp: Date.now(),
+        ok: res.ok,
+        result: normalized,
+      };
+
+      setSyncHistory((prev) => [entry, ...prev].slice(0, 10));
+      if (showRowNotice) {
+        setRowSyncNotice(entry);
+      }
+    } catch {
+      const entry: SyncHistoryItem = {
+        id: `${commandId}-${Date.now()}`,
+        label,
+        timestamp: Date.now(),
+        ok: false,
+        result: {
+          revalidated: false,
+          error: isUz
+            ? "Tarmoq xatoligi yuz berdi"
+            : "Произошла ошибка сети",
+        },
+      };
+      setSyncHistory((prev) => [entry, ...prev].slice(0, 10));
+      if (showRowNotice) {
+        setRowSyncNotice(entry);
+      }
+    } finally {
+      setIsSyncing(false);
+      setActiveSyncCommandId(null);
+    }
+  }
 
   const filteredItems = useMemo(
     () => filterAuditItems(report.items, { issue, brand, category, q }, locale),
@@ -308,10 +396,108 @@ export function InternalAuditDashboard({
             </button>
           </div>
         </div>
+
+        {/* Navigation Tabs */}
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 border-t border-slate-100 flex items-center gap-1 overflow-x-auto">
+          <button
+            type="button"
+            onClick={() => setActiveTab("audit")}
+            className={`inline-flex items-center gap-2 border-b-2 px-4 py-2.5 text-sm font-semibold transition-colors whitespace-nowrap cursor-pointer ${
+              activeTab === "audit"
+                ? "border-slate-900 text-slate-900"
+                : "border-transparent text-slate-500 hover:text-slate-800"
+            }`}
+          >
+            <Table2 className="w-4 h-4" />
+            <span>{isUz ? "Audit jadvali" : "Таблица аудита"}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab("sync")}
+            className={`inline-flex items-center gap-2 border-b-2 px-4 py-2.5 text-sm font-semibold transition-colors whitespace-nowrap cursor-pointer ${
+              activeTab === "sync"
+                ? "border-emerald-600 text-emerald-700"
+                : "border-transparent text-slate-500 hover:text-slate-800"
+            }`}
+          >
+            <ServerCog className="w-4 h-4" />
+            <span>
+              {isUz
+                ? "1C Sinxronizatsiya va Kesh"
+                : "Синхронизация 1С и Кэш"}
+            </span>
+            {syncHistory.length > 0 && (
+              <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-700">
+                {syncHistory.length}
+              </span>
+            )}
+          </button>
+        </div>
       </header>
 
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 mt-6 space-y-6">
-        {/* 6 KPI Cards */}
+        {activeTab === "sync" ? (
+          <SyncControlPanel
+            locale={locale}
+            isSyncing={isSyncing}
+            activeCommandId={activeSyncCommandId}
+            latestEntry={syncHistory[0] ?? null}
+            history={syncHistory}
+            onExecute={(commandId, label, payload) =>
+              executeSyncCommand(commandId, label, payload, false)
+            }
+            onRefreshAudit={() => startRefresh(() => router.refresh())}
+            isRefreshingAudit={isRefreshing}
+          />
+        ) : (
+          <>
+            {rowSyncNotice && (
+              <div
+                role="status"
+                className={`flex flex-wrap items-center justify-between gap-3 rounded-2xl border px-4 py-3 text-sm ${
+                  rowSyncNotice.ok
+                    ? "border-emerald-200 bg-emerald-50 text-emerald-900"
+                    : "border-red-200 bg-red-50 text-red-900"
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  {rowSyncNotice.ok ? (
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  ) : (
+                    <AlertTriangle className="w-4 h-4 text-red-600 shrink-0" />
+                  )}
+                  <span className="font-semibold">{rowSyncNotice.label}:</span>
+                  <span>
+                    {rowSyncNotice.ok
+                      ? isUz
+                        ? `Sayt keshi yangilandi (${rowSyncNotice.result.durationMs ?? 0} ms)`
+                        : `Кэш сайта обновлён (${rowSyncNotice.result.durationMs ?? 0} ms)`
+                      : rowSyncNotice.result.message ||
+                        rowSyncNotice.result.error ||
+                        (isUz ? "Xatolik" : "Ошибка")}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab("sync")}
+                    className="rounded-lg bg-white/80 border border-current/20 px-2.5 py-1 text-xs font-semibold hover:bg-white cursor-pointer"
+                  >
+                    {isUz ? "Tarixni ko‘rish" : "История"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setRowSyncNotice(null)}
+                    aria-label={isUz ? "Yopish" : "Закрыть"}
+                    className="p-1 rounded-lg hover:bg-black/5 cursor-pointer"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            )}
+            {/* 6 KPI Cards */}
         <section
           aria-label={isUz ? "Audit ko‘rsatkichlari" : "Сводка аудита"}
           className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3"
@@ -650,19 +836,44 @@ export function InternalAuditDashboard({
                         </td>
 
                         <td className="py-3 px-4 text-right whitespace-nowrap">
-                          {slug ? (
-                            <Link
-                              href={`/${locale}/products/${slug}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100"
+                          <div className="inline-flex items-center justify-end gap-1.5">
+                            <button
+                              type="button"
+                              disabled={isSyncing}
+                              onClick={() =>
+                                executeSyncCommand(
+                                  `row-${item.id}`,
+                                  `${isUz ? "Mahsulot" : "Товар"} (product-${item.id})`,
+                                  { tag: `product-${item.id}` },
+                                  true,
+                                )
+                              }
+                              title={
+                                isUz
+                                  ? "Ushbu mahsulot keshini 0 soniyada yangilash"
+                                  : "Мгновенно обновить кэш этого товара"
+                              }
+                              className="inline-flex items-center gap-1 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-xs font-medium text-emerald-700 hover:bg-emerald-100 disabled:opacity-50 cursor-pointer"
                             >
-                              <span>{isUz ? "Ochish" : "Открыть"}</span>
-                              <ExternalLink className="w-3.5 h-3.5" />
-                            </Link>
-                          ) : (
-                            <span className="text-xs text-slate-400">—</span>
-                          )}
+                              {isSyncing && activeSyncCommandId === `row-${item.id}` ? (
+                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                              ) : (
+                                <RefreshCw className="w-3.5 h-3.5" />
+                              )}
+                              <span>{isUz ? "Sinxron" : "Синхр."}</span>
+                            </button>
+                            {slug && (
+                              <Link
+                                href={`/${locale}/products/${slug}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100"
+                              >
+                                <span>{isUz ? "Ochish" : "Открыть"}</span>
+                                <ExternalLink className="w-3.5 h-3.5" />
+                              </Link>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     );
@@ -701,6 +912,8 @@ export function InternalAuditDashboard({
             </div>
           )}
         </section>
+          </>
+        )}
       </div>
     </main>
   );
