@@ -1,5 +1,6 @@
 import { api } from "@/lib/api";
 import { calculateProductPrice } from "@/lib/utils/price";
+import { resolveProductImageUrl } from "@/lib/utils/merchant";
 import { NextResponse } from "next/server";
 
 export const revalidate = 86400; // 24 hours
@@ -57,9 +58,10 @@ export async function GET() {
 
     const available = p.price?.stock !== "OutOfStock";
     const desc = p.uz?.short_description_uz || p.uz?.meta_description_uz || name;
-    const picture = p.main_picture.startsWith("http")
-      ? p.main_picture
-      : `${baseUrl}${p.main_picture}`;
+    const picture = resolveProductImageUrl(p.main_picture, {
+      updatedAt: p.updated_at,
+      baseUrl,
+    });
 
     // Find category id if available
     const category = categoriesData.categories.find(

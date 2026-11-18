@@ -1,6 +1,11 @@
 import { Product, getProductLocalized } from "@/lib/schemas/product";
 import { calculateProductPrice } from "@/lib/utils/price";
 import {
+  getValidGtin,
+  getValidMpn,
+  resolveProductImageUrl,
+} from "@/lib/utils/merchant";
+import {
   Review,
   ReviewStats,
   DEFAULT_BEST_RATING,
@@ -88,83 +93,92 @@ export function ProductJsonLd({
     }
   }
 
+  const validGtin = getValidGtin(product.barcode);
+  const validMpn = getValidMpn(product.product_sku);
+  const resolvedImage = resolveProductImageUrl(product.main_picture, {
+    updatedAt: product.updated_at,
+    baseUrl,
+    fallbackUrl: `${baseUrl}/og-image.jpg`,
+  });
+
   const productSchema = {
     "@context": "https://schema.org",
     "@type": "Product",
     name: loc.name,
-    image: product.main_picture.startsWith("http")
-      ? product.main_picture
-      : `${baseUrl}${product.main_picture}`,
+    image: resolvedImage,
     description: loc.meta_description || loc.short_description,
-    sku: product.product_sku,
-    mpn: product.product_sku,
+    ...(validMpn ? { sku: validMpn, mpn: validMpn } : {}),
     category: loc.category,
-    ...(product.barcode
+    ...(validGtin
       ? {
-          gtin: product.barcode,
-          ...(product.barcode.length === 13 ? { gtin13: product.barcode } : {}),
+          gtin: validGtin,
+          ...(validGtin.length === 13 ? { gtin13: validGtin } : {}),
         }
       : {}),
     brand: {
       "@type": "Brand",
-      name: product.brand,
+      name: product.brand || "Sora",
     },
     ...(additionalProperties.length > 0
       ? { additionalProperty: additionalProperties }
       : {}),
-    offers: {
-      "@type": "Offer",
-      url: canonicalUrl,
-      priceCurrency: "UZS",
-      price: priceVal,
-      valueAddedTaxIncluded: true,
-      priceValidUntil: "2027-12-31",
-      availability: inStock
-        ? "https://schema.org/InStock"
-        : "https://schema.org/OutOfStock",
-      itemCondition: "https://schema.org/NewCondition",
-      seller: {
-        "@type": "Organization",
-        name: "Sora.uz",
-        url: baseUrl,
-      },
-      shippingDetails: {
-        "@type": "OfferShippingDetails",
-        shippingRate: {
-          "@type": "MonetaryAmount",
-          value: "0",
-          currency: "UZS",
-        },
-        shippingDestination: {
-          "@type": "DefinedRegion",
-          addressCountry: "UZ",
-        },
-        deliveryTime: {
-          "@type": "ShippingDeliveryTime",
-          handlingTime: {
-            "@type": "QuantitativeValue",
-            minValue: 0,
-            maxValue: 1,
-            unitCode: "DAY",
+    ...(priceVal > 0
+      ? {
+          offers: {
+            "@type": "Offer",
+            url: canonicalUrl,
+            priceCurrency: "UZS",
+            price: priceVal,
+            valueAddedTaxIncluded: true,
+            priceValidUntil: "2027-12-31",
+            availability: inStock
+              ? "https://schema.org/InStock"
+              : "https://schema.org/OutOfStock",
+            itemCondition: "https://schema.org/NewCondition",
+            seller: {
+              "@type": "Organization",
+              name: "Sora.uz",
+              url: baseUrl,
+            },
+            shippingDetails: {
+              "@type": "OfferShippingDetails",
+              shippingRate: {
+                "@type": "MonetaryAmount",
+                value: "0",
+                currency: "UZS",
+              },
+              shippingDestination: {
+                "@type": "DefinedRegion",
+                addressCountry: "UZ",
+              },
+              deliveryTime: {
+                "@type": "ShippingDeliveryTime",
+                handlingTime: {
+                  "@type": "QuantitativeValue",
+                  minValue: 0,
+                  maxValue: 1,
+                  unitCode: "DAY",
+                },
+                transitTime: {
+                  "@type": "QuantitativeValue",
+                  minValue: 1,
+                  maxValue: 3,
+                  unitCode: "DAY",
+                },
+              },
+            },
+            hasMerchantReturnPolicy: {
+              "@type": "MerchantReturnPolicy",
+              applicableCountry: "UZ",
+              returnPolicyCategory:
+                "https://schema.org/MerchantReturnFiniteReturnWindow",
+              merchantReturnDays: 10,
+              returnMethod: "https://schema.org/ReturnByMail",
+              returnFees: "https://schema.org/FreeReturn",
+            },
           },
-          transitTime: {
-            "@type": "QuantitativeValue",
-            minValue: 1,
-            maxValue: 3,
-            unitCode: "DAY",
-          },
-        },
-      },
-      hasMerchantReturnPolicy: {
-        "@type": "MerchantReturnPolicy",
-        applicableCountry: "UZ",
-        returnPolicyCategory:
-          "https://schema.org/MerchantReturnFiniteReturnWindow",
-        merchantReturnDays: 10,
-        returnMethod: "https://schema.org/ReturnByMail",
-        returnFees: "https://schema.org/FreeReturn",
-      },
-    },
+        }
+      : {}),
     ...(stats && stats.reviewCount > 0
       ? {
           aggregateRating: {

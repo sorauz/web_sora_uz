@@ -4,6 +4,7 @@ import { Metadata } from "next";
 import { api } from "@/lib/api";
 import { getProductLocalized } from "@/lib/schemas/product";
 import { calculateProductPrice } from "@/lib/utils/price";
+import { getValidMpn, resolveProductImageUrl } from "@/lib/utils/merchant";
 import { Header } from "@/components/layout/Header";
 import { PromoNav } from "@/components/layout/PromoNav";
 import { Footer } from "@/components/layout/Footer";
@@ -60,6 +61,10 @@ export async function generateMetadata({
       ? `${loc.name} arzon narxda va kafolat bilan Toshkentda xarid qiling.`
       : `Купить ${loc.name} по доступной цене с официальной гарантией в Ташкенте.`);
 
+  const ogImageUrl = resolveProductImageUrl(product.main_picture, {
+    updatedAt: product.updated_at,
+  });
+
   return {
     title,
     description,
@@ -85,7 +90,7 @@ export async function generateMetadata({
       type: "website",
       images: [
         {
-          url: product.main_picture || "https://sora.uz/og-image.jpg",
+          url: ogImageUrl,
           alt: loc.name,
         },
       ],
@@ -94,7 +99,7 @@ export async function generateMetadata({
       card: "summary_large_image",
       title,
       description,
-      images: [product.main_picture],
+      images: [ogImageUrl],
     },
   };
 }
@@ -249,6 +254,11 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
     locale: currentLocale,
   });
 
+  const resolvedOgImage = resolveProductImageUrl(product.main_picture, {
+    updatedAt: product.updated_at,
+  });
+  const validMpn = getValidMpn(product.product_sku);
+
   return (
     <div className="min-h-screen flex flex-col bg-white text-slate-900 pb-20 md:pb-0">
       {/* OpenGraph E-Commerce Product Metadata */}
@@ -257,12 +267,16 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
       <meta property="og:title" content={loc.title || loc.name} />
       <meta property="og:description" content={loc.meta_description || loc.short_description || loc.name} />
       <meta property="og:url" content={`https://sora.uz/${currentLocale}/products/${expectedSlug}`} />
-      <meta property="og:image" content={product.main_picture} />
-      <meta property="product:price:amount" content={priceInfo.price.toString()} />
-      <meta property="product:price:currency" content="UZS" />
+      <meta property="og:image" content={resolvedOgImage} />
+      {priceInfo.price > 0 && (
+        <>
+          <meta property="product:price:amount" content={priceInfo.price.toString()} />
+          <meta property="product:price:currency" content="UZS" />
+        </>
+      )}
       <meta property="product:availability" content={product.price?.stock !== "OutOfStock" ? "in stock" : "out of stock"} />
       {product.brand && <meta property="product:brand" content={product.brand} />}
-      {product.product_sku && <meta property="product:retailer_item_id" content={product.product_sku} />}
+      {validMpn && <meta property="product:retailer_item_id" content={validMpn} />}
       <ProductJsonLd
         product={product}
         locale={currentLocale}

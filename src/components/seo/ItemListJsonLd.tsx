@@ -1,5 +1,6 @@
 import { Product, getProductLocalized } from "@/lib/schemas/product";
 import { calculateProductPrice } from "@/lib/utils/price";
+import { getValidMpn, resolveProductImageUrl } from "@/lib/utils/merchant";
 
 interface ItemListJsonLdProps {
   name: string;
@@ -36,12 +37,12 @@ export function ItemListJsonLd({
       const priceVal = priceInfo.price;
       const inStock = product.price?.stock !== "OutOfStock";
       const canonicalUrl = `${baseUrl}/${locale}/products/${loc.slug}`;
-      const imageUrl =
-        product.main_picture && product.main_picture.trim() !== ""
-          ? product.main_picture.startsWith("http")
-            ? product.main_picture
-            : `${baseUrl}${product.main_picture}`
-          : `${baseUrl}/placeholder-product.svg`;
+      const imageUrl = resolveProductImageUrl(product.main_picture, {
+        updatedAt: product.updated_at,
+        baseUrl,
+        fallbackUrl: `${baseUrl}/og-image.jpg`,
+      });
+      const validMpn = getValidMpn(product.product_sku);
 
       const globalPosition = (currentPage - 1) * pageSize + index + 1;
 
@@ -55,16 +56,16 @@ export function ItemListJsonLd({
           name: loc.name,
           url: canonicalUrl,
           image: imageUrl,
-          sku: product.product_sku,
+          ...(validMpn ? { sku: validMpn } : {}),
           brand: {
             "@type": "Brand",
-            name: product.brand,
+            name: product.brand || "Sora",
           },
           offers: {
             "@type": "Offer",
             url: canonicalUrl,
             priceCurrency: "UZS",
-            price: priceVal,
+            ...(priceVal > 0 ? { price: priceVal } : {}),
             availability: inStock
               ? "https://schema.org/InStock"
               : "https://schema.org/OutOfStock",

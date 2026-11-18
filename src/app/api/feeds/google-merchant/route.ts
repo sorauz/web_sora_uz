@@ -1,5 +1,10 @@
 import { api } from "@/lib/api";
 import { calculateProductPrice } from "@/lib/utils/price";
+import {
+  getValidGtin,
+  getValidMpn,
+  resolveProductImageUrl,
+} from "@/lib/utils/merchant";
 import { NextResponse } from "next/server";
 
 export const revalidate = 86400; // 24 hours
@@ -38,9 +43,13 @@ export async function GET() {
     if (!p.main_picture || !p.main_picture.trim()) continue;
 
     const inStock = p.price?.stock !== "OutOfStock";
-    const picture = p.main_picture.startsWith("http")
-      ? p.main_picture
-      : `${baseUrl}${p.main_picture}`;
+    const picture = resolveProductImageUrl(p.main_picture, {
+      updatedAt: p.updated_at,
+      baseUrl,
+    });
+    const validGtin = getValidGtin(p.barcode);
+    const validMpn = getValidMpn(p.product_sku);
+    const hasIdentifier = Boolean(validGtin || validMpn);
 
     xml += `    <item>
       <g:id>${escapeXml(p.id)}</g:id>
@@ -53,8 +62,9 @@ export async function GET() {
       <g:price>${priceInfo.oldPrice ?? priceInfo.price} UZS</g:price>
       ${priceInfo.hasDiscount ? `<g:sale_price>${priceInfo.price} UZS</g:sale_price>` : ""}
       <g:brand>${escapeXml(p.brand || "Sora")}</g:brand>
-      <g:identifier_exists>${p.product_sku ? "yes" : "no"}</g:identifier_exists>
-      ${p.product_sku ? `<g:mpn>${escapeXml(p.product_sku)}</g:mpn>` : ""}
+      <g:identifier_exists>${hasIdentifier ? "yes" : "no"}</g:identifier_exists>
+      ${validGtin ? `<g:gtin>${escapeXml(validGtin)}</g:gtin>` : ""}
+      ${validMpn ? `<g:mpn>${escapeXml(validMpn)}</g:mpn>` : ""}
     </item>
 `;
   }

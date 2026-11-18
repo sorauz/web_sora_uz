@@ -1,5 +1,6 @@
 import { MetadataRoute } from "next";
 import { api } from "@/lib/api";
+import { resolveProductImageUrl } from "@/lib/utils/merchant";
 
 export const revalidate = 86400; // 24 hours ISR revalidation
 
@@ -133,7 +134,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const ruSlug = product.ru?.slug_ru || product.uz?.slug_uz;
     if (!uzSlug && !ruSlug) continue;
 
-    const images = product.main_picture ? [product.main_picture] : undefined;
+    const images =
+      product.main_picture && product.main_picture.trim()
+        ? [
+            resolveProductImageUrl(product.main_picture, {
+              updatedAt: product.updated_at,
+              baseUrl,
+            }),
+          ]
+        : undefined;
 
     // Use 1C updated_at if valid date, otherwise fallback to now
     let productLastMod = now;

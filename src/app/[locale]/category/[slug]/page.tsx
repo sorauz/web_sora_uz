@@ -425,7 +425,7 @@ export default async function CategoryPage({
       country: p.country || "",
       video_url: "",
       main_picture: p.main_picture,
-      updated_at: "",
+      updated_at: p.updated_at || "",
       price: p.price,
       uz: {
         unit_uz: p.uz?.unit_uz || "dona",
