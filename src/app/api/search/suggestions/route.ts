@@ -4,6 +4,12 @@ import { searchProducts, searchCategories, searchBrands } from "@/lib/utils/sear
 import { getProductLocalized } from "@/lib/schemas/product";
 import { calculateProductPrice } from "@/lib/utils/price";
 
+const SUGGESTIONS_CACHE_HEADERS = {
+  "Cache-Control": "public, max-age=300, s-maxage=3600, stale-while-revalidate=86400",
+  "CDN-Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
+  "Vercel-CDN-Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
+} as const;
+
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
   const q = searchParams.get("q")?.trim() || "";
@@ -12,11 +18,7 @@ export async function GET(request: NextRequest) {
   if (!q || q.length < 2) {
     return NextResponse.json(
       { products: [], categories: [], brands: [] },
-      {
-        headers: {
-          "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
-        },
-      }
+      { headers: SUGGESTIONS_CACHE_HEADERS }
     );
   }
 
@@ -64,11 +66,7 @@ export async function GET(request: NextRequest) {
         categories: matchedCategories,
         brands: matchedBrands,
       },
-      {
-        headers: {
-          "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
-        },
-      }
+      { headers: SUGGESTIONS_CACHE_HEADERS }
     );
   } catch (err: unknown) {
     return NextResponse.json(

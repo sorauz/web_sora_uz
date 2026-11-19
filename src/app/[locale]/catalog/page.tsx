@@ -1,21 +1,20 @@
 import { setRequestLocale } from "next-intl/server";
-import { redirect } from "next/navigation";
 import { api } from "@/lib/api";
 import { Header } from "@/components/layout/Header";
 import { PromoNav } from "@/components/layout/PromoNav";
 import { Footer } from "@/components/layout/Footer";
 import { MobileNav } from "@/components/layout/MobileNav";
 import { Breadcrumbs } from "@/components/discovery/Breadcrumbs";
-import { CategoryCard } from "@/components/discovery/CategoryCard";
 import { BrandCard } from "@/components/discovery/BrandCard";
 import { ProductCard } from "@/components/discovery/ProductCard";
 import { Link } from "@/i18n/routing";
 import { Metadata } from "next";
 import { ShieldCheck, Sparkles, Flame, BadgePercent } from "lucide-react";
 
+export const revalidate = 86400;
+
 interface CatalogPageProps {
   params: Promise<{ locale: string }>;
-  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 export async function generateMetadata({ params }: CatalogPageProps): Promise<Metadata> {
@@ -39,26 +38,10 @@ export async function generateMetadata({ params }: CatalogPageProps): Promise<Me
   };
 }
 
-export default async function CatalogPage({ params, searchParams }: CatalogPageProps) {
+export default async function CatalogPage({ params }: CatalogPageProps) {
   const { locale } = await params;
-  const sParams = (await searchParams) || {};
   setRequestLocale(locale);
   const isUz = locale === "uz";
-
-  const offerFilter = typeof sParams.offer === "string" ? sParams.offer : (typeof sParams.badge === "string" ? sParams.badge : null);
-
-  // SEO & UX: Redirect query-based offer URLs to permanent clean static routes
-  if (offerFilter) {
-    if (offerFilter === "promotions" || offerFilter === "sale") {
-      redirect(`/${locale}/catalog/promotions`);
-    } else if (offerFilter === "low-price" || offerFilter === "low_price_guarantee") {
-      redirect(`/${locale}/catalog/low_price_guarantee`);
-    } else if (offerFilter === "popular" || offerFilter === "top") {
-      redirect(`/${locale}/catalog/popular`);
-    } else if (offerFilter === "new" || offerFilter === "new_products") {
-      redirect(`/${locale}/catalog/new_products`);
-    }
-  }
 
   const [categoriesData, brandsData, productsData] = await Promise.all([
     api.getCategories(),

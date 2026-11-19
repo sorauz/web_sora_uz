@@ -25,10 +25,12 @@ interface ProductPageProps {
   params: Promise<{ locale: string; slug: string }>;
 }
 
+export const revalidate = 86400;
+
 export async function generateStaticParams() {
   const { products } = await api.getAllProducts();
   const params: { locale: string; slug: string }[] = [];
-  for (const p of products.slice(0, 20)) {
+  for (const p of products.slice(0, 60)) {
     if (p.uz?.slug_uz) params.push({ locale: "uz", slug: p.uz.slug_uz });
     if (p.ru?.slug_ru) params.push({ locale: "ru", slug: p.ru.slug_ru });
   }

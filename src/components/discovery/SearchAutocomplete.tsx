@@ -22,6 +22,22 @@ interface SearchAutocompleteProps {
   brands?: Brand[];
 }
 
+interface SuggestionResponse {
+  products: Array<{
+    id: string;
+    slug: string;
+    name: string;
+    main_picture: string;
+    price: number;
+    oldPrice?: number;
+    hasDiscount?: boolean;
+  }>;
+  categories: Array<{ id: string; name: string; slug: string }>;
+  brands: Array<{ id: string; name: string }>;
+}
+
+const clientSuggestionCache = new Map<string, SuggestionResponse>();
+
 export function SearchAutocomplete({
   products = [],
   categories = [],
@@ -35,18 +51,9 @@ export function SearchAutocomplete({
 
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
-  const [remoteResults, setRemoteResults] = useState<{
-    products: Array<{
-      id: string;
-      slug: string;
-      name: string;
-      main_picture: string;
-      price: number;
-      oldPrice?: number;
-      hasDiscount?: boolean;
-    }>;
-    categories: Array<{ id: string; name: string; slug: string }>;
-    brands: Array<{ id: string; name: string }>;
+  const [remoteState, setRemoteState] = useState<{
+    key: string;
+    data: SuggestionResponse;
   } | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -65,10 +72,14 @@ export function SearchAutocomplete({
 
   // If products are passed locally, use synchronous local search; otherwise fetch lightweight suggestions
   const hasLocalData = products.length > 0;
+  const cacheKey = `${locale}:${trimmed}`;
+  const cachedRemote =
+    !hasLocalData && trimmed.length >= 2
+      ? clientSuggestionCache.get(cacheKey)
+      : undefined;
 
   useEffect(() => {
-    if (hasLocalData || trimmed.length < 2) {
-      setRemoteResults(null);
+    if (hasLocalData || trimmed.length < 2 || cachedRemote) {
       return;
     }
 
@@ -80,19 +91,29 @@ export function SearchAutocomplete({
           { signal: controller.signal }
         );
         if (res.ok) {
-          const data = await res.json();
-          setRemoteResults(data);
+          const data = (await res.json()) as SuggestionResponse;
+          if (clientSuggestionCache.size >= 100) {
+            const firstKey = clientSuggestionCache.keys().next().value;
+            if (firstKey) clientSuggestionCache.delete(firstKey);
+          }
+          clientSuggestionCache.set(cacheKey, data);
+          setRemoteState({ key: cacheKey, data });
         }
       } catch {
         // ignore aborts
       }
-    }, 150);
+    }, 200);
 
     return () => {
       clearTimeout(timer);
       controller.abort();
     };
-  }, [trimmed, locale, hasLocalData]);
+  }, [trimmed, locale, hasLocalData, cachedRemote, cacheKey]);
+
+  const activeRemote =
+    trimmed.length >= 2
+      ? cachedRemote ?? (remoteState?.key === cacheKey ? remoteState.data : null)
+      : null;
 
   const matchedProducts = hasLocalData
     ? trimmed.length > 1
@@ -110,7 +131,7 @@ export function SearchAutocomplete({
           };
         })
       : []
-    : remoteResults?.products || [];
+    : activeRemote?.products || [];
 
   const matchedCategories = hasLocalData
     ? trimmed.length > 1
@@ -120,7 +141,7 @@ export function SearchAutocomplete({
           slug: isUz ? c.group_slug_uz : c.group_slug_ru,
         }))
       : []
-    : remoteResults?.categories || [];
+    : activeRemote?.categories || [];
 
   const matchedBrands = hasLocalData
     ? trimmed.length > 1
@@ -129,7 +150,7 @@ export function SearchAutocomplete({
           name: b.name,
         }))
       : []
-    : remoteResults?.brands || [];
+    : activeRemote?.brands || [];
 
   const hasResults =
     matchedProducts.length > 0 ||

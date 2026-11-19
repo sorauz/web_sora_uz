@@ -67,6 +67,34 @@ export function proxy(request: NextRequest) {
     }
   }
 
+  // 4. Redirect legacy query-based catalog offer URLs so /[locale]/catalog stays 100% ISR/PRERENDER
+  const catalogOfferMatch = pathname.match(/^\/(?:(uz|ru)\/)?catalog\/?$/i);
+  if (catalogOfferMatch) {
+    const offerParam =
+      request.nextUrl.searchParams.get("offer") ||
+      request.nextUrl.searchParams.get("badge");
+    if (offerParam) {
+      const locale = catalogOfferMatch[1]?.toLowerCase() || "uz";
+      const targetOffer =
+        offerParam === "promotions" || offerParam === "sale"
+          ? "promotions"
+          : offerParam === "low-price" || offerParam === "low_price_guarantee"
+          ? "low_price_guarantee"
+          : offerParam === "popular" || offerParam === "top"
+          ? "popular"
+          : offerParam === "new" || offerParam === "new_products"
+          ? "new_products"
+          : null;
+
+      if (targetOffer) {
+        const url = request.nextUrl.clone();
+        url.pathname = `/${locale}/catalog/${targetOffer}`;
+        url.search = "";
+        return NextResponse.redirect(url, 308);
+      }
+    }
+  }
+
   return intlMiddleware(request);
 }
 

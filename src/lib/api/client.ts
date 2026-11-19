@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import http from "node:http";
 import https from "node:https";
 import {
@@ -164,6 +165,18 @@ class SoraApiClient {
     tree: CategoryTreeNode[];
     isFallback: boolean;
   }> {
+    if (!hasCustomFetchOptions(options)) {
+      return cachedGetCategories(this);
+    }
+    return this.fetchCategoriesImpl(options);
+  }
+
+  /** @internal */
+  async fetchCategoriesImpl(options?: FetchOptions): Promise<{
+    categories: Category[];
+    tree: CategoryTreeNode[];
+    isFallback: boolean;
+  }> {
     const res = await this.request<{ categories?: Category[] }>(
       "/categories",
       {
@@ -215,6 +228,16 @@ class SoraApiClient {
   async getBrands(
     options?: FetchOptions
   ): Promise<{ data: BrandsResponse; isFallback: boolean }> {
+    if (!hasCustomFetchOptions(options)) {
+      return cachedGetBrands(this);
+    }
+    return this.fetchBrandsImpl(options);
+  }
+
+  /** @internal */
+  async fetchBrandsImpl(
+    options?: FetchOptions
+  ): Promise<{ data: BrandsResponse; isFallback: boolean }> {
     const res = await this.request<BrandsResponse>("/brands", {
       tags: options?.tags ?? ["brands"],
       revalidate: options?.revalidate,
@@ -232,6 +255,19 @@ class SoraApiClient {
    * Fetches latest prices and stock availability.
    */
   async getPrices(
+    options?: FetchOptions
+  ): Promise<{
+    priceMap: Record<string, ProductPriceStock>;
+    isFallback: boolean;
+  }> {
+    if (!hasCustomFetchOptions(options)) {
+      return cachedGetPrices(this);
+    }
+    return this.fetchPricesImpl(options);
+  }
+
+  /** @internal */
+  async fetchPricesImpl(
     options?: FetchOptions
   ): Promise<{
     priceMap: Record<string, ProductPriceStock>;
@@ -262,6 +298,16 @@ class SoraApiClient {
    * Fetches all products.
    */
   async getAllProducts(
+    options?: FetchOptions
+  ): Promise<{ products: Product[]; isFallback: boolean }> {
+    if (!hasCustomFetchOptions(options)) {
+      return cachedGetAllProducts(this);
+    }
+    return this.fetchAllProductsImpl(options);
+  }
+
+  /** @internal */
+  async fetchAllProductsImpl(
     options?: FetchOptions
   ): Promise<{ products: Product[]; isFallback: boolean }> {
     const res = await this.request<unknown[]>("/all_product", {
@@ -306,6 +352,17 @@ class SoraApiClient {
    * Fetches single detailed product by UUID with price and stock attached.
    */
   async getProductById(
+    id: string,
+    options?: FetchOptions
+  ): Promise<{ product: Product | null; isFallback: boolean }> {
+    if (!hasCustomFetchOptions(options)) {
+      return cachedGetProductById(this, id);
+    }
+    return this.fetchProductByIdImpl(id, options);
+  }
+
+  /** @internal */
+  async fetchProductByIdImpl(
     id: string,
     options?: FetchOptions
   ): Promise<{ product: Product | null; isFallback: boolean }> {
@@ -631,6 +688,14 @@ class SoraApiClient {
     slug: string,
     locale: "uz" | "ru" = "uz"
   ): Promise<{ product: Product | null; isFallback: boolean }> {
+    return cachedGetProductBySlug(this, slug, locale);
+  }
+
+  /** @internal */
+  async fetchProductBySlugImpl(
+    slug: string,
+    locale: "uz" | "ru" = "uz"
+  ): Promise<{ product: Product | null; isFallback: boolean }> {
     const all = await this.getAllProducts();
 
     // 1. Try matching slug in requested locale
@@ -857,6 +922,18 @@ class SoraApiClient {
    * Cached with 24-hour ISR and "faq" revalidation tag.
    */
   async getFaqs(options?: FetchOptions): Promise<{
+    faqs: FaqItem[];
+    updatedAt: string;
+    isFallback: boolean;
+  }> {
+    if (!hasCustomFetchOptions(options)) {
+      return cachedGetFaqs(this);
+    }
+    return this.fetchFaqsImpl(options);
+  }
+
+  /** @internal */
+  async fetchFaqsImpl(options?: FetchOptions): Promise<{
     faqs: FaqItem[];
     updatedAt: string;
     isFallback: boolean;
@@ -1244,5 +1321,36 @@ class SoraApiClient {
     }
   }
 }
+
+function hasCustomFetchOptions(options?: FetchOptions): boolean {
+  return Boolean(
+    options?.noCache ||
+      (options?.tags && options.tags.length > 0) ||
+      options?.revalidate !== undefined
+  );
+}
+
+const cachedGetCategories = cache((client: SoraApiClient) =>
+  client.fetchCategoriesImpl()
+);
+const cachedGetBrands = cache((client: SoraApiClient) =>
+  client.fetchBrandsImpl()
+);
+const cachedGetPrices = cache((client: SoraApiClient) =>
+  client.fetchPricesImpl()
+);
+const cachedGetAllProducts = cache((client: SoraApiClient) =>
+  client.fetchAllProductsImpl()
+);
+const cachedGetProductById = cache((client: SoraApiClient, id: string) =>
+  client.fetchProductByIdImpl(id)
+);
+const cachedGetProductBySlug = cache(
+  (client: SoraApiClient, slug: string, locale: "uz" | "ru") =>
+    client.fetchProductBySlugImpl(slug, locale)
+);
+const cachedGetFaqs = cache((client: SoraApiClient) =>
+  client.fetchFaqsImpl()
+);
 
 export const api = new SoraApiClient();

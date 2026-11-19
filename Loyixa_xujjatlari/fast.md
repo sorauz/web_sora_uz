@@ -1,181 +1,187 @@
-# Sora.uz Veb-Saytini Tezlashtirish Bo‘yicha Texnik Audit va Harakatlar Rejasi
+# Sora.uz Veb-Saytini Tezlashtirish Bo‘yicha Takomillashtirilgan Texnik Audit va Harakatlar Rejasi
 
-> **Tahlil sanasi:** 2026-11-19  
-> **O‘rganilgan muhit:** Production (`https://sora.uz`) jonli TTFB/kesh o‘lchovlari + loyiha manba kodi tahlili
-
----
-
-## 1. Hozirgi Holat (Jonli O‘lchov Natijalari)
-
-`https://sora.uz` sahifalarini jonli tekshirish natijasida quyidagi haqiqiy ko‘rsatkichlar qayd etildi:
-
-| Sahifa | TTFB | Umumiy yuklanish | Vercel Cache | `Cache-Control` sarlavhasi | Holat |
-| :--- | :---: | :---: | :---: | :--- | :--- |
-| `/uz` (Bosh sahifa) | 1 111 ms | 1 735 ms | `PRERENDER` | `public, max-age=0, must-revalidate` | Yaxshi |
-| `/uz/catalog` | **3 593 ms** | **3 642 ms** | **`MISS`** | `private, no-cache, no-store` | **Sekin (Kritik)** |
-| `/uz/category/yozuv-qurollari` | 1 221 ms | **3 749 ms** | **`MISS`** | `private, no-cache, no-store` | **Sekin (Kritik)** |
-| `/uz/products/deli-e1589-...` (PDP) | **3 304 ms** | **8 586 ms** | **`MISS`** | `public, max-age=0, must-revalidate` | **Juda sekin (Kritik)** |
-| `/uz/search?q=deli` | **3 060 ms** | **5 570 ms** | **`MISS`** | `private, no-cache, no-store` | **Sekin (Kritik)** |
-
-> **Asosiy xulosa:** Saytning sekin ishlashi dizayn yoki brauzerda emas — **90% muammo server tomonidagi 3 ta kesh uzilishida** (`all_product` > 2 MB bo‘lgani uchun Next.js Data Cache ishlamayapti, dinamik sahifalarda Edge CDN keshi bosib ketilyapti va bitta so‘rov ichida 1C API qayta-qayta chaqirilmoqda).
+> **Yangilangan sana:** 2026-11-19 (commit `898f602` — 1C `/all_product` qisqartirilgan JSON deploy’idan keyin)  
+> **O‘rganilgan muhit:** Production (`https://sora.uz`) jonli TTFB / Edge Cache / `x-vercel-id` o‘lchovlari + loyiha manba kodi auditi
 
 ---
 
-## 2. Ustuvorlik Bo‘yicha Takliflar (Eng Katta Ta’sirdan Boshlab)
+## 1. So‘nggi O‘zgarish Natijasi (Oldin vs Hozir — Jonli O‘lchovlar)
+
+1C `/all_product` endpointidagi kalitlar qisqartirilishi (`sku`, `pic`, `up_date`, `alt_uz`, `alt_ru`) natijasida javob hajmi **`2 105 791` baytdan (`2.01 MB`) → `1 452 905` baytga (`1.38 MB`)** tushdi va Next.js 2 MB Data Cache qayta ishga tushdi.
+
+Bu birgina qadamning o‘zi production saytda quyidagi keskin o‘sishni berdi:
+
+| Sahifa / Endpoint | Oldin (2.01 MB, keshsiz) | Hozir (1.38 MB, Data Cache ON) | O‘zgarish | Vercel Cache / Region (`x-vercel-id`) |
+| :--- | :---: | :---: | :---: | :--- |
+| `/uz` (Bosh sahifa) | 1 735 ms | **1 353 ms** (`67.3 KB`) | **1.3× tezroq** | `PRERENDER` (`arn1`) |
+| `/uz/catalog` | 3 642 ms | **864 ms** (`48.7 KB`) | **4.2× tezroq** | `MISS` · `private, no-store` (`arn1::iad1`) |
+| `/uz/category/yozuv-qurollari` | 3 749 ms | **699 ms** (`49.6 KB`) | **5.4× tezroq** | `MISS` · `private, no-store` (`arn1::iad1`) |
+| `/uz/products/deli-e1589-...` (PDP) | 8 586 ms | **779 ms** (`58.5 KB`) | **11.0× tezroq** | `MISS` (`arn1::iad1`) |
+| `/uz/search?q=deli` | 5 570 ms | **583 ms** (`47.6 KB`) | **9.5× tezroq** | `MISS` · `private, no-store` (`arn1::iad1`) |
+| `/api/search/suggestions?q=deli` | — | **800 ms** (`0.7 KB`) | — | `MISS` · `public` (`arn1::iad1`) |
+
+### Asosiy xulosa (Hozirgi to‘siqlar qayerda?)
+1. **1C 2 MB muammosi vaqtincha hal qilindi**, lekin bu **doimiy emas**: 1 930 ta mahsulot = `1.45 MB` (~`753` bayt/mahsulot), ya’ni katalog **`~2 780` ta mahsulotga** yetgan kuni (yana ~850 ta mahsulot qo‘shilsa) Next.js 2 MB limiti yana buziladi.
+2. **Hozirgi eng katta sekinlashtiruvchi omil — geografiya (`arn1::iad1`) va Edge CDN `MISS`:**  
+   Jonli `x-vercel-id: arn1::iad1` sarlavhasi isbotladiki, O‘zbekistondan kelgan so‘rovlar **Stokgolm (`arn1`) → Atlantika okeani osha Vashington, AQSh (`iad1`) → orqaga Stokgolm → Toshkent** yo‘nalishida aylanib yuribdi! Har bir dinamik sahifa va qidiruv so‘rovi shu sababli `580–860 ms` yo‘qotmoqda.
 
 ---
 
-### P0 — KRITIK (Tezlikni 5–10 barobar oshiradi: 3.7–8.5 s → 0.2–0.6 s)
-
-#### 1. `all_product` 2 MB Next.js Data Cache cheklovini bartaraf etish
-- **Aniqlangan muammo:**  
-  1C `/all_product` javobi hozir **2 105 791 bayt (2.01 MB)**. Next.js Data Cache limiti esa qat’iy **2 097 152 bayt (2.00 MB)**. Atigi **~8.5 KB** oshib ketgani uchun Next.js har bir build va runtime so‘rovda quyidagi xato bilan keshni rad etmoqda:
-  ```text
-  Failed to set Next.js data cache for http://1cloud.uz:777/SORA/hs/for_msp/all_product,
-  items over 2MB can not be cached (2105791 bytes)
-  ```
-  Natijada har bir tashrifchi katalog, kategoriya, qidiruv yoki mahsulot sahifasini ochganda Vercel serveri Toshkentdagi `1cloud.uz:777` dan 2.1 MB JSON’ni qaytadan yuklab olmoqda.
-- **Yechim (2 qatlamli):**
-  1. **Next.js ichida ixcham kesh (`unstable_cache` + in-memory TTL):** `src/lib/api/client.ts` da `/all_product` ni `cache: "no-store"` bilan olib, keraksiz bo‘sh maydonlarni qisqartirgan (yoki 2 ta kichik bo‘lakka ajratgan) holda `unstable_cache` (24 soat, tag: `"all-products"`) va server-xotira (in-memory) keshiga saqlash.
-  2. **1C tomonida (ideal uzoq muddatli yechim):** 1C `/all_product` javobidan bo‘sh maydonlar va ortiqcha probellarni (minified JSON) olib tashlash yoki `gzip` yoqish — bu javob hajmini 2.1 MB dan **~1.1–1.4 MB** gacha tushiradi va Next.js Data Cache yana 100% ishlaydi.
-- **Kutiladigan natija:** Har bir sahifada 1C dan 2.1 MB yuklash yo‘qoladi; server javob vaqti **2–4 soniyaga qisqaradi** va 1C serveriga tushadigan yuklama **95% kamayadi**.
+## 2. Ustuvorlik Bo‘yicha Takliflar (Shaffof Reja: P0 → P3)
 
 ---
 
-#### 2. Bitta sahifa so‘rovida 1C API’ni qayta-qayta chaqirishni to‘xtatish (`React.cache`)
-- **Aniqlangan muammo:**  
-  Mahsulot sahifasi (`src/app/[locale]/products/[slug]/page.tsx`) ochilganda bitta HTTP so‘rovning o‘zida:
-  1. `generateMetadata()` → `api.getProductBySlug()` → `api.getAllProducts()` (1-marta);
-  2. `ProductDetailPage()` → `api.getProductBySlug()` → `api.getAllProducts()` (2-marta);
-  3. `ProductDetailPage()` 128-qator → `Promise.all([..., api.getAllProducts(), ...])` (3-marta).  
-  `/all_product` keshlanmagani uchun bitta mahsulot sahifasi 1C ga **3 marta 2.1 MB** so‘rov yuborib **8.59 soniyagacha** cho‘zilmoqda!
+### P0 — KRITIK (Dinamik sahifalarni 600–860 ms → 100–250 ms ga tushiradi)
+
+#### 1. Vercel Serverless Function mintaqasini AQSh (`iad1`) dan Yevropa/Yaqin Sharq (`fra1` / `dxb1`) ga o‘tkazish
+- **Jonli dalil:** Barcha dinamik sahifalarda `x-vercel-id: arn1::iad1::...` qayd etildi (`vercel.json` da mintaqa ko‘rsatilmagan).
 - **Yechim:**  
-  `src/lib/api/client.ts` dagi `getAllProducts`, `getCategories`, `getBrands`, `getPrices`, `getProductById`, `getProductBySlug` metodlarini React’ning per-request deduplikatsiyasi (`cache()` from `"react"`) bilan o‘rash.
-- **Kutiladigan natija:** Bitta sahifa yuklanishida har bir 1C endpoint ko‘pi bilan **1 marta** chaqiriladi; PDP yuklanishi **8.5 s → ~1.5 s** (kesh bilan **< 0.3 s**) ga tushadi.
+  `vercel.json` ga `"regions": ["fra1"]` (Frankfurt) yoki `"dxb1"` (Dubay) qo‘shish (va Vercel Dashboard → Settings → Functions → Function Region’da tasdiqlash).
+- **Kutiladigan natija:** Transatlantik ping (`~300–450 ms`) butunlay yo‘qoladi; katalog, kategoriya, qidiruv, autocomplete, checkout va 1C API chaqiruvlari **2–3 barobar tezlashadi**.
 
 ---
 
-#### 3. Katalog, Kategoriya va Brend sahifalarida Edge CDN / ISR keshini haqiqatan ishga tushirish
+#### 2. `/uz/catalog` va `/ru/catalog` sahifalarini `ƒ (Dynamic)` dan `PRERENDER` (ISR) ga o‘tkazish *(Yangi topilma)*
 - **Aniqlangan muammo:**  
-  `next.config.ts` da `Cache-Control: public, s-maxage=600, stale-while-revalidate=3600` yozilgan bo‘lsa-da, jonli tekshiruvda `/uz/catalog` va `/uz/category/yozuv-qurollari` sahifalari **`Cache-Control: private, no-cache, no-store`** va **`x-vercel-cache: MISS`** qaytarmoqda.  
-  Sababi: Next.js App Router’da sahifa `searchParams` ni o‘qigan zahoti avtomatik `ƒ (Dynamic)` rejimiga o‘tadi va `next.config.ts` dagi `Cache-Control` ni bekor qiladi.
+  `src/app/[locale]/catalog/page.tsx` (44–61-qatorlar) faqatgina eski `?offer=promotions` / `?badge=sale` query havolalarini yo‘naltirish uchun `await searchParams` ni o‘qimoqda. Bitta shu sababdan butun katalog sahifasi Next.js tomonidan `ƒ (Dynamic)` (`private, no-cache, no-store`, `x-vercel-cache: MISS`, **864 ms**) qilib qo‘yilgan!
+- **Yechim:**  
+  `?offer=` / `?badge=` redirect qoidalarini `src/proxy.ts` (yoki `next.config.ts` `redirects()`) ga ko‘chirib, `CatalogPage` dan `searchParams` ni olib tashlash va `export const revalidate = 86400` qo‘yish.
+- **Kutiladigan natija:** `/uz/catalog` va `/ru/catalog` bir zumda `PRERENDER` (`x-vercel-cache: HIT`) ga o‘tadi: **864 ms → ~120–180 ms**.
+
+---
+
+#### 3. Kategoriya, Brend va Mahsulot sahifalarida haqiqiy ISR / Edge CDN keshini yoqish
+- **Aniqlangan muammo:**
+  - `category/[slug]` va `brand/[slug]` da `searchParams` o‘qilgani uchun `next.config.ts` dagi `Cache-Control: public, s-maxage=600` bekor qilinib, brauzerga `private, no-cache, no-store` (`MISS`, **699 ms**) ketmoqda.
+  - `products/[slug]/page.tsx` da `export const revalidate = 86400` aniq yozilmagan va `generateStaticParams` faqat birinchi **20 ta** mahsulotni oldindan quradi (qolgan 1 910 ta mahsulot birinchi kirishda `MISS` — **779 ms**).
 - **Yechim:**
-  1. **Asosiy kategoriya/katalog/brend sahifalari** (`/uz/category/[slug]`, `/uz/catalog`, `/uz/brand/[slug]`) uchun `export const revalidate = 86400` bilan statik ISR qobiq yaratish (hech bo‘lmaganda filtrsiz 1-sahifa va top kategoriyalar `generateStaticParams` orqali CDN’dan **50–150 ms** da ochiladi).
-  2. Filtr va saralash (`brand`, `minPrice`, `maxPrice`, `inStock`, `sort`, `page`) o‘zgarganda butun sahifani serverda qayta SSR qilmasdan, kategoriya mahsulotlari ro‘yxati ustida mijoz tomonida tezkor filtratsiya qilish (yoki keshlangan JSON API endpoint orqali yuklash).
-  3. Mahsulot sahifalarida (`/[locale]/products/[slug]`) `export const revalidate = 86400` ni aniq belgilash va `generateStaticParams` sonini top 20 tadan top **100–200 ta eng ko‘p kiriladigan mahsulotga** oshirish (qolganlari birinchi kirishdan so‘ng 24 soat CDN’da saqlanadi).
-- **Kutiladigan natija:** Katalog va kategoriya sahifalarida `x-vercel-cache: HIT`, TTFB **3 600 ms → 100–250 ms**!
+  1. `products/[slug]/page.tsx` ga `export const revalidate = 86400` qo‘shish va `generateStaticParams` qamrovini top **100–200 ta** eng ko‘p kiriladigan mahsulotga kengaytirish.
+  2. Asosiy kategoriya va brend sahifalarining filtrsiz ko‘rinishini ISR (statik kesh + `generateStaticParams`) bilan berish, filtr/saralashni esa client-side yoki keshlangan API orqali boshqarish.
+- **Kutiladigan natija:** Kategoriya, brend va mahsulot sahifalarida `x-vercel-cache: HIT`, TTFB **700–800 ms → 100–200 ms**.
 
 ---
 
-### P1 — YUQORI TA’SIR (Vercel–1C tarmoq kechikishi va Core Web Vitals: LCP / INP / TBT)
-
-#### 4. Vercel Serverless funksiyalar mintaqasini O‘zbekistonga yaqinlashtirish (`fra1` yoki `dxb1`)
+#### 4. Bitta sahifa so‘rovida 1C metodlarini `React.cache()` bilan deduplikatsiya qilish
 - **Aniqlangan muammo:**  
-  Vercel’da standart mintaqa odatda AQSh (`iad1` — Washington, D.C.). Toshkentdagi `1cloud.uz:777` serveriga AQSh’dan har bir so‘rov ~200–280 ms tarmoq kechikishi (RTT) bilan borib keladi.
+  Mahsulot sahifasida (`products/[slug]/page.tsx`) `generateMetadata()` ham, `ProductDetailPage()` ham `api.getProductBySlug()` va `api.getAllProducts()` ni ketma-ket **3 marta** chaqiradi. Har safar Zod `AllProductsResponseSchema.safeParse()` barcha 1 930 ta mahsulot ustidan 3 marta qayta yugurib, CPU vaqti (100–200 ms) sarflaydi.
 - **Yechim:**  
-  `vercel.json` (yoki Vercel Project Settings → Functions → Function Region) orqali mintaqani **Frankfurt (`fra1`)** yoki **Dubay (`dxb1`)** ga o‘tkazish.
-- **Kutiladigan natija:** O‘zbekistonlik foydalanuvchilar uchun ham, 1C serveriga so‘rovlar uchun ham tarmoq pingi **2–3 barobar** qisqaradi.
+  `src/lib/api/client.ts` dagi `getAllProducts`, `getCategories`, `getBrands`, `getPrices`, `getProductById`, `getProductBySlug` funksiyalarini `cache()` (`from "react"`) bilan o‘rash.
+- **Kutiladigan natija:** Har bir so‘rovda Zod validatsiya va `fetch` faqat **1 marta** bajariladi (server CPU sarfi 3× kamayadi).
 
 ---
 
-#### 5. Analitika skriptlarini (`YandexMetrika` + `GoogleAnalytics`) kechiktirib yuklash
-- **Aniqlangan muammo:**  
-  `src/components/analytics/YandexMetrika.tsx` va `GoogleAnalytics.tsx` da `strategy="afterInteractive"` ishlatilgan, Yandex Metrika’da esa `webvisor: true` + `clickmap: true` yoqilgan. WebVisor sahifa ochilgan zahoti DOM o‘zgarishlarini yozib olishni boshlab, mobil qurilmalarda asosiy oqimni (Main Thread / TBT / INP) sezilarli band qiladi.
+### P1 — YUQORI TA’SIR (Uzoq muddatli barqarorlik, Qidiruv tezligi va Mobile PageSpeed)
+
+#### 5. `/all_product` 2 MB chegarasidan kelajakda oshib ketishiga qarshi doimiy himoya *(Yangilangan baho)*
+- **Hozirgi zaxira:** `1 930` ta mahsulot = `1.45 MB` → **`~2 780` ta mahsulotda 2 MB limiti yana to‘ladi!**
+- **Doimiy yechim (2 ta yo‘l):**
+  1. **1C tomonida:** `/all_product` javobida HTTP `gzip` siqishni yoqish yoki pagination (`?page=1&limit=1000`) qo‘shish.
+  2. **Next.js tomonida:** `getAllProducts()` ichida natijani 2–3 ta kichik bo‘lakda `unstable_cache` (yoki in-memory LRU + `tags: ["all-products"]`) orqali saqlash — shunda katalog 5 000–10 000 mahsulotga o‘sganda ham 2 MB chekloviga hech qachon urilmaydi.
+
+---
+
+#### 6. Qidiruv Autocomplete (`/api/search/suggestions`) keshini tuzatish *(Yangi topilma)*
+- **Jonli dalil:** `GET /api/search/suggestions?q=deli&locale=uz` hozir **800 ms**, `x-vercel-cache: MISS` va javob sarlavhasida faqat `cache-control: public` (ya’ni `s-maxage=3600` yo‘qolib qolgan!).
 - **Yechim:**
-  - `GoogleAnalytics` va `YandexMetrika` skriptlarini `strategy="lazyOnload"` ga o‘tkazish (sahifa to‘liq chizilib bo‘lgach yuklanadi).
-  - Agar sessiya video-yozuvi doimiy kerak bo‘lmasa, `webvisor: false` qilish (yoki faqat kerakli davrlarda yoqish).
-- **Kutiladigan natija:** Mobile Lighthouse / PageSpeed Performance ko‘rsatkichi **+15–25 ball** yaxshilanadi, TBT (Total Blocking Time) keskin kamayadi.
+  1. `src/app/api/search/suggestions/route.ts` javobiga `Vercel-CDN-Cache-Control: public, s-maxage=3600, stale-while-revalidate=86400` sarlavhasini qo‘shish.
+  2. `SearchAutocomplete.tsx` da client-side `Map` keshi (bir sessiyada avval qidirilgan so‘zni qayta serverga yubormaslik) va `250–300 ms` debounce + `AbortController` ni tekshirish.
+- **Kutiladigan natija:** Qidiruv tavsiyalari chiqishi **800 ms → < 80 ms** (`HIT`).
 
 ---
 
-#### 6. Og‘ir modallarni `next/dynamic` (lazy-load) ga o‘tkazish
+#### 7. Analitika skriptlarini (`YandexMetrika` + `GoogleAnalytics`) kechiktirib yuklash
 - **Aniqlangan muammo:**  
-  `src/components/layout/Header.tsx` har bir sahifada (bosh sahifa, katalog, mahsulot, kontakt) quyidagi modallarni statik import qiladi:
-  - `AuthModal` (680+ qator kod),
-  - `OrderTrackerModal`,
-  - `MobileSearchModal`.  
-  Xaridor ularni ochmagan bo‘lsa ham, ularning butun JS kodi birinchi yuklanishda brauzerga uzatiladi va hydrate qilinadi.
-- **Yechim:**  
-  Ushbu 3 ta modalni `next/dynamic(() => import(...), { ssr: false })` orqali **faqat foydalanuvchi tugmani bosib ochgandagina** yuklanadigan qilish. Xuddi shu usulni `CheckoutForm.tsx` dagi `LocationPickerModal` (xarita/Leaflet) va `CheckoutOtpModal` uchun ham qo‘llash.
-- **Kutiladigan natija:** Boshlang‘ich JavaScript bundle hajmi va hydration vaqti sezilarli qisqaradi.
+  `YandexMetrika.tsx` va `GoogleAnalytics.tsx` da `strategy="afterInteractive"` ishlatilgan, Yandex Metrika’da esa `webvisor: true` + `clickmap: true` yoqilgan. WebVisor brauzerning asosiy oqimini (Main Thread / TBT / INP) kuchli yuklaydi.
+- **Yechim:**
+  - Ikkala skriptni `strategy="lazyOnload"` ga o‘tkazish.
+  - Agar sessiya video-yozuvi doimiy shart bo‘lmasa, `webvisor: false` qilish (yoki faqat kerakli vaqtda yoqish).
+- **Kutiladigan natija:** Mobile PageSpeed Performance **+15–25 ball**, TBT va INP keskin yaxshilanadi.
 
 ---
 
-#### 7. `Header` da har safar `GET /api/auth/me` so‘rovini takrorlamaslik
+#### 8. Og‘ir modallarni `next/dynamic` (lazy-load) ga o‘tkazish
+- **Aniqlangan muammo:**
+  - `Header.tsx` har bir sahifada `AuthModal` (~680 qator), `OrderTrackerModal` va `MobileSearchModal` ni statik import qiladi.
+  - `CheckoutForm.tsx` da `LocationPickerModal` (xarita/Leaflet) va `CheckoutOtpModal` ham statik import qilingan.
+- **Yechim:**  
+  Ushbu modallarni `next/dynamic(() => import(...), { ssr: false })` orqali **faqat ochilganda** yuklanadigan qilish.
+- **Kutiladigan natija:** Barcha sahifalarda boshlang‘ich JS bundle va hydration vaqti qisqaradi.
+
+---
+
+#### 9. `Header` da `GET /api/auth/me` so‘rovini sessiya bo‘yicha 1 martaga cheklash
 - **Aniqlangan muammo:**  
-  `src/components/layout/Header.tsx` (46–49-qatorlar) har bir render/mount’da `checkAuth()` chaqiradi va `GET /api/auth/me` ga so‘rov yuboradi. `useAuthStore` da `isInitialized` bayrog‘i bor, lekin `Header` uni tekshirmaydi.
+  `Header.tsx` (46–49-qatorlar) har safar mount bo‘lganda `checkAuth()` chaqiradi; `useAuthStore` dagi `isInitialized` tekshirilmagani uchun mehmon foydalanuvchilarda ham ortiqcha `/api/auth/me` so‘rovlari ketadi.
 - **Yechim:**  
-  `checkAuth()` ichida `if (get().isInitialized) return;` shartini qo‘shish — shunda foydalanuvchi sayt bo‘ylab 20 ta sahifaga kirsa ham `/api/auth/me` faqat **1 marta** chaqiriladi.
-- **Kutiladigan natija:** Sahifalararo o‘tishda ortiqcha serverless funksiya chaqiruvlari va tarmoq kechikishi yo‘qoladi.
+  `useAuthStore.checkAuth()` boshida `if (get().isInitialized) return;` qo‘shish.
+- **Kutiladigan natija:** Navigatsiyada keraksiz serverless chaqiruvlar yo‘qoladi.
 
 ---
 
-### P2 — O‘RTA TA’SIR (Brauzerda ishlash ravonligi va LCP rasmlari)
+### P2 — O‘RTA TA’SIR (Frontend ravonligi, RSC Payload hajmi va LCP rasmlari)
 
-#### 8. `ProductCard` da Zustand selectorlarini optimallashtirish
+#### 10. `ProductCard` da atomik Zustand selectorlari + `toCardProduct` ni barcha sahifalarga yoyish *(Kengaytirilgan)*
+- **Aniqlangan muammo:**
+  1. `ProductCard.tsx` (33–35-qatorlar) butun `useCartStore()`, `useFavoritesStore()`, `useCompareStore()` obyektlariga obuna bo‘lgan — 1 ta mahsulot savatchaga qo‘shilsa sahifadagi barcha 24–40 ta kartochka qayta render bo‘ladi.
+  2. `toCardProduct()` (og‘ir maydonlarni kesish) hozir faqat bosh sahifada (`page.tsx:93`) bor; `catalog`, `category/[slug]`, `brand/[slug]` va `products/[slug]` (`relatedProducts`/`recommendedProducts`) da esa to‘liq obyektlar Client Component’ga uzatilmoqda.
+- **Yechim:**
+  - `ProductCard` da har bir store’dan faqat `product.id` bo‘yicha selektor olish.
+  - Umumiy `toCardProduct()` funksiyasini barcha ro‘yxat sahifalari va PDP tavsiyalarida ishlatish.
+- **Kutiladigan natija:** Savatcha/sevimlilar klik reaksiyasi (INP) `< 16 ms`; HTML/RSC hajmi 15–25% yengillashadi.
+
+---
+
+#### 11. `Next.js <Link>` ortiqcha avtomatik prefetch’ini tartibga solish *(Yangi topilma)*
 - **Aniqlangan muammo:**  
-  `src/components/discovery/ProductCard.tsx` (33–35-qatorlar):
-  ```ts
-  const { addItem, removeItem, updateQuantity, hasItem, items } = useCartStore();
-  const { toggleFavorite, isFavorite } = useFavoritesStore();
-  const { toggleCompare, isInCompare } = useCompareStore();
-  ```
-  Har bir kartochka **butun `items` massiviga** obuna bo‘lgan. Xaridor 1 ta mahsulotni savatchaga qo‘shganda sahifadagi **barcha 24–40 ta `ProductCard` qayta render bo‘ladi** (INP pasayadi).
+  MegaMenu’da 50+ kategoriya linki va katalog/kategoriya sahifalarida 24–40 ta `ProductCard` linki bor. Next.js standart holda viewport’ga kirgan barcha `<Link>` larni avtomatik prefetch qilib, foydalanuvchi bosmagan o‘nlab dinamik sahifalar uchun fon RSC so‘rovlarini yuboradi (bu brauzer tarmog‘ini band qiladi va Vercel Edge/Function sarfini oshiradi).
 - **Yechim:**  
-  Har bir kartochka faqat o‘z `product.id` siga tegishli qiymatga obuna bo‘lishi kerak:
-  ```ts
-  const currentQuantity = useCartStore(
-    (s) => s.items.find((i) => i.id === product.id)?.quantity ?? 0
-  );
-  const isFav = useFavoritesStore((s) => s.items.some((i) => i.id === product.id));
-  const inCompare = useCompareStore((s) => s.items.some((i) => i.id === product.id));
-  ```
-- **Kutiladigan natija:** Savatcha/sevimlilar tugmasini bosganda javob berish (INP) **bir zumda (< 16 ms)** bo‘ladi.
+  MegaMenu ichki kategoriya linklari hamda `ProductCard` da `prefetch={false}` qo‘yish (yoki faqat eng asosiy menyu tugmalarida qoldirish).
+- **Kutiladigan natija:** Fon tarmoq so‘rovlari va Vercel serverless chaqiruvlari keskin kamayadi.
 
 ---
 
-#### 9. Rasmlar va `public/` fayllarini yengillashtirish
+#### 12. Rasmlar, `public/` statik fayllari va `cdn.sora.uz` keshini optimallashtirish *(Kengaytirilgan)*
 - **Aniqlangan muammolar:**
-  1. `public/` papkasida og‘ir fayllar bor:
-     - `logo.png` — **1 144.8 KB (1.14 MB!)**
-     - `favicon.ico` va `for_web_logo_icon.ico` — har biri **372.1 KB** (normal favicon 10–30 KB bo‘lishi kerak)
-     - `hero-slide-*.png` va `hero-slide-*-transparent.png` — har biri **495–606 KB** (dublikat nusxalar ham mavjud).
-  2. `ProductCard.tsx` da barcha kartochkalarda `loading="lazy"` qo‘yilgan — kategoriya va katalog sahifasida birinchi ekranda ko‘rinadigan (above-the-fold) 2–4 ta mahsulot rasmi ham kechikib yuklanadi.
-  3. `HeroSlider.tsx` 4 ta slaydning barchasini DOM’da ushlab turadi (yashirin 3 ta slayd ham DOM daraxtini kattalashtiradi).
+  1. `public/` dagi og‘ir fayllar:
+     - `logo.png` — **1 144.8 KB (1.14 MB)**
+     - `favicon.ico` va `for_web_logo_icon.ico` — har biri **372.1 KB** (normal hajmi 15–25 KB)
+     - `hero-slide-*.png` va `hero-slide-*-transparent.png` — har biri **495–606 KB** (dublikat PNG fayllar mavjud).
+  2. `ProductCard.tsx` da barcha kartochkalarda `loading="lazy"` turibdi — birinchi ekranda ko‘rinadigan 2–4 ta kartochka rasmi ham kechikib yuklanadi.
+  3. `ProductGallery.tsx` (PDP asosiy rasmi) da `priority` va `fetchPriority="high"` borligini kafolatlash zarur.
+  4. **`cdn.sora.uz` (Cloudflare R2) kesh sarlavhasi:** Rasmlarga `?v=20261110` versiyalash qo‘shilgani sababli Cloudflare’da `Cache-Control: public, max-age=31536000, immutable` qo‘yish mumkin — takroriy tashrifchilarda rasmlar brauzer keshidan **0 ms** da ochiladi.
 - **Yechim:**
-  - `favicon.ico` va `for_web_logo_icon.ico` ni 16×16 / 32×32 / 48×48 o‘lchamda **~15–25 KB** gacha siqish; `logo.png` ni SVG yoki optimallashtirilgan WebP (**< 30 KB**) ga almashtirish.
-  - Hero slayd rasmlarini WebP/AVIF ga o‘tkazish va foydalanilmayotgan dublikat PNG’larni o‘chirish.
-  - `ProductCard` ga `priority?: boolean` prop qo‘shib, katalog/kategoriya sahifasidagi birinchi 4 ta mahsulotga `priority={index < 4}` berish (`loading="lazy"` o‘rniga).
+  - `favicon.ico` / `for_web_logo_icon.ico` ni `~15–25 KB` ga, `logo.png` ni SVG/WebP (`< 30 KB`) ga, Hero slayd rasmlarini WebP/AVIF ga siqish va keraksiz dublikatlarni tozalash.
+  - `ProductCard` ga `priority?: boolean` prop qo‘shib, birinchi 4 ta kartochkaga `priority={idx < 4}` berish.
 
 ---
 
-#### 10. `layout.tsx` dagi keraksiz `preconnect` havolalarini tozalash va `Header` prop’larini yengillashtirish
-- **Aniqlangan muammo:**  
-  `src/app/[locale]/layout.tsx` (131–138-qatorlar):
-  - `<link rel="preconnect" href="http://1cloud.uz:777" />` — **keraksiz!** Brauzer hech qachon 1C ga to‘g‘ridan-to‘g‘ri ulanmaydi (1C faqat serverdan chaqiriladi).
-  - `<link rel="preconnect" href="https://i.ibb.co" />` — barcha mahsulot rasmlari `cdn.sora.uz` ga ko‘chirilgan, bu ham endi keraksiz.
-  - `<link rel="preconnect" href="https://mc.yandex.ru" />` — analitika `lazyOnload` qilinsa, bunga ham `preconnect` emas, `dns-prefetch` kifoya.
-- **Qo‘shimcha (RSC Payload hajmi):**  
-  `Header` komponentiga barcha `categories` + `tree` + `brands` to‘liq uzatiladi; faqat kerakli maydonlarni (`id`, `name`, `slug`) qoldirib uzatish har bir sahifaning HTML/RSC hajmini **15–25% ga** kamaytiradi (hozir bosh sahifa 67.3 KB Brotli).
+#### 13. `layout.tsx` dagi keraksiz `preconnect`, shriftlar va `Header`/`i18n` payload’ini yengillashtirish *(Kengaytirilgan)*
+- **Aniqlangan muammolar:**
+  1. `layout.tsx` (131–138-qatorlar):
+     - `<link rel="preconnect" href="http://1cloud.uz:777" />` — keraksiz (1C faqat serverdan chaqiriladi, brauzer unga ulanmaydi).
+     - `<link rel="preconnect" href="https://i.ibb.co" />` — barcha rasmlar `cdn.sora.uz` ga ko‘chgan.
+     - `<link rel="preconnect" href="https://mc.yandex.ru" />` — `lazyOnload` qilingach `dns-prefetch` kifoya.
+  2. `Plus_Jakarta_Sans` shriftida 5 ta weight (`400, 500, 600, 700, 800`) va 3 ta subset (`latin, latin-ext, cyrillic-ext`) yuklanmoqda — `weight` sonini 3–4 taga qisqartirish (yoki variable font) ilk yuklanishdagi font fayllarini kamaytiradi.
+  3. `Header` ga uzatiladigan `categories`, `tree`, `brands` dan faqat menyuda ko‘rsatiladigan maydonlarni (`id`, `name`, `slug`, `children`) qoldirish har bir sahifaning HTML hajmini (`67.3 KB` → `~35–40 KB`) kamaytiradi.
 
 ---
 
-### P3 — QO‘SHIMCHA (Barqarorlik va Foydalanuvchi Tajribasi)
+### P3 — QO‘SHIMCHA (Vizual tezlik va Build optimizatsiyasi)
 
-#### 11. `loading.tsx` skelet (Skeleton) sahifalarini qo‘shish
-- **Sabab:** Foydalanuvchi havolani bosganda server dinamik sahifani (masalan, qidiruv yoki filtr) tayyorlaguncha eski sahifa "qotib turgandek" tuyuladi.
-- **Yechim:** `/[locale]/category/[slug]/loading.tsx`, `/[locale]/catalog/loading.tsx`, `/[locale]/products/[slug]/loading.tsx`, `/[locale]/search/loading.tsx` skelet komponentlarini qo‘shish — sahifa bosilgan zahoti **0 ms** da chiroyli yuklanish skeleti ko‘rinadi (perceived speed 2–3× tezroq seziladi).
+#### 14. `loading.tsx` skelet (Skeleton) sahifalarini qo‘shish
+- **Maqsad:** Dinamik sahifalarga (`category/[slug]`, `catalog`, `products/[slug]`, `search`) o‘tishda bosilgan zahoti **0 ms** da skelet ko‘rinishi chiqadi — foydalanuvchiga sayt 2–3 barobar tezroq seziladi.
 
-#### 12. `next.config.ts` dagi `optimizePackageImports` ni kengaytirish
-- Hozir faqat `["lucide-react"]` ko‘rsatilgan; unga `"@base-ui/react"` ni ham qo‘shish tree-shaking’ni kuchaytiradi.
+#### 15. `next.config.ts` dagi `optimizePackageImports` ni kengaytirish
+- Hozir `optimizePackageImports: ["lucide-react"]`; unga `"@base-ui/react"` ni ham qo‘shish kerak.
 
 ---
 
-## 3. Bosqichma-Bosqich Amalga Oshirish Tartibi (Tavsiya)
+## 3. Yangilangan Amalga Oshirish Rejasi (Bosqichma-Bosqich)
 
-| Bosqich | Qilinadigan ishlar | Kutiladigan tezlik o‘sishi |
+| Bosqich | Qilinadigan ishlar | Kutiladigan natija |
 | :--- | :--- | :--- |
-| **1-bosqich (Darhol)** | `all_product` 2 MB kesh yechimi + `React.cache()` deduplikatsiyasi + `PDP revalidate=86400` | PDP: **8.5s → <0.8s**, Katalog/Kategoriya: **3.7s → <1.0s** |
-| **2-bosqich (Eng katta effekt)** | Katalog/Kategoriya/Brend ISR keshini yoqish (`x-vercel-cache: HIT`) + Vercel Region `fra1`/`dxb1` | Katalog/Kategoriya: **<1.0s → 100–250ms** |
-| **3-bosqich (Frontend & Core Web Vitals)** | `lazyOnload` analitika, `next/dynamic` modallar, `ProductCard` Zustand selectorlar, `Header` `checkAuth` cheklovi | Mobile PageSpeed **+15–25 ball**, INP `<50ms` |
-| **4-bosqich (Assets & UX)** | `favicon`/`logo`/hero rasmlarni siqish, ortiqcha `preconnect` tozalash, `loading.tsx` skeletlari | LCP yaxshilanishi va darhol vizual reaksiya |
+| **Bajarildi (v1)** | 1C `/all_product` qisqartirilishi (`2.01 MB → 1.38 MB`) + Zod dual-schema (`898f602`) | PDP **8.59s → 0.78s**, Kategoriya **3.75s → 0.70s**, 2 MB xatosi **0** |
+| **1-bosqich (Eng tez va eng katta effekt)** | `vercel.json` region `fra1`/`dxb1` + `/catalog` ni `PRERENDER` (ISR) ga o‘tkazish + `React.cache()` + PDP `revalidate = 86400` + `/api/search/suggestions` `Vercel-CDN-Cache-Control` | Katalog **864ms → 150ms**, Kategoriya/Qidiruv **700ms → 200–300ms**, Autocomplete **800ms → <80ms** |
+| **2-bosqich (Katalog/Kategoriya ISR + 2 MB uzoq muddatli himoya)** | Kategoriya/Brend filtrsiz sahifalarini ISR qilish + `all_product` uchun chunked `unstable_cache` / 1C gzip himoyasi | Barcha asosiy sahifalarda `x-vercel-cache: HIT`, 10 000+ mahsulotga tayyor |
+| **3-bosqich (Frontend & Core Web Vitals)** | `lazyOnload` analitika (`webvisor` nazorati), `next/dynamic` modallar, `ProductCard` atomik Zustand + `toCardProduct`, `Header` `checkAuth` cheklovi, `<Link prefetch={false}>` | Mobile PageSpeed **+15–25 ball**, INP `< 50 ms`, Vercel yuklamasi keskin kamayadi |
+| **4-bosqich (Assets, Fonts & UX)** | `favicon`/`logo`/hero PNG siqish, Cloudflare `immutable` kesh, ortiqcha `preconnect` tozalash, `loading.tsx` skeletlari, `optimizePackageImports` | LCP maksimal tezlikda va sahifalararo o‘tish 0 ms reaksiya bilan |
