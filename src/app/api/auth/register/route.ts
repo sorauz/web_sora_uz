@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
       password,
       ...(type === "B2C"
         ? { phone1: normPhone1, phone2: normPhone2 }
-        : { inn: (inn || "").trim() }),
+        : { inn: (inn || "").trim(), phone1: normPhone1 }),
     };
 
     const result = await api.registerUser(payload);

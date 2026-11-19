@@ -1,4 +1,8 @@
 import { test, expect } from "@playwright/test";
+import {
+  buildOneCOrderPayload,
+  formatOneCOrderComment,
+} from "../src/lib/utils/order-payload";
 
 test.describe("1C ERP Order Placement & Status Checking Flow", () => {
   test("1. POST /api/order/create validates input and returns 400 when empty items", async ({ request }) => {
@@ -140,5 +144,52 @@ test.describe("1C ERP Order Placement & Status Checking Flow", () => {
 
     const statusBadge = page.locator("text=/1C Buyurtma holati/i");
     await expect(statusBadge).toBeVisible();
+  });
+
+  test("6. B2B payload includes both contact_id and client_id and preserves phone at start of comment", () => {
+    const b2bPayload = buildOneCOrderPayload({
+      data: {
+        customerType: "B2B",
+        fullName: "Olim Shokirov",
+        phone: "+998 90 326 54 58",
+        altPhone: "+998 99 111 22 33",
+        deliveryMethod: "courier",
+        address: "Toshkent, Chilonzor 5-mavze",
+        orderComment: "Ishonchnoma tayyor, ".repeat(25),
+        paymentMethod: "b2b",
+        companyName: "OOO TEST HOLDING",
+        companyInn: "204393073",
+        geolocation: "https://maps.google.com/maps?q=41.3,69.2",
+        items: [
+          {
+            id: "65896d54-94da-11e9-8074-d43d7e011714",
+            name: "Deli 0316 Stepler",
+            price: 55000,
+            quantity: 5,
+          },
+        ],
+      },
+      contactId: "79d1f6cb-3178-11e8-812c-d43d7e011714",
+      clientId: "03671895-6f67-11ef-b458-5811229bddba",
+      cleanPhone: "+998903265458",
+      cleanAltPhone: "+998991112233",
+    });
+
+    expect(b2bPayload.type).toBe("B2B");
+    expect(b2bPayload.contact_id).toBe("79d1f6cb-3178-11e8-812c-d43d7e011714");
+    expect(b2bPayload.client_id).toBe("03671895-6f67-11ef-b458-5811229bddba");
+    expect(b2bPayload.comment.startsWith("Aloqa: Olim Shokirov, +998903265458 / +998991112233")).toBe(true);
+    expect(b2bPayload.comment.length).toBeLessThanOrEqual(350);
+
+    const b2cComment = formatOneCOrderComment(
+      {
+        customerType: "B2C",
+        fullName: "Alisher Navoiy",
+        deliveryMethod: "pickup",
+        orderComment: "Soat 17:00 da",
+      },
+      "+998901234567"
+    );
+    expect(b2cComment).toBe("Olib ketish (Samovyvoz). Izoh: Soat 17:00 da");
   });
 });

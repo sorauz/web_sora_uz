@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { api } from "@/lib/api";
-import {
-  CheckoutCreateOrderInputSchema,
-  OneCOrderRequest,
-} from "@/lib/schemas/order";
-import { AuthUserSchema, normalizePhone } from "@/lib/schemas/auth";
+import { CheckoutCreateOrderInputSchema } from "@/lib/schemas/order";
+import { AuthUser, AuthUserSchema, normalizePhone } from "@/lib/schemas/auth";
 import { deriveOneCPassword } from "@/lib/sms/otp-store";
+import { buildOneCOrderPayload } from "@/lib/utils/order-payload";
 
 export async function POST(req: NextRequest) {
   try {
@@ -28,7 +26,7 @@ export async function POST(req: NextRequest) {
     // 1. Check logged-in session cookie
     const cookieStore = await cookies();
     const sessionCookie = cookieStore.get("sora_session");
-    let sessionUser: { id: string; name: string; type: "B2C" | "B2B" } | null = null;
+    let sessionUser: AuthUser | null = null;
 
     if (sessionCookie?.value) {
       try {
@@ -45,108 +43,90 @@ export async function POST(req: NextRequest) {
     const cleanPhone = normalizePhone(data.phone);
     const cleanAltPhone = data.altPhone ? normalizePhone(data.altPhone) : "";
     const isB2B = data.customerType === "B2B";
+    const cleanInn = (data.companyInn || "").replace(/\D/g, "");
 
-    // 2. Determine contact_id (КонтактноеЛицо GUID — required for B2C, optional for B2B)
-    let contactId: string | undefined =
-      sessionUser?.type === "B2C" && sessionUser.id
-        ? sessionUser.id
-        : undefined;
+    // 2. Resolve contact_id (КонтактноеЛицо GUID) for BOTH B2C and B2B orders
+    // so 1C always receives the responsible person's phone record on the order.
+    const resolveContactId = async (): Promise<string | undefined> => {
+      const sessionPhoneMatches =
+        sessionUser?.type === "B2C" &&
+        !!sessionUser.id &&
+        (!sessionUser.phone || normalizePhone(sessionUser.phone) === cleanPhone);
 
-    if (!isB2B && !contactId) {
-      // B2C guest order: get or create КонтактноеЛицо in 1C
+      if (sessionPhoneMatches && sessionUser?.id) {
+        return sessionUser.id;
+      }
+
       try {
         const regRes = await api.registerUser({
           type: "B2C",
-          name: data.fullName,
+          name: data.fullName.trim(),
           phone1: cleanPhone,
           phone2: cleanAltPhone,
           password: deriveOneCPassword(cleanPhone),
         });
 
         if (regRes.id) {
-          contactId = regRes.id;
+          return regRes.id;
         }
       } catch {
-        // Fallback to random UUID if 1C register has temporary hiccup
+        // Temporary 1C /register hiccup handled below
       }
 
-      if (!contactId) {
-        contactId = crypto.randomUUID();
+      // B2C requires contact_id; for B2B omit synthetic UUID so 1C won't reject with 404
+      return isB2B ? undefined : crypto.randomUUID();
+    };
+
+    // 3. Resolve client_id (Контрагент GUID — required for B2B)
+    const resolveClientId = async (): Promise<string | undefined> => {
+      if (!isB2B) return undefined;
+
+      const sessionInnMatches =
+        sessionUser?.type === "B2B" &&
+        !!sessionUser.id &&
+        (!cleanInn ||
+          !sessionUser.inn ||
+          sessionUser.inn.replace(/\D/g, "") === cleanInn);
+
+      if (sessionInnMatches && sessionUser?.id) {
+        return sessionUser.id;
       }
-    }
 
-    // 3. Determine client_id (Контрагент GUID — required for B2B)
-    let clientId: string | undefined = undefined;
-
-    if (isB2B) {
-      if (sessionUser?.type === "B2B" && sessionUser.id) {
-        clientId = sessionUser.id;
-      } else if (data.companyInn) {
-        const cleanInn = data.companyInn.replace(/\D/g, "");
+      if (cleanInn) {
         try {
           const regB2B = await api.registerUser({
             type: "B2B",
-            name: data.companyName || data.fullName,
+            name: (data.companyName || data.fullName).trim(),
             inn: cleanInn,
             phone1: cleanPhone,
             password: deriveOneCPassword(cleanInn || cleanPhone),
           });
           if (regB2B.id) {
-            clientId = regB2B.id;
+            return regB2B.id;
           }
         } catch {
-          // Fallback
+          // Fallback below
         }
-        if (!clientId) {
-          clientId = crypto.randomUUID();
-        }
-      } else {
-        clientId = crypto.randomUUID();
       }
-    }
 
-    // 4. Delivery and Geolocation formatting
-    const withoutDelivery = data.deliveryMethod === "pickup";
-    const resolvedGeolocation = withoutDelivery
-      ? ""
-      : (data.geolocation || "").trim().slice(0, 150);
-    let comment = data.orderComment || "";
-
-    if (!withoutDelivery) {
-      const addressParts = [
-        data.region,
-        data.district,
-        data.address,
-        data.landmark ? `Mo'ljal: ${data.landmark}` : "",
-      ]
-        .filter(Boolean)
-        .join(", ");
-
-      if (addressParts) {
-        comment = comment
-          ? `Yetkazish manzili: ${addressParts}. Izoh: ${comment}`
-          : `Yetkazish manzili: ${addressParts}`;
-      }
-    } else {
-      comment = comment ? `Olib ketish (Samovyvoz). Izoh: ${comment}` : `Olib ketish (Samovyvoz)`;
-    }
-
-    // 5. Construct 1C order payload
-    const oneCPayload: OneCOrderRequest = {
-      type: isB2B ? "B2B" : "B2C",
-      contact_id: contactId,
-      client_id: isB2B ? clientId : undefined,
-      without_delivery: withoutDelivery,
-      geolocation: resolvedGeolocation,
-      comment: comment.substring(0, 350),
-      products: data.items.map((item) => ({
-        product_id: item.id,
-        quantity: item.quantity,
-        price: item.price,
-      })),
+      return crypto.randomUUID();
     };
 
-    // 6. Send order to 1C ERP
+    const [contactId, clientId] = await Promise.all([
+      resolveContactId(),
+      resolveClientId(),
+    ]);
+
+    // 4. Construct 1C order payload (includes contact_id + phone in B2B comment)
+    const oneCPayload = buildOneCOrderPayload({
+      data,
+      contactId,
+      clientId,
+      cleanPhone,
+      cleanAltPhone,
+    });
+
+    // 5. Send order to 1C ERP
     const orderResult = await api.createOrder(oneCPayload);
 
     if (orderResult.success && orderResult.data) {
@@ -155,7 +135,8 @@ export async function POST(req: NextRequest) {
           success: true,
           order_id: orderResult.data.order_id,
           order_number: orderResult.data.order_number,
-          message: orderResult.data.message || "Buyurtma muvaffaqiyatli qabul qilindi",
+          message:
+            orderResult.data.message || "Buyurtma muvaffaqiyatli qabul qilindi",
           isFallback: !!orderResult.isFallback,
         },
         { status: 201 }
@@ -165,7 +146,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        error: orderResult.error || "Buyurtmani qabul qilishda xatolik yuz berdi",
+        error:
+          orderResult.error || "Buyurtmani qabul qilishda xatolik yuz berdi",
       },
       { status: orderResult.statusCode || 500 }
     );
