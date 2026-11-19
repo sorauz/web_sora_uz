@@ -5,6 +5,7 @@ import {
   resolveProductImageUrl,
   CDN_IMAGE_VERSION_FLOOR,
 } from "../src/lib/utils/merchant";
+import { AllProductsResponseSchema } from "../src/lib/schemas/product";
 
 test.describe("Google Merchant & Product Structured Data Hygiene", () => {
   test("1. Unit helpers validate GTIN checksums, sanitize MPN, and version CDN image URLs", () => {
@@ -96,5 +97,76 @@ test.describe("Google Merchant & Product Structured Data Hygiene", () => {
     const productLd = JSON.parse(productLdText!);
     expect(productLd.offers).toBeUndefined();
     expect(productLd.image).toMatch(/\?v=\d{8}/);
+  });
+
+  test("4. Compact 1C /all_product schema (sku, pic, up_date, alt_uz, alt_ru) normalizes identically to legacy keys", () => {
+    const parsed = AllProductsResponseSchema.parse([
+      {
+        id: "08fb26ce-7785-11f1-a5aa-00155dbd2903",
+        sku: "100149693",
+        barcode: "",
+        brand: "DELI",
+        country: "Xitoy",
+        pic: "https://cdn.sora.uz/products/000002188_1.jpg",
+        up_date: "2026-11-04T00:00:00",
+        uz: {
+          unit_uz: "dona",
+          category_uz: "Savdo uchun uskunalar",
+          category_slug_uz: "savdo-uchun-uskunalar",
+          alt_uz: "Deli E3904 pul hisoblagich",
+          name_uz: "Deli E3904 pul hisoblagich",
+          slug_uz: "deli-e3904-pul-hisoblagich",
+        },
+        ru: {
+          unit_ru: "шт",
+          category_ru: "Оборудование для торговли",
+          category_slug_ru: "oborudovanie-dlya-torgovli",
+          alt_ru: "Deli E3904 счётчик наличных",
+          name_ru: "Deli E3904 счётчик наличных",
+          slug_ru: "deli-e3904-schetchik-nalichnyh",
+        },
+      },
+      {
+        id: "legacy-id",
+        product_sku: "E1589",
+        barcode: "",
+        brand: "DELI",
+        country: "Xitoy",
+        main_picture: "https://cdn.sora.uz/products/000001589_1.jpg",
+        updated_at: "2026-11-05T00:00:00",
+        uz: {
+          unit_uz: "dona",
+          category_uz: "Kalkulyatorlar",
+          category_slug_uz: "kalkulyatorlar",
+          alt_picture_uz: "Deli E1589",
+          name_uz: "Deli E1589",
+          slug_uz: "deli-e1589",
+        },
+        ru: {
+          unit_ru: "шт",
+          category_ru: "Калькуляторы",
+          category_slug_ru: "kalkulyatory",
+          alt_picture_ru: "Deli E1589 RU",
+          name_ru: "Deli E1589 RU",
+          slug_ru: "deli-e1589-ru",
+        },
+      },
+    ]);
+
+    expect(parsed[0].product_sku).toBe("100149693");
+    expect(parsed[0].main_picture).toBe(
+      "https://cdn.sora.uz/products/000002188_1.jpg"
+    );
+    expect(parsed[0].updated_at).toBe("2026-11-04T00:00:00");
+    expect(parsed[0].uz.alt_picture_uz).toBe("Deli E3904 pul hisoblagich");
+    expect(parsed[0].ru.alt_picture_ru).toBe("Deli E3904 счётчик наличных");
+
+    expect(parsed[1].product_sku).toBe("E1589");
+    expect(parsed[1].main_picture).toBe(
+      "https://cdn.sora.uz/products/000001589_1.jpg"
+    );
+    expect(parsed[1].updated_at).toBe("2026-11-05T00:00:00");
+    expect(parsed[1].uz.alt_picture_uz).toBe("Deli E1589");
+    expect(parsed[1].ru.alt_picture_ru).toBe("Deli E1589 RU");
   });
 });

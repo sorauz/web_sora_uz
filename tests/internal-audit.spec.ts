@@ -84,7 +84,9 @@ test.describe("Internal Catalog & Google Merchant Audit Panel", () => {
     // Invalid key attempt
     await page.locator("#audit-password").fill("wrong_invalid_key_123");
     await page.getByRole("button", { name: /Tizimga kirish/i }).click();
-    await expect(page.getByRole("alert")).toBeVisible();
+    await expect(
+      page.getByRole("alert").filter({ hasText: /Kirish kaliti/i }),
+    ).toBeVisible();
 
     // Valid key attempt
     const validKey = resolveTestAuditKey();

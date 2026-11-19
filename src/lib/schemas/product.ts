@@ -34,60 +34,111 @@ export const SubProductCardSchema = z.object({
 
 export type SubProductCard = z.infer<typeof SubProductCardSchema>;
 
-export const ProductLocalizedUzSchema = z.object({
-  unit_uz: z.string().default("dona"),
-  category_uz: z.string().default(""),
-  category_slug_uz: z.string().default(""),
-  alt_picture_uz: z.string().default(""),
-  name_uz: z.string().default(""),
-  slug_uz: z.string().default(""),
-  title_uz: z.string().default(""),
-  meta_description_uz: z.string().default(""),
-  short_description_uz: z.string().default(""),
-  product_description_uz: z.string().optional().default(""),
-});
+function normalizeLocalizedUz(val: unknown): unknown {
+  if (!val || typeof val !== "object") return val;
+  const obj = val as Record<string, unknown>;
+  if (obj.alt_picture_uz === undefined && obj.alt_uz !== undefined) {
+    return { ...obj, alt_picture_uz: obj.alt_uz };
+  }
+  return obj;
+}
 
-export const ProductLocalizedRuSchema = z.object({
-  unit_ru: z.string().default("шт"),
-  category_ru: z.string().default(""),
-  category_slug_ru: z.string().default(""),
-  alt_picture_ru: z.string().default(""),
-  name_ru: z.string().default(""),
-  slug_ru: z.string().default(""),
-  title_ru: z.string().default(""),
-  meta_description_ru: z.string().default(""),
-  short_description_ru: z.string().default(""),
-  product_description_ru: z.string().optional().default(""),
-});
+function normalizeLocalizedRu(val: unknown): unknown {
+  if (!val || typeof val !== "object") return val;
+  const obj = val as Record<string, unknown>;
+  if (obj.alt_picture_ru === undefined && obj.alt_ru !== undefined) {
+    return { ...obj, alt_picture_ru: obj.alt_ru };
+  }
+  return obj;
+}
 
-export const ProductSchema = z.object({
-  id: z.string(),
-  product_sku: z.string().default(""),
-  package: z.string().default(""),
-  barcode: z.string().default(""),
-  brand: z.string().default(""),
-  manufacturer: z.string().default(""),
-  country: z.string().default(""),
-  video_url: z.string().optional().default(""),
-  main_picture: z.string().default(""),
-  gallery: z.array(z.string()).optional(),
-  updated_at: z.string().optional().default(""),
-  uz: ProductLocalizedUzSchema,
-  ru: ProductLocalizedRuSchema,
-  attributes: z.array(ProductAttributeSchema).optional().default([]),
-  related_products: z.array(SubProductCardSchema).optional().default([]),
-  recommended_products: z.array(SubProductCardSchema).optional().default([]),
-  // Optionally populated from Price API or raw product endpoint
-  price: z
-    .union([ProductPriceStockSchema, z.string(), z.number()])
-    .optional()
-    .transform((val) => {
-      if (val && typeof val === "object" && "retail_price" in val) {
-        return val as ProductPriceStock;
-      }
-      return undefined;
-    }),
-});
+function normalizeRawProduct(val: unknown): unknown {
+  if (!val || typeof val !== "object") return val;
+  const obj = val as Record<string, unknown>;
+  const hasCompactKeys =
+    (obj.product_sku === undefined && obj.sku !== undefined) ||
+    (obj.main_picture === undefined && obj.pic !== undefined) ||
+    (obj.updated_at === undefined && obj.up_date !== undefined);
+
+  if (!hasCompactKeys) return obj;
+
+  return {
+    ...obj,
+    ...(obj.product_sku === undefined && obj.sku !== undefined
+      ? { product_sku: obj.sku }
+      : {}),
+    ...(obj.main_picture === undefined && obj.pic !== undefined
+      ? { main_picture: obj.pic }
+      : {}),
+    ...(obj.updated_at === undefined && obj.up_date !== undefined
+      ? { updated_at: obj.up_date }
+      : {}),
+  };
+}
+
+export const ProductLocalizedUzSchema = z.preprocess(
+  normalizeLocalizedUz,
+  z.object({
+    unit_uz: z.string().default("dona"),
+    category_uz: z.string().default(""),
+    category_slug_uz: z.string().default(""),
+    alt_picture_uz: z.string().default(""),
+    name_uz: z.string().default(""),
+    slug_uz: z.string().default(""),
+    title_uz: z.string().default(""),
+    meta_description_uz: z.string().default(""),
+    short_description_uz: z.string().default(""),
+    product_description_uz: z.string().optional().default(""),
+  })
+);
+
+export const ProductLocalizedRuSchema = z.preprocess(
+  normalizeLocalizedRu,
+  z.object({
+    unit_ru: z.string().default("шт"),
+    category_ru: z.string().default(""),
+    category_slug_ru: z.string().default(""),
+    alt_picture_ru: z.string().default(""),
+    name_ru: z.string().default(""),
+    slug_ru: z.string().default(""),
+    title_ru: z.string().default(""),
+    meta_description_ru: z.string().default(""),
+    short_description_ru: z.string().default(""),
+    product_description_ru: z.string().optional().default(""),
+  })
+);
+
+export const ProductSchema = z.preprocess(
+  normalizeRawProduct,
+  z.object({
+    id: z.string(),
+    product_sku: z.string().default(""),
+    package: z.string().default(""),
+    barcode: z.string().default(""),
+    brand: z.string().default(""),
+    manufacturer: z.string().default(""),
+    country: z.string().default(""),
+    video_url: z.string().optional().default(""),
+    main_picture: z.string().default(""),
+    gallery: z.array(z.string()).optional(),
+    updated_at: z.string().optional().default(""),
+    uz: ProductLocalizedUzSchema,
+    ru: ProductLocalizedRuSchema,
+    attributes: z.array(ProductAttributeSchema).optional().default([]),
+    related_products: z.array(SubProductCardSchema).optional().default([]),
+    recommended_products: z.array(SubProductCardSchema).optional().default([]),
+    // Optionally populated from Price API or raw product endpoint
+    price: z
+      .union([ProductPriceStockSchema, z.string(), z.number()])
+      .optional()
+      .transform((val) => {
+        if (val && typeof val === "object" && "retail_price" in val) {
+          return val as ProductPriceStock;
+        }
+        return undefined;
+      }),
+  })
+);
 
 export type Product = z.infer<typeof ProductSchema>;
 
