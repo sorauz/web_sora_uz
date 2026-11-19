@@ -127,6 +127,12 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    const verifiedToken = createVerifiedPhoneToken(
+      normPhone,
+      type,
+      cleanInn || undefined
+    );
+
     // Existing customer found in 1C ERP -> Log in immediately!
     if (lookupResult.success && lookupResult.user && lookupResult.user.id) {
       const sessionUser = {
@@ -153,16 +159,12 @@ export async function POST(request: NextRequest) {
         success: true,
         isNewUser: false,
         user: sessionUser,
+        phone: normPhone,
+        verifiedToken,
       });
     }
 
     // Customer not found in 1C (404) -> Return verifiedToken for Step 3 (Name / INN registration)
-    const verifiedToken = createVerifiedPhoneToken(
-      normPhone,
-      type,
-      cleanInn || undefined
-    );
-
     return NextResponse.json({
       success: true,
       isNewUser: true,

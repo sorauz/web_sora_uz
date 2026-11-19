@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isValidUzPhone } from "@/lib/utils/phone";
 
 /**
  * Single product item in 1C order request
@@ -70,31 +71,78 @@ export type OneCOrderStatusResponse = z.infer<typeof OneCOrderStatusResponseSche
 /**
  * Frontend Checkout payload sent to Next.js /api/order/create
  */
-export const CheckoutCreateOrderInputSchema = z.object({
-  customerType: z.enum(["B2C", "B2B"]).default("B2C"),
-  fullName: z.string().min(2, "Ism-sharif kamida 2 ta harfdan iborat bo'lishi kerak"),
-  phone: z.string().min(9, "Telefon raqami kiritilishi shart"),
-  altPhone: z.string().optional(),
-  email: z.string().email().optional().or(z.literal("")),
-  deliveryMethod: z.enum(["courier", "pickup"]),
-  region: z.string().optional(),
-  district: z.string().optional(),
-  address: z.string().optional(),
-  landmark: z.string().optional(),
-  geolocation: z.string().max(150).optional().default(""),
-  orderComment: z.string().optional(),
-  paymentMethod: z.string(),
-  companyName: z.string().optional(),
-  companyInn: z.string().optional(),
-  items: z.array(
-    z.object({
-      id: z.string(),
-      name: z.string(),
-      price: z.number(),
-      quantity: z.number().int().positive(),
-      picture: z.string().optional(),
-    })
-  ).min(1, "Savatcha bo'sh!"),
-});
+export const CheckoutCreateOrderInputSchema = z
+  .object({
+    customerType: z.enum(["B2C", "B2B"]).default("B2C"),
+    fullName: z
+      .string()
+      .trim()
+      .min(2, "Ism-sharif kamida 2 ta harfdan iborat bo'lishi kerak"),
+    phone: z
+      .string()
+      .refine(
+        (val) => isValidUzPhone(val),
+        "Telefon raqami to'liq kiritilishi shart (+998 XX XXX-XX-XX)"
+      ),
+    altPhone: z
+      .string()
+      .optional()
+      .refine(
+        (val) => !val || !val.trim() || isValidUzPhone(val),
+        "Qo'shimcha telefon raqami to'liq kiritilishi shart (+998 XX XXX-XX-XX)"
+      ),
+    email: z.string().email().optional().or(z.literal("")),
+    deliveryMethod: z.enum(["courier", "pickup"]),
+    region: z.string().optional(),
+    district: z.string().optional(),
+    address: z.string().optional(),
+    landmark: z.string().optional(),
+    geolocation: z.string().max(150).optional().default(""),
+    orderComment: z.string().optional(),
+    paymentMethod: z.string(),
+    companyName: z.string().optional(),
+    companyInn: z.string().optional(),
+    verifiedPhoneToken: z.string().optional(),
+    items: z
+      .array(
+        z.object({
+          id: z.string(),
+          name: z.string(),
+          price: z.number(),
+          quantity: z.number().int().positive(),
+          picture: z.string().optional(),
+        })
+      )
+      .min(1, "Savatcha bo'sh!"),
+  })
+  .superRefine((data, ctx) => {
+    if (data.customerType === "B2B") {
+      if (!data.companyName || data.companyName.trim().length < 2) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["companyName"],
+          message: "Tashkilot nomi kiritilishi shart!",
+        });
+      }
+      const cleanInn = (data.companyInn || "").replace(/\D/g, "");
+      if (cleanInn.length !== 9) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["companyInn"],
+          message: "Tashkilotning 9 xonali STIR (INN) raqami kiritilishi shart!",
+        });
+      }
+    }
+    if (
+      data.deliveryMethod === "courier" &&
+      (!data.address || data.address.trim().length < 3)
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["address"],
+        message: "Yetkazib berish manzilini kiriting!",
+      });
+    }
+  });
 
 export type CheckoutCreateOrderInput = z.infer<typeof CheckoutCreateOrderInputSchema>;

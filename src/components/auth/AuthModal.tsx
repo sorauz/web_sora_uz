@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { useLocale } from "next-intl";
 import { useAuthStore } from "@/lib/store/auth";
 import { reachGoal } from "@/lib/analytics/yandex";
+import { formatUzPhoneInput } from "@/lib/utils/phone";
 import {
   X,
   User,
@@ -25,30 +26,6 @@ interface AuthModalProps {
 }
 
 type OtpStep = "phone" | "otp" | "profile";
-
-/**
- * Formats phone input into readable "+998 XX XXX-XX-XX"
- */
-function formatUzPhoneInput(raw: string): string {
-  const digits = raw.replace(/\D/g, "");
-  let local = digits;
-  if (local.startsWith("998")) {
-    local = local.slice(3);
-  } else if (local.startsWith("8") && local.length > 9) {
-    local = local.slice(1);
-  }
-  local = local.slice(0, 9);
-
-  if (local.length === 0) return "+998 ";
-  if (local.length <= 2) return `+998 ${local}`;
-  if (local.length <= 5) return `+998 ${local.slice(0, 2)} ${local.slice(2)}`;
-  if (local.length <= 7)
-    return `+998 ${local.slice(0, 2)} ${local.slice(2, 5)}-${local.slice(5)}`;
-  return `+998 ${local.slice(0, 2)} ${local.slice(2, 5)}-${local.slice(
-    5,
-    7
-  )}-${local.slice(7, 9)}`;
-}
 
 export function AuthModal({ locale: propLocale }: AuthModalProps) {
   const currentLocale = useLocale();

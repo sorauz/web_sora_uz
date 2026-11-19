@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useSyncExternalStore } from "react";
 import { useRouter } from "@/i18n/routing";
 import Image from "next/image";
 import { useCartStore } from "@/lib/store/cart";
@@ -27,11 +27,32 @@ import {
   Navigation,
   Sparkles,
   QrCode,
+  Loader2,
+  MessageSquareCode,
 } from "lucide-react";
 import {
   LocationPickerModal,
   formatOneCGeolocationUrl,
 } from "@/components/checkout/LocationPickerModal";
+import { CheckoutOtpModal } from "@/components/checkout/CheckoutOtpModal";
+import {
+  formatInnInput,
+  formatOptionalUzPhoneInput,
+  formatUzPhoneInput,
+  isValidUzPhone,
+  normalizeUzPhone,
+} from "@/lib/utils/phone";
+
+type CheckoutFieldKey =
+  | "companyName"
+  | "companyInn"
+  | "fullName"
+  | "phone"
+  | "altPhone"
+  | "email"
+  | "address";
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 interface CheckoutFormProps {
   locale: "uz" | "ru";
@@ -45,9 +66,14 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
 
   const { items, getTotalPrice } = useCartStore();
 
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const hasSubmittedRef = useRef(false);
+  const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [syncedUserId, setSyncedUserId] = useState<string | null>(null);
 
   // Form Fields
   const [fullName, setFullName] = useState("");
@@ -56,7 +82,7 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
   const [email, setEmail] = useState("");
 
   const [deliveryMethod, setDeliveryMethod] = useState<"courier" | "pickup">("courier");
-  const [region, setRegion] = useState(locale === "uz" ? "Toshkent shahri" : "г. Ташкент");
+  const region = locale === "uz" ? "Toshkent shahri" : "г. Ташкент";
   const [district, setDistrict] = useState("");
   const [address, setAddress] = useState("");
   const [landmark, setLandmark] = useState("");
@@ -70,38 +96,61 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
   const [companyName, setCompanyName] = useState("");
   const [companyInn, setCompanyInn] = useState("");
   const [submitError, setSubmitError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<
+    Partial<Record<CheckoutFieldKey, string>>
+  >({});
 
-  const { user, openModal } = useAuthStore();
+  // Mandatory Checkout SMS OTP state
+  const [verifiedPhone, setVerifiedPhone] = useState("");
+  const [verifiedPhoneToken, setVerifiedPhoneToken] = useState("");
+  const [isOtpModalOpen, setIsOtpModalOpen] = useState(false);
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
+  const [otpCooldown, setOtpCooldown] = useState(0);
+  const [otpDevCode, setOtpDevCode] = useState("");
+  const [submitOrderAfterOtp, setSubmitOrderAfterOtp] = useState(false);
 
+  // Input refs for scroll + focus on validation error
+  const companyNameRef = useRef<HTMLInputElement>(null);
+  const companyInnRef = useRef<HTMLInputElement>(null);
+  const fullNameRef = useRef<HTMLInputElement>(null);
+  const phoneRef = useRef<HTMLInputElement>(null);
+  const altPhoneRef = useRef<HTMLInputElement>(null);
+  const emailRef = useRef<HTMLInputElement>(null);
+  const addressRef = useRef<HTMLInputElement>(null);
+
+  const { user, openModal, sendOtp, verifyOtp } = useAuthStore();
+
+  const trackedCheckoutRef = useRef(false);
   useEffect(() => {
-    setMounted(true);
-    if (items.length > 0) {
+    if (!trackedCheckoutRef.current && items.length > 0) {
+      trackedCheckoutRef.current = true;
       reachGoal("START_CHECKOUT", {
         items_count: items.length,
         total: getTotalPrice(),
       });
     }
-  }, []);
+  }, [items.length, getTotalPrice]);
 
-  useEffect(() => {
-    if (user) {
-      if (user.name && !fullName) setFullName(user.name);
-      if (user.phone && phone === "+998 ") setPhone(user.phone);
-      if (user.type === "B2B") {
-        setOrderType("B2B");
-        if (user.inn && !companyInn) setCompanyInn(user.inn);
-        if (user.name && !companyName) setCompanyName(user.name);
-      }
+  if (user && user.id && user.id !== syncedUserId) {
+    setSyncedUserId(user.id);
+    if (user.name && !fullName) setFullName(user.name);
+    if (user.phone && phone === "+998 ") {
+      setPhone(formatUzPhoneInput(user.phone));
     }
-  }, [user]);
+    if (user.type === "B2B") {
+      setOrderType("B2B");
+      if (user.inn && !companyInn) setCompanyInn(formatInnInput(user.inn));
+      if (user.name && !companyName) setCompanyName(user.name);
+    }
+  }
 
   useEffect(() => {
-    if (mounted && items.length === 0 && !hasSubmittedRef.current) {
+    if (mounted && items.length === 0 && !hasSubmitted) {
       router.push("/cart");
     }
-  }, [mounted, items.length, router]);
+  }, [mounted, items.length, hasSubmitted, router]);
 
-  if (!mounted || (items.length === 0 && !hasSubmittedRef.current)) {
+  if (!mounted || (items.length === 0 && !hasSubmitted)) {
     return (
       <div className="py-20 flex justify-center items-center">
         <div className="w-8 h-8 border-4 border-sora-600 border-t-transparent rounded-full animate-spin"></div>
@@ -131,36 +180,177 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
     }
   };
 
-  const handleSubmitOrder = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!phone || phone.trim().length < 9 || !fullName.trim()) return;
+  const isUz = locale === "uz";
+  const normalizedPhone = normalizeUzPhone(phone);
+  const isPhoneComplete = isValidUzPhone(phone);
+  const isPhoneVerified =
+    isPhoneComplete &&
+    ((!!user?.phone && normalizeUzPhone(user.phone) === normalizedPhone) ||
+      (!!verifiedPhoneToken && verifiedPhone === normalizedPhone));
 
-    const finalCustomerType =
-      orderType === "B2B" || paymentMethod === "b2b" ? "B2B" : "B2C";
+  const finalCustomerType: "B2C" | "B2B" =
+    orderType === "B2B" || paymentMethod === "b2b" ? "B2B" : "B2C";
 
-    if (finalCustomerType === "B2B") {
-      if (!companyName.trim()) {
-        setSubmitError(
-          locale === "uz"
-            ? "Tashkilot nomi kiritilishi shart!"
-            : "Название организации обязательно!"
-        );
-        return;
-      }
-      const cleanInn = companyInn.replace(/\D/g, "");
-      if (cleanInn.length !== 9) {
-        setSubmitError(
-          locale === "uz"
-            ? "Tashkilotning 9 xonali STIR (INN) raqami kiritilishi shart!"
-            : "ИНН организации должен состоять ровно из 9 цифр!"
-        );
+  const clearFieldError = (field: CheckoutFieldKey) => {
+    setFieldErrors((prev) => {
+      if (!prev[field]) return prev;
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
+    if (submitError) setSubmitError("");
+  };
+
+  const focusFirstErrorField = (
+    errors: Partial<Record<CheckoutFieldKey, string>>
+  ) => {
+    const order: Array<{
+      key: CheckoutFieldKey;
+      ref: React.RefObject<HTMLInputElement | null>;
+    }> = [
+      { key: "companyName", ref: companyNameRef },
+      { key: "companyInn", ref: companyInnRef },
+      { key: "fullName", ref: fullNameRef },
+      { key: "phone", ref: phoneRef },
+      { key: "altPhone", ref: altPhoneRef },
+      { key: "email", ref: emailRef },
+      { key: "address", ref: addressRef },
+    ];
+    for (const entry of order) {
+      if (errors[entry.key] && entry.ref.current) {
+        entry.ref.current.scrollIntoView({ behavior: "smooth", block: "center" });
+        entry.ref.current.focus({ preventScroll: true });
         return;
       }
     }
+  };
 
-    hasSubmittedRef.current = true;
+  const validateCheckoutForm = (): boolean => {
+    const errors: Partial<Record<CheckoutFieldKey, string>> = {};
+    const missingLabels: string[] = [];
+
+    if (finalCustomerType === "B2B") {
+      if (companyName.trim().length < 2) {
+        errors.companyName = isUz
+          ? "Tashkilot nomini kiriting"
+          : "Введите название организации";
+        missingLabels.push(isUz ? "Tashkilot nomi" : "Название компании");
+      }
+      const cleanInn = formatInnInput(companyInn);
+      if (cleanInn.length !== 9) {
+        errors.companyInn = isUz
+          ? "Tashkilotning 9 xonali STIR (INN) raqamini to‘liq kiriting"
+          : "Введите 9-значный ИНН организации";
+        missingLabels.push(isUz ? "STIR (INN)" : "ИНН");
+      }
+    }
+
+    if (fullName.trim().length < 2) {
+      errors.fullName = isUz
+        ? "Ism-sharifingizni kiriting (kamida 2 ta harf)"
+        : "Введите ваше имя и фамилию (минимум 2 буквы)";
+      missingLabels.push(t("fullName"));
+    }
+
+    if (!isValidUzPhone(phone)) {
+      errors.phone = isUz
+        ? "Telefon raqamingizni to‘liq kiriting (+998 XX XXX-XX-XX)"
+        : "Введите полный номер телефона (+998 XX XXX-XX-XX)";
+      missingLabels.push(t("phone"));
+    }
+
+    if (altPhone.trim().length > 0 && !isValidUzPhone(altPhone)) {
+      errors.altPhone = isUz
+        ? "Qo‘shimcha telefon raqamini to‘liq (9 ta raqam) kiriting yoki bo‘sh qoldiring"
+        : "Введите дополнительный номер полностью (9 цифр) или оставьте пустым";
+      missingLabels.push(t("altPhone"));
+    }
+
+    if (email.trim().length > 0 && !EMAIL_RE.test(email.trim())) {
+      errors.email = isUz
+        ? "Email manzilini to‘g‘ri formatda kiriting"
+        : "Введите корректный адрес электронной почты";
+      missingLabels.push(t("email"));
+    }
+
+    if (deliveryMethod === "courier" && address.trim().length < 3) {
+      errors.address = isUz
+        ? "Yetkazib berish manzilini kiriting"
+        : "Укажите адрес доставки";
+      missingLabels.push(t("address"));
+    }
+
+    setFieldErrors(errors);
+
+    if (Object.keys(errors).length > 0) {
+      setSubmitError(
+        isUz
+          ? `Quyidagi majburiy maydonlarni to‘g‘ri to‘ldiring: ${missingLabels.join(", ")}`
+          : `Пожалуйста, заполните обязательные поля: ${missingLabels.join(", ")}`
+      );
+      focusFirstErrorField(errors);
+      return false;
+    }
+
+    setSubmitError("");
+    return true;
+  };
+
+  const initiateCheckoutOtp = async (autoSubmitAfter: boolean) => {
+    if (!isValidUzPhone(phone)) {
+      const phoneErr = isUz
+        ? "SMS kod olish uchun telefon raqamingizni to‘liq kiriting (+998 XX XXX-XX-XX)"
+        : "Введите полный номер телефона для получения СМС-кода";
+      setFieldErrors((prev) => ({ ...prev, phone: phoneErr }));
+      phoneRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      phoneRef.current?.focus({ preventScroll: true });
+      return;
+    }
+
+    setIsSendingOtp(true);
+    setSubmitError("");
+    setSubmitOrderAfterOtp(autoSubmitAfter);
+
+    const cleanInn = formatInnInput(companyInn);
+    const res = await sendOtp({
+      phone: normalizedPhone,
+      type: finalCustomerType,
+      inn: finalCustomerType === "B2B" && cleanInn.length === 9 ? cleanInn : undefined,
+      locale,
+    });
+
+    setIsSendingOtp(false);
+
+    if (res.success) {
+      setOtpCooldown(res.cooldown ?? 60);
+      setOtpDevCode(res.isTestMode && res.devCode ? res.devCode : "");
+      setIsOtpModalOpen(true);
+      return;
+    }
+
+    // If cooldown is still running from a recent SMS to the same number, still open the modal so user can enter it
+    if (res.retryAfter && res.retryAfter > 0) {
+      setOtpCooldown(res.retryAfter);
+      setIsOtpModalOpen(true);
+      return;
+    }
+
+    setSubmitError(
+      res.error ||
+        (isUz
+          ? "SMS kod yuborishda xatolik yuz berdi. Qaytadan urinib ko‘ring."
+          : "Ошибка при отправке СМС-кода. Попробуйте снова.")
+    );
+  };
+
+  const submitOrderRequest = async (overrideToken?: string) => {
+    setHasSubmitted(true);
     setIsSubmitting(true);
     setSubmitError("");
+
+    const activeToken =
+      overrideToken ||
+      (verifiedPhone === normalizedPhone ? verifiedPhoneToken : "");
 
     try {
       const res = await fetch("/api/order/create", {
@@ -170,23 +360,26 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
         },
         body: JSON.stringify({
           customerType: finalCustomerType,
-          fullName,
-          phone,
-          altPhone: altPhone || undefined,
-          email: email || undefined,
+          fullName: fullName.trim(),
+          phone: normalizedPhone,
+          altPhone: altPhone.trim() ? normalizeUzPhone(altPhone) : undefined,
+          email: email.trim() || undefined,
           deliveryMethod,
           region: undefined,
           district:
             deliveryMethod === "courier" && district && !address.includes(district)
               ? district
               : undefined,
-          address: deliveryMethod === "courier" ? address : undefined,
-          landmark: landmark || undefined,
+          address: deliveryMethod === "courier" ? address.trim() : undefined,
+          landmark: landmark.trim() || undefined,
           geolocation: deliveryMethod === "courier" ? geolocation : "",
-          orderComment: orderComment || undefined,
+          orderComment: orderComment.trim() || undefined,
           paymentMethod,
-          companyName: finalCustomerType === "B2B" ? companyName.trim() : undefined,
-          companyInn: finalCustomerType === "B2B" ? companyInn.trim() : undefined,
+          companyName:
+            finalCustomerType === "B2B" ? companyName.trim() : undefined,
+          companyInn:
+            finalCustomerType === "B2B" ? formatInnInput(companyInn) : undefined,
+          verifiedPhoneToken: activeToken || undefined,
           items: items.map((i) => ({
             id: i.id,
             name: i.name,
@@ -199,33 +392,47 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
 
       const resData = await res.json();
 
-      if (!res.ok && res.status === 400) {
-        setSubmitError(resData.error || "Buyurtma ma'lumotlarida xatolik yuz berdi");
+      if (res.status === 401 || resData.code === "PHONE_VERIFICATION_REQUIRED") {
+        setVerifiedPhoneToken("");
+        setVerifiedPhone("");
         setIsSubmitting(false);
-        hasSubmittedRef.current = false;
+        setHasSubmitted(false);
+        await initiateCheckoutOtp(true);
         return;
       }
 
-      const orderId = resData.order_id || `SORA-${Math.floor(100000 + Math.random() * 900000)}`;
+      if (!res.ok) {
+        setSubmitError(
+          resData.error ||
+            (isUz
+              ? "Buyurtma ma'lumotlarida xatolik yuz berdi"
+              : "Ошибка в данных заказа")
+        );
+        setIsSubmitting(false);
+        setHasSubmitted(false);
+        return;
+      }
+
+      const orderId = resData.order_id || "SORA-ORDER";
       const orderNumber = resData.order_number || orderId;
 
       const orderData = {
         orderId,
         orderNumber,
         createdAt: new Date().toISOString(),
-        fullName,
-        phone,
-        altPhone,
-        email,
+        fullName: fullName.trim(),
+        phone: normalizedPhone,
+        altPhone: altPhone.trim() ? normalizeUzPhone(altPhone) : "",
+        email: email.trim(),
         deliveryMethod,
         region,
         district,
-        address,
-        landmark,
-        orderComment,
+        address: address.trim(),
+        landmark: landmark.trim(),
+        orderComment: orderComment.trim(),
         paymentMethod,
-        companyName,
-        companyInn,
+        companyName: companyName.trim(),
+        companyInn: formatInnInput(companyInn),
         items,
         subtotal,
         deliveryFee,
@@ -257,18 +464,48 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
         })),
       });
 
-      router.push(`/checkout/success?orderId=${encodeURIComponent(orderId)}&orderNumber=${encodeURIComponent(orderNumber)}`);
+      router.push(
+        `/checkout/success?orderId=${encodeURIComponent(orderId)}&orderNumber=${encodeURIComponent(orderNumber)}`
+      );
     } catch {
-      // Fallback in case of temporary network glitch
-      const fallbackId = `SORA-${Math.floor(100000 + Math.random() * 900000)}`;
-      router.push(`/checkout/success?orderId=${encodeURIComponent(fallbackId)}`);
+      setSubmitError(
+        isUz
+          ? "Server bilan aloqada xatolik yuz berdi. Iltimos, qaytadan urinib ko‘ring."
+          : "Ошибка соединения с сервером. Пожалуйста, попробуйте снова."
+      );
+      setHasSubmitted(false);
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const handleSubmitOrder = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isSubmitting || isSendingOtp) return;
+
+    if (!validateCheckoutForm()) {
+      return;
+    }
+
+    if (!isPhoneVerified) {
+      await initiateCheckoutOtp(true);
+      return;
+    }
+
+    await submitOrderRequest();
+  };
+
+  const inputBorderClass = (field: CheckoutFieldKey, defaultBorder: string) =>
+    fieldErrors[field]
+      ? "border-rose-500 ring-2 ring-rose-500/20 focus:ring-rose-500"
+      : `${defaultBorder} focus:ring-sora-500`;
+
   return (
-    <form onSubmit={handleSubmitOrder} className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+    <form
+      noValidate
+      onSubmit={handleSubmitOrder}
+      className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start"
+    >
       {/* Left: Checkout Steps (8 cols) */}
       <div className="lg:col-span-8 space-y-8">
         <div>
@@ -355,31 +592,52 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
                     {locale === "uz" ? "Tashkilot nomi" : "Название компании"} *
                   </label>
                   <input
+                    ref={companyNameRef}
                     type="text"
                     required={orderType === "B2B"}
+                    aria-invalid={!!fieldErrors.companyName}
                     value={companyName}
-                    onChange={(e) => setCompanyName(e.target.value)}
+                    onChange={(e) => {
+                      setCompanyName(e.target.value);
+                      clearFieldError("companyName");
+                    }}
                     placeholder={locale === "uz" ? "«Navruz International» MCHJ" : "ООО «Навруз»"}
                     data-metrika-noindex="true"
-                    className="w-full px-3.5 py-2 bg-white dark:bg-slate-800 border border-amber-200 dark:border-slate-700 rounded-xl text-sm dark:text-white ym-disable-keys"
+                    className={`w-full px-3.5 py-2 bg-white dark:bg-slate-800 border rounded-xl text-sm focus:outline-none focus:ring-2 dark:text-white ym-disable-keys ${inputBorderClass("companyName", "border-amber-200 dark:border-slate-700")}`}
                   />
+                  {fieldErrors.companyName && (
+                    <p role="alert" className="mt-1 text-[11px] font-medium text-rose-600 dark:text-rose-400 flex items-center gap-1">
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                      <span>{fieldErrors.companyName}</span>
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                     {locale === "uz" ? "STIR (INN, 9 xonali)" : "ИНН (9 цифр)"} *
                   </label>
                   <input
+                    ref={companyInnRef}
                     type="text"
                     inputMode="numeric"
                     pattern="[0-9]*"
-                    maxLength={9}
                     required={orderType === "B2B"}
+                    aria-invalid={!!fieldErrors.companyInn}
                     value={companyInn}
-                    onChange={(e) => setCompanyInn(e.target.value)}
+                    onChange={(e) => {
+                      setCompanyInn(formatInnInput(e.target.value));
+                      clearFieldError("companyInn");
+                    }}
                     placeholder="204393073"
                     data-metrika-noindex="true"
-                    className="w-full px-3.5 py-2 bg-white dark:bg-slate-800 border border-amber-200 dark:border-slate-700 rounded-xl text-sm font-mono dark:text-white ym-disable-keys"
+                    className={`w-full px-3.5 py-2 bg-white dark:bg-slate-800 border rounded-xl text-sm font-mono focus:outline-none focus:ring-2 dark:text-white ym-disable-keys ${inputBorderClass("companyInn", "border-amber-200 dark:border-slate-700")}`}
                   />
+                  {fieldErrors.companyInn && (
+                    <p role="alert" className="mt-1 text-[11px] font-medium text-rose-600 dark:text-rose-400 flex items-center gap-1">
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                      <span>{fieldErrors.companyInn}</span>
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
@@ -393,15 +651,26 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
               <div className="relative">
                 <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
+                  ref={fullNameRef}
                   type="text"
                   required
+                  aria-invalid={!!fieldErrors.fullName}
                   value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
+                  onChange={(e) => {
+                    setFullName(e.target.value);
+                    clearFieldError("fullName");
+                  }}
                   placeholder={t("fullNamePlaceholder")}
                   data-metrika-noindex="true"
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sora-500 dark:text-white ym-disable-keys"
+                  className={`w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border rounded-xl text-sm focus:outline-none focus:ring-2 dark:text-white ym-disable-keys ${inputBorderClass("fullName", "border-slate-200 dark:border-slate-700")}`}
                 />
               </div>
+              {fieldErrors.fullName && (
+                <p role="alert" className="mt-1 text-[11px] font-medium text-rose-600 dark:text-rose-400 flex items-center gap-1">
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                  <span>{fieldErrors.fullName}</span>
+                </p>
+              )}
             </div>
 
             <div>
@@ -411,15 +680,58 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
               <div className="relative">
                 <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
+                  ref={phoneRef}
                   type="tel"
-                  inputMode="tel"
+                  inputMode="numeric"
                   required
+                  aria-invalid={!!fieldErrors.phone}
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
+                  onChange={(e) => {
+                    const formatted = formatUzPhoneInput(e.target.value);
+                    setPhone(formatted);
+                    clearFieldError("phone");
+                  }}
                   placeholder={t("phonePlaceholder")}
                   data-metrika-noindex="true"
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sora-500 dark:text-white ym-disable-keys"
+                  className={`w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border rounded-xl text-sm font-mono focus:outline-none focus:ring-2 dark:text-white ym-disable-keys ${inputBorderClass("phone", "border-slate-200 dark:border-slate-700")}`}
                 />
+              </div>
+              {fieldErrors.phone && (
+                <p role="alert" className="mt-1 text-[11px] font-medium text-rose-600 dark:text-rose-400 flex items-center gap-1">
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                  <span>{fieldErrors.phone}</span>
+                </p>
+              )}
+              <div className="mt-1.5 flex items-center justify-between gap-2">
+                {isPhoneVerified ? (
+                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 dark:text-emerald-400">
+                    <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                    <span>
+                      {isUz ? "SMS orqali tasdiqlangan" : "Номер подтверждён по СМС"}
+                    </span>
+                  </span>
+                ) : (
+                  <>
+                    <span className="text-[11px] text-amber-700 dark:text-amber-400 font-medium">
+                      {isUz
+                        ? "Buyurtma uchun SMS tasdiqlash talab etiladi"
+                        : "Для заказа требуется подтверждение по СМС"}
+                    </span>
+                    <button
+                      type="button"
+                      disabled={!isPhoneComplete || isSendingOtp}
+                      onClick={() => void initiateCheckoutOtp(false)}
+                      className="shrink-0 inline-flex items-center gap-1 rounded-lg bg-sora-50 dark:bg-sora-950/50 border border-sora-200 dark:border-sora-800 px-2.5 py-1 text-[11px] font-bold text-sora-700 dark:text-sora-300 hover:bg-sora-100 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                    >
+                      {isSendingOtp ? (
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                      ) : (
+                        <MessageSquareCode className="w-3 h-3" />
+                      )}
+                      <span>{isUz ? "SMS kod olish" : "Получить СМС"}</span>
+                    </button>
+                  </>
+                )}
               </div>
             </div>
 
@@ -430,15 +742,26 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
               <div className="relative">
                 <Smartphone className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
+                  ref={altPhoneRef}
                   type="tel"
-                  inputMode="tel"
+                  inputMode="numeric"
+                  aria-invalid={!!fieldErrors.altPhone}
                   value={altPhone}
-                  onChange={(e) => setAltPhone(e.target.value)}
+                  onChange={(e) => {
+                    setAltPhone(formatOptionalUzPhoneInput(e.target.value));
+                    clearFieldError("altPhone");
+                  }}
                   placeholder={t("altPhonePlaceholder")}
                   data-metrika-noindex="true"
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sora-500 dark:text-white ym-disable-keys"
+                  className={`w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border rounded-xl text-sm font-mono focus:outline-none focus:ring-2 dark:text-white ym-disable-keys ${inputBorderClass("altPhone", "border-slate-200 dark:border-slate-700")}`}
                 />
               </div>
+              {fieldErrors.altPhone && (
+                <p role="alert" className="mt-1 text-[11px] font-medium text-rose-600 dark:text-rose-400 flex items-center gap-1">
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                  <span>{fieldErrors.altPhone}</span>
+                </p>
+              )}
             </div>
 
             <div>
@@ -448,14 +771,25 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
               <div className="relative">
                 <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
+                  ref={emailRef}
                   type="email"
+                  aria-invalid={!!fieldErrors.email}
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    clearFieldError("email");
+                  }}
                   placeholder={t("emailPlaceholder")}
                   data-metrika-noindex="true"
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sora-500 dark:text-white ym-disable-keys"
+                  className={`w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border rounded-xl text-sm focus:outline-none focus:ring-2 dark:text-white ym-disable-keys ${inputBorderClass("email", "border-slate-200 dark:border-slate-700")}`}
                 />
               </div>
+              {fieldErrors.email && (
+                <p role="alert" className="mt-1 text-[11px] font-medium text-rose-600 dark:text-rose-400 flex items-center gap-1">
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                  <span>{fieldErrors.email}</span>
+                </p>
+              )}
             </div>
           </div>
         </section>
@@ -650,14 +984,25 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
                 <div className="relative">
                   <MapPin className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                   <input
+                    ref={addressRef}
                     type="text"
                     required
+                    aria-invalid={!!fieldErrors.address}
                     value={address}
-                    onChange={(e) => setAddress(e.target.value)}
+                    onChange={(e) => {
+                      setAddress(e.target.value);
+                      clearFieldError("address");
+                    }}
                     placeholder={t("addressPlaceholder")}
-                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sora-500 dark:text-white"
+                    className={`w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border rounded-xl text-sm focus:outline-none focus:ring-2 dark:text-white ${inputBorderClass("address", "border-slate-200 dark:border-slate-700")}`}
                   />
                 </div>
+                {fieldErrors.address && (
+                  <p role="alert" className="mt-1 text-[11px] font-medium text-rose-600 dark:text-rose-400 flex items-center gap-1">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    <span>{fieldErrors.address}</span>
+                  </p>
+                )}
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -896,10 +1241,14 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
                       <input
                         type="text"
                         required={paymentMethod === "b2b"}
+                        aria-invalid={!!fieldErrors.companyName}
                         value={companyName}
-                        onChange={(e) => setCompanyName(e.target.value)}
+                        onChange={(e) => {
+                          setCompanyName(e.target.value);
+                          clearFieldError("companyName");
+                        }}
                         placeholder='«Navruz International» MCHJ'
-                        className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs dark:text-white"
+                        className={`w-full px-3 py-2 bg-white dark:bg-slate-800 border rounded-lg text-xs focus:outline-none focus:ring-2 dark:text-white ${inputBorderClass("companyName", "border-slate-200 dark:border-slate-700")}`}
                       />
                     </div>
                     <div>
@@ -910,12 +1259,15 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
                         type="text"
                         inputMode="numeric"
                         pattern="[0-9]*"
-                        maxLength={9}
                         required={paymentMethod === "b2b"}
+                        aria-invalid={!!fieldErrors.companyInn}
                         value={companyInn}
-                        onChange={(e) => setCompanyInn(e.target.value)}
+                        onChange={(e) => {
+                          setCompanyInn(formatInnInput(e.target.value));
+                          clearFieldError("companyInn");
+                        }}
                         placeholder="204393073"
-                        className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-mono dark:text-white"
+                        className={`w-full px-3 py-2 bg-white dark:bg-slate-800 border rounded-lg text-xs font-mono focus:outline-none focus:ring-2 dark:text-white ${inputBorderClass("companyInn", "border-slate-200 dark:border-slate-700")}`}
                       />
                     </div>
                   </div>
@@ -1012,11 +1364,20 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
           {/* Confirm Button */}
           <button
             type="submit"
-            disabled={isSubmitting}
-            className="w-full flex items-center justify-center gap-2 py-4 px-6 rounded-2xl bg-sora-600 hover:bg-sora-700 active:scale-[0.98] text-white font-bold text-sm shadow-md shadow-sora-500/25 transition-all disabled:opacity-50"
+            disabled={isSubmitting || isSendingOtp}
+            className="w-full flex items-center justify-center gap-2 py-4 px-6 rounded-2xl bg-sora-600 hover:bg-sora-700 active:scale-[0.98] text-white font-bold text-sm shadow-md shadow-sora-500/25 transition-all disabled:opacity-50 cursor-pointer"
           >
-            {isSubmitting ? (
-              <span>{t("processing")}</span>
+            {isSubmitting || isSendingOtp ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>
+                  {isSendingOtp
+                    ? isUz
+                      ? "SMS kod yuborilmoqda..."
+                      : "Отправка СМС-кода..."
+                    : t("processing")}
+                </span>
+              </>
             ) : (
               <>
                 <span>{t("confirmOrder")}</span>
@@ -1049,9 +1410,77 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
             .join(", ");
           if (fullAddress) {
             setAddress(fullAddress);
+            clearFieldError("address");
           }
         }}
       />
+
+      {/* Mandatory Checkout SMS OTP Verification Modal */}
+      {isOtpModalOpen && (
+      <CheckoutOtpModal
+        isOpen={isOtpModalOpen}
+        locale={locale}
+        formattedPhone={phone}
+        normalizedPhone={normalizedPhone}
+        customerType={finalCustomerType}
+        companyInn={formatInnInput(companyInn)}
+        initialCooldown={otpCooldown}
+        devCode={otpDevCode}
+        isSubmittingOrderAfterVerify={submitOrderAfterOtp}
+        onClose={() => {
+          setIsOtpModalOpen(false);
+          setSubmitOrderAfterOtp(false);
+        }}
+        onResend={async () => {
+          const cleanInn = formatInnInput(companyInn);
+          const res = await sendOtp({
+            phone: normalizedPhone,
+            type: finalCustomerType,
+            inn:
+              finalCustomerType === "B2B" && cleanInn.length === 9
+                ? cleanInn
+                : undefined,
+            locale,
+          });
+          return {
+            success: res.success,
+            cooldown: res.cooldown ?? res.retryAfter,
+            devCode: res.isTestMode ? res.devCode : undefined,
+            error: res.error,
+          };
+        }}
+        onVerify={async (code) => {
+          const cleanInn = formatInnInput(companyInn);
+          const res = await verifyOtp({
+            phone: normalizedPhone,
+            code,
+            type: finalCustomerType,
+            inn:
+              finalCustomerType === "B2B" && cleanInn.length === 9
+                ? cleanInn
+                : undefined,
+            locale,
+          });
+          if (res.success) {
+            const token = res.verifiedToken || "";
+            setVerifiedPhone(normalizedPhone);
+            setVerifiedPhoneToken(token);
+            setIsOtpModalOpen(false);
+            clearFieldError("phone");
+            if (submitOrderAfterOtp) {
+              setSubmitOrderAfterOtp(false);
+              await submitOrderRequest(token);
+            }
+          }
+          return {
+            success: res.success,
+            verifiedToken: res.verifiedToken,
+            user: res.user,
+            error: res.error,
+          };
+        }}
+      />
+      )}
     </form>
   );
 }

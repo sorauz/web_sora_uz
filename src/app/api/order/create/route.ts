@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { api } from "@/lib/api";
 import { CheckoutCreateOrderInputSchema } from "@/lib/schemas/order";
 import { AuthUser, AuthUserSchema, normalizePhone } from "@/lib/schemas/auth";
-import { deriveOneCPassword } from "@/lib/sms/otp-store";
+import { deriveOneCPassword, verifyPhoneToken } from "@/lib/sms/otp-store";
 import { buildOneCOrderPayload } from "@/lib/utils/order-payload";
 
 export async function POST(req: NextRequest) {
@@ -44,6 +44,28 @@ export async function POST(req: NextRequest) {
     const cleanAltPhone = data.altPhone ? normalizePhone(data.altPhone) : "";
     const isB2B = data.customerType === "B2B";
     const cleanInn = (data.companyInn || "").replace(/\D/g, "");
+
+    // 1.5. Strict SMS OTP Verification Gate (required for BOTH B2C and B2B)
+    const sessionPhoneVerified =
+      !!sessionUser?.phone && normalizePhone(sessionUser.phone) === cleanPhone;
+
+    const otpTokenPayload = data.verifiedPhoneToken
+      ? verifyPhoneToken(data.verifiedPhoneToken)
+      : null;
+    const tokenPhoneVerified =
+      !!otpTokenPayload && normalizePhone(otpTokenPayload.phone) === cleanPhone;
+
+    if (!sessionPhoneVerified && !tokenPhoneVerified) {
+      return NextResponse.json(
+        {
+          success: false,
+          code: "PHONE_VERIFICATION_REQUIRED",
+          error:
+            "Buyurtmani rasmiylashtirish uchun telefon raqamingizni SMS kod orqali tasdiqlang!",
+        },
+        { status: 401 }
+      );
+    }
 
     // 2. Resolve contact_id (КонтактноеЛицо GUID) for BOTH B2C and B2B orders
     // so 1C always receives the responsible person's phone record on the order.
@@ -130,6 +152,29 @@ export async function POST(req: NextRequest) {
     const orderResult = await api.createOrder(oneCPayload);
 
     if (orderResult.success && orderResult.data) {
+      // If user verified phone via Checkout OTP without an existing session, persist session cookie
+      if (!sessionUser && tokenPhoneVerified) {
+        const primaryId = isB2B ? clientId : contactId;
+        if (primaryId) {
+          const newSessionUser: AuthUser = {
+            id: primaryId,
+            name: isB2B
+              ? (data.companyName || data.fullName).trim()
+              : data.fullName.trim(),
+            type: isB2B ? "B2B" : "B2C",
+            phone: cleanPhone,
+            inn: isB2B && cleanInn ? cleanInn : undefined,
+          };
+          cookieStore.set("sora_session", JSON.stringify(newSessionUser), {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            maxAge: 60 * 60 * 24 * 30,
+            path: "/",
+          });
+        }
+      }
+
       return NextResponse.json(
         {
           success: true,
