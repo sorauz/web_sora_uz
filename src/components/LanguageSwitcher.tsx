@@ -2,8 +2,16 @@
 
 import { useLocale } from "next-intl";
 import { usePathname, useRouter } from "@/i18n/routing";
-import { useState, useRef, useEffect, useTransition, useId } from "react";
-import { ChevronDown, Check } from "lucide-react";
+import {
+  useState,
+  useRef,
+  useEffect,
+  useTransition,
+  useId,
+  useCallback,
+} from "react";
+import { createPortal } from "react-dom";
+import { ChevronDown, Check, Loader2 } from "lucide-react";
 
 /**
  * Circular flag badge for the Russian Federation
@@ -103,121 +111,198 @@ export function UzbekFlagIcon({ className = "w-5 h-5" }: { className?: string })
   );
 }
 
+interface MenuCoords {
+  top: number;
+  right: number;
+}
+
 export function LanguageSwitcher() {
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
   const [isPending, startTransition] = useTransition();
   const [isOpen, setIsOpen] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [switchingTo, setSwitchingTo] = useState<"uz" | "ru" | null>(null);
+  const [menuCoords, setMenuCoords] = useState<MenuCoords | null>(null);
 
-  // Close dropdown on outside click
-  useEffect(() => {
-    const handleOutsideClick = (event: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleOutsideClick);
-    return () => document.removeEventListener("mousedown", handleOutsideClick);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  const updateMenuPosition = useCallback(() => {
+    const el = triggerRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    setMenuCoords({
+      top: Math.max(8, rect.bottom + 6),
+      right: Math.max(8, window.innerWidth - rect.right),
+    });
   }, []);
 
-  // Close on Escape key
+  // Keep portal menu anchored to trigger on scroll & resize
   useEffect(() => {
+    if (!isOpen) return;
+
+    const handleReposition = () => updateMenuPosition();
+    window.addEventListener("resize", handleReposition);
+    window.addEventListener("scroll", handleReposition, { passive: true, capture: true });
+
+    return () => {
+      window.removeEventListener("resize", handleReposition);
+      window.removeEventListener("scroll", handleReposition, true);
+    };
+  }, [isOpen, updateMenuPosition]);
+
+  // Close dropdown on outside pointerdown (checks BOTH trigger & portal menu)
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleOutsidePointerDown = (event: PointerEvent) => {
+      const target = event.target as Node | null;
+      if (!target) return;
+      if (triggerRef.current?.contains(target)) return;
+      if (menuRef.current?.contains(target)) return;
+      setIsOpen(false);
+    };
+
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         setIsOpen(false);
+        triggerRef.current?.focus();
       }
     };
+
+    document.addEventListener("pointerdown", handleOutsidePointerDown);
     document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, []);
+    return () => {
+      document.removeEventListener("pointerdown", handleOutsidePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen]);
+
+  const handleToggleOpen = () => {
+    if (isOpen) {
+      setIsOpen(false);
+      return;
+    }
+    updateMenuPosition();
+    setIsOpen(true);
+  };
 
   const toggleLocale = (nextLocale: "uz" | "ru") => {
     setIsOpen(false);
     if (nextLocale === locale) return;
+
+    setSwitchingTo(nextLocale);
+    const search =
+      typeof window !== "undefined" ? window.location.search : "";
+    const targetPath = search ? `${pathname}${search}` : pathname;
+
     startTransition(() => {
-      router.replace(pathname, { locale: nextLocale });
+      router.replace(targetPath, { locale: nextLocale });
     });
   };
 
-  const isUz = locale === "uz";
+  const activeSwitchingLocale =
+    isPending && switchingTo && switchingTo !== locale ? switchingTo : null;
+  const displayedLocale = activeSwitchingLocale ?? (locale === "ru" ? "ru" : "uz");
+  const isUz = displayedLocale === "uz";
 
   return (
-    <div className="relative inline-block text-left" ref={containerRef}>
+    <div className="relative inline-block text-left">
       {/* Trigger Button */}
       <button
+        ref={triggerRef}
         type="button"
-        onClick={() => setIsOpen((prev) => !prev)}
+        onClick={handleToggleOpen}
         data-testid="language-switcher-trigger"
         aria-label={isUz ? "Tilni tanlash: O‘zbekcha" : "Выбор языка: Русский"}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
-        disabled={isPending}
-        className="h-9 sm:h-10 px-2 sm:px-3 rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-slate-800 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700 flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 transition-colors cursor-pointer select-none focus:outline-none focus:ring-2 focus:ring-sora-500/40"
+        aria-busy={Boolean(activeSwitchingLocale)}
+        disabled={Boolean(activeSwitchingLocale)}
+        className={`h-9 sm:h-10 px-2.5 sm:px-3 rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-slate-800 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700 flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 transition-colors cursor-pointer select-none focus:outline-none focus:ring-2 focus:ring-sora-500/40 ${
+          activeSwitchingLocale ? "opacity-80 cursor-wait" : ""
+        }`}
       >
         {isUz ? (
           <UzbekFlagIcon className="w-4 h-4 sm:w-5 sm:h-5" />
         ) : (
           <RussianFlagIcon className="w-4 h-4 sm:w-5 sm:h-5" />
         )}
-        <span className="truncate max-w-[80px] sm:max-w-none">
+        <span className="truncate max-w-[84px] sm:max-w-none">
           {isUz ? "O‘zbekcha" : "Русский"}
         </span>
-        <ChevronDown
-          className={`w-3.5 h-3.5 text-slate-500 transition-transform duration-200 ${
-            isOpen ? "rotate-180" : ""
-          }`}
-        />
+        {activeSwitchingLocale ? (
+          <Loader2 className="w-3.5 h-3.5 text-sora-600 animate-spin shrink-0" />
+        ) : (
+          <ChevronDown
+            className={`w-3.5 h-3.5 text-slate-500 transition-transform duration-200 shrink-0 ${
+              isOpen ? "rotate-180" : ""
+            }`}
+          />
+        )}
       </button>
 
-      {/* Vertical Dropdown Menu (Matches reference layout) */}
-      {isOpen && (
-        <div
-          aria-label="Tillar ro'yxati"
-          className="absolute right-0 top-full mt-1.5 w-44 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl p-1.5 z-50 animate-in fade-in zoom-in-95 duration-100 space-y-1"
-        >
-          {/* Option 1: Russian (Top row as in reference image) */}
-          <button
-            type="button"
-            onClick={() => toggleLocale("ru")}
-            disabled={isPending}
-            className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs sm:text-sm transition-all cursor-pointer select-none text-left ${
-              locale === "ru"
-                ? "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white font-semibold shadow-xs"
-                : "text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60 font-medium"
-            }`}
+      {/* Portal Dropdown Menu — immune to header overflow/backdrop-filter clipping on all browsers */}
+      {isOpen &&
+        menuCoords &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <div
+            ref={menuRef}
+            aria-label="Tillar ro'yxati"
+            style={{
+              position: "fixed",
+              top: `${menuCoords.top}px`,
+              right: `${menuCoords.right}px`,
+            }}
+            onPointerDown={(e) => e.stopPropagation()}
+            className="w-48 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl p-1.5 z-[9999] space-y-1"
           >
-            <div className="flex items-center gap-2.5">
-              <RussianFlagIcon className="w-5 h-5" />
-              <span>Русский</span>
-            </div>
-            {locale === "ru" && (
-              <Check className="w-4 h-4 text-sora-600 dark:text-sora-400 shrink-0" />
-            )}
-          </button>
+            {/* Option 1: Russian */}
+            <button
+              type="button"
+              aria-current={locale === "ru" ? "true" : undefined}
+              onClick={() => toggleLocale("ru")}
+              disabled={Boolean(activeSwitchingLocale)}
+              className={`w-full min-h-[44px] flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm transition-colors cursor-pointer select-none text-left touch-manipulation ${
+                locale === "ru"
+                  ? "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white font-semibold"
+                  : "text-slate-700 dark:text-slate-200 hover:bg-sora-50 dark:hover:bg-slate-800/80 active:bg-sora-100 font-medium"
+              }`}
+            >
+              <span className="flex items-center gap-2.5">
+                <RussianFlagIcon className="w-5 h-5" />
+                <span>Русский</span>
+              </span>
+              {locale === "ru" && (
+                <Check className="w-4 h-4 text-sora-600 dark:text-sora-400 shrink-0" />
+              )}
+            </button>
 
-          {/* Option 2: Uzbek (Bottom row as in reference image) */}
-          <button
-            type="button"
-            onClick={() => toggleLocale("uz")}
-            disabled={isPending}
-            className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs sm:text-sm transition-all cursor-pointer select-none text-left ${
-              locale === "uz"
-                ? "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white font-semibold shadow-xs"
-                : "text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60 font-medium"
-            }`}
-          >
-            <div className="flex items-center gap-2.5">
-              <UzbekFlagIcon className="w-5 h-5" />
-              <span>O‘zbekcha</span>
-            </div>
-            {locale === "uz" && (
-              <Check className="w-4 h-4 text-sora-600 dark:text-sora-400 shrink-0" />
-            )}
-          </button>
-        </div>
-      )}
+            {/* Option 2: Uzbek */}
+            <button
+              type="button"
+              aria-current={locale === "uz" ? "true" : undefined}
+              onClick={() => toggleLocale("uz")}
+              disabled={Boolean(activeSwitchingLocale)}
+              className={`w-full min-h-[44px] flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm transition-colors cursor-pointer select-none text-left touch-manipulation ${
+                locale === "uz"
+                  ? "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white font-semibold"
+                  : "text-slate-700 dark:text-slate-200 hover:bg-sora-50 dark:hover:bg-slate-800/80 active:bg-sora-100 font-medium"
+              }`}
+            >
+              <span className="flex items-center gap-2.5">
+                <UzbekFlagIcon className="w-5 h-5" />
+                <span>O‘zbekcha</span>
+              </span>
+              {locale === "uz" && (
+                <Check className="w-4 h-4 text-sora-600 dark:text-sora-400 shrink-0" />
+              )}
+            </button>
+          </div>,
+          document.body
+        )}
     </div>
   );
 }

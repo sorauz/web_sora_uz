@@ -15,7 +15,7 @@ test.describe("FAZA 5: Technical SEO, Canonical Redirection, and Price Display",
     expect(firstPriceText).toMatch(/[1-9]\d*([,\s.]\d{3})*\s*so'm/i);
   });
 
-  test("Language switch on category page automatically redirects to canonical localized slug", async ({
+  test("Language switch on category page automatically redirects to canonical localized slug (uz <-> ru) and preserves query params", async ({
     page,
   }) => {
     // 1. Visit Uzbek category
@@ -31,6 +31,22 @@ test.describe("FAZA 5: Technical SEO, Canonical Redirection, and Price Display",
     // 3. Verify it does NOT show 404 and redirected to Russian category slug
     await page.waitForURL("**/ru/category/magnitnye-i-markernye-doski");
     await expect(page.locator("h1")).toContainText(/Магнитные/i);
+
+    // 4. Switch BACK from Russian -> Uzbek via portal dropdown
+    await page.getByTestId("language-switcher-trigger").click();
+    const uzBtn = page.getByRole("button", { name: "O‘zbekcha" });
+    await expect(uzBtn).toBeVisible();
+    await uzBtn.click();
+
+    await page.waitForURL("**/uz/category/magnit-va-marker-doskalari");
+    await expect(page.locator("h1")).toContainText(/Magnit va marker/i);
+
+    // 5. Verify query parameters are preserved when switching ru -> uz on /ru/search?q=deli
+    await page.goto("/ru/search?q=deli");
+    await page.getByTestId("language-switcher-trigger").click();
+    await page.getByRole("button", { name: "O‘zbekcha" }).click();
+    await page.waitForURL("**/uz/search?q=deli");
+    await expect(page.locator("h1")).toContainText(/deli/i);
   });
 
   test("Robots.txt is accessible and disallows cart/checkout/filters", async ({ request }) => {

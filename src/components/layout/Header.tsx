@@ -87,7 +87,7 @@ export function Header({ tree, categories, brands, products = [] }: HeaderProps)
   const compareCount = mounted ? getCompareCount() : 0;
 
   return (
-    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 w-full overflow-x-clip">
+    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 w-full">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-18 flex items-center justify-between gap-2 sm:gap-4">
         {/* Logo - Matching logo.png */}
         <Link href="/" className="flex flex-col shrink-0 group">
