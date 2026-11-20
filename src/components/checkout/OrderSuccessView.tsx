@@ -409,11 +409,23 @@ export function OrderSuccessView({
         {/* Action Buttons */}
         <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
           <Link
-            href="/orders"
+            href={
+              displayOrderId && displayOrderId !== "SORA-849201"
+                ? `/orders?orderId=${encodeURIComponent(displayOrderId)}`
+                : "/orders"
+            }
             className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/50 dark:hover:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 font-bold text-xs transition-colors"
           >
             <ClipboardList className="w-4 h-4" />
-            <span>{isUz ? "Mening buyurtmalarim" : "Мои заказы"}</span>
+            <span>
+              {displayOrderNumber && displayOrderNumber !== "SORA-849201"
+                ? isUz
+                  ? `Buyurtma holatini kuzatish (#${displayOrderNumber})`
+                  : `Отслеживать заказ (#${displayOrderNumber})`
+                : isUz
+                ? "Mening buyurtmalarim"
+                : "Мои заказы"}
+            </span>
           </Link>
           <Link
             href="/"

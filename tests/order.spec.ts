@@ -453,7 +453,12 @@ test.describe("Checkout Validation, Phone Masking, Mandatory SMS OTP & 1C Order 
       "/uz/checkout/success?orderId=f1e2d3c4-b5a6-7890-abcd-ef1234567890&orderNumber=0000-001426"
     );
 
-    await expect(page.getByText(/0000-001426/)).toBeVisible();
+    await expect(
+      page.getByText(/Buyurtma raqami:\s*0000-001426/i)
+    ).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: /Buyurtma holatini kuzatish/i })
+    ).toBeVisible();
     await expect(
       page.getByText(/Qabul qilindi — menejer tekshiruvida/i)
     ).toBeVisible();
@@ -591,5 +596,269 @@ test.describe("Checkout Validation, Phone Masking, Mandatory SMS OTP & 1C Order 
       page.getByRole("heading", { name: /Войдите, чтобы увидеть историю заказов/i })
     ).toBeVisible();
     await expect(page.getByRole("button", { name: /Войти в аккаунт/i })).toBeVisible();
+  });
+
+  test("11. /uz/orders renders status tabs, live search, mini-progress bar, and deep linking without legacy tracker modal", async ({
+    page,
+    context,
+  }) => {
+    // 1. Verify Header has no legacy "Buyurtma holati" button
+    await page.goto("/uz");
+    await expect(page.getByRole("button", { name: "Buyurtma holati" })).toHaveCount(0);
+
+    // 2. Setup authenticated session
+    await page.route("**/api/auth/me", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          authenticated: true,
+          user: {
+            id: "usr-12345",
+            name: "Sardor Rahimov",
+            type: "B2C",
+            phone: "+998901234567",
+          },
+        }),
+      });
+    });
+
+    // 3. Mock /api/orders list
+    await page.route("**/api/orders*", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          success: true,
+          limit: 20,
+          offset: 0,
+          has_more: false,
+          orders: [
+            {
+              order_id: "order-guid-1",
+              order_number: "0000-001425",
+              order_date: "2026-11-20T09:15:00",
+              online: true,
+              status_code: "ASSEMBLED",
+              status: "Omborda yig'ildi",
+              without_delivery: false,
+              total_amount: 450000,
+              items_count: 2,
+            },
+            {
+              order_id: "order-guid-2",
+              order_number: "0000-001426",
+              order_date: "2026-11-19T14:20:00",
+              online: false,
+              status_code: "DELIVERED",
+              status: "Yetkazib berildi",
+              without_delivery: true,
+              total_amount: 120000,
+              items_count: 1,
+            },
+          ],
+        }),
+      });
+    });
+
+    // 4. Mock /api/order/status
+    await page.route("**/api/order/status*", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          success: true,
+          order: {
+            order_id: "order-guid-1",
+            order_number: "0000-001425",
+            order_date: "2026-11-20T09:15:00",
+            online: true,
+            status_code: "ASSEMBLED",
+            status: "Omborda yig'ildi",
+            posted: true,
+            total_amount: 450000,
+            payment_type: "CASH_OR_CARD",
+            comment: "Tezroq yetkazilsa minnatdormiz",
+            delivery: {
+              without_delivery: false,
+              geolocation: "41.3111,69.2797",
+              pickup_point: "Toshkent, Chilonzor 5-mavze",
+            },
+            timeline: [
+              { code: "CONFIRMED", title: "Qabul qilindi", completed: true, date: "2026-11-20T09:15:00" },
+              { code: "ASSEMBLED", title: "Omborda yig'ildi", completed: true, date: "2026-11-20T10:00:00" },
+              { code: "SHIPPED", title: "Kuryerga topshirildi", completed: false, date: null },
+              { code: "DELIVERED", title: "Yetkazib berildi", completed: false, date: null },
+            ],
+            products: [
+              {
+                line_number: 1,
+                product_id: "prod-calc-1",
+                product_name: "Deli Kalkulyator",
+                unit: "dona",
+                quantity: 2,
+                price: 150000,
+                amount: 300000,
+              },
+              {
+                line_number: 2,
+                product_id: "prod-pen-1",
+                product_name: "Deli Ruchka to'plami",
+                unit: "dona",
+                quantity: 1,
+                price: 150000,
+                amount: 150000,
+              },
+            ],
+          },
+        }),
+      });
+    });
+
+    // 5. Navigate to /uz/orders and check tabs and orders
+    await page.goto("/uz/orders");
+    await expect(page.getByRole("heading", { name: "Mening buyurtmalarim" })).toBeVisible();
+
+    // Verify tabs
+    await expect(page.getByRole("button", { name: /Barchasi/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: /Faol \/ Jarayonda/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: /Yetkazilgan/ })).toBeVisible();
+
+    // Verify both orders rendered
+    await expect(page.getByText("#0000-001425")).toBeVisible();
+    await expect(page.getByText("#0000-001426")).toBeVisible();
+
+    // Verify search filters orders
+    const searchInput = page.getByPlaceholder(/Buyurtma raqami bo'yicha qidirish/i);
+    await searchInput.fill("1425");
+    await expect(page.getByText("#0000-001425")).toBeVisible();
+    await expect(page.getByText("#0000-001426")).toHaveCount(0);
+
+    await searchInput.clear();
+    await expect(page.getByText("#0000-001426")).toBeVisible();
+
+    // 6. Test Detail Modal by clicking order card
+    await page.getByText("#0000-001425").click();
+    const modalDialog = page.getByRole("dialog");
+    await expect(modalDialog).toBeVisible();
+    await expect(modalDialog.getByText("Deli Kalkulyator")).toBeVisible();
+    await expect(modalDialog.getByRole("button", { name: "Ushbu buyurtmani takrorlash" })).toBeVisible();
+    await expect(modalDialog.getByRole("button", { name: "Chop etish" })).toBeVisible();
+    await expect(modalDialog.getByRole("link", { name: "Telegram orqali yozish" })).toBeVisible();
+
+    // 7. Test Repeat Order action: clicks repeat order, products added to cart, redirects to /cart
+    await modalDialog.getByRole("button", { name: "Ushbu buyurtmani takrorlash" }).click();
+    await expect(page).toHaveURL(/\/uz\/cart/);
+
+    // 8. Test Deep linking: /uz/orders?orderId=order-guid-1 automatically opens modal
+    await page.goto("/uz/orders?orderId=order-guid-1");
+    await expect(page.getByRole("dialog")).toBeVisible();
+    await expect(page.getByRole("dialog").getByText("#0000-001425")).toBeVisible();
+  });
+
+  test("12. Repeat checkout auto-fills saved profile, skips SMS OTP for verified session phone, and warns on phone switch", async ({
+    page,
+  }) => {
+    // 1. Mock authenticated 30-day session
+    await page.route("**/api/auth/me", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          authenticated: true,
+          user: {
+            id: "11112222-3333-4444-5555-666677778888",
+            name: "Alisher Navoiy",
+            type: "B2C",
+            phone: "+998901234567",
+          },
+        }),
+      });
+    });
+
+    // 2. Seed cart and saved 30-day checkout delivery profile
+    await page.addInitScript(() => {
+      localStorage.setItem(
+        "sora-cart-storage",
+        JSON.stringify({
+          state: {
+            items: [
+              {
+                id: "prod-1",
+                sku: "SKU-1",
+                name: "Deli Kalkulyator",
+                price: 150000,
+                picture: "",
+                unit: "dona",
+                quantity: 1,
+              },
+            ],
+          },
+          version: 0,
+        })
+      );
+      localStorage.setItem(
+        "sora_checkout_profile",
+        JSON.stringify({
+          phone: "+998901234567",
+          fullName: "Alisher Navoiy",
+          deliveryMethod: "courier",
+          address: "Chilonzor 5-mavze, 12-uy",
+          savedAt: Date.now(),
+        })
+      );
+    });
+
+    let otpRequested = false;
+    await page.route("**/api/auth/otp/send", async (route) => {
+      otpRequested = true;
+      await route.fulfill({ status: 200, body: JSON.stringify({ success: true }) });
+    });
+
+    let createOrderCalled = false;
+    await page.route("**/api/order/create", async (route) => {
+      createOrderCalled = true;
+      await route.fulfill({
+        status: 201,
+        contentType: "application/json",
+        body: JSON.stringify({
+          success: true,
+          order_id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+          order_number: "0000-001999",
+          status_code: "CONFIRMED",
+          status: "Qabul qilindi / Tasdiqlandi",
+          posted: true,
+          total_amount: 150000,
+          session_user: {
+            id: "11112222-3333-4444-5555-666677778888",
+            name: "Alisher Navoiy",
+            type: "B2C",
+            phone: "+998901234567",
+          },
+        }),
+      });
+    });
+
+    await page.goto("/uz/checkout");
+
+    // 3. Verify auto-fill & green verified badge (no SMS needed)
+    await expect(page.getByText(/SMS orqali tasdiqlangan/i)).toBeVisible();
+    await expect(page.locator('input[value="Chilonzor 5-mavze, 12-uy"]')).toBeVisible();
+
+    // 4. Typing a different phone number immediately removes verified badge and shows account-switch warning
+    const phoneInput = page.locator('input[type="tel"]').first();
+    await phoneInput.fill("909998877");
+    await expect(
+      page.getByText(/Yangi raqam — SMS orqali tasdiqlanadi va hisobingiz yangilanadi/i)
+    ).toBeVisible();
+
+    // 5. Restoring original verified phone allows 1-click order creation with ZERO SMS OTP
+    await phoneInput.fill("901234567");
+    await expect(page.getByText(/SMS orqali tasdiqlangan/i)).toBeVisible();
+
+    await page.getByRole("button", { name: /Buyurtmani tasdiqlash/i }).click();
+    await expect(page).toHaveURL(/\/uz\/checkout\/success/);
+    expect(createOrderCalled).toBe(true);
+    expect(otpRequested).toBe(false);
   });
 });

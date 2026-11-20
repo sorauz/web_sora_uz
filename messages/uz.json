@@ -352,6 +352,21 @@
     "colPrice": "Narx",
     "colAmount": "Summa",
     "totalAmountLabel": "Jami buyurtma summasi:",
-    "viewDetails": "Tafsilotlar"
+    "viewDetails": "Tafsilotlar",
+    "tabAll": "Barchasi",
+    "tabActive": "Faol / Jarayonda",
+    "tabDelivered": "Yetkazilgan",
+    "tabCancelled": "Bekor qilingan",
+    "statActive": "Faol buyurtmalar: {count} ta",
+    "statDelivered": "Yetkazilgan: {count} ta",
+    "searchPlaceholder": "Buyurtma raqami bo'yicha qidirish (masalan: 1425 yoki 0000-001425)...",
+    "noSearchMatch": "Qidiruv bo'yicha buyurtma topilmadi",
+    "copyOrderNumber": "Buyurtma raqamidan nusxa olish",
+    "copied": "Nusxalandi!",
+    "repeatOrder": "Ushbu buyurtmani takrorlash",
+    "repeatOrderSuccess": "Mahsulotlar savatga qo'shildi",
+    "printOrder": "Chop etish",
+    "contactSupport": "Telegram orqali yozish",
+    "skuLabel": "Artikul"
   }
 }

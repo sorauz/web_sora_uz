@@ -7,14 +7,14 @@ import { Link } from "@/i18n/routing";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { MegaMenu } from "@/components/discovery/MegaMenu";
 import { SearchAutocomplete } from "@/components/discovery/SearchAutocomplete";
-import { Heart, ShoppingBag, User, LogOut, Package, Scale, Search, ClipboardList } from "lucide-react";
+import { Heart, ShoppingBag, User, LogOut, Scale, Search, ClipboardList } from "lucide-react";
 import { useCartStore } from "@/lib/store/cart";
 import { useFavoritesStore } from "@/lib/store/favorites";
 import { useCompareStore } from "@/lib/store/compare";
 import { useAuthStore } from "@/lib/store/auth";
 import { useMobileSearchStore } from "@/lib/store/mobileSearch";
 import { AuthModal } from "@/components/auth/AuthModal";
-import { OrderTrackerModal } from "@/components/checkout/OrderTrackerModal";
+
 import { MobileSearchModal } from "@/components/discovery/MobileSearchModal";
 import { useEffect, useState, useRef, useSyncExternalStore } from "react";
 import { useTranslations, useLocale } from "next-intl";
@@ -42,7 +42,7 @@ export function Header({ tree, categories, brands, products = [] }: HeaderProps)
     () => false
   );
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const [trackerOpen, setTrackerOpen] = useState(false);
+
   const [hideMobileSearchOnScroll, setHideMobileSearchOnScroll] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const lastScrollYRef = useRef(0);
@@ -215,16 +215,6 @@ export function Header({ tree, categories, brands, products = [] }: HeaderProps)
                   <button
                     onClick={() => {
                       setUserMenuOpen(false);
-                      setTrackerOpen(true);
-                    }}
-                    className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-                  >
-                    <Package className="w-3.5 h-3.5 text-sora-600 dark:text-sora-400" />
-                    <span>{isUz ? "Buyurtma holati" : "Статус заказа"}</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      setUserMenuOpen(false);
                       logout();
                     }}
                     className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
@@ -263,13 +253,6 @@ export function Header({ tree, categories, brands, products = [] }: HeaderProps)
 
       {/* Auth Modal */}
       <AuthModal locale={locale as "uz" | "ru"} />
-
-      {/* Order Tracker Modal */}
-      <OrderTrackerModal
-        locale={locale as "uz" | "ru"}
-        isOpen={trackerOpen}
-        onClose={() => setTrackerOpen(false)}
-      />
 
       {/* Mobile Fullscreen Search Modal */}
       <MobileSearchModal

@@ -53,6 +53,59 @@ type CheckoutFieldKey =
   | "address";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const CHECKOUT_PROFILE_STORAGE_KEY = "sora_checkout_profile";
+const CHECKOUT_PROFILE_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
+
+interface SavedCheckoutProfile {
+  phone: string;
+  fullName?: string;
+  altPhone?: string;
+  email?: string;
+  deliveryMethod?: "courier" | "pickup";
+  district?: string;
+  address?: string;
+  landmark?: string;
+  geolocation?: string;
+  customerType?: "B2C" | "B2B";
+  companyName?: string;
+  companyInn?: string;
+  savedAt: string | number;
+}
+
+function readSavedCheckoutProfile(
+  expectedPhone?: string
+): SavedCheckoutProfile | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(CHECKOUT_PROFILE_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as SavedCheckoutProfile;
+    const savedTime =
+      typeof parsed?.savedAt === "number"
+        ? parsed.savedAt
+        : typeof parsed?.savedAt === "string"
+        ? Date.parse(parsed.savedAt)
+        : NaN;
+    if (
+      !parsed ||
+      Number.isNaN(savedTime) ||
+      new Date().getTime() - savedTime > CHECKOUT_PROFILE_TTL_MS
+    ) {
+      localStorage.removeItem(CHECKOUT_PROFILE_STORAGE_KEY);
+      return null;
+    }
+    if (
+      expectedPhone &&
+      parsed.phone &&
+      normalizeUzPhone(parsed.phone) !== normalizeUzPhone(expectedPhone)
+    ) {
+      return null;
+    }
+    return parsed;
+  } catch {
+    return null;
+  }
+}
 
 interface CheckoutFormProps {
   locale: "uz" | "ru";
@@ -120,7 +173,7 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
   const emailRef = useRef<HTMLInputElement>(null);
   const addressRef = useRef<HTMLInputElement>(null);
 
-  const { user, openModal, sendOtp, verifyOtp } = useAuthStore();
+  const { user, openModal, sendOtp, verifyOtp, setUser } = useAuthStore();
 
   const trackedCheckoutRef = useRef(false);
   useEffect(() => {
@@ -135,14 +188,50 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
 
   if (user && user.id && user.id !== syncedUserId) {
     setSyncedUserId(user.id);
-    if (user.name && !fullName) setFullName(user.name);
+    const savedProfile = readSavedCheckoutProfile(user.phone);
+
+    if (savedProfile?.fullName && !fullName) {
+      setFullName(savedProfile.fullName);
+    } else if (user.name && !fullName) {
+      setFullName(user.name);
+    }
     if (user.phone && phone === "+998 ") {
       setPhone(formatUzPhoneInput(user.phone));
     }
+    if (savedProfile?.altPhone && !altPhone) {
+      setAltPhone(formatOptionalUzPhoneInput(savedProfile.altPhone));
+    }
+    if (savedProfile?.email && !email) {
+      setEmail(savedProfile.email);
+    }
+    if (savedProfile?.deliveryMethod) {
+      setDeliveryMethod(savedProfile.deliveryMethod);
+    }
+    if (savedProfile?.district && !district) {
+      setDistrict(savedProfile.district);
+    }
+    if (savedProfile?.address && !address) {
+      setAddress(savedProfile.address);
+    }
+    if (savedProfile?.landmark && !landmark) {
+      setLandmark(savedProfile.landmark);
+    }
+    if (savedProfile?.geolocation && !geolocation) {
+      setGeolocation(savedProfile.geolocation);
+    }
     if (user.type === "B2B") {
       setOrderType("B2B");
-      if (user.inn && !companyInn) setCompanyInn(formatInnInput(user.inn));
-      if (user.name && !companyName) setCompanyName(user.name);
+      setPaymentMethod("b2b");
+      if (user.inn && !companyInn) {
+        setCompanyInn(formatInnInput(user.inn));
+      } else if (savedProfile?.companyInn && !companyInn) {
+        setCompanyInn(formatInnInput(savedProfile.companyInn));
+      }
+      if (user.name && !companyName) {
+        setCompanyName(user.name);
+      } else if (savedProfile?.companyName && !companyName) {
+        setCompanyName(savedProfile.companyName);
+      }
     }
   }
 
@@ -478,8 +567,36 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
         currency: "UZS",
       };
 
+      // Immediately sync client auth store with the 30-day session set/updated by /api/order/create
+      if (resData.session_user && resData.session_user.id) {
+        setUser(resData.session_user);
+      }
+
       try {
         localStorage.setItem("sora_last_order", JSON.stringify(orderData));
+        const profileToSave: SavedCheckoutProfile = {
+          phone: normalizedPhone,
+          fullName: fullName.trim(),
+          altPhone: altPhone.trim() ? normalizeUzPhone(altPhone) : undefined,
+          email: email.trim() || undefined,
+          deliveryMethod,
+          district: district || undefined,
+          address: address.trim() || undefined,
+          landmark: landmark.trim() || undefined,
+          geolocation: geolocation || undefined,
+          customerType: finalCustomerType,
+          companyName:
+            finalCustomerType === "B2B" ? companyName.trim() : undefined,
+          companyInn:
+            finalCustomerType === "B2B"
+              ? formatInnInput(companyInn)
+              : undefined,
+          savedAt: new Date().toISOString(),
+        };
+        localStorage.setItem(
+          CHECKOUT_PROFILE_STORAGE_KEY,
+          JSON.stringify(profileToSave)
+        );
       } catch {
         // Ignore localStorage errors
       }
@@ -761,9 +878,15 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
                 ) : (
                   <>
                     <span className="text-[11px] text-amber-700 dark:text-amber-400 font-medium">
-                      {isUz
-                        ? "Buyurtma uchun SMS tasdiqlash talab etiladi"
-                        : "Для заказа требуется подтверждение по СМС"}
+                      {!!user?.phone &&
+                      isPhoneComplete &&
+                      normalizeUzPhone(user.phone) !== normalizedPhone
+                        ? isUz
+                          ? "Yangi raqam — SMS orqali tasdiqlanadi va hisobingiz yangilanadi"
+                          : "Новый номер — потребуется СМС, аккаунт обновится"
+                        : isUz
+                        ? "1 marta SMS tasdiqlash talab etiladi (30 kun saqlanadi)"
+                        : "Требуется 1 раз подтвердить по СМС (сохраняется на 30 дней)"}
                     </span>
                     <button
                       type="button"

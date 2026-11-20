@@ -352,6 +352,21 @@
     "colPrice": "Цена",
     "colAmount": "Сумма",
     "totalAmountLabel": "Итоговая сумма заказа:",
-    "viewDetails": "Подробнее"
+    "viewDetails": "Подробнее",
+    "tabAll": "Все",
+    "tabActive": "Активные",
+    "tabDelivered": "Завершённые",
+    "tabCancelled": "Отменённые",
+    "statActive": "Активных заказов: {count}",
+    "statDelivered": "Завершённых: {count}",
+    "searchPlaceholder": "Поиск по номеру заказа (например: 1425 или 0000-001425)...",
+    "noSearchMatch": "По запросу заказы не найдены",
+    "copyOrderNumber": "Скопировать номер заказа",
+    "copied": "Скопировано!",
+    "repeatOrder": "Повторить заказ",
+    "repeatOrderSuccess": "Товары добавлены в корзину",
+    "printOrder": "Печать",
+    "contactSupport": "Написать в Telegram",
+    "skuLabel": "Артикул"
   }
 }

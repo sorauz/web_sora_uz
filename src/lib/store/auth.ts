@@ -57,6 +57,7 @@ interface AuthState {
     input: RegisterInput
   ) => Promise<{ success: boolean; isConflict?: boolean; error?: string }>;
   logout: () => Promise<void>;
+  setUser: (user: AuthUser | null) => void;
   openModal: (options?: AuthModalOptions) => void;
   closeModal: () => void;
   setModalTab: (tab: "login" | "register") => void;
@@ -144,6 +145,7 @@ export const useAuthStore = create<AuthState>((set) => ({
             success: true,
             isNewUser: false,
             user: data.user,
+            verifiedToken: data.verifiedToken,
           };
         }
 
@@ -292,6 +294,8 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({ user: null, isLoading: false });
     }
   },
+
+  setUser: (user) => set({ user, isInitialized: true, isLoading: false }),
 
   openModal: (options) => {
     set({

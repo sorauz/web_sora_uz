@@ -157,21 +157,35 @@ export async function POST(req: NextRequest) {
     const orderResult = await api.createOrder(oneCPayload);
 
     if (orderResult.success && orderResult.data) {
-      // If user verified phone via Checkout OTP without an existing session, persist session cookie
-      if (!sessionUser && tokenPhoneVerified) {
-        const primaryId = isB2B ? clientId : contactId;
-        if (primaryId) {
-          const newSessionUser: AuthUser = {
-            id: primaryId,
-            name: isB2B
-              ? (data.companyName || data.fullName).trim()
-              : data.fullName.trim(),
-            type: isB2B ? "B2B" : "B2C",
-            phone: cleanPhone,
-            inn: isB2B && cleanInn ? cleanInn : undefined,
-          };
-          await setSessionCookie(newSessionUser, cookieStore);
-        }
+      // Persist or switch 30-day HMAC session cookie when guest verifies via OTP,
+      // or when an existing user verifies a new phone number / switches B2C<->B2B account.
+      let resolvedSessionUser: AuthUser | null = sessionUser;
+      const targetType: "B2C" | "B2B" = isB2B ? "B2B" : "B2C";
+      const primaryId = isB2B ? clientId : contactId;
+
+      const phoneChangedOrNewSession =
+        tokenPhoneVerified &&
+        (!sessionUser ||
+          !sessionUser.phone ||
+          normalizePhone(sessionUser.phone) !== cleanPhone);
+      const accountIdentityChanged =
+        Boolean(primaryId) &&
+        (!sessionUser ||
+          sessionUser.id !== primaryId ||
+          sessionUser.type !== targetType);
+
+      if (primaryId && (phoneChangedOrNewSession || accountIdentityChanged)) {
+        const updatedSessionUser: AuthUser = {
+          id: primaryId,
+          name: isB2B
+            ? (data.companyName || data.fullName).trim()
+            : data.fullName.trim(),
+          type: targetType,
+          phone: cleanPhone,
+          inn: isB2B && cleanInn ? cleanInn : undefined,
+        };
+        await setSessionCookie(updatedSessionUser, cookieStore);
+        resolvedSessionUser = updatedSessionUser;
       }
 
       const ownerId = isB2B ? clientId : contactId;
@@ -179,7 +193,7 @@ export async function POST(req: NextRequest) {
         await setRecentOrderAccessCookie(
           {
             orderId: orderResult.data.order_id,
-            type: isB2B ? "B2B" : "B2C",
+            type: targetType,
             ownerId,
           },
           cookieStore
@@ -206,6 +220,7 @@ export async function POST(req: NextRequest) {
           status: statusText,
           posted,
           total_amount: orderResult.data.total_amount,
+          ...(resolvedSessionUser ? { session_user: resolvedSessionUser } : {}),
         },
         { status: 201 }
       );
