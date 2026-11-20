@@ -2,12 +2,34 @@ import { z } from "zod";
 import { isValidUzPhone } from "@/lib/utils/phone";
 
 /**
+ * Unified 1C Order Status Code
+ * Standard codes shared across POST /order (CONFIRMED, PENDING) and GET /order.
+ */
+export const OrderStatusCodeSchema = z.enum([
+  "CONFIRMED",
+  "PENDING",
+  "ASSEMBLED",
+  "SHIPPED",
+  "READY_FOR_PICKUP",
+  "DELIVERED",
+  "CANCELLED",
+]);
+
+export type OrderStatusCode = z.infer<typeof OrderStatusCodeSchema>;
+
+/**
  * Single product item in 1C order request
  */
 export const OrderProductItemSchema = z.object({
   product_id: z.string().min(1, "Mahsulot ID (GUID) majburiy"),
-  quantity: z.number().int().positive("Miqdor 1 yoki undan ortiq bo'lishi kerak"),
-  price: z.number().nonnegative("Mahsulot narxi musbat bo'lishi kerak"),
+  quantity: z
+    .number()
+    .finite()
+    .positive("Miqdor 0 dan katta son bo'lishi kerak"),
+  price: z
+    .number()
+    .finite()
+    .nonnegative("Mahsulot narxi manfiy bo'lishi mumkin emas"),
 });
 
 export type OrderProductItem = z.infer<typeof OrderProductItemSchema>;
@@ -43,30 +65,184 @@ export type OneCOrderRequest = z.infer<typeof OneCOrderRequestSchema>;
 
 /**
  * 1C Order Creation Response
- * 201 Created
+ * 201 Created — supports both CONFIRMED (posted: true) and PENDING draft (posted: false)
  */
 export const OneCOrderResponseSchema = z.object({
   message: z.string().optional(),
   order_number: z.string(),
   order_id: z.string(),
+  status_code: OrderStatusCodeSchema.or(z.string()).optional(),
+  status: z.string().optional(),
+  posted: z.boolean().optional(),
+  total_amount: z.number().finite().nonnegative().optional(),
 });
 
 export type OneCOrderResponse = z.infer<typeof OneCOrderResponseSchema>;
 
-/**
- * 1C Order Status Response
- * GET /SORA/hs/for_msp/order?order_id={GUID} -> 200 OK
- */
-export const OneCOrderStatusResponseSchema = z.object({
-  order_id: z.string(),
-  order_number: z.string(),
-  order_date: z.string(),
-  status: z.enum(["Tasdiqlangan", "Bekor qilingan", "Jarayonda"]).or(z.string()),
+export const OrderPaymentTypeSchema = z
+  .enum(["TRANSFER", "CASH_OR_CARD"])
+  .or(z.string());
+
+export type OrderPaymentType = z.infer<typeof OrderPaymentTypeSchema>;
+
+export const OneCOrderDeliverySchema = z.object({
   without_delivery: z.boolean(),
-  total_amount: z.number(),
+  geolocation: z
+    .string()
+    .nullable()
+    .optional()
+    .transform((v) => v ?? null),
+  pickup_point: z
+    .string()
+    .nullable()
+    .optional()
+    .transform((v) => v ?? null),
 });
 
-export type OneCOrderStatusResponse = z.infer<typeof OneCOrderStatusResponseSchema>;
+export type OneCOrderDelivery = z.infer<typeof OneCOrderDeliverySchema>;
+
+export const OneCOrderCustomerContactSchema = z.object({
+  contact_id: z.string(),
+  name: z
+    .string()
+    .nullable()
+    .optional()
+    .transform((v) => v ?? ""),
+  phone_1: z
+    .string()
+    .nullable()
+    .optional()
+    .transform((v) => v ?? null),
+  phone_2: z
+    .string()
+    .nullable()
+    .optional()
+    .transform((v) => v ?? null),
+  tg_username: z
+    .string()
+    .nullable()
+    .optional()
+    .transform((v) => v ?? null),
+});
+
+export type OneCOrderCustomerContact = z.infer<
+  typeof OneCOrderCustomerContactSchema
+>;
+
+export const OneCOrderCustomerSchema = z.object({
+  type: z.enum(["B2B", "B2C"]).or(z.string()),
+  client_id: z
+    .string()
+    .nullable()
+    .optional()
+    .transform((v) => v ?? null),
+  client_name: z
+    .string()
+    .nullable()
+    .optional()
+    .transform((v) => v ?? null),
+  contact: OneCOrderCustomerContactSchema.nullable()
+    .optional()
+    .transform((v) => v ?? null),
+});
+
+export type OneCOrderCustomer = z.infer<typeof OneCOrderCustomerSchema>;
+
+export const OneCOrderTimelineStepSchema = z.object({
+  code: OrderStatusCodeSchema.or(z.string()),
+  title: z.string().default(""),
+  completed: z.boolean().default(false),
+  date: z
+    .string()
+    .nullable()
+    .optional()
+    .transform((v) => v ?? null),
+});
+
+export type OneCOrderTimelineStep = z.infer<typeof OneCOrderTimelineStepSchema>;
+
+export const OneCOrderProductLineSchema = z.object({
+  line_number: z.number(),
+  product_id: z.string(),
+  product_name: z.string(),
+  unit: z.string().default(""),
+  quantity: z.number(),
+  price: z.number(),
+  amount: z.number(),
+});
+
+export type OneCOrderProductLine = z.infer<typeof OneCOrderProductLineSchema>;
+
+/**
+ * 1C Order Detail Response (Mode 1)
+ * GET /SORA/hs/for_msp/order?order_id={GUID}&type=... -> 200 OK
+ */
+export const OneCOrderDetailResponseSchema = z.object({
+  order_id: z.string(),
+  order_number: z.string(),
+  order_date: z
+    .string()
+    .nullable()
+    .optional()
+    .transform((v) => v ?? null),
+  online: z.boolean().optional().default(true),
+  online_date: z
+    .string()
+    .nullable()
+    .optional()
+    .transform((v) => v ?? null),
+  payment_type: OrderPaymentTypeSchema.optional().default("CASH_OR_CARD"),
+  status_code: OrderStatusCodeSchema.or(z.string()).optional(),
+  status: z.string().default(""),
+  posted: z.boolean().optional(),
+  total_amount: z.number().default(0),
+  comment: z
+    .string()
+    .nullable()
+    .optional()
+    .transform((v) => v ?? ""),
+  delivery: OneCOrderDeliverySchema,
+  customer: OneCOrderCustomerSchema.optional(),
+  timeline: z.array(OneCOrderTimelineStepSchema).default([]),
+  products: z.array(OneCOrderProductLineSchema).default([]),
+});
+
+export type OneCOrderDetailResponse = z.infer<
+  typeof OneCOrderDetailResponseSchema
+>;
+
+/**
+ * 1C Order History List Item (Mode 2)
+ * GET /SORA/hs/for_msp/order?type=... -> 200 OK
+ */
+export const OneCOrderHistoryItemSchema = z.object({
+  order_id: z.string(),
+  order_number: z.string(),
+  order_date: z
+    .string()
+    .nullable()
+    .optional()
+    .transform((v) => v ?? null),
+  online: z.boolean().optional().default(true),
+  status_code: OrderStatusCodeSchema.or(z.string()).optional(),
+  status: z.string().default(""),
+  without_delivery: z.boolean().default(false),
+  total_amount: z.number().default(0),
+  items_count: z.number().int().nonnegative().default(0),
+});
+
+export type OneCOrderHistoryItem = z.infer<typeof OneCOrderHistoryItemSchema>;
+
+export const OneCOrderHistoryResponseSchema = z.object({
+  limit: z.number().int().positive(),
+  offset: z.number().int().nonnegative(),
+  has_more: z.boolean(),
+  orders: z.array(OneCOrderHistoryItemSchema).default([]),
+});
+
+export type OneCOrderHistoryResponse = z.infer<
+  typeof OneCOrderHistoryResponseSchema
+>;
 
 /**
  * Frontend Checkout payload sent to Next.js /api/order/create
@@ -106,9 +282,12 @@ export const CheckoutCreateOrderInputSchema = z
     items: z
       .array(
         z.object({
-          id: z.string(),
+          id: z.string().min(1),
           name: z.string(),
-          price: z.number(),
+          price: z
+            .number()
+            .finite()
+            .nonnegative("Mahsulot narxi manfiy bo'lishi mumkin emas"),
           quantity: z.number().int().positive(),
           picture: z.string().optional(),
         })

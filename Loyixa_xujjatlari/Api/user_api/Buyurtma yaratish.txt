@@ -1,0 +1,107 @@
+API Hujjati: Buyurtma yaratish (POST /order)
+Servis: for_msp (1C:Предприятие 8.3.20)
+Metod va URL: POST [http://1cloud.uz:777/SORA/hs/for_msp/order](http://1cloud.uz:777/SORA/hs/for_msp/order)Format: application/json; charset=utf-8Avtorizatsiya: 1C HTTP-servis uchun belgilangan Basic Auth (mavjud sozlamalar o‘zgarishsiz qoladi)
+
+1. Oldingi versiyaga nisbatan asosiy o‘zgarishlar
+Tashqi servis (frontend / backend) integratsiyasida quyidagi yangilanishlarni inobatga olish zarur:
+
+Qaytariladigan javob kengaytirildi (201 Created): Mavjud message, order_number, order_id maydonlariga qo‘shimcha ravishda status_code, status, posted va total_amount maydonlari qo‘shildi (eski maydonlar bilan to‘liq mos).
+
+O‘tkazilmagan hujjatda 500 o‘rniga 201 qaytadi: Avval omborda qoldiq yetmaganda yoki hujjatni o‘tkazishda (Проведение) muammo chiqqanda server 500 xato qaytarardi. Endi buyurtma chernovik sifatida saqlanadi va server 201 Created (posted: false, status_code: "PENDING") javobini beradi. Mijozga buyurtma qabul qilinganini ko‘rsatish va so‘rovni qayta yubormaslik kerak.
+
+Qat’iy validatsiya kuchaytirildi:
+
+Bazada mavjud bo‘lmagan GUID lar aniq tekshiriladi (404 Not Found).
+
+1C da o‘chirishga belgilangan mijoz, kontakt yoki mahsulotlar rad etiladi (400 Bad Request).
+
+quantity qat’iy 0 dan katta, price esa manfiy bo‘lmagan son bo‘lishi shart.
+
+null qiymatlar endi 500 xato keltirib chiqarmaydi, to‘g‘ri validatsiya xabari qaytariladi.
+
+Kafolatlangan JSON xato formati: Barcha 400, 404 va 500 javoblar har doim to‘g‘ri ekranlangan {"error": "..."} JSON formatida qaytadi.
+
+2. So‘rov parametrlari (Request Body)
+Asosiy maydonlar
+
+Maydon,Turi,Majburiyligi,Tavsif va cheklovlar
+type,string,Majburiy,"Mijoz turi: faqat ""B2C"" yoki ""B2B"" (katta-kichik harf farqlanmaydi)."
+contact_id,string (GUID),"B2C da majburiy, B2B da ixtiyoriy",1C КонтактныйЛицо GUID si. Bazada mavjud va o‘chirishga belgilanmagan bo‘lishi kerak. B2B da noto‘g‘ri yoki bo‘sh yuborilsa e’tiborsiz qoldiriladi.
+client_id,string (GUID),"B2B da majburiy, B2C da ishlatilmaydi",1C Контрагенты GUID si. Bazada mavjud va o‘chirishga belgilanmagan bo‘lishi kerak.
+without_delivery,boolean,Ixtiyoriy (false),true bo‘lsa o‘zi olib ketish (samovivoz) belgilanadi va geolocation bo‘sh saqlanadi.
+geolocation,string,"Ixtiyoriy ("""")",Yetkazib berish koordinatalari yoki manzil havolasi (without_delivery: false bo‘lganda saqlanadi).
+comment,string,"Ixtiyoriy ("""")",Buyurtma izohi. 350 belgidan oshgan qismi avtomatik qirqiladi.
+products,array,Majburiy,Kamida 1 ta mahsulot obyektidan iborat massiv.
+
+
+Maydon,Turi,Majburiyligi,Tavsif va cheklovlar
+product_id,string (GUID),Majburiy,1C Номенклатура GUID si. Bazada mavjud va o‘chirishga belgilanmagan bo‘lishi shart.
+quantity,number,Majburiy,Miqdori. Qat’iy 0 dan katta son bo‘lishi kerak.
+price,number,Majburiy,Birlik narxi (so‘m). 0 yoki undan katta son bo‘lishi kerak.
+
+So‘rov namunalariB2C buyurtma (yetkazib berish bilan):JSON{
+  "type": "B2C",
+  "contact_id": "11112222-3333-4444-5555-666677778888",
+  "without_delivery": false,
+  "geolocation": "41.311081, 69.240562",
+  "comment": "Darvoza oldida qo'ng'iroq qiling",
+  "products": [
+    {
+      "product_id": "99998888-7777-6666-5555-444433332222",
+      "quantity": 10,
+      "price": 45000
+    }
+  ]
+}
+B2B buyurtma (o‘zi olib ketish, kontakt shaxs ixtiyoriy):JSON{
+  "type": "B2B",
+  "client_id": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+  "contact_id": "11112222-3333-4444-5555-666677778888",
+  "without_delivery": true,
+  "comment": "Shartnoma asosida hisob-faktura bilan",
+  "products": [
+    {
+      "product_id": "99998888-7777-6666-5555-444433332222",
+      "quantity": 50,
+      "price": 42000
+    }
+  ]
+}
+3. Javob formatlari (Responses)201 Created — Buyurtma qabul qilindi va darhol tasdiqlandi (posted: true)JSON{
+  "message": "Buyurtma muvaffaqiyatli qabul qilindi",
+  "status_code": "CONFIRMED",
+  "status": "Qabul qilindi / Tasdiqlandi",
+  "posted": true,
+  "order_number": "0000-001425",
+  "order_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "total_amount": 450000
+}
+201 Created — Buyurtma qabul qilindi, menejer tekshiruvida (posted: false)Omborda qoldiq yetmagan yoki 1C da hujjatni avtomatik o‘tkazib bo‘lmagan hollarda buyurtma saqlanadi, menejerga Telegram orqali ogohlantirish ketadi va saytga quyidagi javob qaytadi:JSON{
+  "message": "Buyurtma qabul qilindi va menejer tekshiruviga yuborildi",
+  "status_code": "PENDING",
+  "status": "Tekshirilmoqda",
+  "posted": false,
+  "order_number": "0000-001426",
+  "order_id": "f1e2d3c4-b5a6-7890-abcd-ef1234567890",
+  "total_amount": 450000
+}
+Javob maydonlari tavsifi:MaydonTuriTavsifmessagestringXaridorga ko‘rsatish mumkin bo‘lgan xabar matni.status_codestringGET /order bilan bir xil standartdagi status kodi: "CONFIRMED" yoki "PENDING".statusstringStatusning o‘qiladigan nomi.postedbooleantrue — 1C da to‘liq o‘tkazilgan; false — chernovik sifatida saqlangan.order_numberstring1C dagi buyurtma raqami.order_idstring (GUID)Keyinchalik GET /order?order_id=... orqali holatni tekshirish uchun buyurtma ID si.total_amountnumber1C da qayta hisoblangan yakuniy buyurtma summasi (har bir qator 2 xonagacha yaxlitlanadi).Xato javoblari (400, 404, 500)Barcha xato javoblari yagona JSON tuzilmasida qaytadi:JSON{
+  "error": "Xatolik tavsifi"
+}
+
+
+HTTP kod,Sabablar,Misol javob
+400 Bad Request,"Bo‘sh tanasi, noto‘g‘ri JSON, noto‘g‘ri type, GUID formati xato, bo‘sh products, quantity 0 yoki manfiy, price manfiy, obyekt 1C da o‘chirishga belgilangan.","{""error"": ""Mahsulot miqdori ('quantity') 0 dan katta son bo'lishi kerak (ID: ...)""}"
+404 Not Found,"contact_id (B2C), client_id (B2B) yoki biror product_id 1C bazasida topilmadi.","{""error"": ""Mahsulot bazada topilmadi (ID: ...)""}"
+500 Internal Server Error,1C da kutilmagan texnik nosozlik yoki hujjatni umuman saqlab bo‘lmadi.,"{""error"": ""Buyurtmani bazaga saqlab bo'lmadi!""}"
+
+
+4. Integratsiya bo‘yicha muhim qoidalar
+Qayta yuborish (Retry) mantiqi: 201 javobida posted: false kelsa, bu xato emas — buyurtma 1C ga tushgan va order_id berilgan. So‘rovni qayta yubormang, savatchani tozalab xaridorga order_number ni ko‘rsating. Faqat tarmoq uzilishi yoki 500 da foydalanuvchiga qayta urinish taklif qilinadi.
+
+Yakuniy summa: UI da buyurtma chekini chiqarishda server qaytargan total_amount qiymatidan foydalaning, chunki 1C qator summalarini 2 xona aniqlikda yaxlitlab hisoblaydi.
+
+Statuslar mosligi: POST /order qaytargan status_code qiymatlari (CONFIRMED, PENDING) GET /order javobidagi status kodlari bilan bir xil — frontendda yagona status badge/rang xaritasini ishlatishingiz mumkin.
+
+
+

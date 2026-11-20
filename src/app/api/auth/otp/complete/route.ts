@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
 import crypto from "crypto";
 import { api } from "@/lib/api";
+import { setSessionCookie } from "@/lib/auth/session";
 import { OtpCompleteInputSchema, normalizePhone } from "@/lib/schemas/auth";
 import { deriveOneCPassword, verifyPhoneToken } from "@/lib/sms/otp-store";
 
@@ -96,14 +96,7 @@ export async function POST(request: NextRequest) {
       inn: finalType === "B2B" ? finalInn : undefined,
     };
 
-    const cookieStore = await cookies();
-    cookieStore.set("sora_session", JSON.stringify(sessionUser), {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 30, // 30 days
-      path: "/",
-    });
+    await setSessionCookie(sessionUser);
 
     return NextResponse.json({
       success: true,

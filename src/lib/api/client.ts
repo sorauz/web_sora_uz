@@ -32,11 +32,13 @@ import {
   OneCUserResponseSchema,
 } from "../schemas/auth";
 import {
+  OneCOrderDetailResponse,
+  OneCOrderDetailResponseSchema,
+  OneCOrderHistoryResponse,
+  OneCOrderHistoryResponseSchema,
   OneCOrderRequest,
   OneCOrderResponse,
   OneCOrderResponseSchema,
-  OneCOrderStatusResponse,
-  OneCOrderStatusResponseSchema,
 } from "../schemas/order";
 import { buildCategoryTree } from "../utils/category-tree";
 import { isOfferActive, offerItemToProduct } from "../utils/offer";
@@ -1153,9 +1155,22 @@ class SoraApiClient {
     data?: OneCOrderResponse;
     error?: string;
     statusCode: number;
-    isFallback?: boolean;
+    retryable?: boolean;
   }> {
     const url = `${this.baseUrl}/order`;
+    const sanitizedPayload: OneCOrderRequest = {
+      type: payload.type,
+      ...(payload.contact_id ? { contact_id: payload.contact_id } : {}),
+      ...(payload.client_id ? { client_id: payload.client_id } : {}),
+      without_delivery: Boolean(payload.without_delivery),
+      geolocation: (payload.geolocation ?? "").slice(0, 150),
+      comment: (payload.comment ?? "").slice(0, 350),
+      products: payload.products.map((item) => ({
+        product_id: item.product_id,
+        quantity: item.quantity,
+        price: item.price,
+      })),
+    };
 
     try {
       const response = await fetch(url, {
@@ -1165,7 +1180,7 @@ class SoraApiClient {
           Accept: "application/json",
           "Content-Type": "application/json; charset=utf-8",
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(sanitizedPayload),
         cache: "no-store",
       });
 
@@ -1177,6 +1192,11 @@ class SoraApiClient {
         resJson = { error: text };
       }
 
+      const apiError =
+        typeof resJson.error === "string" && resJson.error.trim().length > 0
+          ? resJson.error.trim()
+          : undefined;
+
       if (response.status === 201 || response.status === 200) {
         const parsed = OneCOrderResponseSchema.safeParse(resJson);
         if (parsed.success) {
@@ -1186,77 +1206,74 @@ class SoraApiClient {
             statusCode: 201,
           };
         }
+
+        return {
+          success: false,
+          error: "1C serveridan noto'g'ri javob formati qaytdi",
+          statusCode: 502,
+          retryable: true,
+        };
       }
 
       if (response.status === 400) {
         return {
           success: false,
-          error:
-            (typeof resJson.error === "string" && resJson.error) ||
-            "Buyurtma ma'lumotlarida xatolik!",
+          error: apiError || "Buyurtma ma'lumotlarida xatolik!",
           statusCode: 400,
+          retryable: false,
         };
       }
 
-      // If 1C returns 500 (e.g. line 3253 error or out of stock), handle accordingly:
-      // If 1C threw the known line 3253 internal error, provide a safe fallback order
-      // so user order is not lost while 1C developer fixes line 3253
-      const isKnown1CLineError =
-        typeof resJson.error === "string" &&
-        (resJson.error.includes("3253") ||
-          resJson.error.includes("3865") ||
-          resJson.error.includes("Свойство") ||
-          resJson.error.includes("Получить"));
-
-      if (isKnown1CLineError || response.status >= 500) {
-        const randomNum = Math.floor(100000 + Math.random() * 900000);
-        const fallbackOrder: OneCOrderResponse = {
-          message: "Buyurtma qabul qilindi (Sinxronizatsiya navbatida)",
-          order_number: `РТ-${randomNum}`,
-          order_id: crypto.randomUUID(),
-        };
+      if (response.status === 404) {
         return {
-          success: true,
-          data: fallbackOrder,
-          statusCode: 201,
-          isFallback: true,
+          success: false,
+          error:
+            apiError ||
+            "Buyurtmadagi mahsulot yoki mijoz 1C bazasida topilmadi!",
+          statusCode: 404,
+          retryable: false,
+        };
+      }
+
+      if (response.status >= 500) {
+        return {
+          success: false,
+          error:
+            apiError ||
+            "1C serverida texnik nosozlik yuz berdi. Iltimos, qayta urinib ko'ring.",
+          statusCode: response.status,
+          retryable: true,
         };
       }
 
       return {
         success: false,
-        error:
-          (typeof resJson.error === "string" && resJson.error) ||
-          "Buyurtmani rasmiylashtirishda xatolik yuz berdi",
+        error: apiError || "Buyurtmani rasmiylashtirishda xatolik yuz berdi",
         statusCode: response.status,
+        retryable: false,
       };
     } catch {
-      // Network failure fallback
-      const randomNum = Math.floor(100000 + Math.random() * 900000);
       return {
-        success: true,
-        data: {
-          message: "Buyurtma qabul qilindi (Offline rejimda)",
-          order_number: `РТ-${randomNum}`,
-          order_id: crypto.randomUUID(),
-        },
-        statusCode: 201,
-        isFallback: true,
+        success: false,
+        error:
+          "1C serveri bilan aloqa uzildi. Savatchangiz saqlandi — qayta urinib ko'ring.",
+        statusCode: 503,
+        retryable: true,
       };
     }
   }
 
-  /**
-   * Get order status from 1C ERP via GET /order?order_id={id}
-   */
-  async getOrderStatus(orderId: string): Promise<{
+  private async fetchOneCOrderGet<T>(
+    params: URLSearchParams,
+    parse: (raw: unknown) => { success: true; data: T } | { success: false },
+    fallbackError: string
+  ): Promise<{
     success: boolean;
-    data?: OneCOrderStatusResponse;
+    data?: T;
     error?: string;
     statusCode: number;
-    isFallback?: boolean;
   }> {
-    const url = `${this.baseUrl}/order?order_id=${encodeURIComponent(orderId)}`;
+    const url = `${this.baseUrl}/order?${params.toString()}`;
 
     try {
       const response = await fetch(url, {
@@ -1276,8 +1293,13 @@ class SoraApiClient {
         resJson = { error: text };
       }
 
+      const apiError =
+        typeof resJson.error === "string" && resJson.error.trim().length > 0
+          ? resJson.error.trim()
+          : undefined;
+
       if (response.status === 200) {
-        const parsed = OneCOrderStatusResponseSchema.safeParse(resJson);
+        const parsed = parse(resJson);
         if (parsed.success) {
           return {
             success: true,
@@ -1285,40 +1307,123 @@ class SoraApiClient {
             statusCode: 200,
           };
         }
-      }
-
-      if (response.status === 404) {
         return {
           success: false,
-          error: "Ushbu ID ga ega buyurtma topilmadi!",
-          statusCode: 404,
+          error: "1C serveridan kutilmagan javob formati keldi",
+          statusCode: 502,
         };
       }
 
       if (response.status === 400) {
         return {
           success: false,
-          error:
-            (typeof resJson.error === "string" && resJson.error) ||
-            "Yuborilgan 'order_id' formati noto'g'ri! GUID kutilmoqda.",
+          error: apiError || "So'rov parametrlari noto'g'ri!",
           statusCode: 400,
+        };
+      }
+
+      if (response.status === 403) {
+        return {
+          success: false,
+          error:
+            apiError || "Ushbu buyurtmani ko'rish uchun ruxsat yo'q!",
+          statusCode: 403,
+        };
+      }
+
+      if (response.status === 404) {
+        return {
+          success: false,
+          error: apiError || "Ushbu ID ga ega buyurtma topilmadi!",
+          statusCode: 404,
         };
       }
 
       return {
         success: false,
-        error:
-          (typeof resJson.error === "string" && resJson.error) ||
-          "Buyurtma holatini olishda xatolik yuz berdi",
-        statusCode: response.status,
+        error: apiError || fallbackError,
+        statusCode: response.status >= 400 ? response.status : 500,
       };
     } catch (err) {
       return {
         success: false,
         error: err instanceof Error ? err.message : "Tarmoq xatosi",
-        statusCode: 500,
+        statusCode: 503,
       };
     }
+  }
+
+  /**
+   * Mode 1: Get single order details, dynamic timeline, and products via GET /order
+   */
+  async getOrderDetail(input: {
+    orderId: string;
+    type: "B2C" | "B2B";
+    contactId?: string;
+    clientId?: string;
+  }): Promise<{
+    success: boolean;
+    data?: OneCOrderDetailResponse;
+    error?: string;
+    statusCode: number;
+  }> {
+    const qs = new URLSearchParams({
+      order_id: input.orderId,
+      type: input.type,
+    });
+    if (input.type === "B2C" && input.contactId) {
+      qs.set("contact_id", input.contactId);
+    }
+    if (input.type === "B2B" && input.clientId) {
+      qs.set("client_id", input.clientId);
+    }
+
+    return this.fetchOneCOrderGet(
+      qs,
+      (raw) => OneCOrderDetailResponseSchema.safeParse(raw),
+      "Buyurtma tafsilotini olishda xatolik yuz berdi"
+    );
+  }
+
+  /**
+   * Mode 2: Get paginated customer order history via GET /order (without order_id)
+   */
+  async getOrderHistory(input: {
+    type: "B2C" | "B2B";
+    contactId?: string;
+    clientId?: string;
+    limit?: number;
+    offset?: number;
+    onlyOnline?: boolean;
+  }): Promise<{
+    success: boolean;
+    data?: OneCOrderHistoryResponse;
+    error?: string;
+    statusCode: number;
+  }> {
+    const clampedLimit = Math.min(Math.max(Math.trunc(input.limit ?? 20), 1), 100);
+    const clampedOffset = Math.max(Math.trunc(input.offset ?? 0), 0);
+
+    const qs = new URLSearchParams({
+      type: input.type,
+      limit: String(clampedLimit),
+      offset: String(clampedOffset),
+    });
+    if (input.type === "B2C" && input.contactId) {
+      qs.set("contact_id", input.contactId);
+    }
+    if (input.type === "B2B" && input.clientId) {
+      qs.set("client_id", input.clientId);
+    }
+    if (typeof input.onlyOnline === "boolean") {
+      qs.set("only_online", input.onlyOnline ? "true" : "false");
+    }
+
+    return this.fetchOneCOrderGet(
+      qs,
+      (raw) => OneCOrderHistoryResponseSchema.safeParse(raw),
+      "Buyurtmalar tarixini olishda xatolik yuz berdi"
+    );
   }
 }
 

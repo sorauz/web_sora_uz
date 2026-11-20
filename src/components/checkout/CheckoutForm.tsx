@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef, useSyncExternalStore } from "react";
-import { useRouter } from "@/i18n/routing";
+import { Link, useRouter } from "@/i18n/routing";
 import Image from "next/image";
 import { useCartStore } from "@/lib/store/cart";
 import { useAuthStore } from "@/lib/store/auth";
@@ -96,6 +96,8 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
   const [companyName, setCompanyName] = useState("");
   const [companyInn, setCompanyInn] = useState("");
   const [submitError, setSubmitError] = useState("");
+  const [submitErrorStatus, setSubmitErrorStatus] = useState<number | null>(null);
+  const [submitErrorRetryable, setSubmitErrorRetryable] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<
     Partial<Record<CheckoutFieldKey, string>>
   >({});
@@ -347,6 +349,8 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
     setHasSubmitted(true);
     setIsSubmitting(true);
     setSubmitError("");
+    setSubmitErrorStatus(null);
+    setSubmitErrorRetryable(false);
 
     const activeToken =
       overrideToken ||
@@ -402,9 +406,17 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
       }
 
       if (!res.ok) {
+        const isRetryable =
+          Boolean(resData.retryable) || res.status >= 500;
+        setSubmitErrorStatus(res.status);
+        setSubmitErrorRetryable(isRetryable);
         setSubmitError(
           resData.error ||
-            (isUz
+            (isRetryable
+              ? isUz
+                ? "Server vaqtincha band, iltimos 'Buyurtmani tasdiqlash' tugmasini qayta bosing."
+                : "Сервер временно занят, пожалуйста, нажмите «Подтвердить заказ» ещё раз."
+              : isUz
               ? "Buyurtma ma'lumotlarida xatolik yuz berdi"
               : "Ошибка в данных заказа")
         );
@@ -415,11 +427,36 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
 
       const orderId = resData.order_id || "SORA-ORDER";
       const orderNumber = resData.order_number || orderId;
+      const posted = resData.posted !== false;
+      const statusCode =
+        typeof resData.status_code === "string" && resData.status_code
+          ? resData.status_code
+          : posted
+          ? "CONFIRMED"
+          : "PENDING";
+      const statusText =
+        typeof resData.status === "string" && resData.status
+          ? resData.status
+          : posted
+          ? "Qabul qilindi / Tasdiqlandi"
+          : "Tekshirilmoqda";
+      const serverMessage =
+        typeof resData.message === "string" ? resData.message : "";
+      const productsTotal =
+        typeof resData.total_amount === "number" &&
+        Number.isFinite(resData.total_amount)
+          ? resData.total_amount
+          : subtotal;
+      const officialTotal = productsTotal + deliveryFee;
 
       const orderData = {
         orderId,
         orderNumber,
         createdAt: new Date().toISOString(),
+        statusCode,
+        statusText,
+        posted,
+        serverMessage,
         fullName: fullName.trim(),
         phone: normalizedPhone,
         altPhone: altPhone.trim() ? normalizeUzPhone(altPhone) : "",
@@ -434,9 +471,10 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
         companyName: companyName.trim(),
         companyInn: formatInnInput(companyInn),
         items,
-        subtotal,
+        subtotal: productsTotal,
+        totalAmount1C: productsTotal,
         deliveryFee,
-        total,
+        total: officialTotal,
         currency: "UZS",
       };
 
@@ -446,16 +484,23 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
         // Ignore localStorage errors
       }
 
-      // Yandex Metrika Goal & Ecommerce event
+      // Yandex Metrika Goal & Ecommerce event (using 1C's rounded official total_amount)
       reachGoal("PURCHASE_SUCCESS", {
         orderId,
         orderNumber,
-        total,
+        total: officialTotal,
+        totalAmount1C: productsTotal,
+        posted,
+        statusCode,
         currency: "UZS",
         items_count: items.length,
       });
       sendEcommerceEvent("purchase", {
-        actionField: { id: orderNumber, revenue: total, currency: "UZS" },
+        actionField: {
+          id: orderNumber,
+          revenue: productsTotal,
+          currency: "UZS",
+        },
         products: items.map((i) => ({
           id: i.id,
           name: i.name,
@@ -464,14 +509,17 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
         })),
       });
 
+      // Redirect directly without retrying (both posted: true and posted: false are saved in 1C)
       router.push(
         `/checkout/success?orderId=${encodeURIComponent(orderId)}&orderNumber=${encodeURIComponent(orderNumber)}`
       );
     } catch {
+      setSubmitErrorStatus(503);
+      setSubmitErrorRetryable(true);
       setSubmitError(
         isUz
-          ? "Server bilan aloqada xatolik yuz berdi. Iltimos, qaytadan urinib ko‘ring."
-          : "Ошибка соединения с сервером. Пожалуйста, попробуйте снова."
+          ? "Server bilan aloqada xatolik yuz berdi. Savatchangiz saqlandi — 'Buyurtmani tasdiqlash' tugmasini qayta bosing."
+          : "Ошибка соединения с сервером. Корзина сохранена — нажмите «Подтвердить заказ» ещё раз."
       );
       setHasSubmitted(false);
     } finally {
@@ -1355,9 +1403,36 @@ export function CheckoutForm({ locale }: CheckoutFormProps) {
           </p>
 
           {submitError && (
-            <div className="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-xs text-rose-600 dark:text-rose-400 flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 shrink-0" />
-              <span>{submitError}</span>
+            <div
+              role="alert"
+              className="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-xs text-rose-700 dark:text-rose-300 space-y-2"
+            >
+              <div className="flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-600 dark:text-rose-400" />
+                <div className="space-y-1">
+                  <p className="font-semibold">{submitError}</p>
+                  {submitErrorRetryable && (
+                    <p className="text-[11px] text-rose-600/90 dark:text-rose-300/90">
+                      {isUz
+                        ? "Savatchangiz saqlandi — birozdan so‘ng «Buyurtmani tasdiqlash» tugmasini qayta bosing."
+                        : "Ваша корзина сохранена — нажмите «Подтвердить заказ» ещё раз."}
+                    </p>
+                  )}
+                </div>
+              </div>
+              {(submitErrorStatus === 400 || submitErrorStatus === 404) && (
+                <div className="pl-6">
+                  <Link
+                    href="/cart"
+                    className="inline-flex items-center gap-1 font-bold underline hover:no-underline text-rose-700 dark:text-rose-300"
+                  >
+                    <span>
+                      {isUz ? "Savatchaga qaytish" : "Вернуться в корзину"}
+                    </span>
+                    <ArrowRight className="w-3 h-3" />
+                  </Link>
+                </div>
+              )}
             </div>
           )}
 

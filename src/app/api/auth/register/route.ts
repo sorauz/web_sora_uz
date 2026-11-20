@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
 import { api } from "@/lib/api";
+import { setSessionCookie } from "@/lib/auth/session";
 import { RegisterInputSchema, normalizePhone } from "@/lib/schemas/auth";
 
 export async function POST(request: NextRequest) {
@@ -64,15 +64,8 @@ export async function POST(request: NextRequest) {
       inn: inn?.trim(),
     };
 
-    // Auto-login on successful registration
-    const cookieStore = await cookies();
-    cookieStore.set("sora_session", JSON.stringify(sessionUser), {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 30,
-      path: "/",
-    });
+    // Auto-login on successful registration with HMAC-signed session cookie
+    await setSessionCookie(sessionUser);
 
     return NextResponse.json({
       success: true,

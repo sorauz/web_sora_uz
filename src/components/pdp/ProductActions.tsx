@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import {
@@ -62,6 +62,11 @@ export function ProductActions({ product, locale }: ProductActionsProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [fastOrderSubmitted, setFastOrderSubmitted] = useState(false);
+  const [fastOrderReceipt, setFastOrderReceipt] = useState<{
+    orderNumber?: string;
+    message?: string;
+    isPending?: boolean;
+  } | null>(null);
   const [fastComment, setFastComment] = useState("");
   const [pendingFastOrder, setPendingFastOrder] = useState(false);
 
@@ -88,13 +93,8 @@ export function ProductActions({ product, locale }: ProductActionsProps) {
   const isFav = isFavorite(product.id);
   const inCompare = isInCompare(product.id);
 
-  // Automatically reopen fast order modal once guest successfully verifies via AuthModal
-  useEffect(() => {
-    if (user && pendingFastOrder) {
-      setIsModalOpen(true);
-      setPendingFastOrder(false);
-    }
-  }, [user, pendingFastOrder]);
+  // Reopen fast order modal once guest successfully authenticates via AuthModal
+  const effectiveModalOpen = isModalOpen || (Boolean(user) && pendingFastOrder);
 
   const handleAddToCart = () => {
     if (!canAddToCart) return;
@@ -213,21 +213,42 @@ export function ProductActions({ product, locale }: ProductActionsProps) {
         }),
       });
 
+      const resData = await res.json().catch(() => ({}));
+
       if (res.ok) {
+        setFastOrderError("");
+        setFastOrderReceipt({
+          orderNumber:
+            typeof resData.order_number === "string"
+              ? resData.order_number
+              : undefined,
+          message:
+            typeof resData.message === "string" ? resData.message : undefined,
+          isPending: resData.posted === false || resData.status_code === "PENDING",
+        });
         setFastOrderSubmitted(true);
         setTimeout(() => {
           setFastOrderSubmitted(false);
+          setFastOrderReceipt(null);
+          setPendingFastOrder(false);
           setIsModalOpen(false);
           setFastComment("");
-        }, 2500);
+        }, 3000);
+        return;
       }
+
+      setFastOrderError(
+        (typeof resData.error === "string" && resData.error) ||
+          (locale === "uz"
+            ? "Buyurtma yuborishda xatolik yuz berdi. Qayta urinib ko'ring."
+            : "Ошибка при оформлении заказа. Попробуйте снова.")
+      );
     } catch {
-      // Resilient fallback
-      setFastOrderSubmitted(true);
-      setTimeout(() => {
-        setFastOrderSubmitted(false);
-        setIsModalOpen(false);
-      }, 2500);
+      setFastOrderError(
+        locale === "uz"
+          ? "Server bilan aloqada xatolik yuz berdi. Qaytadan urinib ko'ring."
+          : "Ошибка соединения с сервером. Пожалуйста, попробуйте снова."
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -488,7 +509,7 @@ export function ProductActions({ product, locale }: ProductActionsProps) {
       </div>
 
       {/* 1-Click Fast Order Modal */}
-      {isModalOpen && canOneClickBuy && (
+      {effectiveModalOpen && canOneClickBuy && (
         <div
           data-testid="fast-order-modal"
           className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto"
@@ -496,7 +517,10 @@ export function ProductActions({ product, locale }: ProductActionsProps) {
           <div className="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 shadow-2xl border border-slate-200 dark:border-slate-800 animate-in fade-in zoom-in-95 duration-200 max-h-[94vh] overflow-y-auto">
             <button
               type="button"
-              onClick={() => setIsModalOpen(false)}
+              onClick={() => {
+                setPendingFastOrder(false);
+                setIsModalOpen(false);
+              }}
               className="absolute top-4 right-4 p-1.5 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
@@ -504,12 +528,21 @@ export function ProductActions({ product, locale }: ProductActionsProps) {
 
             {fastOrderSubmitted ? (
               <div className="py-8 text-center space-y-3">
-                <CheckCircle2 className="w-16 h-16 text-emerald-500 mx-auto" />
+                {fastOrderReceipt?.isPending ? (
+                  <Clock className="w-16 h-16 text-amber-500 mx-auto" />
+                ) : (
+                  <CheckCircle2 className="w-16 h-16 text-emerald-500 mx-auto" />
+                )}
                 <h3 className="text-xl font-bold text-slate-900 dark:text-white">
                   {locale === "uz" ? "Rahmat!" : "Спасибо!"}
                 </h3>
+                {fastOrderReceipt?.orderNumber && (
+                  <div className="inline-block px-3 py-1 rounded-full text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200">
+                    #{fastOrderReceipt.orderNumber}
+                  </div>
+                )}
                 <p className="text-sm text-slate-600 dark:text-slate-300">
-                  {t("fastOrderSuccess")}
+                  {fastOrderReceipt?.message || t("fastOrderSuccess")}
                 </p>
               </div>
             ) : (

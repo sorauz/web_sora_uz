@@ -1,23 +1,10 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { AuthUser, AuthUserSchema } from "@/lib/schemas/auth";
+import { getSessionUser } from "@/lib/auth/session";
 
 export async function GET() {
   try {
-    const cookieStore = await cookies();
-    const sessionCookie = cookieStore.get("sora_session");
-
-    if (!sessionCookie?.value) {
-      return NextResponse.json({
-        authenticated: false,
-        user: null,
-      });
-    }
-
-    const raw = JSON.parse(sessionCookie.value);
-    const parsed = AuthUserSchema.safeParse(raw);
-
-    if (!parsed.success) {
+    const user = await getSessionUser();
+    if (!user) {
       return NextResponse.json({
         authenticated: false,
         user: null,
@@ -26,7 +13,7 @@ export async function GET() {
 
     return NextResponse.json({
       authenticated: true,
-      user: parsed.data as AuthUser,
+      user,
     });
   } catch {
     return NextResponse.json({

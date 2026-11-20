@@ -1,0 +1,39 @@
+Next.js asosidagi e-commerce loyihasida xaridor katalogdan kerakli mahsulotlarni tanlab, o'zi uchun tayyor Tijorat taklifini (KP) PDF shaklida yuklab olishi to'liq mumkin. B2B va korporativ savdoda bu eng yaxshi konversiya beradigan funksiyalardan biri hisoblanadi, chunki xaridor menejer javobini kutmasdan rahbariyatga yoki buxgalteriyaga tayyor hujjat taqdim eta oladi.
+
+Tavsiya etiladigan texnologiyalar
+Texnologiya tanlovi dizayn murakkabligi, server resurslari (masalan, Serverless muhit cheklovlari) va hujjatdagi mahsulotlar soniga bog'liq:
+
+Texnologiya / Yondashuv,Qayerda ishlaydi,Afzalliklari,Kamchiliklari va cheklovlari
+@react-pdf/renderer (Eng optimal tanlov),Brauzer (Client) yoki Next.js API (Server),React komponentlari kabi yig'iladi; mijoz brauzerida ishlatsa serverga yuklama nolga teng; Serverless muhitlarda muammosiz ishlaydi.,"Oddiy HTML/Tailwind klasslarini to'g'ridan-to'g'ri qabul qilmaydi, o'zining stil tizimi bor."
+Playwright / Puppeteer (HTML-to-PDF),Faqat Server (alohida VPS yoki mikroservis),Mavjud Tailwind CSS dizaynini 100% aniqlikda PDFga o'tkazadi; murakkab jadvallar va grafiklar uchun ideal.,Xotira (RAM) va CPU ko'p talab qiladi; Serverless funksiyalarda hajm va vaqt (timeout) cheklovlariga duch kelishi mumkin.
+jsPDF + jspdf-autotable,Brauzer (Client),Juda tez ishlaydi; 100+ qatorli katta jadvallarni (prays-list kabi) sahifalarga chiroyli bo'lib beradi.,"Murakkab dizayn, rasm joylashtirish va brending berish noqulayroq."
+"Backend / ERP (masalan, 1C) orqali generatsiya",Asosiy hisob tizimi,"Hujjatga avtomatik rasmiy raqam beriladi, real qoldiq va shartnoma narxlari bilan chiqadi, buxgalteriya shakli bilan bir xil bo'ladi.",Frontend tomonda dizaynni tezkor o'zgartirish qiyinroq; hisob tizimiga qo'shimcha so'rovlar tushadi.
+
+
+Tavsiya: Agar tezkorlik va server xarajatlarini tejash muhim bo'lsa, @react-pdf/renderer (yoki katta jadvallar uchun jsPDF AutoTable) ni mijoz tomonida (client-side) ishlatish eng qulay yechim. Agar PDF hujjat rasmiy raqamlanishi va darhol savdo bazasida qayd etilishi shart bo'lsa, Next.js API + Backend/ERP kombinatsiyasi eng to'g'ri yo'l.
+
+Jarayonni yanada yaxshilash bo'yicha takliflar
+Funksiyani shunchaki "PDF yuklash tugmasi" emas, balki haqiqiy savdo va lid yig'ish vositasiga aylantirish uchun quyidagi jihatlarni joriy etish tavsiya etiladi:
+
+Savatdan to'g'ridan-to'g'ri chiqarish. Alohida murakkab interfeys yasamasdan, xaridor odatdagidek mahsulotlarni savatga yig'ishi va savat ichida "Buyurtma berish" tugmasi yonida "Tijorat taklifi (PDF) yuklab olish" tugmasini ko'rishi eng tushunarli UX hisoblanadi.
+
+Qisqa shaxsiylashtirish oynasi (Modal). Yuklab olishdan oldin ixtiyoriy qisqa forma chiqaring: Kompaniya nomi (yoki STIR), Mas'ul shaxs ismi va Telefon raqami. Xaridor o'z tashkiloti nomiga rasmiylashtirilgan chiroyli KP oladi, sizning savdo bo'limingiz esa tayyor issiq mijoz (lid) ma'lumotiga ega bo'ladi.
+
+Menejerlarga avtomatik xabarnoma va noyob raqam. Har bir generatsiya qilingan KPga noyob raqam (masalan, KP-2026-1045) berib, uni bazada saqlab qoling va Telegram/CRMga xabar yuboring. Mijoz keyinroq qo'ng'iroq qilib faqat shu raqamni aytsa, menejer barcha tanlangan mahsulotlarni bir zumda ko'ra oladi.
+
+PDF ichida "Jonli savat" QR-kodi va havolalar. PDFning pastki qismiga maxsus QR-kod va havola qo'ying — rahbar yoki ta'minotchi uni skanerlaganda saytda aynan shu mahsulotlar yig'ilgan savat ochilib, bir bosishda buyurtmani tasdiqlay olsin. Shuningdek, jadvaldagi har bir mahsulot nomini bosiladigan (clickable link) qiling.
+
+Ko'rinish sozlamalari (QQS va ixcham rejim). Xaridorga yuklab olishdan oldin ikkita qulay tanlov bering:
+
+Rasmlar bilan (taqdimot uchun chiroyli) yoki Ixcham jadval (mahsulot ko'p bo'lsa, qog'oz tejash uchun).
+
+QQS (12%) alohida ko'rsatilsin yoki Umumiy narx ichida.
+
+{Ixcham jadval} - faqat Excel yuklab olish imkoniyati
+{Rasmlarli jadval} - faqat PDF yuklab olish imkoniyati
+
+Amal qilish muddati va rasmiy elementlar. Narxlar o'zgarishi sababli kelishmovchilik bo'lmasligi uchun "Taklif 3 ish kuni davomida amal qiladi" degan avtomatik sanani, kompaniya rekvizitlarini, muhr/imzo tasvirini (faksimele) va bog'lanish raqamlarini hujjatga qo'shing.
+
+Shriftlar va til mosligi. O'zbek tilidagi maxsus belgilar (o', g') hamda kirill alifbosi PDFda buzilib qolmasligi (??? bo'lib chiqmasligi) uchun standart shriftlar o'rniga to'liq Unicode qo'llovchi shriftlarni (masalan, Inter, Roboto yoki PT Sans) paket ichiga ulash shart.
+
+Excel (.xlsx) formatini ham yonma-yon qo'shish. Korporativ xaridorlar va tender bo'limlari PDFni rahbarga ko'rsatish uchun, Excelni esa narxlarni o'z hisob-kitob jadvallariga ko'chirib olish uchun ishlatadi. PDF yonida Excel yuklab olish imkoniyati bo'lishi B2B mijozlar uchun katta qulaylik yaratadi.

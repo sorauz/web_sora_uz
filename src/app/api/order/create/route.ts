@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { api } from "@/lib/api";
+import {
+  getSessionUser,
+  setRecentOrderAccessCookie,
+  setSessionCookie,
+} from "@/lib/auth/session";
 import { CheckoutCreateOrderInputSchema } from "@/lib/schemas/order";
-import { AuthUser, AuthUserSchema, normalizePhone } from "@/lib/schemas/auth";
+import { AuthUser, normalizePhone } from "@/lib/schemas/auth";
 import { deriveOneCPassword, verifyPhoneToken } from "@/lib/sms/otp-store";
 import { buildOneCOrderPayload } from "@/lib/utils/order-payload";
 
@@ -23,22 +28,9 @@ export async function POST(req: NextRequest) {
 
     const data = parseResult.data;
 
-    // 1. Check logged-in session cookie
+    // 1. Check HMAC-verified logged-in session cookie
     const cookieStore = await cookies();
-    const sessionCookie = cookieStore.get("sora_session");
-    let sessionUser: AuthUser | null = null;
-
-    if (sessionCookie?.value) {
-      try {
-        const parsed = JSON.parse(sessionCookie.value);
-        const validated = AuthUserSchema.safeParse(parsed);
-        if (validated.success) {
-          sessionUser = validated.data;
-        }
-      } catch {
-        // Ignore session parse error
-      }
-    }
+    const sessionUser: AuthUser | null = await getSessionUser(cookieStore);
 
     const cleanPhone = normalizePhone(data.phone);
     const cleanAltPhone = data.altPhone ? normalizePhone(data.altPhone) : "";
@@ -95,8 +87,9 @@ export async function POST(req: NextRequest) {
         // Temporary 1C /register hiccup handled below
       }
 
-      // B2C requires contact_id; for B2B omit synthetic UUID so 1C won't reject with 404
-      return isB2B ? undefined : crypto.randomUUID();
+      // Do NOT send synthetic crypto.randomUUID() — 1C rejects unknown GUIDs with 404.
+      // For B2C this triggers 503 retry below; for B2B contact_id is optional in 1C.
+      return undefined;
     };
 
     // 3. Resolve client_id (Контрагент GUID — required for B2B)
@@ -127,17 +120,29 @@ export async function POST(req: NextRequest) {
             return regB2B.id;
           }
         } catch {
-          // Fallback below
+          // Handled cleanly as 503 below instead of synthetic UUID
         }
       }
 
-      return crypto.randomUUID();
+      return undefined;
     };
 
     const [contactId, clientId] = await Promise.all([
       resolveContactId(),
       resolveClientId(),
     ]);
+
+    if ((!isB2B && !contactId) || (isB2B && !clientId)) {
+      return NextResponse.json(
+        {
+          success: false,
+          retryable: true,
+          error:
+            "1C tizimida mijoz hisobini tasdiqlab bo'lmadi. Iltimos, birozdan so'ng qayta urinib ko'ring.",
+        },
+        { status: 503 }
+      );
+    }
 
     // 4. Construct 1C order payload (includes contact_id + phone in B2B comment)
     const oneCPayload = buildOneCOrderPayload({
@@ -165,24 +170,42 @@ export async function POST(req: NextRequest) {
             phone: cleanPhone,
             inn: isB2B && cleanInn ? cleanInn : undefined,
           };
-          cookieStore.set("sora_session", JSON.stringify(newSessionUser), {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
-            maxAge: 60 * 60 * 24 * 30,
-            path: "/",
-          });
+          await setSessionCookie(newSessionUser, cookieStore);
         }
       }
+
+      const ownerId = isB2B ? clientId : contactId;
+      if (ownerId) {
+        await setRecentOrderAccessCookie(
+          {
+            orderId: orderResult.data.order_id,
+            type: isB2B ? "B2B" : "B2C",
+            ownerId,
+          },
+          cookieStore
+        );
+      }
+
+      const posted = orderResult.data.posted ?? true;
+      const statusCode =
+        orderResult.data.status_code || (posted ? "CONFIRMED" : "PENDING");
+      const statusText =
+        orderResult.data.status ||
+        (posted ? "Qabul qilindi / Tasdiqlandi" : "Tekshirilmoqda");
+      const defaultMessage = posted
+        ? "Buyurtma muvaffaqiyatli qabul qilindi"
+        : "Buyurtma qabul qilindi va menejer tekshiruviga yuborildi";
 
       return NextResponse.json(
         {
           success: true,
           order_id: orderResult.data.order_id,
           order_number: orderResult.data.order_number,
-          message:
-            orderResult.data.message || "Buyurtma muvaffaqiyatli qabul qilindi",
-          isFallback: !!orderResult.isFallback,
+          message: orderResult.data.message || defaultMessage,
+          status_code: statusCode,
+          status: statusText,
+          posted,
+          total_amount: orderResult.data.total_amount,
         },
         { status: 201 }
       );
@@ -191,6 +214,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         success: false,
+        retryable: Boolean(orderResult.retryable),
         error:
           orderResult.error || "Buyurtmani qabul qilishda xatolik yuz berdi",
       },

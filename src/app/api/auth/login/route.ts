@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
 import { api } from "@/lib/api";
+import { setSessionCookie } from "@/lib/auth/session";
 import { LoginInputSchema, normalizePhone } from "@/lib/schemas/auth";
 
 export async function POST(request: NextRequest) {
@@ -37,23 +37,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const resolvedType: "B2C" | "B2B" =
+      result.user.type?.toUpperCase() === "B2B"
+        ? "B2B"
+        : result.user.type?.toUpperCase() === "B2C"
+        ? "B2C"
+        : type;
+
     const sessionUser = {
       id: result.user.id,
-      name: result.user.name || (type === "B2C" ? "Foydalanuvchi" : "Tashkilot"),
-      type: result.user.type || type,
-      phone: type === "B2C" ? identifier : undefined,
-      inn: type === "B2B" ? identifier : undefined,
+      name: result.user.name || (resolvedType === "B2C" ? "Foydalanuvchi" : "Tashkilot"),
+      type: resolvedType,
+      phone: resolvedType === "B2C" ? identifier : undefined,
+      inn: resolvedType === "B2B" ? identifier : undefined,
     };
 
-    // Set secure session cookie (30 days)
-    const cookieStore = await cookies();
-    cookieStore.set("sora_session", JSON.stringify(sessionUser), {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 30,
-      path: "/",
-    });
+    // Set HMAC-signed secure session cookie (30 days)
+    await setSessionCookie(sessionUser);
 
     return NextResponse.json({
       success: true,

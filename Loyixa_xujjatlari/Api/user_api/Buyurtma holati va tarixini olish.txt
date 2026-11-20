@@ -1,0 +1,196 @@
+API Hujjati: Buyurtma holati va tarixini olish (GET /order)
+Servis: for_msp (1C:Предприятие 8.3.20)
+Metod va URL: GET [http://1cloud.uz:777/SORA/hs/for_msp/order](http://1cloud.uz:777/SORA/hs/for_msp/order)Format: application/json; charset=utf-8Avtorizatsiya: 1C HTTP-servis uchun belgilangan Basic Auth (mavjud sozlamalar o‘zgarishsiz qoladi)
+
+1. Oldingi versiyaga nisbatan asosiy o‘zgarishlar
+Bu yangilanishda breaking changes (oldingi so‘rov va javob tuzilmasini o‘zgartiradigan yangiliklar) mavjud — web ilova kodini quyidagilarga moslashtirish shart:
+
+Egalik huquqini tekshirish majburiy bo‘ldi (Breaking Change): Avval bitta buyurtmani olish uchun faqat order_id yetarli edi. Endi har bir so‘rovda mijoz turi (type) va identifikatori (contact_id yoki client_id) yuborilishi shart. Aks holda 400 Bad Request, begona buyurtma so‘ralganda esa 403 Forbidden qaytadi.
+
+Ikki xil ishlash rejimi qo‘shildi:
+
+order_id yuborilsa — bitta buyurtmaning to‘liq tafsiloti, bosqichlar tarixi (timeline) va mahsulotlar ro‘yxati (products) qaytadi.
+
+order_id yuborilmasa — mijozning barcha buyurtmalari ro‘yxati (shaxsiy kabinet tarixi) sahifalash (limit, offset, has_more) bilan qaytadi.
+
+without_delivery maydoni joyi o‘zgardi (Breaking Change): Bitta buyurtma tafsilotida without_delivery endi ildiz darajasida emas, balki delivery.without_delivery ichida keladi. Buyurtmalar ro‘yxatida esa har bir elementning ildiz darajasida qoladi.
+
+Kengaytirilgan status tizimi va timeline: Avvalgi 3 ta oddiy matn o‘rniga 6 ta standart mashina kodi (status_code) hamda yetkazib berish / samovivozga moslashuvchi bosqichlar tarixi (timeline) qo‘shildi.
+
+To‘liq tarkib va aktual summa: Bitta buyurtma javobiga products jadvali, delivery, customer, comment, payment_type, online, online_date bloklari qo‘shildi. Agar menejer 1C ichida miqdor yoki narxni tahrirlagan bo‘lsa, GET har doim eng oxirgi aktual ma’lumotni qaytaradi.
+
+2. 1-Rejim: Bitta buyurtma tafsiloti
+Buyurtma sahifasi va statusini real vaqtda kuzatish uchun ishlatiladi.
+
+Query parametrlari
+
+Parametr,Turi,Majburiyligi,Tavsif
+order_id,string (GUID),Majburiy,1C buyurtma (Реализация) GUID si.
+type,string,Majburiy,"Mijoz turi: ""B2C"" yoki ""B2B"" (katta-kichik harf farqlanmaydi)."
+contact_id,string (GUID),B2C da majburiy,1C КонтактныйЛицо GUID si. Buyurtma aynan shu kontaktga tegishli ekanini tekshiradi.
+client_id,string (GUID),B2B da majburiy,1C Контрагенты GUID si. Buyurtma aynan shu yuridik shaxsga tegishli ekanini tekshiradi.
+
+
+So‘rov namunalari
+HTTP
+GET /SORA/hs/for_msp/order?order_id=a1b2c3d4-e5f6-7890-abcd-ef1234567890&type=B2C&contact_id=11112222-3333-4444-5555-666677778888
+
+HTTP
+GET /SORA/hs/for_msp/order?order_id=a1b2c3d4-e5f6-7890-abcd-ef1234567890&type=B2B&client_id=aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee
+
+Javob namunasi (200 OK)
+JSON
+{
+  "order_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "order_number": "0000-001425",
+  "order_date": "2026-11-20T09:15:00",
+  "online": true,
+  "online_date": "2026-11-20T09:15:00",
+  "payment_type": "CASH_OR_CARD",
+  "status_code": "ASSEMBLED",
+  "status": "Omborda yig'ildi",
+  "total_amount": 450000,
+  "comment": "Darvoza oldida qo'ng'iroq qiling",
+  "delivery": {
+    "without_delivery": false,
+    "geolocation": "41.311081, 69.240562",
+    "pickup_point": null
+  },
+  "customer": {
+    "type": "B2C",
+    "client_id": null,
+    "client_name": null,
+    "contact": {
+      "contact_id": "11112222-3333-4444-5555-666677778888",
+      "name": "Alisher Valiyev",
+      "phone_1": "+998901234567",
+      "phone_2": null,
+      "tg_username": "@alisher"
+    }
+  },
+  "timeline": [
+    { "code": "CONFIRMED", "title": "Qabul qilindi / Tasdiqlandi", "completed": true, "date": "2026-11-20T09:16:12" },
+    { "code": "ASSEMBLED", "title": "Omborda yig'ildi", "completed": true, "date": "2026-11-20T09:42:05" },
+    { "code": "SHIPPED", "title": "Kuryerga topshirildi / Yo'lda", "completed": false, "date": null },
+    { "code": "DELIVERED", "title": "Yetkazib berildi", "completed": false, "date": null }
+  ],
+  "products": [
+    {
+      "line_number": 1,
+      "product_id": "99998888-7777-6666-5555-444433332222",
+      "product_name": "Kabel UTP Cat6",
+      "unit": "m",
+      "quantity": 100,
+      "price": 4500,
+      "amount": 450000
+    }
+  ]
+}
+
+Javob maydonlari tavsifi
+
+Maydon,Turi,Tavsif
+order_id,string,Buyurtma GUID si.
+order_number,string,1C dagi buyurtma raqami.
+order_date,string | null,"Hujjat sanasi (YYYY-MM-DDTHH:mm:ss, server mahalliy vaqti)."
+online,boolean,Sayt orqali yaratilgan onlayn buyurtma belgisi.
+online_date,string | null,Onlayn buyurtma kelib tushgan vaqt (bo‘sh bo‘lsa null).
+payment_type,string,"""TRANSFER"" (pul o‘tkazish, B2B) yoki ""CASH_OR_CARD"" (naqd/karta, B2C)."
+status_code,string,Joriy holat kodi (4-bo‘limga qarang).
+status,string,Joriy holatning o‘zbekcha nomi.
+total_amount,number,Hujjatdagi barcha qatorlar summasining aktual yig‘indisi.
+comment,string,"Buyurtma izohi (bo‘sh bo‘lsa """")."
+delivery.without_delivery,boolean,"true — samovivoz, false — yetkazib berish."
+delivery.geolocation,string | null,Yetkazib berish koordinatasi (without_delivery: true bo‘lsa null).
+delivery.pickup_point,string | null,Olib ketish do‘koni/ombori nomi (without_delivery: false bo‘lsa null).
+customer.type,string,"""B2B"" yoki ""B2C""."
+customer.client_id / client_name,string | null,"Faqat B2B buyurtmalarda to‘ldiriladi, B2C da null."
+customer.contact,object | null,"Kontakt shaxs (contact_id, name, phone_1, phone_2, tg_username). Biriktirilmagan bo‘lsa null."
+timeline,array,"Bosqichlar ketma-ketligi (code, title, completed, date)."
+products,array,Qator tartibida (line_number) saralangan mahsulotlar jadvali.
+
+
+3. 2-Rejim: Mijozning buyurtmalar ro‘yxati (Tarix)
+order_id yuborilmaganda servis avtomatik ravishda shaxsiy kabinet uchun buyurtmalar ro‘yxatini sanasi bo‘yicha kamayish tartibida (eng yangisi birinchi) qaytaradi.
+
+Query parametrlari
+
+
+Parametr,Turi,Majburiyligi,Odatiy qiymat,Tavsif
+type,string,Majburiy,—,"""B2C"" yoki ""B2B""."
+contact_id,string (GUID),B2C da majburiy,—,B2C mijozning kontakt GUID si.
+client_id,string (GUID),B2B da majburiy,—,B2B kompaniyaning kontragent GUID si.
+limit,integer,Ixtiyoriy,20,Bitta sahifadagi elementlar soni (1 dan 100 gacha avtomatik chegaralanadi).
+offset,integer,Ixtiyoriy,0,Tashlab o‘tiladigan yozuvlar soni (0 yoki undan katta).
+only_online,boolean,Ixtiyoriy,"B2C: true, B2B: false","Faqat sayt buyurtmalarini filtrlash. ""true"" bo‘lsa faqat online: true hujjatlar, boshqa qiymatda (masalan ""false"") oflayn xaridlar ham qaytadi."
+
+
+So‘rov namunalari
+HTTP
+GET /SORA/hs/for_msp/order?type=B2C&contact_id=11112222-3333-4444-5555-666677778888&limit=20&offset=0&only_online=true
+HTTP
+GET /SORA/hs/for_msp/order?type=B2B&client_id=aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee&limit=20&offset=0
+Javob namunasi (200 OK)
+JSON
+{
+  "limit": 20,
+  "offset": 0,
+  "has_more": true,
+  "orders": [
+    {
+      "order_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "order_number": "0000-001425",
+      "order_date": "2026-11-20T09:15:00",
+      "online": true,
+      "status_code": "ASSEMBLED",
+      "status": "Omborda yig'ildi",
+      "without_delivery": false,
+      "total_amount": 450000,
+      "items_count": 3
+    }
+  ]
+}
+
+Sahifalash qoidasi: Agar has_more: true bo‘lsa, keyingi sahifani yuklash uchun offset qiymatini offset + limit qilib oshiring. has_more: false kelganda ro‘yxat tugagan hisoblanadi.
+
+4. Status kodlari va timeline mantiqi
+UI ranglari, ikonkalar va ko‘p tilli (UZ/RU) tarjimalarni status matniga emas, balki qat’iy status_code ga bog‘lang:
+
+
+status_code,Yetkazib berish (without_delivery: false),Samovivoz (without_delivery: true),Izoh
+PENDING,Tekshirilmoqda,Tekshirilmoqda,"Hujjat 1C da saqlangan, lekin hali o‘tkazilmagan (menejer tasdig‘ida)."
+CONFIRMED,Qabul qilindi / Tasdiqlandi,Qabul qilindi / Tasdiqlandi,Hujjat o‘tkazilgan va buyurtma tasdiqlangan.
+ASSEMBLED,Omborda yig'ildi,Olib ketishga tayyor,Mahsulotlar omborda yig‘ib tayyorlangan.
+SHIPPED,Kuryerga topshirildi / Yo'lda,—,Faqat yetkazib berish buyurtmalarida chiqadi.
+READY_FOR_PICKUP,—,Topshirishga tayyor,Faqat samovivoz buyurtmalarida chiqadi.
+DELIVERED,Yetkazib berildi,Mijozga topshirildi,Yakuniy muvaffaqiyatli holat.
+CANCELLED,Bekor qilingan,Bekor qilingan,1C da o‘chirishga belgilangan hujjat (eng yuqori ustuvorlik).
+
+
+timeline ni chizishda e’tibor berish kerak bo‘lgan qoidalar:
+
+Massiv odatda 4 ta qadamdan iborat (CONFIRMED, ASSEMBLED, SHIPPED yoki READY_FOR_PICKUP, DELIVERED). Buyurtma bekor qilingan bo‘lsagina 5-element sifatida CANCELLED qo‘shiladi.
+
+Agar omborchi biror bosqichni belgilamasdan keyingi bosqichga o‘tib ketgan bo‘lsa, oldingi qadamda completed: true va date: null keladi — UI da bunday qadam bajarilgan (yashil), lekin vaqtsiz ko‘rsatilishi kerak.
+
+PENDING holatidagi buyurtmalarda timeline ichidagi barcha 4 ta qadam completed: false ko‘rinishida keladi.
+
+5. Xato javoblari
+Barcha xato holatlarida server {"error": "..."} JSON formatida javob qaytaradi:
+
+
+HTTP kod,Sabablar,Misol javob
+400 Bad Request,type noto‘g‘ri yoki yo‘q; contact_id / client_id yuborilmagan; GUID formati noto‘g‘ri yoki bo‘sh GUID; limit / offset son emas.,"{""error"": ""B2C uchun 'contact_id' parametri majburiy!""}"
+403 Forbidden,"order_id bazada mavjud, lekin yuborilgan type va contact_id / client_id ga tegishli emas.","{""error"": ""Ushbu buyurtmani ko'rish uchun ruxsat yo'q!""}"
+404 Not Found,Berilgan order_id ga ega buyurtma 1C bazasida topilmadi.,"{""error"": ""Ushbu ID ga ega buyurtma topilmadi!""}"
+500 Internal Server Error,1C serverida kutilmagan ichki xatolik.,"{""error"": ""Serverda ichki xatolik yuz berdi!""}"
+
+6. Web ilova integratsiyasi uchun eslatmalar
+Xavfsizlik (contact_id / client_id): Bu parametrlarni brauzer URL sidan ochiq olmay, faqat foydalanuvchining joriy avtorizatsiya sessiyasi (server-side / API route) orqali 1C ga uzating.
+
+null qiymatlar: online_date, delivery.geolocation, delivery.pickup_point, customer.client_id, customer.contact va timeline[].date maydonlari bo‘sh holatda null bo‘lib keladi — UI da optional chaining bilan ishlov bering.
+
+Ikki tilli interfeys (UZ/RU): 1C status va timeline[].title maydonlarini o‘zbek tilida qaytaradi. Ruscha interfeysda status_code hamda timeline[].code qiymatlari orqali lokal lug‘atdan tarjima chiqarish tavsiya etiladi.
+
+B2B ro‘yxati: B2B mijozlar uchun only_online sukut bo‘yicha false — ya’ni kompaniyaning oflayn (menejer orqali kiritilgan) realizatsiyalari ham ko‘rinadi. Agar shaxsiy kabinetda faqat sayt buyurtmalarini ko‘rsatish kerak bo‘lsa, so‘rovga only_online=true qo‘shing.
+

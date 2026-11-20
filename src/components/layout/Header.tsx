@@ -7,7 +7,7 @@ import { Link } from "@/i18n/routing";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { MegaMenu } from "@/components/discovery/MegaMenu";
 import { SearchAutocomplete } from "@/components/discovery/SearchAutocomplete";
-import { Heart, ShoppingBag, User, LogOut, Package, Scale, Search } from "lucide-react";
+import { Heart, ShoppingBag, User, LogOut, Package, Scale, Search, ClipboardList } from "lucide-react";
 import { useCartStore } from "@/lib/store/cart";
 import { useFavoritesStore } from "@/lib/store/favorites";
 import { useCompareStore } from "@/lib/store/compare";
@@ -16,7 +16,7 @@ import { useMobileSearchStore } from "@/lib/store/mobileSearch";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { OrderTrackerModal } from "@/components/checkout/OrderTrackerModal";
 import { MobileSearchModal } from "@/components/discovery/MobileSearchModal";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useSyncExternalStore } from "react";
 import { useTranslations, useLocale } from "next-intl";
 
 interface HeaderProps {
@@ -36,7 +36,11 @@ export function Header({ tree, categories, brands, products = [] }: HeaderProps)
   const { user, openModal, logout, checkAuth } = useAuthStore();
   const { openSearch } = useMobileSearchStore();
 
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [trackerOpen, setTrackerOpen] = useState(false);
   const [hideMobileSearchOnScroll, setHideMobileSearchOnScroll] = useState(false);
@@ -44,7 +48,6 @@ export function Header({ tree, categories, brands, products = [] }: HeaderProps)
   const lastScrollYRef = useRef(0);
 
   useEffect(() => {
-    setMounted(true);
     checkAuth();
   }, [checkAuth]);
 
@@ -201,6 +204,14 @@ export function Header({ tree, categories, brands, products = [] }: HeaderProps)
                 </div>
 
                 <div className="pt-1 border-t border-slate-100 dark:border-slate-800 space-y-1">
+                  <Link
+                    href="/orders"
+                    onClick={() => setUserMenuOpen(false)}
+                    className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                  >
+                    <ClipboardList className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                    <span>{isUz ? "Mening buyurtmalarim" : "Мои заказы"}</span>
+                  </Link>
                   <button
                     onClick={() => {
                       setUserMenuOpen(false);
@@ -209,7 +220,7 @@ export function Header({ tree, categories, brands, products = [] }: HeaderProps)
                     className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
                   >
                     <Package className="w-3.5 h-3.5 text-sora-600 dark:text-sora-400" />
-                    <span>Buyurtma holati</span>
+                    <span>{isUz ? "Buyurtma holati" : "Статус заказа"}</span>
                   </button>
                   <button
                     onClick={() => {
@@ -219,7 +230,7 @@ export function Header({ tree, categories, brands, products = [] }: HeaderProps)
                     className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
                   >
                     <LogOut className="w-3.5 h-3.5" />
-                    <span>Chiqish</span>
+                    <span>{isUz ? "Chiqish" : "Выйти"}</span>
                   </button>
                 </div>
               </div>
