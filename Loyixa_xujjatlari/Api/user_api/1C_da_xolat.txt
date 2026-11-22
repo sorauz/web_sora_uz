@@ -1,0 +1,161 @@
+API Hujjati: Buyurtma / KP holati (GET /order) va amallar (POST /order_action)
+Servis: for_msp (1C:Предприятие 8.3.20)
+Bazaviy URL: [http://1cloud.uz:777/SORA/hs/for_msp](http://1cloud.uz:777/SORA/hs/for_msp)Format: application/json; charset=utf-8Avtorizatsiya: 1C HTTP-servis Basic Auth (mavjud sozlamalar o‘zgarishsiz)
+
+``
+1. POST /SORA/hs/for_msp/order bo‘yicha kiritilgan o‘zgarishlar (Tayyor)
+
+1C hujjatiga KP (Boolean) va СрокДействияКП (Date/Time) rekvizitlari qo‘shildi.
+
+So‘rovga ixtiyoriy is_kp (true/false) va kp_valid_until (YYYY-MM-DD yoki ISO vaqt) maydonlari qo‘shildi.
+
+is_kp: true kelganda:
+
+kp_valid_until yuborilmasa, avtomatik +5 kun (23:59:59) qilib o‘rnatiladi (YYYY-MM-DD yuborilsa ham shu kunning 23:59:59 vaqtiga o‘giriladi).
+
+Hujjat ombor qoldig‘ini kesmasligi uchun Проведение qilinmaydi (posted: false) va ombor yig‘uvchilar ro‘yxatiga tushmaydi.
+
+Telegramga KP ekani va amal qilish muddati ko‘rsatilgan alohida xabar boradi.
+
+Javob (201 Created) barcha holatlarda is_kp va kp_valid_until maydonlari bilan qaytadi (oddiy buyurtmada is_kp: false, kp_valid_until: null).
+``
+
+
+
+
+1. GET /order — Yangilangan buyurtma va KP holati / tarixi
+Xavfsizlik qoidasi (2-variant): 1C tomonida egalik huquqi (type + client_id / contact_id) barcha so‘rovlarda qat’iy tekshiriladi. Ommaviy QR-kod sahifasi (/kp/{token}) uchun Next.js serveri HMAC-SHA256 tokenni ochib, 1C ga standart GET /order?order_id=...&type=B2B&client_id=... so‘rovini yuboradi va foydalanuvchiga faqat rasmiy KP maydonlarini (telefon va ichki izohlarsiz) qaytaradi.
+
+
+1.1. 1-Rejim: Bitta buyurtma yoki KP tafsiloti
+Query parametrlari:
+
+Parametr,Turi,Majburiyligi,Tavsif
+order_id,string (GUID),Majburiy,Hujjat (Реализация) GUID si.
+type,string,Majburiy,"""B2C"" yoki ""B2B""."
+contact_id,string (GUID),B2C da majburiy,КонтактныйЛицо GUID si.
+client_id,string (GUID),B2B da majburiy,Контрагенты GUID si.
+
+
+So‘rov namunasi (B2B KP):HTTPGET /SORA/hs/for_msp/order?order_id=c3d4e5f6-a1b2-7890-abcd-ef1234567890&type=B2B&client_id=aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee
+Javob namunasi (200 OK — Faol Tijorat taklifi):JSON{
+  "order_id": "c3d4e5f6-a1b2-7890-abcd-ef1234567890",
+  "order_number": "0000-001430",
+  "order_date": "2026-11-22T14:10:00",
+  "online": true,
+  "online_date": "2026-11-22T14:10:00",
+  "is_kp": true,
+  "kp_valid_until": "2026-11-27T23:59:59",
+  "payment_type": "TRANSFER",
+  "status_code": "KP_ACTIVE",
+  "status": "Tijorat taklifi (Faol)",
+  "total_amount": 2250000,
+  "comment": "Tijorat taklifi (KP) | H/R: 20208000... | MFO: 00444",
+  "delivery": {
+    "without_delivery": true,
+    "geolocation": null,
+    "pickup_point": "Магазин"
+  },
+  "customer": {
+    "type": "B2B",
+    "client_id": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+    "client_name": "ALPHA SERVICE MCHJ",
+    "client_inn": "305123456",
+    "contact": {
+      "contact_id": "11112222-3333-4444-5555-666677778888",
+      "name": "Alisher Valiyev",
+      "phone_1": "+998901234567",
+      "phone_2": null,
+      "tg_username": "@alisher"
+    }
+  },
+  "timeline": [],
+  "products": [
+    {
+      "line_number": 1,
+      "product_id": "99998888-7777-6666-5555-444433332222",
+      "product_name": "Ofis qog'ozi A4 SvetoCopy",
+      "unit": "pachka",
+      "quantity": 50,
+      "price": 45000,
+      "amount": 2250000
+    }
+  ]
+}
+Yangi qo‘shilgan maydonlar:is_kp (boolean): true — Tijorat taklifi (KP), false — oddiy buyurtma.kp_valid_until (string | null): KP amal qilish muddati (YYYY-MM-DDTHH:mm:ss). Oddiy buyurtmada yoki sana bo‘sh bo‘lsa null.customer.client_inn (string | null): B2B kontragentning STIR (INN) raqami. B2C mijozlarda yoki 1C da to‘ldirilmagan bo‘lsa null.timeline (array): is_kp: true bo‘lganda har doim bo‘sh massiv [] qaytadi. KP buyurtmaga aylangach (is_kp: false) standart 4 qadamli timeline bilan qaytadi.1.2. 2-Rejim: Buyurtmalar va KP lar ro‘yxatiorder_id yuborilmaganda ishga tushadi va hujjatlarni sanasi bo‘yicha kamayish tartibida qaytaradi.Query parametrlari:ParametrTuriMajburiyligiOdatiy qiymatTavsiftypestringMajburiy—"B2C" yoki "B2B".contact_idstring (GUID)B2C da majburiy—B2C mijoz GUID si.client_idstring (GUID)B2B da majburiy—B2B kompaniya GUID si.is_kpbooleanIxtiyoriy(hammasi)"true" — faqat KP lar; "false" — faqat oddiy buyurtmalar; yuborilmasa — hammasi birga. Boshqa qiymat yuborilsa 400 qaytadi.only_onlinebooleanIxtiyoriyB2C: true, B2B: false"true" bo‘lsa faqat saytdan berilgan hujjatlar qaytadi.limitintegerIxtiyoriy201 dan 100 gacha.offsetintegerIxtiyoriy00 yoki undan katta.So‘rov namunalari:HTTPGET /SORA/hs/for_msp/order?type=B2B&client_id=aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee&is_kp=true&limit=20&offset=0
+GET /SORA/hs/for_msp/order?type=B2B&client_id=aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee&is_kp=false&limit=20&offset=0
+Javob namunasi (200 OK):JSON{
+  "limit": 20,
+  "offset": 0,
+  "has_more": false,
+  "orders": [
+    {
+      "order_id": "c3d4e5f6-a1b2-7890-abcd-ef1234567890",
+      "order_number": "0000-001430",
+      "order_date": "2026-11-22T14:10:00",
+      "online": true,
+      "is_kp": true,
+      "kp_valid_until": "2026-11-27T23:59:59",
+      "status_code": "KP_ACTIVE",
+      "status": "Tijorat taklifi (Faol)",
+      "without_delivery": true,
+      "total_amount": 2250000,
+      "items_count": 1
+    }
+  ]
+}
+1.3. Yagona status kodlari va ustuvorlik tartibiUstuvorlikstatus_codestatus (UZ)Qachon qaytadi1CANCELLEDBekor qilinganHujjat 1C da o‘chirishga belgilangan (is_kp: true va false ning ikkalasi uchun eng yuqori ustuvorlik).2KP_EXPIREDMuddati tugaganis_kp: true va server joriy vaqti kp_valid_until dan oshgan.3KP_ACTIVETijorat taklifi (Faol)is_kp: true va amal qilish muddati ichida (menejer 1C da sanani sursa avtomatik KP_ACTIVE ga qaytadi).4DELIVEREDYetkazib berildi / Mijozga topshirildiOddiy buyurtma yakunlangan.5SHIPPED / READY_FOR_PICKUPKuryerga topshirildi / Yo'lda / Topshirishga tayyorYuklangan (without_delivery ga qarab kod tanlanadi).6ASSEMBLEDOmborda yig'ildi / Olib ketishga tayyorOmborda yig‘ib tayyorlangan.7CONFIRMEDQabul qilindi / TasdiqlandiOddiy buyurtma 1C da o‘tkazilgan (posted: true).8PENDINGTekshirilmoqdaOddiy buyurtma chernovik sifatida saqlangan (posted: false).2. POST /order_action — KP holatini boshqarish (Yangi)Metod va URL: POST [http://1cloud.uz:777/SORA/hs/for_msp/order_action](http://1cloud.uz:777/SORA/hs/for_msp/order_action)Xaridor shaxsiy kabinetidan Tijorat taklifini (KP) haqiqiy buyurtmaga aylantirishi (CONVERT_TO_ORDER) yoki bekor qilishi (CANCEL_KP) uchun ishlatiladi. Ikkala amalda ham 1C Telegram guruhiga avtomatik xabarnoma yuboradi.2.1. So‘rov parametrlari (Request Body)MaydonTuriMajburiyligiTavsiforder_idstring (GUID)MajburiyKP hujjatining GUID si.typestringMajburiy"B2B" yoki "B2C".client_idstring (GUID)B2B da majburiyEgalikni tasdiqlovchi kontragent GUID si.contact_idstring (GUID)B2C da majburiyEgalikni tasdiqlovchi kontakt GUID si.actionstringMajburiyFaqat "CONVERT_TO_ORDER" yoki "CANCEL_KP".without_deliverybooleanIxtiyoriy (CONVERT_TO_ORDER)Yuborilmasa KP dagi avvalgi qiymat saqlanib qoladi. true bo‘lsa geolocation tozalanadi.geolocationstringIxtiyoriy (CONVERT_TO_ORDER)Faqat without_delivery: false bo‘lganda yangilanadi; yuborilmasa eski qiymat qoladi.commentstringIxtiyoriy (CONVERT_TO_ORDER)Izohni yangilash (350 belgigacha); yuborilmasa eski izoh saqlanadi.2.2. Amal 1: KP ni buyurtmaga aylantirish (CONVERT_TO_ORDER)1C tomonda bajariladigan mantiq:Hujjat is_kp: true, bekor qilinmagan va muddati o‘tmagan bo‘lishi shart.KP = false qilinadi va hujjat sanasi (order_date) joriy server vaqtiga yangilanadi (1C da ombor qoldig‘i va tannarx hisobini o‘tgan sanaga buzmaslik uchun).Hujjat o‘tkaziladi (Проведение): omborda qoldiq yetsa CONFIRMED (posted: true), yetmasa chernovik saqlanib PENDING (posted: false) qaytadi.So‘rov namunasi:JSON{
+  "order_id": "c3d4e5f6-a1b2-7890-abcd-ef1234567890",
+  "type": "B2B",
+  "client_id": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+  "action": "CONVERT_TO_ORDER",
+  "without_delivery": false,
+  "geolocation": "41.311081, 69.240562",
+  "comment": "Ertaga soat 10:00 gacha yetkazib bering"
+}
+Javob namunasi (200 OK — Qoldiq yetib, to‘liq tasdiqlanganda):JSON{
+  "message": "Tijorat taklifi muvaffaqiyatli buyurtmaga aylantirildi",
+  "status_code": "CONFIRMED",
+  "status": "Qabul qilindi / Tasdiqlandi",
+  "action": "CONVERT_TO_ORDER",
+  "order_id": "c3d4e5f6-a1b2-7890-abcd-ef1234567890",
+  "order_number": "0000-001430",
+  "order_date": "2026-11-22T15:05:12",
+  "is_kp": false,
+  "kp_valid_until": null,
+  "posted": true,
+  "total_amount": 2250000
+}
+Javob namunasi (200 OK — Qoldiq yetmay, menejer tekshiruviga tushganda):JSON{
+  "message": "Tijorat taklifi buyurtmaga aylantirildi va menejer tekshiruviga yuborildi",
+  "status_code": "PENDING",
+  "status": "Tekshirilmoqda",
+  "action": "CONVERT_TO_ORDER",
+  "order_id": "c3d4e5f6-a1b2-7890-abcd-ef1234567890",
+  "order_number": "0000-001430",
+  "order_date": "2026-11-22T15:05:12",
+  "is_kp": false,
+  "kp_valid_until": null,
+  "posted": false,
+  "total_amount": 2250000
+}
+2.3. Amal 2: KP ni bekor qilish (CANCEL_KP)1C tomonda bajariladigan mantiq:Faqat o‘tkazilmagan KP (is_kp: true, posted: false) ustida ishlaydi — oddiy buyurtmalarni bu metod bilan bekor qilib bo‘lmaydi (400).Idempotent: Agar KP allaqachon bekor qilingan bo‘lsa, xato bermasdan 200 OK qaytaradi va Telegramga qayta xabar yubormaydi.So‘rov namunasi:JSON{
+  "order_id": "c3d4e5f6-a1b2-7890-abcd-ef1234567890",
+  "type": "B2B",
+  "client_id": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+  "action": "CANCEL_KP"
+}
+Javob namunasi (200 OK):JSON{
+  "message": "Tijorat taklifi bekor qilindi",
+  "action": "CANCEL_KP",
+  "order_id": "c3d4e5f6-a1b2-7890-abcd-ef1234567890",
+  "order_number": "0000-001430",
+  "order_date": "2026-11-22T14:10:00",
+  "is_kp": true,
+  "kp_valid_until": "2026-11-27T23:59:59",
+  "posted": false,
+  "status_code": "CANCELLED",
+  "status": "Bekor qilingan",
+  "total_amount": 2250000
+}
+2.4. POST /order_action xato kodlariBarcha xatolar {"error": "..."} JSON formatida qaytadi:HTTP kodSabablarUI dagi tavsiya etilgan harakat400 Bad RequestParametrlar noto‘g‘ri; KP muddati tugagan; bekor qilingan KP ni aylantirishga urinish; mahsulotlar bo‘sh; oddiy/o‘tkazilgan buyurtmaga CANCEL_KP yuborish.Serverdan kelgan error matnini foydalanuvchiga ko‘rsating (muddati o‘tgan KP da tugmani nofaol qiling).403 ForbiddenHujjat joriy mijozga tegishli emas.Ruxsat yo‘qligi haqida xabar chiqaring.404 Not Foundorder_id bazada topilmadi.«Hujjat topilmadi» sahifasini ko‘rsating.409 Conflict1) KP allaqachon buyurtmaga aylantirilgan yoki holati o‘zgargan; 2) Hujjat ayni damda 1C da menejer tomonidan tahrirlanmoqda (bloklangan).error matnini chiqaring va foydalanuvchiga sahifani yangilash yoki birozdan so‘ng qayta urinish tugmasini bering.500 Internal Server Error1C serverida kutilmagan texnik xatolik.Umumiy xatolik xabarini chiqaring.3. Web-ilova integratsiyasi uchun qisqa eslatmalarShaxsiy kabinet tablari: «Buyurtmalarim» bo‘limi uchun GET /order?...&is_kp=false, «Tijorat takliflarim» bo‘limi uchun GET /order?...&is_kp=true so‘rovlaridan foydalaning.Tugmalarni ko‘rsatish sharti: «Buyurtmaga aylantirish» tugmasini faqat status_code === "KP_ACTIVE" holatida faol qiling; KP_EXPIRED da foydalanuvchiga menejer bilan bog‘lanish yoki savatchadan yangi KP yaratish imkonini bering; «Bekor qilish» tugmasini KP_ACTIVE va KP_EXPIRED holatlarida ko‘rsatish mumkin.CONVERT_TO_ORDER dan keyin: Javobda is_kp: false va yangilangan order_date qaytadi — hujjatni darhol «Buyurtmalarim» ro‘yxatiga o‘tkazing va qayta GET /order so‘rab to‘liq 4 qadamli timeline ni chizing (posted: false kelsa ham bu muvaffaqiyatli konvertatsiya, qayta so‘rov yubormang).Ommaviy QR sahifasi (/kp/{token}): customer.contact (telefonlar, Telegram) va ichki izohlarni Next.js server qatlamida filtrlab tashlang, mijoz blokidan faqat customer.client_name va customer.client_inn ni ko‘rsating.

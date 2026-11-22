@@ -16,6 +16,7 @@ import {
 import { OrderDetailModal } from "@/components/orders/OrderDetailModal";
 import { CatalogProductMap } from "@/lib/types/catalog-summary";
 import {
+  FileText,
   Package,
   Truck,
   Store,
@@ -40,7 +41,14 @@ interface OrdersHistoryClientProps {
 
 const PAGE_LIMIT = 20;
 
-type FilterTab = "all" | "active" | "delivered" | "cancelled";
+type DocMode = "orders" | "kp";
+type FilterTab =
+  | "all"
+  | "active"
+  | "delivered"
+  | "cancelled"
+  | "kp_active"
+  | "kp_expired";
 
 const ACTIVE_STATUS_CODES = [
   "PENDING",
@@ -71,7 +79,8 @@ export function OrdersHistoryClient({
   const [loadedKey, setLoadedKey] = useState("");
   const [refreshTick, setRefreshTick] = useState(0);
 
-  // Filter & Search states
+  // Doc section (Regular Orders vs Commercial Offers KP) & Filter & Search states
+  const [docMode, setDocMode] = useState<DocMode>("orders");
   const [activeTab, setActiveTab] = useState<FilterTab>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [copiedOrderNumber, setCopiedOrderNumber] = useState<string | null>(
@@ -82,12 +91,13 @@ export function OrdersHistoryClient({
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [detailOrder, setDetailOrder] =
     useState<OneCOrderDetailResponse | null>(null);
+  const [detailKpToken, setDetailKpToken] = useState<string | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState("");
 
   const activeFilter = user?.type === "B2B" ? b2bOnlyOnline : true;
   const currentKey = user
-    ? `${user.type}:${user.id}:${String(activeFilter)}:${refreshTick}`
+    ? `${user.type}:${user.id}:${docMode}:${String(activeFilter)}:${refreshTick}`
     : "";
   const isInitialLoading = Boolean(currentKey && loadedKey !== currentKey);
 
@@ -100,6 +110,7 @@ export function OrdersHistoryClient({
       limit: String(PAGE_LIMIT),
       offset: "0",
       only_online: activeFilter ? "true" : "false",
+      is_kp: docMode === "kp" ? "true" : "false",
     });
 
     fetch(`/api/orders?${qs.toString()}`)
@@ -146,11 +157,12 @@ export function OrdersHistoryClient({
     return () => {
       active = false;
     };
-  }, [currentKey, user, activeFilter, isUz, t]);
+  }, [currentKey, user, activeFilter, docMode, isUz, t]);
 
   const handleOpenDetail = async (orderId: string) => {
     setSelectedOrderId(orderId);
     setDetailOrder(null);
+    setDetailKpToken(null);
     setDetailError("");
     setDetailLoading(true);
 
@@ -178,6 +190,9 @@ export function OrdersHistoryClient({
 
       if (data.order) {
         setDetailOrder(data.order as OneCOrderDetailResponse);
+        setDetailKpToken(
+          typeof data.kp_public_token === "string" ? data.kp_public_token : null
+        );
       }
     } catch {
       setDetailError(
@@ -214,6 +229,7 @@ export function OrdersHistoryClient({
         limit: String(PAGE_LIMIT),
         offset: String(offset),
         only_online: activeFilter ? "true" : "false",
+        is_kp: docMode === "kp" ? "true" : "false",
       });
 
       const res = await fetch(`/api/orders?${qs.toString()}`);
@@ -258,6 +274,19 @@ export function OrdersHistoryClient({
     () => orders.filter((i) => i.status_code === "CANCELLED").length,
     [orders]
   );
+  const countKpActive = useMemo(
+    () =>
+      orders.filter(
+        (i) =>
+          i.status_code === "KP_ACTIVE" ||
+          (i.is_kp && i.status_code === "PENDING")
+      ).length,
+    [orders]
+  );
+  const countKpExpired = useMemo(
+    () => orders.filter((i) => i.status_code === "KP_EXPIRED").length,
+    [orders]
+  );
 
   // Filtered orders by Tab & Search query
   const filteredOrders = useMemo(() => {
@@ -280,6 +309,15 @@ export function OrdersHistoryClient({
       }
       if (activeTab === "cancelled") {
         return item.status_code === "CANCELLED";
+      }
+      if (activeTab === "kp_active") {
+        return (
+          item.status_code === "KP_ACTIVE" ||
+          (item.is_kp && item.status_code === "PENDING")
+        );
+      }
+      if (activeTab === "kp_expired") {
+        return item.status_code === "KP_EXPIRED";
       }
       return true;
     });
@@ -377,8 +415,43 @@ export function OrdersHistoryClient({
         </div>
       </div>
 
+      {/* Primary Section Switcher: Regular Orders vs Commercial Offers (KP) */}
+      <div className="inline-flex p-1.5 rounded-2xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 gap-1">
+        <button
+          type="button"
+          onClick={() => {
+            setDocMode("orders");
+            setActiveTab("all");
+          }}
+          className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            docMode === "orders"
+              ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs"
+              : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+          }`}
+        >
+          <Package className="w-4 h-4 text-sora-600" />
+          <span>{t("sectionOrders")}</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            setDocMode("kp");
+            setActiveTab("all");
+          }}
+          className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            docMode === "kp"
+              ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs"
+              : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+          }`}
+        >
+          <FileText className="w-4 h-4 text-violet-600" />
+          <span>{t("sectionKp")}</span>
+        </button>
+      </div>
+
       {/* Mini-Stats Bar */}
-      {!isInitialLoading && orders.length > 0 && (
+      {!isInitialLoading && orders.length > 0 && docMode === "orders" && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center gap-3 shadow-2xs">
             <div className="w-9 h-9 rounded-xl bg-sora-50 dark:bg-sora-950/60 text-sora-600 dark:text-sora-400 flex items-center justify-center shrink-0">
@@ -464,47 +537,95 @@ export function OrdersHistoryClient({
               </span>
             </button>
 
-            <button
-              type="button"
-              onClick={() => setActiveTab("active")}
-              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
-                activeTab === "active"
-                  ? "bg-amber-600 text-white shadow-sm shadow-amber-500/20"
-                  : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800"
-              }`}
-            >
-              <span>{t("tabActive")}</span>
-              <span
-                className={`px-1.5 py-0.2 rounded-md text-[10px] ${
-                  activeTab === "active"
-                    ? "bg-white/20 text-white"
-                    : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
-                }`}
-              >
-                {countActive}
-              </span>
-            </button>
+            {docMode === "kp" ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("kp_active")}
+                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+                    activeTab === "kp_active"
+                      ? "bg-violet-600 text-white shadow-sm shadow-violet-500/20"
+                      : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800"
+                  }`}
+                >
+                  <span>{t("tabKpActive")}</span>
+                  <span
+                    className={`px-1.5 py-0.2 rounded-md text-[10px] ${
+                      activeTab === "kp_active"
+                        ? "bg-white/20 text-white"
+                        : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
+                    }`}
+                  >
+                    {countKpActive}
+                  </span>
+                </button>
 
-            <button
-              type="button"
-              onClick={() => setActiveTab("delivered")}
-              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
-                activeTab === "delivered"
-                  ? "bg-emerald-600 text-white shadow-sm shadow-emerald-500/20"
-                  : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800"
-              }`}
-            >
-              <span>{t("tabDelivered")}</span>
-              <span
-                className={`px-1.5 py-0.2 rounded-md text-[10px] ${
-                  activeTab === "delivered"
-                    ? "bg-white/20 text-white"
-                    : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
-                }`}
-              >
-                {countDelivered}
-              </span>
-            </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("kp_expired")}
+                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+                    activeTab === "kp_expired"
+                      ? "bg-amber-600 text-white shadow-sm shadow-amber-500/20"
+                      : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800"
+                  }`}
+                >
+                  <span>{t("tabKpExpired")}</span>
+                  <span
+                    className={`px-1.5 py-0.2 rounded-md text-[10px] ${
+                      activeTab === "kp_expired"
+                        ? "bg-white/20 text-white"
+                        : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
+                    }`}
+                  >
+                    {countKpExpired}
+                  </span>
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("active")}
+                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+                    activeTab === "active"
+                      ? "bg-amber-600 text-white shadow-sm shadow-amber-500/20"
+                      : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800"
+                  }`}
+                >
+                  <span>{t("tabActive")}</span>
+                  <span
+                    className={`px-1.5 py-0.2 rounded-md text-[10px] ${
+                      activeTab === "active"
+                        ? "bg-white/20 text-white"
+                        : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
+                    }`}
+                  >
+                    {countActive}
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("delivered")}
+                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+                    activeTab === "delivered"
+                      ? "bg-emerald-600 text-white shadow-sm shadow-emerald-500/20"
+                      : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800"
+                  }`}
+                >
+                  <span>{t("tabDelivered")}</span>
+                  <span
+                    className={`px-1.5 py-0.2 rounded-md text-[10px] ${
+                      activeTab === "delivered"
+                        ? "bg-white/20 text-white"
+                        : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
+                    }`}
+                  >
+                    {countDelivered}
+                  </span>
+                </button>
+              </>
+            )}
 
             <button
               type="button"
@@ -628,19 +749,23 @@ export function OrdersHistoryClient({
       {!isInitialLoading && filteredOrders.length > 0 && (
         <div className="space-y-3">
           {filteredOrders.map((item) => {
+            const isKpDoc = Boolean(item.is_kp || docMode === "kp");
             const statusMeta = getOrderStatusUiMeta(
               {
                 statusCode: item.status_code,
                 statusText: item.status,
                 withoutDelivery: item.without_delivery,
+                isKp: isKpDoc,
               },
               locale
             );
 
-            const isActiveOrder = Boolean(
-              item.status_code && ACTIVE_STATUS_CODES.includes(item.status_code)
-            );
-            const isPendingOrder = item.status_code === "PENDING";
+            const isActiveOrder =
+              !isKpDoc &&
+              Boolean(
+                item.status_code && ACTIVE_STATUS_CODES.includes(item.status_code)
+              );
+            const isPendingOrder = !isKpDoc && item.status_code === "PENDING";
 
             // 4-step progress computation
             // Step 1: CONFIRMED (25%)
@@ -670,7 +795,7 @@ export function OrdersHistoryClient({
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="text-base font-black text-slate-900 dark:text-white">
-                      #{item.order_number}
+                      {isKpDoc ? "KP " : ""}#{item.order_number}
                     </span>
 
                     <button
@@ -777,6 +902,12 @@ export function OrdersHistoryClient({
                     {item.order_date && (
                       <span>{formatOrderDate(item.order_date, locale)}</span>
                     )}
+                    {isKpDoc && item.kp_valid_until && (
+                      <span className="font-semibold text-violet-600 dark:text-violet-400">
+                        {isUz ? "Muddat:" : "Срок:"}{" "}
+                        {formatOrderDate(item.kp_valid_until, locale)}
+                      </span>
+                    )}
                     <span className="inline-flex items-center gap-1">
                       {item.without_delivery ? (
                         <Store className="w-3.5 h-3.5 text-emerald-600" />
@@ -823,13 +954,23 @@ export function OrdersHistoryClient({
         onClose={() => {
           setSelectedOrderId(null);
           setDetailOrder(null);
+          setDetailKpToken(null);
           setDetailError("");
         }}
         order={detailOrder}
+        kpPublicToken={detailKpToken}
         loading={detailLoading}
         error={detailError}
         locale={locale}
         productsMap={productsMap}
+        onKpUpdated={(action, res) => {
+          if (action === "CONVERT_TO_ORDER") {
+            setDocMode("orders");
+            setActiveTab("all");
+          }
+          setRefreshTick((n) => n + 1);
+          void handleOpenDetail(res.order_id);
+        }}
       />
     </div>
   );

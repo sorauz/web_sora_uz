@@ -7,7 +7,7 @@ import { PromoNav } from "@/components/layout/PromoNav";
 import { Footer } from "@/components/layout/Footer";
 import { MobileNav } from "@/components/layout/MobileNav";
 import { OrdersHistoryClient } from "@/components/orders/OrdersHistoryClient";
-import { CatalogProductMap } from "@/lib/types/catalog-summary";
+import { buildCatalogProductMap } from "@/lib/types/catalog-summary";
 
 interface OrdersPageProps {
   params: Promise<{ locale: string }>;
@@ -39,26 +39,7 @@ export default async function OrdersPage({ params }: OrdersPageProps) {
     api.getAllProducts(),
   ]);
 
-  const productsMap: CatalogProductMap = {};
-  for (const p of productsRes.products || []) {
-    if (p.id) {
-      productsMap[p.id] = {
-        id: p.id,
-        sku: p.product_sku || "",
-        name_uz: p.uz?.name_uz || "",
-        name_ru: p.ru?.name_ru || "",
-        slug_uz: p.uz?.slug_uz || "",
-        slug_ru: p.ru?.slug_ru || "",
-        picture: p.main_picture || "",
-        price:
-          typeof p.price === "object" && p.price
-            ? p.price.retail_price
-            : undefined,
-        unit_uz: p.uz?.unit_uz || "dona",
-        unit_ru: p.ru?.unit_ru || "шт",
-      };
-    }
-  }
+  const productsMap = buildCatalogProductMap(productsRes.products);
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50/40 dark:bg-slate-950 text-slate-900 pb-20 md:pb-0">

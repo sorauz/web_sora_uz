@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { useCartStore } from "@/lib/store/cart";
 import { useTranslations } from "next-intl";
 import { CartItemRow } from "./CartItemRow";
@@ -17,10 +17,20 @@ interface CartViewProps {
 
 export function CartView({ localizationMap }: CartViewProps) {
   const t = useTranslations("cart");
-  const { items, clearCart, getTotalPrice, getTotalItems } = useCartStore();
+  const {
+    items,
+    clearCart,
+    getTotalPrice,
+    getTotalItems,
+    editingKpOrderId,
+    setEditingKpOrderId,
+  } = useCartStore();
 
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
 
   if (!mounted) {
     return (
@@ -69,6 +79,19 @@ export function CartView({ localizationMap }: CartViewProps) {
         </div>
 
         {/* Items rows */}
+        {editingKpOrderId && (
+          <div className="flex items-center justify-between gap-3 px-4 py-2.5 rounded-2xl bg-violet-50 dark:bg-violet-950/40 border border-violet-200 dark:border-violet-800 text-xs text-violet-800 dark:text-violet-300 font-medium">
+            <span>{t("editingKpNotice")}</span>
+            <button
+              type="button"
+              onClick={() => setEditingKpOrderId(null)}
+              className="px-2.5 py-1 rounded-lg bg-white/80 dark:bg-slate-900/80 text-violet-700 dark:text-violet-300 font-bold hover:bg-white cursor-pointer shrink-0"
+            >
+              {t("cancelEditKp")}
+            </button>
+          </div>
+        )}
+
         <div className="space-y-3">
           {items.map((item) => (
             <CartItemRow

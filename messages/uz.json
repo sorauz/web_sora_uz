@@ -200,7 +200,11 @@
     "securePayment": "Xavfsiz to'lov va rasmiy kafolat",
     "delete": "O'chirish",
     "quickAdd": "Qo'shish",
-    "quantity": "Miqdori"
+    "quantity": "Miqdori",
+    "downloadKp": "Tijorat taklifi (KP) yuklab olish",
+    "downloadKpHint": "PDF (rasmli) yoki Excel (.xlsx) · 1C kafolatlangan narx",
+    "editingKpNotice": "Siz tijorat taklifini tahrirlayapsiz — yangi KP yaratilgach eski hujjat avtomatik bekor qilinadi.",
+    "cancelEditKp": "Bekor qilish"
   },
   "checkout": {
     "title": "Buyurtmani rasmiylashtirish",
@@ -367,6 +371,15 @@
     "repeatOrderSuccess": "Mahsulotlar savatga qo'shildi",
     "printOrder": "Chop etish",
     "contactSupport": "Telegram orqali yozish",
-    "skuLabel": "Artikul"
+    "skuLabel": "Artikul",
+    "sectionOrders": "Buyurtmalarim",
+    "sectionKp": "Tijorat takliflarim (KP)",
+    "tabKpActive": "Faol KP",
+    "tabKpExpired": "Muddati tugagan",
+    "kpConvertBtn": "Buyurtmaga aylantirish",
+    "kpEditInCart": "Tahrirlash (Savatga)",
+    "kpCopyQrLink": "QR havolani nusxalash",
+    "kpCancelBtn": "Bekor qilish",
+    "kpExtendViaManager": "Muddatni uzaytirish"
   }
 }

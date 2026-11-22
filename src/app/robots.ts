@@ -8,6 +8,8 @@ export default function robots(): MetadataRoute.Robots {
     "/ru/internal-audit",
     "/uz/cart",
     "/ru/cart",
+    "/uz/kp/",
+    "/ru/kp/",
     "/uz/checkout",
     "/ru/checkout",
     "/uz/favorites",

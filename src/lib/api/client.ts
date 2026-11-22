@@ -32,6 +32,9 @@ import {
   OneCUserResponseSchema,
 } from "../schemas/auth";
 import {
+  OneCOrderActionRequest,
+  OneCOrderActionResponse,
+  OneCOrderActionResponseSchema,
   OneCOrderDetailResponse,
   OneCOrderDetailResponseSchema,
   OneCOrderHistoryResponse,
@@ -1162,6 +1165,10 @@ class SoraApiClient {
       type: payload.type,
       ...(payload.contact_id ? { contact_id: payload.contact_id } : {}),
       ...(payload.client_id ? { client_id: payload.client_id } : {}),
+      ...(typeof payload.is_kp === "boolean" ? { is_kp: payload.is_kp } : {}),
+      ...(payload.kp_valid_until
+        ? { kp_valid_until: payload.kp_valid_until }
+        : {}),
       without_delivery: Boolean(payload.without_delivery),
       geolocation: (payload.geolocation ?? "").slice(0, 150),
       comment: (payload.comment ?? "").slice(0, 350),
@@ -1395,6 +1402,7 @@ class SoraApiClient {
     limit?: number;
     offset?: number;
     onlyOnline?: boolean;
+    isKp?: boolean;
   }): Promise<{
     success: boolean;
     data?: OneCOrderHistoryResponse;
@@ -1418,12 +1426,107 @@ class SoraApiClient {
     if (typeof input.onlyOnline === "boolean") {
       qs.set("only_online", input.onlyOnline ? "true" : "false");
     }
+    if (typeof input.isKp === "boolean") {
+      qs.set("is_kp", input.isKp ? "true" : "false");
+    }
 
     return this.fetchOneCOrderGet(
       qs,
       (raw) => OneCOrderHistoryResponseSchema.safeParse(raw),
       "Buyurtmalar tarixini olishda xatolik yuz berdi"
     );
+  }
+
+  /**
+   * Perform a KP lifecycle action (CONVERT_TO_ORDER or CANCEL_KP) via POST /order_action
+   */
+  async performOrderAction(payload: OneCOrderActionRequest): Promise<{
+    success: boolean;
+    data?: OneCOrderActionResponse;
+    error?: string;
+    statusCode: number;
+  }> {
+    const url = `${this.baseUrl}/order_action`;
+    const bodyPayload: OneCOrderActionRequest = {
+      order_id: payload.order_id,
+      type: payload.type,
+      ...(payload.client_id ? { client_id: payload.client_id } : {}),
+      ...(payload.contact_id ? { contact_id: payload.contact_id } : {}),
+      action: payload.action,
+      ...(typeof payload.without_delivery === "boolean"
+        ? { without_delivery: payload.without_delivery }
+        : {}),
+      ...(payload.geolocation !== undefined
+        ? { geolocation: payload.geolocation.slice(0, 150) }
+        : {}),
+      ...(payload.comment !== undefined
+        ? { comment: payload.comment.slice(0, 350) }
+        : {}),
+    };
+
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          Authorization: this.authHeader,
+          Accept: "application/json",
+          "Content-Type": "application/json; charset=utf-8",
+        },
+        body: JSON.stringify(bodyPayload),
+        cache: "no-store",
+      });
+
+      const text = await response.text();
+      let resJson: Record<string, unknown> = {};
+      try {
+        resJson = JSON.parse(text);
+      } catch {
+        resJson = { error: text };
+      }
+
+      const apiError =
+        typeof resJson.error === "string" && resJson.error.trim().length > 0
+          ? resJson.error.trim()
+          : undefined;
+
+      if (response.status === 200 || response.status === 201) {
+        const parsed = OneCOrderActionResponseSchema.safeParse(resJson);
+        if (parsed.success) {
+          return {
+            success: true,
+            data: parsed.data,
+            statusCode: 200,
+          };
+        }
+        return {
+          success: false,
+          error: "1C serveridan kutilmagan javob formati qaytdi",
+          statusCode: 502,
+        };
+      }
+
+      const defaultErrorByStatus: Record<number, string> = {
+        400: "So'rov parametrlari noto'g'ri yoki KP muddati tugagan!",
+        403: "Ushbu hujjat ustida amal bajarish uchun ruxsat yo'q!",
+        404: "Hujjat 1C bazasida topilmadi!",
+        409: "Hujjat holati o'zgargan yoki 1C da menejer tomonidan tahrirlanmoqda. Sahifani yangilab qayta urinib ko'ring.",
+      };
+
+      return {
+        success: false,
+        error:
+          apiError ||
+          defaultErrorByStatus[response.status] ||
+          "Amalni bajarishda xatolik yuz berdi",
+        statusCode: response.status >= 400 ? response.status : 500,
+      };
+    } catch (err) {
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : "1C serveri bilan aloqa uzildi",
+        statusCode: 503,
+      };
+    }
   }
 }
 

@@ -8,7 +8,8 @@ import {
 } from "@/lib/auth/session";
 import { CheckoutCreateOrderInputSchema } from "@/lib/schemas/order";
 import { AuthUser, normalizePhone } from "@/lib/schemas/auth";
-import { deriveOneCPassword, verifyPhoneToken } from "@/lib/sms/otp-store";
+import { verifyPhoneToken } from "@/lib/sms/otp-store";
+import { resolveOneCCustomerIds } from "@/lib/auth/resolve-1c-customer";
 import { buildOneCOrderPayload } from "@/lib/utils/order-payload";
 
 export async function POST(req: NextRequest) {
@@ -59,78 +60,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 2. Resolve contact_id (КонтактноеЛицо GUID) for BOTH B2C and B2B orders
-    // so 1C always receives the responsible person's phone record on the order.
-    const resolveContactId = async (): Promise<string | undefined> => {
-      const sessionPhoneMatches =
-        sessionUser?.type === "B2C" &&
-        !!sessionUser.id &&
-        (!sessionUser.phone || normalizePhone(sessionUser.phone) === cleanPhone);
-
-      if (sessionPhoneMatches && sessionUser?.id) {
-        return sessionUser.id;
-      }
-
-      try {
-        const regRes = await api.registerUser({
-          type: "B2C",
-          name: data.fullName.trim(),
-          phone1: cleanPhone,
-          phone2: cleanAltPhone,
-          password: deriveOneCPassword(cleanPhone),
-        });
-
-        if (regRes.id) {
-          return regRes.id;
-        }
-      } catch {
-        // Temporary 1C /register hiccup handled below
-      }
-
-      // Do NOT send synthetic crypto.randomUUID() — 1C rejects unknown GUIDs with 404.
-      // For B2C this triggers 503 retry below; for B2B contact_id is optional in 1C.
-      return undefined;
-    };
-
-    // 3. Resolve client_id (Контрагент GUID — required for B2B)
-    const resolveClientId = async (): Promise<string | undefined> => {
-      if (!isB2B) return undefined;
-
-      const sessionInnMatches =
-        sessionUser?.type === "B2B" &&
-        !!sessionUser.id &&
-        (!cleanInn ||
-          !sessionUser.inn ||
-          sessionUser.inn.replace(/\D/g, "") === cleanInn);
-
-      if (sessionInnMatches && sessionUser?.id) {
-        return sessionUser.id;
-      }
-
-      if (cleanInn) {
-        try {
-          const regB2B = await api.registerUser({
-            type: "B2B",
-            name: (data.companyName || data.fullName).trim(),
-            inn: cleanInn,
-            phone1: cleanPhone,
-            password: deriveOneCPassword(cleanInn || cleanPhone),
-          });
-          if (regB2B.id) {
-            return regB2B.id;
-          }
-        } catch {
-          // Handled cleanly as 503 below instead of synthetic UUID
-        }
-      }
-
-      return undefined;
-    };
-
-    const [contactId, clientId] = await Promise.all([
-      resolveContactId(),
-      resolveClientId(),
-    ]);
+    // 2. Resolve contact_id & client_id from verified session or 1C /register
+    const { contactId, clientId } = await resolveOneCCustomerIds({
+      sessionUser,
+      isB2B,
+      fullName: data.fullName,
+      cleanPhone,
+      cleanAltPhone,
+      companyName: data.companyName,
+      cleanInn,
+    });
 
     if ((!isB2B && !contactId) || (isB2B && !clientId)) {
       return NextResponse.json(

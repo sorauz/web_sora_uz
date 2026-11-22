@@ -20,9 +20,11 @@ export interface CartItem {
 
 interface CartStore {
   items: CartItem[];
+  editingKpOrderId: string | null;
   addItem: (item: Omit<CartItem, "quantity">, quantity?: number) => void;
   removeItem: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
+  setEditingKpOrderId: (id: string | null) => void;
   clearCart: () => void;
   getTotalItems: () => number;
   getTotalPrice: () => number;
@@ -33,6 +35,7 @@ export const useCartStore = create<CartStore>()(
   persist(
     (set, get) => ({
       items: [],
+      editingKpOrderId: null,
       addItem: (item, quantity = 1) => {
         set((state) => {
           const existing = state.items.find((i) => i.id === item.id);
@@ -72,7 +75,8 @@ export const useCartStore = create<CartStore>()(
           items: state.items.map((i) => (i.id === id ? { ...i, quantity } : i)),
         }));
       },
-      clearCart: () => set({ items: [] }),
+      setEditingKpOrderId: (id) => set({ editingKpOrderId: id }),
+      clearCart: () => set({ items: [], editingKpOrderId: null }),
       getTotalItems: () => {
         return get().items.reduce((total, i) => total + i.quantity, 0);
       },

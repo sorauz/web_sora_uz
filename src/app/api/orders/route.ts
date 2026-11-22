@@ -21,6 +21,7 @@ export async function GET(req: NextRequest) {
     const rawLimit = searchParams.get("limit");
     const rawOffset = searchParams.get("offset");
     const rawOnlyOnline = searchParams.get("only_online");
+    const rawIsKp = searchParams.get("is_kp");
 
     const parsedLimit = rawLimit !== null ? Number(rawLimit) : 20;
     const parsedOffset = rawOffset !== null ? Number(rawOffset) : 0;
@@ -53,6 +54,21 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    let isKp: boolean | undefined;
+    if (rawIsKp === "true") {
+      isKp = true;
+    } else if (rawIsKp === "false") {
+      isKp = false;
+    } else if (rawIsKp !== null && rawIsKp.trim() !== "") {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "'is_kp' faqat 'true' yoki 'false' bo'lishi mumkin!",
+        },
+        { status: 400 }
+      );
+    }
+
     const result = await api.getOrderHistory({
       type: sessionUser.type,
       contactId: sessionUser.type === "B2C" ? sessionUser.id : undefined,
@@ -60,6 +76,7 @@ export async function GET(req: NextRequest) {
       limit,
       offset,
       onlyOnline,
+      isKp,
     });
 
     if (result.success && result.data) {

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { api } from "@/lib/api";
 import { getRecentOrderAccess, getSessionUser } from "@/lib/auth/session";
+import { encodeKpPublicToken } from "@/lib/kp/token";
 
 const GUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -77,10 +78,20 @@ export async function GET(req: NextRequest) {
     });
 
     if (result.success && result.data) {
+      const kpClientId = result.data.customer?.client_id || clientId;
+      const kpPublicToken =
+        result.data.is_kp && ownerType === "B2B" && kpClientId
+          ? encodeKpPublicToken({
+              orderId: result.data.order_id,
+              clientId: kpClientId,
+            })
+          : undefined;
+
       return NextResponse.json(
         {
           success: true,
           order: result.data,
+          ...(kpPublicToken ? { kp_public_token: kpPublicToken } : {}),
         },
         { status: 200 }
       );

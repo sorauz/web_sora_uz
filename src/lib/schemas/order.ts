@@ -2,8 +2,8 @@ import { z } from "zod";
 import { isValidUzPhone } from "@/lib/utils/phone";
 
 /**
- * Unified 1C Order Status Code
- * Standard codes shared across POST /order (CONFIRMED, PENDING) and GET /order.
+ * Unified 1C Order & KP Status Code
+ * Standard codes shared across POST /order, GET /order, and POST /order_action.
  */
 export const OrderStatusCodeSchema = z.enum([
   "CONFIRMED",
@@ -13,6 +13,8 @@ export const OrderStatusCodeSchema = z.enum([
   "READY_FOR_PICKUP",
   "DELIVERED",
   "CANCELLED",
+  "KP_ACTIVE",
+  "KP_EXPIRED",
 ]);
 
 export type OrderStatusCode = z.infer<typeof OrderStatusCodeSchema>;
@@ -42,6 +44,8 @@ export const OneCOrderRequestSchema = z.object({
   type: z.enum(["B2C", "B2B"]),
   contact_id: z.string().optional(),
   client_id: z.string().optional(),
+  is_kp: z.boolean().optional(),
+  kp_valid_until: z.string().optional(),
   without_delivery: z.boolean(),
   geolocation: z.string().max(150).optional().default(""),
   comment: z.string().max(350).optional().default(""),
@@ -65,7 +69,7 @@ export type OneCOrderRequest = z.infer<typeof OneCOrderRequestSchema>;
 
 /**
  * 1C Order Creation Response
- * 201 Created — supports both CONFIRMED (posted: true) and PENDING draft (posted: false)
+ * 201 Created — supports CONFIRMED (posted: true), PENDING draft (posted: false), and KP (is_kp: true)
  */
 export const OneCOrderResponseSchema = z.object({
   message: z.string().optional(),
@@ -74,6 +78,12 @@ export const OneCOrderResponseSchema = z.object({
   status_code: OrderStatusCodeSchema.or(z.string()).optional(),
   status: z.string().optional(),
   posted: z.boolean().optional(),
+  is_kp: z.boolean().optional(),
+  kp_valid_until: z
+    .string()
+    .nullable()
+    .optional()
+    .transform((v) => v ?? null),
   total_amount: z.number().finite().nonnegative().optional(),
 });
 
@@ -141,6 +151,11 @@ export const OneCOrderCustomerSchema = z.object({
     .nullable()
     .optional()
     .transform((v) => v ?? null),
+  client_inn: z
+    .string()
+    .nullable()
+    .optional()
+    .transform((v) => v ?? null),
   contact: OneCOrderCustomerContactSchema.nullable()
     .optional()
     .transform((v) => v ?? null),
@@ -191,6 +206,12 @@ export const OneCOrderDetailResponseSchema = z.object({
     .nullable()
     .optional()
     .transform((v) => v ?? null),
+  is_kp: z.boolean().optional().default(false),
+  kp_valid_until: z
+    .string()
+    .nullable()
+    .optional()
+    .transform((v) => v ?? null),
   payment_type: OrderPaymentTypeSchema.optional().default("CASH_OR_CARD"),
   status_code: OrderStatusCodeSchema.or(z.string()).optional(),
   status: z.string().default(""),
@@ -224,6 +245,12 @@ export const OneCOrderHistoryItemSchema = z.object({
     .optional()
     .transform((v) => v ?? null),
   online: z.boolean().optional().default(true),
+  is_kp: z.boolean().optional().default(false),
+  kp_valid_until: z
+    .string()
+    .nullable()
+    .optional()
+    .transform((v) => v ?? null),
   status_code: OrderStatusCodeSchema.or(z.string()).optional(),
   status: z.string().default(""),
   without_delivery: z.boolean().default(false),
@@ -243,6 +270,120 @@ export const OneCOrderHistoryResponseSchema = z.object({
 export type OneCOrderHistoryResponse = z.infer<
   typeof OneCOrderHistoryResponseSchema
 >;
+
+/**
+ * 1C KP Action Request & Response
+ * POST /SORA/hs/for_msp/order_action
+ */
+export const KpActionTypeSchema = z.enum(["CONVERT_TO_ORDER", "CANCEL_KP"]);
+export type KpActionType = z.infer<typeof KpActionTypeSchema>;
+
+export const OneCOrderActionRequestSchema = z.object({
+  order_id: z.string().min(1),
+  type: z.enum(["B2C", "B2B"]),
+  client_id: z.string().optional(),
+  contact_id: z.string().optional(),
+  action: KpActionTypeSchema,
+  without_delivery: z.boolean().optional(),
+  geolocation: z.string().max(150).optional(),
+  comment: z.string().max(350).optional(),
+});
+
+export type OneCOrderActionRequest = z.infer<
+  typeof OneCOrderActionRequestSchema
+>;
+
+export const OneCOrderActionResponseSchema = z.object({
+  message: z.string().optional().default(""),
+  action: KpActionTypeSchema.or(z.string()).optional(),
+  order_id: z.string(),
+  order_number: z.string().optional().default(""),
+  order_date: z
+    .string()
+    .nullable()
+    .optional()
+    .transform((v) => v ?? null),
+  is_kp: z.boolean().optional(),
+  kp_valid_until: z
+    .string()
+    .nullable()
+    .optional()
+    .transform((v) => v ?? null),
+  posted: z.boolean().optional(),
+  status_code: OrderStatusCodeSchema.or(z.string()).optional(),
+  status: z.string().optional().default(""),
+  total_amount: z.number().optional(),
+});
+
+export type OneCOrderActionResponse = z.infer<
+  typeof OneCOrderActionResponseSchema
+>;
+
+/**
+ * Frontend KP Creation payload sent to Next.js /api/kp/create
+ */
+export const KpCreateInputSchema = z.object({
+  companyName: z
+    .string()
+    .trim()
+    .min(2, "Tashkilot nomi kamida 2 ta belgidan iborat bo'lishi kerak"),
+  companyInn: z
+    .string()
+    .transform((v) => v.replace(/\D/g, ""))
+    .refine(
+      (v) => /^\d{9}$/.test(v),
+      "Tashkilotning 9 xonali STIR (INN) raqami kiritilishi shart!"
+    ),
+  fullName: z
+    .string()
+    .trim()
+    .min(2, "Mas'ul shaxs F.I.Sh. kamida 2 ta harfdan iborat bo'lishi kerak"),
+  phone: z
+    .string()
+    .refine(
+      (val) => isValidUzPhone(val),
+      "Telefon raqami to'liq kiritilishi shart (+998 XX XXX-XX-XX)"
+    ),
+  bankAccount: z.string().trim().max(32).optional().default(""),
+  bankMfo: z.string().trim().max(10).optional().default(""),
+  legalAddress: z.string().trim().max(180).optional().default(""),
+  vatMode: z.enum(["included", "separate"]).default("included"),
+  docLocale: z.enum(["uz", "ru"]).default("uz"),
+  format: z.enum(["pdf", "excel"]).default("pdf"),
+  verifiedPhoneToken: z.string().optional(),
+  editingKpOrderId: z.string().optional(),
+  items: z
+    .array(
+      z.object({
+        id: z.string().min(1),
+        name: z.string(),
+        price: z
+          .number()
+          .finite()
+          .nonnegative("Mahsulot narxi manfiy bo'lishi mumkin emas"),
+        quantity: z.number().int().positive(),
+      })
+    )
+    .min(1, "Savatcha bo'sh!"),
+});
+
+export type KpCreateInput = z.infer<typeof KpCreateInputSchema>;
+
+/**
+ * Frontend KP Action payload sent to Next.js /api/kp/action
+ */
+export const KpActionInputSchema = z.object({
+  orderId: z.string().min(1, "Hujjat ID si majburiy"),
+  action: KpActionTypeSchema,
+  publicToken: z.string().optional(),
+  verifiedPhoneToken: z.string().optional(),
+  verifiedPhone: z.string().optional(),
+  withoutDelivery: z.boolean().optional(),
+  geolocation: z.string().max(150).optional(),
+  comment: z.string().max(350).optional(),
+});
+
+export type KpActionInput = z.infer<typeof KpActionInputSchema>;
 
 /**
  * Frontend Checkout payload sent to Next.js /api/order/create

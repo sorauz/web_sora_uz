@@ -1,9 +1,19 @@
 "use client";
 
+import { useState } from "react";
+import dynamic from "next/dynamic";
 import { Link } from "@/i18n/routing";
-import { useTranslations } from "next-intl";
-import { ShieldCheck, Truck, ArrowRight } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+import { ShieldCheck, Truck, ArrowRight, FileText } from "lucide-react";
 import { reachGoal } from "@/lib/analytics/yandex";
+
+const CommercialOfferModal = dynamic(
+  () =>
+    import("./CommercialOfferModal").then((mod) => ({
+      default: mod.CommercialOfferModal,
+    })),
+  { ssr: false }
+);
 
 interface CartSummaryProps {
   subtotal: number;
@@ -12,6 +22,8 @@ interface CartSummaryProps {
 export function CartSummary({ subtotal }: CartSummaryProps) {
   const t = useTranslations("cart");
   const common = useTranslations("common");
+  const locale = (useLocale() === "ru" ? "ru" : "uz") as "uz" | "ru";
+  const [kpModalOpen, setKpModalOpen] = useState(false);
 
   // Delivery rules: Free delivery if subtotal >= 500,000 UZS, otherwise 30,000 UZS
   const isFreeDelivery = subtotal >= 500000;
@@ -97,11 +109,37 @@ export function CartSummary({ subtotal }: CartSummaryProps) {
         <ArrowRight className="w-4 h-4" />
       </Link>
 
+      {/* Commercial Offer (KP) Button */}
+      <button
+        type="button"
+        onClick={() => {
+          reachGoal("OPEN_KP_MODAL", { subtotal });
+          setKpModalOpen(true);
+        }}
+        className="w-full flex flex-col items-center justify-center gap-0.5 py-3 px-5 rounded-2xl border-2 border-sora-200 dark:border-sora-800/70 bg-sora-50/50 dark:bg-sora-950/30 hover:bg-sora-100/70 dark:hover:bg-sora-900/40 text-sora-700 dark:text-sora-300 transition-all cursor-pointer"
+      >
+        <span className="flex items-center gap-2 font-bold text-sm">
+          <FileText className="w-4 h-4" />
+          <span>{t("downloadKp")}</span>
+        </span>
+        <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
+          {t("downloadKpHint")}
+        </span>
+      </button>
+
       {/* Trust notice */}
       <div className="flex items-center justify-center gap-2 text-xs text-slate-400 pt-2 text-center">
         <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
         <span>{t("securePayment")}</span>
       </div>
+
+      {kpModalOpen && (
+        <CommercialOfferModal
+          isOpen={kpModalOpen}
+          onClose={() => setKpModalOpen(false)}
+          locale={locale}
+        />
+      )}
     </div>
   );
 }

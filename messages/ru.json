@@ -200,7 +200,11 @@
     "securePayment": "Безопасная оплата и официальная гарантия",
     "delete": "Удалить",
     "quickAdd": "Добавить",
-    "quantity": "Количество"
+    "quantity": "Количество",
+    "downloadKp": "Скачать коммерческое предложение (КП)",
+    "downloadKpHint": "PDF (с фото) или Excel (.xlsx) · фиксация цены в 1С",
+    "editingKpNotice": "Вы редактируете КП — после создания нового документа прежнее КП будет отменено.",
+    "cancelEditKp": "Отмена"
   },
   "checkout": {
     "title": "Оформление заказа",
@@ -367,6 +371,15 @@
     "repeatOrderSuccess": "Товары добавлены в корзину",
     "printOrder": "Печать",
     "contactSupport": "Написать в Telegram",
-    "skuLabel": "Артикул"
+    "skuLabel": "Артикул",
+    "sectionOrders": "Мои заказы",
+    "sectionKp": "Коммерческие предложения (КП)",
+    "tabKpActive": "Активные КП",
+    "tabKpExpired": "Срок истёк",
+    "kpConvertBtn": "Оформить заказ",
+    "kpEditInCart": "Редактировать (в корзину)",
+    "kpCopyQrLink": "Ссылка QR-паспорта",
+    "kpCancelBtn": "Отменить КП",
+    "kpExtendViaManager": "Продлить срок"
   }
 }

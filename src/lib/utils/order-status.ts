@@ -5,7 +5,9 @@ export type NormalizedOrderStatus =
   | "SHIPPED"
   | "READY_FOR_PICKUP"
   | "DELIVERED"
-  | "CANCELLED";
+  | "CANCELLED"
+  | "KP_ACTIVE"
+  | "KP_EXPIRED";
 
 export type OrderStatusTone =
   | "emerald"
@@ -13,13 +15,15 @@ export type OrderStatusTone =
   | "rose"
   | "indigo"
   | "blue"
-  | "teal";
+  | "teal"
+  | "violet";
 
 export interface OrderStatusInput {
   statusCode?: string | null;
   statusText?: string | null;
   posted?: boolean | null;
   withoutDelivery?: boolean;
+  isKp?: boolean;
 }
 
 export interface OrderStatusUiMeta {
@@ -32,6 +36,8 @@ export interface OrderStatusUiMeta {
   isConfirmedLike: boolean;
   isPending: boolean;
   isCancelled: boolean;
+  isKpActive: boolean;
+  isKpExpired: boolean;
 }
 
 const KNOWN_STATUS_CODES = new Set<NormalizedOrderStatus>([
@@ -42,18 +48,34 @@ const KNOWN_STATUS_CODES = new Set<NormalizedOrderStatus>([
   "READY_FOR_PICKUP",
   "DELIVERED",
   "CANCELLED",
+  "KP_ACTIVE",
+  "KP_EXPIRED",
 ]);
 
 /**
- * Normalizes 1C `POST /order` and `GET /order` statuses (`status_code`, `posted`,
- * and legacy Uzbek status strings) into a single canonical status code.
+ * Normalizes 1C `POST /order`, `GET /order`, and `POST /order_action` statuses
+ * (`status_code`, `posted`, `is_kp`, and legacy Uzbek status strings) into a single canonical status code.
  */
 export function normalizeOrderStatus(
   input: OrderStatusInput
 ): NormalizedOrderStatus {
   const rawCode = input.statusCode?.trim().toUpperCase();
   if (rawCode && KNOWN_STATUS_CODES.has(rawCode as NormalizedOrderStatus)) {
+    if (input.isKp && rawCode === "PENDING") {
+      return "KP_ACTIVE";
+    }
     return rawCode as NormalizedOrderStatus;
+  }
+
+  if (input.isKp) {
+    const rawKpText = (input.statusText || "").trim().toLowerCase();
+    if (rawKpText.includes("bekor") || rawKpText.includes("отмен")) {
+      return "CANCELLED";
+    }
+    if (rawKpText.includes("muddat") || rawKpText.includes("истек") || rawKpText.includes("истёк")) {
+      return "KP_EXPIRED";
+    }
+    return "KP_ACTIVE";
   }
 
   if (input.posted === false) {
@@ -64,6 +86,15 @@ export function normalizeOrderStatus(
   if (rawText) {
     if (rawText.includes("bekor") || rawText.includes("отмен")) {
       return "CANCELLED";
+    }
+    if (rawText.includes("muddat") || rawText.includes("истек") || rawText.includes("истёк")) {
+      return "KP_EXPIRED";
+    }
+    if (
+      rawText.includes("tijorat taklifi") ||
+      rawText.includes("коммерческое предложение")
+    ) {
+      return "KP_ACTIVE";
     }
     if (
       rawText.includes("yetkazib berildi") ||
@@ -237,6 +268,32 @@ const STATUS_SPECS: Record<NormalizedOrderStatus, StatusSpec> = {
       },
     },
   },
+  KP_ACTIVE: {
+    tone: "violet",
+    delivery: {
+      uz: {
+        full: "Tijorat taklifi (Faol)",
+        short: "KP (Faol)",
+      },
+      ru: {
+        full: "Коммерческое предложение (Активно)",
+        short: "КП (Активно)",
+      },
+    },
+  },
+  KP_EXPIRED: {
+    tone: "amber",
+    delivery: {
+      uz: {
+        full: "Muddati tugagan (KP)",
+        short: "Muddati tugagan",
+      },
+      ru: {
+        full: "Срок действия истёк (КП)",
+        short: "Срок истёк",
+      },
+    },
+  },
 };
 
 const TONE_CLASSES: Record<
@@ -273,10 +330,15 @@ const TONE_CLASSES: Record<
       "bg-teal-100 text-teal-700 dark:bg-teal-950/60 dark:text-teal-300",
     text: "text-teal-600 dark:text-teal-400",
   },
+  violet: {
+    badge:
+      "bg-violet-100 text-violet-700 dark:bg-violet-950/60 dark:text-violet-300",
+    text: "text-violet-600 dark:text-violet-400",
+  },
 };
 
 /**
- * Returns unified badge styles, tone, and localized UZ/RU labels for an order status.
+ * Returns unified badge styles, tone, and localized UZ/RU labels for an order or KP status.
  */
 export function getOrderStatusUiMeta(
   input: OrderStatusInput,
@@ -296,9 +358,15 @@ export function getOrderStatusUiMeta(
     textClassName: toneClasses.text,
     label: copy.full,
     shortLabel: copy.short,
-    isConfirmedLike: code !== "PENDING" && code !== "CANCELLED",
+    isConfirmedLike:
+      code !== "PENDING" &&
+      code !== "CANCELLED" &&
+      code !== "KP_ACTIVE" &&
+      code !== "KP_EXPIRED",
     isPending: code === "PENDING",
     isCancelled: code === "CANCELLED",
+    isKpActive: code === "KP_ACTIVE",
+    isKpExpired: code === "KP_EXPIRED",
   };
 }
 

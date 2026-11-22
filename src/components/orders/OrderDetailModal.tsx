@@ -6,7 +6,14 @@ import Image from "next/image";
 import { Link, useRouter } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import { useCartStore } from "@/lib/store/cart";
-import { OneCOrderDetailResponse } from "@/lib/schemas/order";
+import { SORA_COMPANY_INFO } from "@/lib/config/company";
+import { parseKpCommentMeta } from "@/lib/kp/calculations";
+import type { KpDocumentData } from "@/lib/kp/types";
+import { KpConvertModal } from "@/components/kp/KpConvertModal";
+import type {
+  OneCOrderActionResponse,
+  OneCOrderDetailResponse,
+} from "@/lib/schemas/order";
 import {
   formatOrderDate,
   getOrderStatusUiMeta,
@@ -32,26 +39,39 @@ import {
   RotateCcw,
   Printer,
   Send,
+  CheckCircle2,
+  FileSpreadsheet,
+  FileText,
+  Pencil,
+  Ban,
+  QrCode,
 } from "lucide-react";
 
 interface OrderDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
   order: OneCOrderDetailResponse | null;
+  kpPublicToken?: string | null;
   loading: boolean;
   error: string;
   locale: "uz" | "ru";
   productsMap?: CatalogProductMap;
+  onKpUpdated?: (
+    action: "CONVERT_TO_ORDER" | "CANCEL_KP",
+    res: OneCOrderActionResponse
+  ) => void;
 }
 
 export function OrderDetailModal({
   isOpen,
   onClose,
   order,
+  kpPublicToken,
   loading,
   error,
   locale,
   productsMap = {},
+  onKpUpdated,
 }: OrderDetailModalProps) {
   const t = useTranslations("orders");
   const common = useTranslations("common");
@@ -59,7 +79,12 @@ export function OrderDetailModal({
   const isUz = locale === "uz";
 
   const [copied, setCopied] = useState(false);
-  const { addItem } = useCartStore();
+  const [copiedQr, setCopiedQr] = useState(false);
+  const [kpDownloading, setKpDownloading] = useState<"" | "pdf" | "excel">("");
+  const [kpActionLoading, setKpActionLoading] = useState(false);
+  const [kpActionError, setKpActionError] = useState("");
+  const [convertModalOpen, setConvertModalOpen] = useState(false);
+  const { addItem, clearCart, setEditingKpOrderId } = useCartStore();
 
   if (!isOpen) return null;
 
@@ -71,6 +96,7 @@ export function OrderDetailModal({
           statusText: order.status,
           posted: order.posted,
           withoutDelivery,
+          isKp: order.is_kp,
         },
         locale
       )
@@ -139,10 +165,178 @@ export function OrderDetailModal({
     window.print();
   };
 
+  const handleEditKpInCart = () => {
+    if (!order?.products || order.products.length === 0) return;
+    clearCart();
+    for (const prod of order.products) {
+      const cat = productsMap[prod.product_id];
+      addItem(
+        {
+          id: prod.product_id,
+          sku: cat?.sku || "",
+          name: isUz
+            ? cat?.name_uz || prod.product_name
+            : cat?.name_ru || prod.product_name,
+          name_uz: cat?.name_uz || prod.product_name,
+          name_ru: cat?.name_ru || prod.product_name,
+          slug: isUz
+            ? cat?.slug_uz || cat?.slug_ru
+            : cat?.slug_ru || cat?.slug_uz,
+          slug_uz: cat?.slug_uz,
+          slug_ru: cat?.slug_ru,
+          price:
+            prod.price > 0
+              ? prod.price
+              : cat?.price && cat.price > 0
+                ? cat.price
+                : 0,
+          picture: cat?.picture || "",
+          unit: isUz
+            ? cat?.unit_uz || prod.unit || "dona"
+            : cat?.unit_ru || prod.unit || "шт",
+          unit_uz: cat?.unit_uz || prod.unit || "dona",
+          unit_ru: cat?.unit_ru || prod.unit || "шт",
+        },
+        prod.quantity || 1
+      );
+    }
+    setEditingKpOrderId(order.order_id);
+    onClose();
+    router.push("/cart");
+  };
+
+  const handleDownloadKpFile = async (format: "pdf" | "excel") => {
+    if (!order || kpDownloading) return;
+    setKpDownloading(format);
+    setKpActionError("");
+    try {
+      const origin =
+        typeof window !== "undefined"
+          ? window.location.origin
+          : SORA_COMPANY_INFO.website;
+      const publicUrl = kpPublicToken
+        ? `${origin}/${locale}/kp/${kpPublicToken}`
+        : `${origin}/${locale}/orders?orderId=${order.order_id}`;
+      const requisites = parseKpCommentMeta(order.comment);
+
+      const docData: KpDocumentData = {
+        orderNumber: order.order_number,
+        createdAtIso: order.order_date,
+        validUntilIso: order.kp_valid_until,
+        docLocale: locale,
+        vatMode: "included",
+        publicUrl,
+        totalAmountOverride: order.total_amount,
+        customer: {
+          companyName:
+            order.customer?.client_name ||
+            order.customer?.contact?.name ||
+            (isUz ? "Tashkilot" : "Организация"),
+          companyInn: order.customer?.client_inn || null,
+          contactName: order.customer?.contact?.name || null,
+          phone: order.customer?.contact?.phone_1 || null,
+          bankAccount: requisites.bankAccount || null,
+          bankMfo: requisites.bankMfo || null,
+          legalAddress: requisites.legalAddress || null,
+        },
+        items: order.products.map((prod) => {
+          const cat = productsMap[prod.product_id];
+          return {
+            id: prod.product_id,
+            sku: cat?.sku || "",
+            name: isUz
+              ? cat?.name_uz || prod.product_name
+              : cat?.name_ru || prod.product_name,
+            slug: isUz
+              ? cat?.slug_uz || cat?.slug_ru
+              : cat?.slug_ru || cat?.slug_uz,
+            picture: cat?.picture || "",
+            unit: isUz
+              ? cat?.unit_uz || prod.unit || "dona"
+              : cat?.unit_ru || prod.unit || "шт",
+            quantity: prod.quantity,
+            price: prod.price,
+          };
+        }),
+      };
+
+      if (format === "pdf") {
+        const { generateAndDownloadKpPdf } = await import(
+          "@/lib/kp/generate-pdf"
+        );
+        await generateAndDownloadKpPdf(docData);
+      } else {
+        const { generateAndDownloadKpExcel } = await import(
+          "@/lib/kp/generate-excel"
+        );
+        await generateAndDownloadKpExcel(docData);
+      }
+    } catch {
+      setKpActionError(
+        isUz
+          ? "KP faylini yuklab olishda xatolik yuz berdi"
+          : "Не удалось скачать файл КП"
+      );
+    } finally {
+      setKpDownloading("");
+    }
+  };
+
+  const handleCancelKp = async () => {
+    if (!order || kpActionLoading) return;
+    const confirmMsg = isUz
+      ? `#${order.order_number} raqamli tijorat taklifini bekor qilmoqchimisiz?`
+      : `Вы действительно хотите отменить КП №${order.order_number}?`;
+    if (!window.confirm(confirmMsg)) return;
+
+    setKpActionLoading(true);
+    setKpActionError("");
+    try {
+      const res = await fetch("/api/kp/action", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderId: order.order_id,
+          action: "CANCEL_KP",
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.success) {
+        setKpActionError(
+          data.error ||
+            (isUz ? "KP ni bekor qilib bo‘lmadi" : "Не удалось отменить КП")
+        );
+        return;
+      }
+      onKpUpdated?.("CANCEL_KP", data as OneCOrderActionResponse);
+    } catch {
+      setKpActionError(
+        isUz ? "Tarmoq xatosi yuz berdi" : "Сетевая ошибка"
+      );
+    } finally {
+      setKpActionLoading(false);
+    }
+  };
+
+  const handleCopyQrUrl = () => {
+    if (!kpPublicToken) return;
+    const origin =
+      typeof window !== "undefined"
+        ? window.location.origin
+        : SORA_COMPANY_INFO.website;
+    navigator.clipboard.writeText(`${origin}/${locale}/kp/${kpPublicToken}`);
+    setCopiedQr(true);
+    setTimeout(() => setCopiedQr(false), 2000);
+  };
+
   const tgMessage = order
     ? isUz
-      ? `Assalomu alaykum! #${order.order_number} raqamli buyurtma bo'yicha savolim bor edi.`
-      : `Здравствуйте! У меня вопрос по заказу #${order.order_number}.`
+      ? `Assalomu alaykum! #${order.order_number} raqamli ${
+          order.is_kp ? "tijorat taklifi (KP)" : "buyurtma"
+        } bo'yicha savolim bor edi.`
+      : `Здравствуйте! У меня вопрос по ${
+          order.is_kp ? "коммерческому предложению №" : "заказу #"
+        }${order.order_number}.`
     : "";
 
   return createPortal(
@@ -163,7 +357,15 @@ export function OrderDetailModal({
             <div className="flex flex-wrap items-center gap-2">
               <h2 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white">
                 {order
-                  ? `${isUz ? "Buyurtma" : "Заказ"} #${order.order_number}`
+                  ? `${
+                      order.is_kp
+                        ? isUz
+                          ? "Tijorat taklifi (KP)"
+                          : "КП"
+                        : isUz
+                          ? "Buyurtma"
+                          : "Заказ"
+                    } #${order.order_number}`
                   : isUz
                   ? "Buyurtma tafsiloti"
                   : "Детали заказа"}
@@ -202,6 +404,12 @@ export function OrderDetailModal({
             {order?.order_date && (
               <p className="text-xs text-slate-500 dark:text-slate-400">
                 {formatOrderDate(order.order_date, locale)}
+                {order.is_kp && order.kp_valid_until && (
+                  <span className="ml-2 font-semibold text-violet-600 dark:text-violet-400">
+                    · {isUz ? "Amal qiladi:" : "Действует до:"}{" "}
+                    {formatOrderDate(order.kp_valid_until, locale)}
+                  </span>
+                )}
               </p>
             )}
           </div>
@@ -336,6 +544,11 @@ export function OrderDetailModal({
                   {order.customer.client_name && (
                     <div className="font-semibold text-slate-800 dark:text-slate-100">
                       {order.customer.client_name}
+                      {order.customer.client_inn && (
+                        <span className="ml-2 text-xs font-mono text-slate-500">
+                          ({isUz ? "STIR:" : "ИНН:"} {order.customer.client_inn})
+                        </span>
+                      )}
                     </div>
                   )}
 
@@ -482,26 +695,122 @@ export function OrderDetailModal({
               </div>
             </div>
 
-            {/* Modal Bottom Actions (Repeat Order, Print, Telegram Support) */}
+            {kpActionError && (
+              <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-xs text-rose-700 dark:text-rose-300 flex items-center gap-2 no-print">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{kpActionError}</span>
+              </div>
+            )}
+
+            {/* Modal Bottom Actions */}
             <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 no-print">
               <div className="flex flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  onClick={handleRepeatOrder}
-                  className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-sora-600 hover:bg-sora-700 text-white font-bold text-xs shadow-md shadow-sora-500/20 transition-all cursor-pointer"
-                >
-                  <RotateCcw className="w-3.5 h-3.5" />
-                  <span>{t("repeatOrder")}</span>
-                </button>
+                {order.is_kp ? (
+                  <>
+                    {statusMeta?.code === "KP_ACTIVE" && (
+                      <button
+                        type="button"
+                        onClick={() => setConvertModalOpen(true)}
+                        className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-sora-600 hover:bg-sora-700 text-white font-bold text-xs shadow-md shadow-sora-500/20 transition-all cursor-pointer"
+                      >
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        <span>{t("kpConvertBtn")}</span>
+                      </button>
+                    )}
 
-                <button
-                  type="button"
-                  onClick={handlePrint}
-                  className="inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-xs transition-colors cursor-pointer"
-                >
-                  <Printer className="w-3.5 h-3.5" />
-                  <span>{t("printOrder")}</span>
-                </button>
+                    {(statusMeta?.code === "KP_ACTIVE" ||
+                      statusMeta?.code === "KP_EXPIRED") && (
+                      <button
+                        type="button"
+                        onClick={handleEditKpInCart}
+                        className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-xs transition-colors cursor-pointer"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                        <span>{t("kpEditInCart")}</span>
+                      </button>
+                    )}
+
+                    <button
+                      type="button"
+                      disabled={Boolean(kpDownloading)}
+                      onClick={() => void handleDownloadKpFile("pdf")}
+                      className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-xs transition-colors cursor-pointer disabled:opacity-50"
+                    >
+                      {kpDownloading === "pdf" ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <FileText className="w-3.5 h-3.5" />
+                      )}
+                      <span>PDF</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      disabled={Boolean(kpDownloading)}
+                      onClick={() => void handleDownloadKpFile("excel")}
+                      className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 font-semibold text-xs transition-colors cursor-pointer disabled:opacity-50"
+                    >
+                      {kpDownloading === "excel" ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <FileSpreadsheet className="w-3.5 h-3.5" />
+                      )}
+                      <span>Excel</span>
+                    </button>
+
+                    {kpPublicToken && (
+                      <button
+                        type="button"
+                        onClick={handleCopyQrUrl}
+                        className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-xs transition-colors cursor-pointer"
+                      >
+                        {copiedQr ? (
+                          <Check className="w-3.5 h-3.5 text-emerald-600" />
+                        ) : (
+                          <QrCode className="w-3.5 h-3.5" />
+                        )}
+                        <span>{copiedQr ? t("copied") : t("kpCopyQrLink")}</span>
+                      </button>
+                    )}
+
+                    {(statusMeta?.code === "KP_ACTIVE" ||
+                      statusMeta?.code === "KP_EXPIRED") && (
+                      <button
+                        type="button"
+                        disabled={kpActionLoading}
+                        onClick={() => void handleCancelKp()}
+                        className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800 font-semibold text-xs transition-colors cursor-pointer disabled:opacity-50"
+                      >
+                        {kpActionLoading ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <Ban className="w-3.5 h-3.5" />
+                        )}
+                        <span>{t("kpCancelBtn")}</span>
+                      </button>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      onClick={handleRepeatOrder}
+                      className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-sora-600 hover:bg-sora-700 text-white font-bold text-xs shadow-md shadow-sora-500/20 transition-all cursor-pointer"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" />
+                      <span>{t("repeatOrder")}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handlePrint}
+                      className="inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-xs transition-colors cursor-pointer"
+                    >
+                      <Printer className="w-3.5 h-3.5" />
+                      <span>{t("printOrder")}</span>
+                    </button>
+                  </>
+                )}
               </div>
 
               <a
@@ -511,12 +820,31 @@ export function OrderDetailModal({
                 className="inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-sky-50 hover:bg-sky-100 dark:bg-sky-950/40 dark:hover:bg-sky-900/50 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800 font-semibold text-xs transition-colors cursor-pointer"
               >
                 <Send className="w-3.5 h-3.5 text-[#229ED9]" />
-                <span>{t("contactSupport")}</span>
+                <span>
+                  {statusMeta?.code === "KP_EXPIRED"
+                    ? t("kpExtendViaManager")
+                    : t("contactSupport")}
+                </span>
               </a>
             </div>
           </div>
         )}
       </div>
+
+      {order && (
+        <KpConvertModal
+          isOpen={convertModalOpen}
+          onClose={() => setConvertModalOpen(false)}
+          orderId={order.order_id}
+          orderNumber={order.order_number}
+          locale={locale}
+          requiresPhoneOtp={false}
+          defaultWithoutDelivery={withoutDelivery}
+          onConverted={(res) => {
+            onKpUpdated?.("CONVERT_TO_ORDER", res);
+          }}
+        />
+      )}
     </div>,
     document.body
   );
