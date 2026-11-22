@@ -1,3 +1,5 @@
+import fs from "node:fs";
+import ExcelJS from "exceljs";
 import { test, expect } from "@playwright/test";
 import {
   KpActionInputSchema,
@@ -482,6 +484,9 @@ test.describe("Commercial Offer (KP) System — Unit, API & E2E Tests", () => {
     expect(pdfDownload.suggestedFilename()).toBe("Sora_KP_000068476.pdf");
     const pdfPath = await pdfDownload.path();
     expect(pdfPath).toBeTruthy();
+    const pdfBytes = fs.readFileSync(pdfPath!);
+    expect(pdfBytes.subarray(0, 5).toString("ascii")).toBe("%PDF-");
+    expect(pdfBytes.length).toBeGreaterThan(5000);
 
     // Success view should appear and Excel redownload should also succeed
     await expect(
@@ -500,6 +505,146 @@ test.describe("Commercial Offer (KP) System — Unit, API & E2E Tests", () => {
     const excelPath = await excelDownload.path();
     expect(excelPath).toBeTruthy();
 
+    // Inspect UZ Excel contents: combined logo image, website link, and "NEW PRICE" OK requisites
+    const uzWb = new ExcelJS.Workbook();
+    await uzWb.xlsx.readFile(excelPath!);
+    const uzSheet = uzWb.worksheets[0];
+    expect(uzSheet.getImages().length).toBeGreaterThanOrEqual(1);
+    expect(String(uzSheet.getCell("C1").value)).toContain("Ofis va korporativ");
+    expect(JSON.stringify(uzSheet.getCell("C2").value)).toContain("https://sora.uz");
+    expect(String(uzSheet.getCell("A6").value)).toContain('"NEW PRICE" OK');
+    expect(String(uzSheet.getCell("A6").value)).toContain("309528015");
+    expect(String(uzSheet.getCell("A6").value)).toContain("326090188543");
+    expect(String(uzSheet.getCell("A6").value)).toContain("46180");
+    expect(String(uzSheet.getCell("A6").value)).toContain("Oldi-sotdi");
+    expect(String(uzSheet.getCell("A7").value)).toContain("20208000905524274001");
+    expect(String(uzSheet.getCell("A7").value)).toContain("01036");
+    // Formula integrity check on Row 12 (first data row after header row 11)
+    expect(uzSheet.getCell("G12").value).toEqual({
+      formula: "E12*F12",
+      result: 450000,
+    });
+    // Director signature in footer
+    const uzAllText = uzSheet
+      .getSheetValues()
+      .flat()
+      .map((v) => (v && typeof v === "object" ? JSON.stringify(v) : String(v || "")))
+      .join("\n");
+    expect(uzAllText).toContain("GAPPAROV V.");
+
     expect(cspErrors).toEqual([]);
+  });
+
+  test("9. Russian KP PDF and Excel use СП \"NEW PRICE\" requisites while keeping SORA.UZ header branding", async ({
+    page,
+  }) => {
+    await page.route("**/api/auth/me", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          authenticated: true,
+          user: {
+            id: "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+            name: "ALPHA SERVICE LLC",
+            type: "B2B",
+            phone: "+998901234567",
+            inn: "305123456",
+          },
+        }),
+      });
+    });
+
+    await page.route("**/api/kp/create", async (route) => {
+      await route.fulfill({
+        status: 201,
+        contentType: "application/json",
+        body: JSON.stringify({
+          success: true,
+          order_id: "c3d4e5f6-a1b2-7890-abcd-ef1234567890",
+          order_number: "000068477",
+          status_code: "KP_ACTIVE",
+          is_kp: true,
+          kp_valid_until: "2026-11-27T23:59:59",
+          total_amount: 450000,
+          public_token:
+            "ruFet-ZkEfGl0gAVXXjDA8_wnxvkDRHxpc8AFV14wwOPe9Of-syDSrOprc1l6pZU",
+          public_path:
+            "/ru/kp/ruFet-ZkEfGl0gAVXXjDA8_wnxvkDRHxpc8AFV14wwOPe9Of-syDSrOprc1l6pZU",
+        }),
+      });
+    });
+
+    await page.addInitScript(() => {
+      localStorage.setItem(
+        "sora-cart-storage",
+        JSON.stringify({
+          state: {
+            items: [
+              {
+                id: "99998888-7777-6666-5555-444433332222",
+                sku: "00412",
+                name: "SvetoCopy A4",
+                name_ru: "Бумага SvetoCopy A4",
+                price: 45000,
+                picture: "",
+                unit: "пачка",
+                quantity: 10,
+              },
+            ],
+            editingKpOrderId: null,
+          },
+          version: 0,
+        })
+      );
+    });
+
+    await page.goto("/ru/cart");
+    await page
+      .getByRole("button", { name: /Скачать коммерческое предложение/i })
+      .click();
+
+    await page.locator('input[placeholder*="Алишер Валиев"]').fill("Иван Иванов");
+
+    const pdfDownloadPromise = page.waitForEvent("download", { timeout: 15000 });
+    await page
+      .getByRole("button", { name: /Скачать КП в формате PDF/i })
+      .click();
+    const pdfDownload = await pdfDownloadPromise;
+    expect(pdfDownload.suggestedFilename()).toBe("Sora_KP_000068477.pdf");
+    const pdfPath = await pdfDownload.path();
+    expect(fs.readFileSync(pdfPath!).subarray(0, 5).toString("ascii")).toBe("%PDF-");
+
+    const excelDownloadPromise = page.waitForEvent("download", {
+      timeout: 15000,
+    });
+    await page
+      .getByRole("dialog")
+      .getByRole("button", { name: "Excel (.xlsx)", exact: true })
+      .click();
+    const excelDownload = await excelDownloadPromise;
+    const excelPath = await excelDownload.path();
+
+    const ruWb = new ExcelJS.Workbook();
+    await ruWb.xlsx.readFile(excelPath!);
+    const ruSheet = ruWb.worksheets[0];
+    expect(ruSheet.getImages().length).toBeGreaterThanOrEqual(1);
+    expect(String(ruSheet.getCell("C1").value)).toContain(
+      "Центр офисного и корпоративного снабжения"
+    );
+    expect(String(ruSheet.getCell("A6").value)).toContain('СП "NEW PRICE"');
+    expect(String(ruSheet.getCell("A6").value)).toContain("309528015");
+    expect(String(ruSheet.getCell("A6").value)).toContain("326090188543");
+    expect(String(ruSheet.getCell("A6").value)).toContain("Плательщик НДС+");
+    expect(String(ruSheet.getCell("A6").value)).toContain("46180");
+    expect(String(ruSheet.getCell("A6").value)).toContain("Купля-продажа");
+    expect(String(ruSheet.getCell("A7").value)).toContain("АИКБ «ИПАК ЙУЛИ БАНК»");
+    const ruAllText = ruSheet
+      .getSheetValues()
+      .flat()
+      .map((v) => (v && typeof v === "object" ? JSON.stringify(v) : String(v || "")))
+      .join("\n");
+    expect(ruAllText).toContain('СП "NEW PRICE"');
+    expect(ruAllText).toContain("Директор: GAPPAROV V.");
   });
 });

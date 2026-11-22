@@ -34,3 +34,34 @@ export const SORA_COMPANY_INFO = {
   freeDeliveryThreshold: 500_000,
   standardDeliveryFee: 30_000,
 } as const;
+
+/**
+ * Legal seller requisites used exclusively inside Commercial Offer (KP)
+ * PDF and Excel exports (preserving SORA.UZ branding in the header).
+ */
+export const KP_SELLER_INFO = {
+  logoPath: "/kp-logo.png",
+  inn: "309528015",
+  vatRegCode: "326090188543",
+  bankAccount: "20208000905524274001",
+  mfo: "01036",
+  oked: "46180",
+  phones: ["+998 (90) 326-47-57", "+998 (90) 969-90-90"],
+  directorName: "GAPPAROV V.",
+  uz: {
+    legalName: '"NEW PRICE" OK',
+    vatStatus: "QQS to‘lovchisi+ (sertifikat faol)",
+    bankName: "AIKB «IPAK YO‘LI BANK» Sag‘bon filiali, Toshkent shahar",
+    address: "Toshkent shahri, Olmazor tumani, Dilsaroy ko‘chasi, 1-uy",
+    goodsOrigin: "Oldi-sotdi",
+    directorRole: "Direktor",
+  },
+  ru: {
+    legalName: 'СП "NEW PRICE"',
+    vatStatus: "Плательщик НДС+ (сертификат активный)",
+    bankName: "АИКБ «ИПАК ЙУЛИ БАНК» филиал Сагбан, г. Ташкент",
+    address: "г. Ташкент, Алмазарский район, ул. Дилсарой, дом 1",
+    goodsOrigin: "Купля-продажа",
+    directorRole: "Директор",
+  },
+} as const;

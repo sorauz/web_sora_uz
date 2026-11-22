@@ -1,7 +1,7 @@
 "use client";
 
 import ExcelJS from "exceljs";
-import { SORA_COMPANY_INFO } from "@/lib/config/company";
+import { KP_SELLER_INFO, SORA_COMPANY_INFO } from "@/lib/config/company";
 import { calculateKpTotals } from "./calculations";
 import {
   formatKpDisplayDate,
@@ -9,17 +9,50 @@ import {
   type KpDocumentData,
 } from "./types";
 
+async function loadExcelLogoBase64(src: string): Promise<string | null> {
+  if (typeof window === "undefined") return null;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 4000);
+  try {
+    const res = await fetch(src, {
+      mode: "same-origin",
+      cache: "default",
+      signal: controller.signal,
+    });
+    if (!res.ok) return null;
+    const blob = await res.blob();
+    if (!blob || blob.size === 0) return null;
+
+    return await new Promise<string | null>((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        resolve(typeof reader.result === "string" ? reader.result : null);
+      };
+      reader.onerror = () => resolve(null);
+      reader.readAsDataURL(blob);
+    });
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 /**
  * Generates and downloads a compact, formula-driven Excel (.xlsx) Commercial Offer
- * with clickable product hyperlinks, text-formatted SKUs, and A4 print setup.
+ * with SORA.UZ logo header, legal KP seller requisites, clickable product hyperlinks,
+ * text-formatted SKUs, and A4 print setup.
  */
 export async function generateAndDownloadKpExcel(
   data: KpDocumentData
 ): Promise<void> {
   const isUz = data.docLocale === "uz";
-  const seller = isUz ? SORA_COMPANY_INFO.uz : SORA_COMPANY_INFO.ru;
+  const brand = isUz ? SORA_COMPANY_INFO.uz : SORA_COMPANY_INFO.ru;
+  const kpSeller = isUz ? KP_SELLER_INFO.uz : KP_SELLER_INFO.ru;
   const currency = isUz ? "so'm" : "сум";
   const separateVat = data.vatMode === "separate";
+
+  const logoBase64 = await loadExcelLogoBase64(KP_SELLER_INFO.logoPath);
 
   const workbook = new ExcelJS.Workbook();
   workbook.creator = "Sora.uz";
@@ -39,7 +72,7 @@ export async function generateAndDownloadKpExcel(
   if (separateVat) {
     sheet.columns = [
       { key: "num", width: 5 },
-      { key: "sku", width: 15 },
+      { key: "sku", width: 16 },
       { key: "name", width: 38 },
       { key: "unit", width: 10 },
       { key: "qty", width: 10 },
@@ -51,7 +84,7 @@ export async function generateAndDownloadKpExcel(
   } else {
     sheet.columns = [
       { key: "num", width: 5 },
-      { key: "sku", width: 15 },
+      { key: "sku", width: 16 },
       { key: "name", width: 46 },
       { key: "unit", width: 10 },
       { key: "qty", width: 11 },
@@ -62,40 +95,136 @@ export async function generateAndDownloadKpExcel(
 
   const lastColLetter = separateVat ? "I" : "G";
 
-  // 1. Title Row
-  sheet.mergeCells(`A1:${lastColLetter}1`);
-  const titleCell = sheet.getCell("A1");
+  // 1. Top Brand Header (Rows 1–2): Combined Logo + Slogan image, Tagline, and Website Link
+  sheet.mergeCells("A1:B2");
+  sheet.getRow(1).height = 24;
+  sheet.getRow(2).height = 20;
+
+  if (logoBase64) {
+    const logoId = workbook.addImage({
+      base64: logoBase64,
+      extension: "png",
+    });
+    sheet.addImage(logoId, {
+      tl: { col: 0.08, row: 0.12 },
+      ext: { width: 136, height: 48 },
+    });
+  } else {
+    const logoFallback = sheet.getCell("A1");
+    logoFallback.value = "SORA.UZ";
+    logoFallback.font = {
+      name: "Calibri",
+      size: 16,
+      bold: true,
+      color: { argb: "FFBE185D" },
+    };
+    logoFallback.alignment = { vertical: "middle", horizontal: "left" };
+  }
+
+  sheet.mergeCells(`C1:${lastColLetter}1`);
+  const taglineCell = sheet.getCell("C1");
+  taglineCell.value = brand.tagline;
+  taglineCell.font = {
+    name: "Calibri",
+    size: 11,
+    bold: true,
+    color: { argb: "FF0F172A" },
+  };
+  taglineCell.alignment = { vertical: "bottom", horizontal: "right" };
+
+  sheet.mergeCells(`C2:${lastColLetter}2`);
+  const websiteCell = sheet.getCell("C2");
+  websiteCell.value = {
+    text: `${SORA_COMPANY_INFO.website}  ·  ${SORA_COMPANY_INFO.emailPrimary}`,
+    hyperlink: SORA_COMPANY_INFO.website,
+  };
+  websiteCell.font = {
+    name: "Calibri",
+    size: 10,
+    bold: true,
+    color: { argb: "FF0284C7" },
+    underline: true,
+  };
+  websiteCell.alignment = { vertical: "top", horizontal: "right" };
+
+  // 2. Title Row (Row 4)
+  sheet.mergeCells(`A4:${lastColLetter}4`);
+  const titleCell = sheet.getCell("A4");
   titleCell.value = `${
     isUz ? "TIJORAT TAKLIFI" : "КОММЕРЧЕСКОЕ ПРЕДЛОЖЕНИЕ"
   } № ${data.orderNumber}`;
-  titleCell.font = { name: "Calibri", size: 15, bold: true, color: { argb: "FF0C4A6E" } };
+  titleCell.font = {
+    name: "Calibri",
+    size: 14,
+    bold: true,
+    color: { argb: "FF0C4A6E" },
+  };
   titleCell.fill = {
     type: "pattern",
     pattern: "solid",
     fgColor: { argb: "FFF0F9FF" },
   };
   titleCell.alignment = { vertical: "middle", horizontal: "left", indent: 1 };
-  sheet.getRow(1).height = 28;
+  sheet.getRow(4).height = 26;
 
-  // 2. Date & Validity
-  sheet.mergeCells(`A2:${lastColLetter}2`);
-  sheet.getCell("A2").value = `${
+  // 3. Date & Validity (Row 5)
+  sheet.mergeCells(`A5:${lastColLetter}5`);
+  sheet.getCell("A5").value = `${
     isUz ? "Sana:" : "Дата:"
   } ${formatKpDisplayDate(data.createdAtIso, data.docLocale, true)}   |   ${
     isUz ? "Amal qilish muddati (1C):" : "Действительно до (1С):"
   } ${formatKpDisplayDate(data.validUntilIso, data.docLocale)}`;
-  sheet.getCell("A2").font = { name: "Calibri", size: 10, bold: true, color: { argb: "FF0369A1" } };
+  sheet.getCell("A5").font = {
+    name: "Calibri",
+    size: 10,
+    bold: true,
+    color: { argb: "FF0369A1" },
+  };
 
-  // 3. Seller & Buyer Details
-  sheet.mergeCells(`A4:${lastColLetter}4`);
-  sheet.getCell("A4").value = `${isUz ? "Sotuvchi:" : "Продавец:"} ${seller.legalName} | ${
+  // 4. Seller Requisites (Rows 6–7, KP_SELLER_INFO)
+  sheet.mergeCells(`A6:${lastColLetter}6`);
+  const sellerRow1Cell = sheet.getCell("A6");
+  sellerRow1Cell.value = `${isUz ? "Sotuvchi:" : "Продавец:"} ${kpSeller.legalName} | ${
     isUz ? "STIR:" : "ИНН:"
-  } ${SORA_COMPANY_INFO.inn} | ${isUz ? "H/R:" : "Р/с:"} ${SORA_COMPANY_INFO.bankAccount} | MFO: ${
-    SORA_COMPANY_INFO.mfo
-  } | ${SORA_COMPANY_INFO.phones[0]}`;
-  sheet.getCell("A4").font = { name: "Calibri", size: 9.5, color: { argb: "FF334155" } };
+  } ${KP_SELLER_INFO.inn} | ${isUz ? "QQS kodi:" : "Рег. код НДС:"} ${
+    KP_SELLER_INFO.vatRegCode
+  } — ${kpSeller.vatStatus} | ${isUz ? "OKED:" : "ОКЭД:"} ${KP_SELLER_INFO.oked} | ${
+    isUz ? "Tovar kelib chiqishi:" : "Происхождение товара:"
+  } ${kpSeller.goodsOrigin}`;
+  sellerRow1Cell.font = {
+    name: "Calibri",
+    size: 9.5,
+    bold: true,
+    color: { argb: "FF1E293B" },
+  };
+  sellerRow1Cell.alignment = {
+    vertical: "middle",
+    horizontal: "left",
+    wrapText: true,
+  };
+  sheet.getRow(6).height = 28;
 
-  sheet.mergeCells(`A5:${lastColLetter}5`);
+  sheet.mergeCells(`A7:${lastColLetter}7`);
+  const sellerRow2Cell = sheet.getCell("A7");
+  sellerRow2Cell.value = `${isUz ? "H/R:" : "Р/с:"} ${KP_SELLER_INFO.bankAccount} | ${
+    isUz ? "MFO:" : "МФО:"
+  } ${KP_SELLER_INFO.mfo} | ${isUz ? "Bank:" : "Банк:"} ${kpSeller.bankName} | ${
+    isUz ? "Manzil:" : "Адрес:"
+  } ${kpSeller.address} | ${isUz ? "Tel:" : "Тел:"} ${KP_SELLER_INFO.phones.join(", ")}`;
+  sellerRow2Cell.font = {
+    name: "Calibri",
+    size: 9,
+    color: { argb: "FF334155" },
+  };
+  sellerRow2Cell.alignment = {
+    vertical: "middle",
+    horizontal: "left",
+    wrapText: true,
+  };
+  sheet.getRow(7).height = 28;
+
+  // 5. Buyer Details (Rows 8–9)
+  sheet.mergeCells(`A8:${lastColLetter}8`);
   const customerParts = [
     `${isUz ? "Buyurtmachi:" : "Покупатель:"} ${data.customer.companyName}`,
     data.customer.companyInn
@@ -108,23 +237,28 @@ export async function generateAndDownloadKpExcel(
   ]
     .filter(Boolean)
     .join(" | ");
-  sheet.getCell("A5").value = customerParts;
-  sheet.getCell("A5").font = { name: "Calibri", size: 10, bold: true, color: { argb: "FF0F172A" } };
+  sheet.getCell("A8").value = customerParts;
+  sheet.getCell("A8").font = {
+    name: "Calibri",
+    size: 10,
+    bold: true,
+    color: { argb: "FF0F172A" },
+  };
 
   if (data.customer.bankAccount || data.customer.bankMfo || data.customer.legalAddress) {
-    sheet.mergeCells(`A6:${lastColLetter}6`);
-    sheet.getCell("A6").value = [
+    sheet.mergeCells(`A9:${lastColLetter}9`);
+    sheet.getCell("A9").value = [
       data.customer.bankAccount ? `${isUz ? "H/R:" : "Р/с:"} ${data.customer.bankAccount}` : "",
       data.customer.bankMfo ? `MFO: ${data.customer.bankMfo}` : "",
       data.customer.legalAddress || "",
     ]
       .filter(Boolean)
       .join(" | ");
-    sheet.getCell("A6").font = { name: "Calibri", size: 9, color: { argb: "FF475569" } };
+    sheet.getCell("A9").font = { name: "Calibri", size: 9, color: { argb: "FF475569" } };
   }
 
-  // 4. Table Header Row (Row 8)
-  const headerRowIdx = 8;
+  // 6. Table Header Row (Row 11)
+  const headerRowIdx = 11;
   const headers = separateVat
     ? [
         "№",
@@ -311,13 +445,23 @@ export async function generateAndDownloadKpExcel(
     r.getCell(valColIdx).alignment = { horizontal: "right", vertical: "middle" };
   });
 
-  // 7. Footer terms + Public QR Check Link
+  // 7. Footer terms + Director signature + Public QR Check Link
   const footerRowIdx = grandTotalRowIdx + 2;
   sheet.mergeCells(`A${footerRowIdx}:${lastColLetter}${footerRowIdx}`);
-  sheet.getCell(`A${footerRowIdx}`).value = seller.paymentTerms;
+  sheet.getCell(`A${footerRowIdx}`).value = brand.paymentTerms;
   sheet.getCell(`A${footerRowIdx}`).font = { name: "Calibri", size: 9, color: { argb: "FF475569" } };
 
-  const linkRowIdx = footerRowIdx + 1;
+  const directorRowIdx = footerRowIdx + 1;
+  sheet.mergeCells(`A${directorRowIdx}:${lastColLetter}${directorRowIdx}`);
+  sheet.getCell(`A${directorRowIdx}`).value = `${kpSeller.legalName}  ·  ${kpSeller.directorRole}: ${KP_SELLER_INFO.directorName}`;
+  sheet.getCell(`A${directorRowIdx}`).font = {
+    name: "Calibri",
+    size: 9.5,
+    bold: true,
+    color: { argb: "FF0F172A" },
+  };
+
+  const linkRowIdx = directorRowIdx + 1;
   sheet.mergeCells(`A${linkRowIdx}:${lastColLetter}${linkRowIdx}`);
   sheet.getCell(`A${linkRowIdx}`).value = {
     text: isUz

@@ -12,7 +12,7 @@ import {
   View,
   pdf,
 } from "@react-pdf/renderer";
-import { SORA_COMPANY_INFO } from "@/lib/config/company";
+import { KP_SELLER_INFO, SORA_COMPANY_INFO } from "@/lib/config/company";
 import { calculateKpTotals } from "./calculations";
 import { generateKpQrDataUrl } from "./qrcode";
 import {
@@ -131,34 +131,41 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   brandBlock: {
-    width: "46%",
-  },
-  logoRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginBottom: 4,
+    width: "40%",
   },
   logoImg: {
-    width: 34,
-    height: 34,
+    width: 142,
+    height: 50,
     objectFit: "contain",
+    marginBottom: 4,
   },
   brandTitle: {
     fontSize: 16,
     fontWeight: 700,
-    color: "#0284c7",
+    color: "#be185d",
+    marginBottom: 2,
   },
   brandTagline: {
-    fontSize: 8,
+    fontSize: 7.8,
     color: "#475569",
-    marginTop: 2,
+    marginTop: 1.5,
+  },
+  brandLinksRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 2.5,
+  },
+  brandLink: {
+    fontSize: 7.8,
+    fontWeight: 700,
+    color: "#0284c7",
+    textDecoration: "none",
   },
   sellerBlock: {
-    width: "52%",
+    width: "58%",
     textAlign: "right",
-    fontSize: 7.5,
-    lineHeight: 1.38,
+    fontSize: 7.1,
+    lineHeight: 1.32,
     color: "#334155",
   },
   sellerName: {
@@ -401,7 +408,8 @@ function KpPdfDocument({
   productImages,
 }: PreparedPdfProps) {
   const isUz = data.docLocale === "uz";
-  const seller = isUz ? SORA_COMPANY_INFO.uz : SORA_COMPANY_INFO.ru;
+  const brand = isUz ? SORA_COMPANY_INFO.uz : SORA_COMPANY_INFO.ru;
+  const kpSeller = isUz ? KP_SELLER_INFO.uz : KP_SELLER_INFO.ru;
   const currency = isUz ? "so'm" : "сум";
   const totals = calculateKpTotals(
     data.items.map((item) => ({ quantity: item.quantity, price: item.price })),
@@ -432,32 +440,44 @@ function KpPdfDocument({
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.brandBlock}>
-            <View style={styles.logoRow}>
-              {logoDataUrl && (
-                <PdfImage src={logoDataUrl} style={styles.logoImg} />
-              )}
-              <View>
-                <Text style={styles.brandTitle}>SORA.UZ</Text>
-                <Text style={styles.brandTagline}>{seller.tagline}</Text>
-              </View>
+            {logoDataUrl ? (
+              <PdfImage src={logoDataUrl} style={styles.logoImg} />
+            ) : (
+              <Text style={styles.brandTitle}>SORA.UZ</Text>
+            )}
+            <Text style={styles.brandTagline}>{brand.tagline}</Text>
+            <View style={styles.brandLinksRow}>
+              <Link src={SORA_COMPANY_INFO.website} style={styles.brandLink}>
+                {SORA_COMPANY_INFO.website}
+              </Link>
+              <Text style={styles.brandTagline}>
+                {" "}
+                · {SORA_COMPANY_INFO.emailPrimary}
+              </Text>
             </View>
-            <Text style={styles.brandTagline}>
-              {SORA_COMPANY_INFO.website} · {SORA_COMPANY_INFO.emailPrimary}
-            </Text>
           </View>
 
           <View style={styles.sellerBlock}>
-            <Text style={styles.sellerName}>{seller.legalName}</Text>
+            <Text style={styles.sellerName}>{kpSeller.legalName}</Text>
             <Text>
-              {isUz ? "STIR (INN):" : "ИНН:"} {SORA_COMPANY_INFO.inn} ·{" "}
-              {isUz ? "MFO:" : "МФО:"} {SORA_COMPANY_INFO.mfo}
+              {isUz ? "STIR (INN):" : "ИНН:"} {KP_SELLER_INFO.inn} ·{" "}
+              {isUz ? "MFO:" : "МФО:"} {KP_SELLER_INFO.mfo} ·{" "}
+              {isUz ? "OKED:" : "ОКЭД:"} {KP_SELLER_INFO.oked}
             </Text>
             <Text>
-              {isUz ? "H/R:" : "Р/с:"} {SORA_COMPANY_INFO.bankAccount}
+              {isUz ? "QQS kodi:" : "Рег. код НДС:"} {KP_SELLER_INFO.vatRegCode}{" "}
+              · {kpSeller.vatStatus}
             </Text>
-            <Text>{seller.bankName}</Text>
-            <Text>{seller.address}</Text>
-            <Text>{SORA_COMPANY_INFO.phones.slice(0, 2).join(" · ")}</Text>
+            <Text>
+              {isUz ? "H/R:" : "Р/с:"} {KP_SELLER_INFO.bankAccount}
+            </Text>
+            <Text>{kpSeller.bankName}</Text>
+            <Text>{kpSeller.address}</Text>
+            <Text>{KP_SELLER_INFO.phones.join(" · ")}</Text>
+            <Text>
+              {isUz ? "Tovar kelib chiqishi:" : "Происхождение товара:"}{" "}
+              {kpSeller.goodsOrigin}
+            </Text>
           </View>
         </View>
 
@@ -679,13 +699,18 @@ function KpPdfDocument({
         {/* Footer with Terms & Public QR Code */}
         <View style={styles.footerGrid} wrap={false}>
           <View style={styles.termsBlock}>
-            <Text>{seller.paymentTerms}</Text>
-            <Text style={{ marginTop: 3 }}>{seller.warrantyNote}</Text>
+            <Text>{brand.paymentTerms}</Text>
+            <Text style={{ marginTop: 3 }}>{brand.warrantyNote}</Text>
             <View style={styles.signatureLine}>
               <Text>
-                {seller.legalName} · {seller.directorRole}
+                {kpSeller.legalName} · {kpSeller.directorRole}:{" "}
+                {KP_SELLER_INFO.directorName}
               </Text>
-              <Text>___________________ / M.O‘.</Text>
+              <Text>
+                {isUz
+                  ? "___________________ / M.O‘."
+                  : "___________________ / М.П."}
+              </Text>
             </View>
           </View>
 
@@ -710,7 +735,7 @@ function KpPdfDocument({
         {/* Page Number Footer */}
         <View style={styles.pageNumber} fixed>
           <Text>
-            {seller.legalName} · KP № {data.orderNumber}
+            {kpSeller.legalName} · KP № {data.orderNumber}
           </Text>
           <Text
             render={({ pageNumber, totalPages }) =>
@@ -743,7 +768,7 @@ export async function generateAndDownloadKpPdf(
 
   const [qrDataUrl, logoDataUrl, ...resolvedImages] = await Promise.all([
     generateKpQrDataUrl(data.publicUrl),
-    resolvePdfSafeImageDataUrl("/logo.png", 128),
+    resolvePdfSafeImageDataUrl(KP_SELLER_INFO.logoPath, 600),
     ...Array.from(uniqueImgUrls.entries()).map(async ([id, url]) => ({
       id,
       dataUrl: await resolvePdfSafeImageDataUrl(url, 84),
