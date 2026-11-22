@@ -206,7 +206,7 @@ export function OrderDetailModal({
   };
 
   const handleDownloadKpFile = async (format: "pdf" | "excel") => {
-    if (!order || kpDownloading) return;
+    if (!order || kpDownloading === format) return;
     setKpDownloading(format);
     setKpActionError("");
     try {
@@ -732,7 +732,7 @@ export function OrderDetailModal({
 
                     <button
                       type="button"
-                      disabled={Boolean(kpDownloading)}
+                      disabled={kpDownloading === "pdf"}
                       onClick={() => void handleDownloadKpFile("pdf")}
                       className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-xs transition-colors cursor-pointer disabled:opacity-50"
                     >
@@ -746,7 +746,7 @@ export function OrderDetailModal({
 
                     <button
                       type="button"
-                      disabled={Boolean(kpDownloading)}
+                      disabled={kpDownloading === "excel"}
                       onClick={() => void handleDownloadKpFile("excel")}
                       className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 font-semibold text-xs transition-colors cursor-pointer disabled:opacity-50"
                     >

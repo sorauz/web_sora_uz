@@ -388,4 +388,118 @@ test.describe("Commercial Offer (KP) System — Unit, API & E2E Tests", () => {
       })
     ).toBeVisible();
   });
+
+  test("8. Client-side PDF and Excel generation succeed under production CSP without worker/WASM errors", async ({
+    page,
+  }) => {
+    const cspErrors: string[] = [];
+    page.on("console", (msg) => {
+      const text = msg.text();
+      if (
+        msg.type() === "error" &&
+        text.includes("Content Security Policy") &&
+        (text.includes("connect-src") ||
+          text.includes("worker-src") ||
+          text.includes("script-src")) &&
+        !text.includes("cloudflareinsights")
+      ) {
+        cspErrors.push(text);
+      }
+    });
+
+    await page.route("**/api/auth/me", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          authenticated: true,
+          user: {
+            id: "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+            name: "ALPHA SERVICE MCHJ",
+            type: "B2B",
+            phone: "+998901234567",
+            inn: "305123456",
+          },
+        }),
+      });
+    });
+
+    await page.route("**/api/kp/create", async (route) => {
+      await route.fulfill({
+        status: 201,
+        contentType: "application/json",
+        body: JSON.stringify({
+          success: true,
+          order_id: "c3d4e5f6-a1b2-7890-abcd-ef1234567890",
+          order_number: "000068476",
+          status_code: "KP_ACTIVE",
+          is_kp: true,
+          kp_valid_until: "2026-11-27T23:59:59",
+          total_amount: 450000,
+          public_token:
+            "ruFet-ZkEfGl0gAVXXjDA8_wnxvkDRHxpc8AFV14wwOPe9Of-syDSrOprc1l6pZU",
+          public_path:
+            "/uz/kp/ruFet-ZkEfGl0gAVXXjDA8_wnxvkDRHxpc8AFV14wwOPe9Of-syDSrOprc1l6pZU",
+        }),
+      });
+    });
+
+    await page.addInitScript(() => {
+      localStorage.setItem(
+        "sora-cart-storage",
+        JSON.stringify({
+          state: {
+            items: [
+              {
+                id: "99998888-7777-6666-5555-444433332222",
+                sku: "00412",
+                name: "SvetoCopy A4",
+                price: 45000,
+                picture: "",
+                unit: "pachka",
+                quantity: 10,
+              },
+            ],
+            editingKpOrderId: null,
+          },
+          version: 0,
+        })
+      );
+    });
+
+    await page.goto("/uz/cart");
+    await page
+      .getByRole("button", { name: /Tijorat taklifi \(KP\) yuklab olish/i })
+      .click();
+
+    await page.locator('input[placeholder*="Alisher Valiyev"]').fill("Alisher Valiyev");
+
+    const pdfDownloadPromise = page.waitForEvent("download", { timeout: 15000 });
+    await page
+      .getByRole("button", { name: /PDF Tijorat taklifini yuklab olish/i })
+      .click();
+    const pdfDownload = await pdfDownloadPromise;
+    expect(pdfDownload.suggestedFilename()).toBe("Sora_KP_000068476.pdf");
+    const pdfPath = await pdfDownload.path();
+    expect(pdfPath).toBeTruthy();
+
+    // Success view should appear and Excel redownload should also succeed
+    await expect(
+      page.getByText(/Tijorat taklifi #000068476 yaratildi/i)
+    ).toBeVisible();
+
+    const excelDownloadPromise = page.waitForEvent("download", {
+      timeout: 15000,
+    });
+    await page
+      .getByRole("dialog")
+      .getByRole("button", { name: "Excel (.xlsx)", exact: true })
+      .click();
+    const excelDownload = await excelDownloadPromise;
+    expect(excelDownload.suggestedFilename()).toBe("Sora_KP_000068476.xlsx");
+    const excelPath = await excelDownload.path();
+    expect(excelPath).toBeTruthy();
+
+    expect(cspErrors).toEqual([]);
+  });
 });

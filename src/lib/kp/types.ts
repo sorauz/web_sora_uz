@@ -61,10 +61,14 @@ export function formatMoney(amount: number): string {
 export function triggerBrowserDownload(blob: Blob, filename: string): void {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
+  link.style.display = "none";
   link.href = url;
   link.download = filename;
+  link.rel = "noopener";
   document.body.appendChild(link);
   link.click();
-  link.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 5000);
+  setTimeout(() => {
+    link.remove();
+    URL.revokeObjectURL(url);
+  }, 30_000);
 }

@@ -299,9 +299,7 @@ export function CommercialOfferModal({
         })),
       };
 
-      await downloadKpFile(docData, format);
-
-      setCreatedResult({
+      const resultPayload: CreatedKpSuccess = {
         orderNumber: data.order_number,
         kpValidUntil: data.kp_valid_until,
         publicToken: data.public_token,
@@ -309,7 +307,18 @@ export function CommercialOfferModal({
         publicUrl,
         docData,
         format,
-      });
+      };
+      setCreatedResult(resultPayload);
+
+      try {
+        await downloadKpFile(docData, format);
+      } catch {
+        setError(
+          isUz
+            ? "Tijorat taklifi yaratildi, biroq faylni avtomatik yuklab bo‘lmadi. Quyidagi tugmalar orqali qayta yuklab oling."
+            : "КП сформировано, но не удалось автоматически скачать файл. Скачайте его кнопками ниже."
+        );
+      }
     } catch (err) {
       setError(
         err instanceof Error
@@ -363,8 +372,9 @@ export function CommercialOfferModal({
   };
 
   const handleRedownload = async (target: "pdf" | "excel") => {
-    if (!createdResult || redownloading) return;
+    if (!createdResult || redownloading === target) return;
     setRedownloading(target);
+    setError("");
     try {
       await downloadKpFile(createdResult.docData, target);
     } catch {
@@ -374,7 +384,7 @@ export function CommercialOfferModal({
           : "Ошибка повторной загрузки файла"
       );
     } finally {
-      setRedownloading("");
+      setRedownloading((curr) => (curr === target ? "" : curr));
     }
   };
 
@@ -508,7 +518,7 @@ export function CommercialOfferModal({
                 <div className="flex flex-wrap items-center gap-2">
                   <button
                     type="button"
-                    disabled={Boolean(redownloading)}
+                    disabled={redownloading === "pdf"}
                     onClick={() => void handleRedownload("pdf")}
                     className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-sora-600 hover:bg-sora-700 text-white text-xs font-bold cursor-pointer disabled:opacity-50"
                   >
@@ -522,7 +532,7 @@ export function CommercialOfferModal({
 
                   <button
                     type="button"
-                    disabled={Boolean(redownloading)}
+                    disabled={redownloading === "excel"}
                     onClick={() => void handleRedownload("excel")}
                     className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold cursor-pointer disabled:opacity-50"
                   >

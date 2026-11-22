@@ -57,6 +57,7 @@ export function KpPublicView({
   const [error, setError] = useState(initialError);
   const [refreshing, setRefreshing] = useState(false);
   const [downloading, setDownloading] = useState<"" | "pdf" | "excel">("");
+  const [downloadError, setDownloadError] = useState("");
   const [convertOpen, setConvertOpen] = useState(false);
   const [convertedMessage, setConvertedMessage] = useState("");
 
@@ -175,8 +176,9 @@ export function KpPublicView({
   };
 
   const handleDownload = async (format: "pdf" | "excel") => {
-    if (downloading) return;
+    if (downloading === format) return;
     setDownloading(format);
+    setDownloadError("");
     try {
       const docData = buildDocData();
       if (format === "pdf") {
@@ -191,13 +193,13 @@ export function KpPublicView({
         await generateAndDownloadKpExcel(docData);
       }
     } catch {
-      setError(
+      setDownloadError(
         isUz
-          ? "Faylni yuklab olishda xatolik yuz berdi"
-          : "Ошибка при формировании файла"
+          ? "Faylni yuklab olishda xatolik yuz berdi. Iltimos, qayta urinib ko‘ring."
+          : "Ошибка при формировании файла. Пожалуйста, попробуйте снова."
       );
     } finally {
-      setDownloading("");
+      setDownloading((curr) => (curr === format ? "" : curr));
     }
   };
 
@@ -495,6 +497,16 @@ export function KpPublicView({
           </span>
         </div>
 
+        {downloadError && (
+          <div
+            role="alert"
+            className="flex items-start gap-2 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 px-4 py-3 text-xs text-rose-700 dark:text-rose-300"
+          >
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+            <span>{downloadError}</span>
+          </div>
+        )}
+
         {/* Bottom Actions */}
         <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2">
@@ -515,7 +527,7 @@ export function KpPublicView({
 
             <button
               type="button"
-              disabled={Boolean(downloading)}
+              disabled={downloading === "pdf"}
               onClick={() => void handleDownload("pdf")}
               className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold cursor-pointer disabled:opacity-50"
             >
@@ -529,7 +541,7 @@ export function KpPublicView({
 
             <button
               type="button"
-              disabled={Boolean(downloading)}
+              disabled={downloading === "excel"}
               onClick={() => void handleDownload("excel")}
               className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-xs font-bold cursor-pointer disabled:opacity-50"
             >

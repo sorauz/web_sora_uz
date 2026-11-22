@@ -38,8 +38,9 @@ function ensureRobotoFontsRegistered(): void {
 }
 
 /**
- * Loads an image in the browser (supporting WebP/AVIF/PNG/JPG with Cloudflare R2 CORS)
- * and renders it to a compact PNG Data URL so @react-pdf/renderer never fails on WebP or broken links.
+ * Loads an image in the browser via CORS fetch (`cache: "no-store"` to bypass
+ * non-CORS browser cache entries poisoned by page `<img>` tags) and renders it
+ * to a compact PNG Data URL so @react-pdf/renderer never fails on WebP or CORS.
  */
 async function resolvePdfSafeImageDataUrl(
   src?: string | null,
@@ -47,43 +48,67 @@ async function resolvePdfSafeImageDataUrl(
 ): Promise<string | null> {
   if (!src || typeof window === "undefined") return null;
 
-  return new Promise((resolve) => {
-    const img = new window.Image();
-    img.crossOrigin = "anonymous";
-    const timer = setTimeout(() => {
-      resolve(null);
-    }, 4000);
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 5000);
+  let objectUrl: string | null = null;
 
-    img.onload = () => {
-      clearTimeout(timer);
-      try {
-        const canvas = document.createElement("canvas");
-        const w = img.naturalWidth || size;
-        const h = img.naturalHeight || size;
-        const scale = Math.min(1, size / Math.max(w, h));
-        canvas.width = Math.max(1, Math.round(w * scale));
-        canvas.height = Math.max(1, Math.round(h * scale));
-        const ctx = canvas.getContext("2d");
-        if (!ctx) {
+  try {
+    const isExternal = /^https?:\/\//i.test(src);
+    const res = await fetch(src, {
+      mode: isExternal ? "cors" : "same-origin",
+      cache: isExternal ? "no-store" : "default",
+      signal: controller.signal,
+    });
+    if (!res.ok) return null;
+
+    const blob = await res.blob();
+    if (!blob || blob.size === 0) return null;
+
+    objectUrl = URL.createObjectURL(blob);
+    const dataUrl = await new Promise<string | null>((resolve) => {
+      const img = new window.Image();
+      const imgTimer = setTimeout(() => resolve(null), 3000);
+
+      img.onload = () => {
+        clearTimeout(imgTimer);
+        try {
+          const canvas = document.createElement("canvas");
+          const w = img.naturalWidth || size;
+          const h = img.naturalHeight || size;
+          const scale = Math.min(1, size / Math.max(w, h));
+          canvas.width = Math.max(1, Math.round(w * scale));
+          canvas.height = Math.max(1, Math.round(h * scale));
+          const ctx = canvas.getContext("2d");
+          if (!ctx) {
+            resolve(null);
+            return;
+          }
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          resolve(canvas.toDataURL("image/png"));
+        } catch {
           resolve(null);
-          return;
         }
-        ctx.fillStyle = "#ffffff";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        resolve(canvas.toDataURL("image/png"));
-      } catch {
+      };
+
+      img.onerror = () => {
+        clearTimeout(imgTimer);
         resolve(null);
-      }
-    };
+      };
 
-    img.onerror = () => {
-      clearTimeout(timer);
-      resolve(null);
-    };
+      img.src = objectUrl!;
+    });
 
-    img.src = src;
-  });
+    return dataUrl;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+    if (objectUrl) {
+      URL.revokeObjectURL(objectUrl);
+    }
+  }
 }
 
 const styles = StyleSheet.create({
@@ -730,7 +755,7 @@ export async function generateAndDownloadKpPdf(
     productImages[entry.id] = entry.dataUrl;
   }
 
-  const blob = await pdf(
+  const pdfPromise = pdf(
     <KpPdfDocument
       data={data}
       logoDataUrl={logoDataUrl}
@@ -738,6 +763,21 @@ export async function generateAndDownloadKpPdf(
       productImages={productImages}
     />
   ).toBlob();
+
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    timeoutId = setTimeout(() => {
+      reject(new Error("PDF generation timed out"));
+    }, 15_000);
+  });
+
+  const blob = await Promise.race([pdfPromise, timeoutPromise]).finally(() => {
+    if (timeoutId) clearTimeout(timeoutId);
+  });
+
+  if (!blob || blob.size === 0) {
+    throw new Error("Generated PDF is empty");
+  }
 
   const safeNum = data.orderNumber.replace(/[^a-zA-Z0-9_-]/g, "_");
   triggerBrowserDownload(blob, `Sora_KP_${safeNum}.pdf`);
