@@ -445,7 +445,6 @@ function KpPdfDocument({
             ) : (
               <Text style={styles.brandTitle}>SORA.UZ</Text>
             )}
-            <Text style={styles.brandTagline}>{brand.tagline}</Text>
             <View style={styles.brandLinksRow}>
               <Link src={SORA_COMPANY_INFO.website} style={styles.brandLink}>
                 {SORA_COMPANY_INFO.website}

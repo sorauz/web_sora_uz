@@ -95,7 +95,7 @@ export async function generateAndDownloadKpExcel(
 
   const lastColLetter = separateVat ? "I" : "G";
 
-  // 1. Top Brand Header (Rows 1–2): Combined Logo + Slogan image, Tagline, and Website Link
+  // 1. Top Brand Header (Rows 1–2): Combined Logo + Slogan image and Website Link
   sheet.mergeCells("A1:B2");
   sheet.getRow(1).height = 24;
   sheet.getRow(2).height = 20;
@@ -121,31 +121,20 @@ export async function generateAndDownloadKpExcel(
     logoFallback.alignment = { vertical: "middle", horizontal: "left" };
   }
 
-  sheet.mergeCells(`C1:${lastColLetter}1`);
-  const taglineCell = sheet.getCell("C1");
-  taglineCell.value = brand.tagline;
-  taglineCell.font = {
-    name: "Calibri",
-    size: 11,
-    bold: true,
-    color: { argb: "FF0F172A" },
-  };
-  taglineCell.alignment = { vertical: "bottom", horizontal: "right" };
-
-  sheet.mergeCells(`C2:${lastColLetter}2`);
-  const websiteCell = sheet.getCell("C2");
+  sheet.mergeCells(`C1:${lastColLetter}2`);
+  const websiteCell = sheet.getCell("C1");
   websiteCell.value = {
     text: `${SORA_COMPANY_INFO.website}  ·  ${SORA_COMPANY_INFO.emailPrimary}`,
     hyperlink: SORA_COMPANY_INFO.website,
   };
   websiteCell.font = {
     name: "Calibri",
-    size: 10,
+    size: 10.5,
     bold: true,
     color: { argb: "FF0284C7" },
     underline: true,
   };
-  websiteCell.alignment = { vertical: "top", horizontal: "right" };
+  websiteCell.alignment = { vertical: "middle", horizontal: "right" };
 
   // 2. Title Row (Row 4)
   sheet.mergeCells(`A4:${lastColLetter}4`);

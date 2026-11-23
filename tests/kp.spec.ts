@@ -510,8 +510,7 @@ test.describe("Commercial Offer (KP) System — Unit, API & E2E Tests", () => {
     await uzWb.xlsx.readFile(excelPath!);
     const uzSheet = uzWb.worksheets[0];
     expect(uzSheet.getImages().length).toBeGreaterThanOrEqual(1);
-    expect(String(uzSheet.getCell("C1").value)).toContain("Ofis va korporativ");
-    expect(JSON.stringify(uzSheet.getCell("C2").value)).toContain("https://sora.uz");
+    expect(JSON.stringify(uzSheet.getCell("C1").value)).toContain("https://sora.uz");
     expect(String(uzSheet.getCell("A6").value)).toContain('"NEW PRICE" OK');
     expect(String(uzSheet.getCell("A6").value)).toContain("309528015");
     expect(String(uzSheet.getCell("A6").value)).toContain("326090188543");
@@ -524,13 +523,14 @@ test.describe("Commercial Offer (KP) System — Unit, API & E2E Tests", () => {
       formula: "E12*F12",
       result: 450000,
     });
-    // Director signature in footer
+    // Director signature in footer and no legacy tagline under logo
     const uzAllText = uzSheet
       .getSheetValues()
       .flat()
       .map((v) => (v && typeof v === "object" ? JSON.stringify(v) : String(v || "")))
       .join("\n");
     expect(uzAllText).toContain("GAPPAROV V.");
+    expect(uzAllText).not.toContain("Ofis va korporativ");
 
     expect(cspErrors).toEqual([]);
   });
@@ -629,9 +629,7 @@ test.describe("Commercial Offer (KP) System — Unit, API & E2E Tests", () => {
     await ruWb.xlsx.readFile(excelPath!);
     const ruSheet = ruWb.worksheets[0];
     expect(ruSheet.getImages().length).toBeGreaterThanOrEqual(1);
-    expect(String(ruSheet.getCell("C1").value)).toContain(
-      "Центр офисного и корпоративного снабжения"
-    );
+    expect(JSON.stringify(ruSheet.getCell("C1").value)).toContain("https://sora.uz");
     expect(String(ruSheet.getCell("A6").value)).toContain('СП "NEW PRICE"');
     expect(String(ruSheet.getCell("A6").value)).toContain("309528015");
     expect(String(ruSheet.getCell("A6").value)).toContain("326090188543");
@@ -646,5 +644,6 @@ test.describe("Commercial Offer (KP) System — Unit, API & E2E Tests", () => {
       .join("\n");
     expect(ruAllText).toContain('СП "NEW PRICE"');
     expect(ruAllText).toContain("Директор: GAPPAROV V.");
+    expect(ruAllText).not.toContain("Центр офисного");
   });
 });
