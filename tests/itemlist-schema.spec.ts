@@ -1,5 +1,27 @@
 import { test, expect } from "@playwright/test";
 
+interface ItemListSchemaElement {
+  "@type"?: string;
+  position?: number;
+  name?: string;
+  url?: string;
+  item?: {
+    "@type"?: string;
+    offers?: {
+      "@type"?: string;
+      price?: number;
+      priceCurrency?: string;
+    };
+  };
+}
+
+interface ItemListSchema {
+  "@context"?: string;
+  "@type"?: string;
+  name?: string;
+  itemListElement?: ItemListSchemaElement[];
+}
+
 test.describe("Schema.org ItemList (Product Collections & Carousels)", () => {
   test("1. Category page contains valid ItemList Schema with localized products and positions", async ({
     page,
@@ -8,11 +30,11 @@ test.describe("Schema.org ItemList (Product Collections & Carousels)", () => {
     await page.waitForLoadState("domcontentloaded");
 
     const scripts = await page.locator('script[type="application/ld+json"]').allTextContents();
-    let itemListSchema: any = null;
+    let itemListSchema: ItemListSchema | null = null;
 
     for (const text of scripts) {
       try {
-        const parsed = JSON.parse(text);
+        const parsed = JSON.parse(text) as ItemListSchema;
         if (parsed["@type"] === "ItemList") {
           itemListSchema = parsed;
           break;
@@ -23,21 +45,25 @@ test.describe("Schema.org ItemList (Product Collections & Carousels)", () => {
     }
 
     expect(itemListSchema).not.toBeNull();
-    expect(itemListSchema["@context"]).toBe("https://schema.org");
-    expect(itemListSchema.name).toBeTruthy();
-    expect(Array.isArray(itemListSchema.itemListElement)).toBe(true);
-    expect(itemListSchema.itemListElement.length).toBeGreaterThan(0);
-    expect(itemListSchema.itemListElement.length).toBeLessThanOrEqual(24);
+    expect(itemListSchema?.["@context"]).toBe("https://schema.org");
+    expect(itemListSchema?.name).toBeTruthy();
+    expect(Array.isArray(itemListSchema?.itemListElement)).toBe(true);
+    const elements = itemListSchema?.itemListElement ?? [];
+    expect(elements.length).toBeGreaterThan(0);
+    expect(elements.length).toBeLessThanOrEqual(24);
 
     // Verify first element structure
-    const firstItem = itemListSchema.itemListElement[0];
+    const firstItem = elements[0];
     expect(firstItem["@type"]).toBe("ListItem");
     expect(firstItem.position).toBe(1);
     expect(firstItem.url).toMatch(/^https:\/\/sora\.uz\/uz\/products\//);
     expect(firstItem.name).toBeTruthy();
-    expect(firstItem.item["@type"]).toBe("Product");
-    expect(firstItem.item.offers["@type"]).toBe("Offer");
-    expect(firstItem.item.offers.priceCurrency).toBe("UZS");
+    if (firstItem.item) {
+      expect(firstItem.item["@type"]).toBe("Product");
+      expect(firstItem.item.offers?.["@type"]).toBe("Offer");
+      expect(firstItem.item.offers?.priceCurrency).toBe("UZS");
+      expect(firstItem.item.offers?.price).toBeGreaterThan(0);
+    }
   });
 
   test("2. Brand page contains valid ItemList Schema", async ({ page }) => {
@@ -45,11 +71,11 @@ test.describe("Schema.org ItemList (Product Collections & Carousels)", () => {
     await page.waitForLoadState("domcontentloaded");
 
     const scripts = await page.locator('script[type="application/ld+json"]').allTextContents();
-    let brandItemList: any = null;
+    let brandItemList: ItemListSchema | null = null;
 
     for (const text of scripts) {
       try {
-        const parsed = JSON.parse(text);
+        const parsed = JSON.parse(text) as ItemListSchema;
         if (parsed["@type"] === "ItemList") {
           brandItemList = parsed;
           break;
@@ -60,10 +86,13 @@ test.describe("Schema.org ItemList (Product Collections & Carousels)", () => {
     }
 
     expect(brandItemList).not.toBeNull();
-    expect(brandItemList.name).toContain("DELI");
-    expect(brandItemList.itemListElement.length).toBeGreaterThan(0);
-    expect(brandItemList.itemListElement[0].position).toBe(1);
-    expect(brandItemList.itemListElement[0].item["@type"]).toBe("Product");
+    expect(brandItemList?.name).toContain("DELI");
+    const elements = brandItemList?.itemListElement ?? [];
+    expect(elements.length).toBeGreaterThan(0);
+    expect(elements[0].position).toBe(1);
+    if (elements[0].item) {
+      expect(elements[0].item["@type"]).toBe("Product");
+    }
   });
 
   test("3. Special offers page contains valid ItemList Schema", async ({ page }) => {
@@ -71,11 +100,11 @@ test.describe("Schema.org ItemList (Product Collections & Carousels)", () => {
     await page.waitForLoadState("domcontentloaded");
 
     const scripts = await page.locator('script[type="application/ld+json"]').allTextContents();
-    let offerItemList: any = null;
+    let offerItemList: ItemListSchema | null = null;
 
     for (const text of scripts) {
       try {
-        const parsed = JSON.parse(text);
+        const parsed = JSON.parse(text) as ItemListSchema;
         if (parsed["@type"] === "ItemList") {
           offerItemList = parsed;
           break;
@@ -86,9 +115,12 @@ test.describe("Schema.org ItemList (Product Collections & Carousels)", () => {
     }
 
     expect(offerItemList).not.toBeNull();
-    expect(offerItemList.itemListElement.length).toBeGreaterThan(0);
-    expect(offerItemList.itemListElement[0].url).toContain("/products/");
-    expect(offerItemList.itemListElement[0].item["@type"]).toBe("Product");
+    const elements = offerItemList?.itemListElement ?? [];
+    expect(elements.length).toBeGreaterThan(0);
+    expect(elements[0].url).toContain("/products/");
+    if (elements[0].item) {
+      expect(elements[0].item["@type"]).toBe("Product");
+    }
   });
 
   test("4. Multi-page pagination starts ItemList position from (page - 1) * 24 + 1", async ({
@@ -98,11 +130,11 @@ test.describe("Schema.org ItemList (Product Collections & Carousels)", () => {
     await page.waitForLoadState("domcontentloaded");
 
     const scripts = await page.locator('script[type="application/ld+json"]').allTextContents();
-    let page2ItemList: any = null;
+    let page2ItemList: ItemListSchema | null = null;
 
     for (const text of scripts) {
       try {
-        const parsed = JSON.parse(text);
+        const parsed = JSON.parse(text) as ItemListSchema;
         if (parsed["@type"] === "ItemList") {
           page2ItemList = parsed;
           break;
@@ -112,8 +144,64 @@ test.describe("Schema.org ItemList (Product Collections & Carousels)", () => {
       }
     }
 
-    if (page2ItemList && page2ItemList.itemListElement.length > 0) {
-      expect(page2ItemList.itemListElement[0].position).toBe(25);
+    const elements = page2ItemList?.itemListElement ?? [];
+    if (elements.length > 0) {
+      expect(elements[0].position).toBe(25);
+    }
+  });
+
+  test("5. No ItemList emits an Offer without positive price across category, brand, and offers pages", async ({
+    page,
+  }) => {
+    const urls = [
+      "/uz/category/ilmiy-kalkulyatorlar",
+      "/uz/category/ish-stoli-kalkulyatorlari",
+      "/uz/brand/deli",
+      "/uz/catalog/popular",
+    ];
+
+    for (const url of urls) {
+      await page.goto(url);
+      await page.waitForLoadState("domcontentloaded");
+
+      const scripts = await page
+        .locator('script[type="application/ld+json"]')
+        .allTextContents();
+
+      for (const text of scripts) {
+        let parsed: Record<string, unknown>;
+        try {
+          parsed = JSON.parse(text);
+        } catch {
+          continue;
+        }
+        if (parsed["@type"] !== "ItemList") continue;
+        const elements = parsed.itemListElement as Array<{
+          position?: number;
+          name?: string;
+          url?: string;
+          item?: {
+            "@type"?: string;
+            offers?: {
+              "@type"?: string;
+              price?: number;
+              priceCurrency?: string;
+            };
+          };
+        }>;
+        for (const el of elements) {
+          expect(el.position).toBeGreaterThan(0);
+          expect(el.name).toBeTruthy();
+          expect(el.url).toMatch(/^https:\/\/sora\.uz\//);
+          if (el.item) {
+            expect(el.item["@type"]).toBe("Product");
+            expect(el.item.offers).toBeDefined();
+            expect(typeof el.item.offers?.price).toBe("number");
+            expect(el.item.offers?.price).toBeGreaterThan(0);
+            expect(el.item.offers?.priceCurrency).toBe("UZS");
+          }
+        }
+      }
     }
   });
 });

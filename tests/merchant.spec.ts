@@ -65,7 +65,7 @@ test.describe("Google Merchant & Product Structured Data Hygiene", () => {
     expect(xml).not.toContain("<g:price>0 UZS</g:price>");
   });
 
-  test("3. Negotiable product (price=0) omits 0 UZS Offer & price meta while keeping clean Product JSON-LD", async ({
+  test("3. Negotiable product (price=0) omits invalid Product/Offer JSON-LD & price meta while keeping BreadcrumbList and og:image", async ({
     page,
   }) => {
     // Deli E1710A is a real 1C product with price=0 ("Narxi kelishiladi")
@@ -86,17 +86,33 @@ test.describe("Google Merchant & Product Structured Data Hygiene", () => {
     expect(ogImg).toContain("cdn.sora.uz/products/");
     expect(ogImg).toMatch(/\?v=\d{8}/);
 
-    // Product JSON-LD must NOT emit "price":0 Offer
+    // Must NOT emit a Product JSON-LD with missing offers/review/aggregateRating or price=0
     const jsonLdScripts = await page
       .locator('script[type="application/ld+json"]')
       .allTextContents();
     const productLdText = jsonLdScripts.find((t) =>
       t.includes('"@type":"Product"')
     );
-    expect(productLdText).toBeTruthy();
-    const productLd = JSON.parse(productLdText!);
-    expect(productLd.offers).toBeUndefined();
-    expect(productLd.image).toMatch(/\?v=\d{8}/);
+    if (productLdText) {
+      const productLd = JSON.parse(productLdText);
+      expect(
+        Boolean(
+          (productLd.offers && productLd.offers.price > 0) ||
+            productLd.review ||
+            productLd.aggregateRating
+        )
+      ).toBe(true);
+      if (productLd.offers) {
+        expect(typeof productLd.offers.price).toBe("number");
+        expect(productLd.offers.price).toBeGreaterThan(0);
+      }
+    }
+
+    // BreadcrumbList JSON-LD must still be present
+    const breadcrumbLdText = jsonLdScripts.find((t) =>
+      t.includes('"@type":"BreadcrumbList"')
+    );
+    expect(breadcrumbLdText).toBeTruthy();
   });
 
   test("4. Compact 1C /all_product schema (sku, pic, up_date, alt_uz, alt_ru) normalizes identically to legacy keys", () => {

@@ -32,10 +32,15 @@ export function ProductJsonLd({
   const loc = getProductLocalized(product, locale);
   const priceInfo = calculateProductPrice(product.price);
   const priceVal = priceInfo.price;
+  const hasValidPrice = Number.isFinite(priceVal) && priceVal > 0;
   const inStock = product.price?.stock !== "OutOfStock";
   const canonicalUrl = `${baseUrl}/${locale}/products/${loc.slug}`;
 
   const hasRealReviews = reviews.length > 0;
+  const hasAggregateRating = Boolean(stats && stats.reviewCount > 0);
+  // Google Product Snippets require at least one of offers, review, or aggregateRating.
+  const canEmitProductSchema =
+    hasValidPrice || hasRealReviews || hasAggregateRating;
   const isUz = locale === "uz";
 
   // Build Schema.org PropertyValue array for AI & Search Engine crawlers
@@ -122,7 +127,7 @@ export function ProductJsonLd({
     ...(additionalProperties.length > 0
       ? { additionalProperty: additionalProperties }
       : {}),
-    ...(priceVal > 0
+    ...(hasValidPrice
       ? {
           offers: {
             "@type": "Offer",
@@ -260,10 +265,12 @@ export function ProductJsonLd({
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
-      />
+      {canEmitProductSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
+        />
+      )}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
