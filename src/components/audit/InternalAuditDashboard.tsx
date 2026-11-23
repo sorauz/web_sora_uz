@@ -372,18 +372,37 @@ export function InternalAuditDashboard({
               <span>{isUz ? "1C dan yangilash" : "Обновить из 1С"}</span>
             </button>
 
-            <a
-              href={exportHref}
-              download
-              className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 transition-colors"
-            >
-              <Download className="w-4 h-4" />
-              <span>
-                {isUz
-                  ? `Excel (CSV) yuklab olish (${filteredItems.length} ta)`
-                  : `Скачать Excel (CSV) (${filteredItems.length} шт.)`}
-              </span>
-            </a>
+            <div className="inline-flex items-center rounded-xl bg-emerald-600 shadow-sm transition-colors hover:bg-emerald-700">
+              <a
+                href={exportHref}
+                download
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white"
+                title={
+                  isUz
+                    ? "Zamonaviy Excel (.xlsx) formatida yuklab olish"
+                    : "Скачать в формате Excel (.xlsx)"
+                }
+              >
+                <Download className="w-4 h-4" />
+                <span>
+                  {isUz
+                    ? `Excel (.xlsx) yuklab olish (${filteredItems.length} ta)`
+                    : `Скачать Excel (.xlsx) (${filteredItems.length} шт.)`}
+                </span>
+              </a>
+              <a
+                href={`${exportHref}${exportHref.includes("?") ? "&" : "?"}format=csv`}
+                download
+                className="border-l border-emerald-500/60 px-2.5 py-2 text-xs font-semibold text-emerald-100 hover:text-white hover:bg-emerald-800/40 rounded-r-xl transition-colors"
+                title={
+                  isUz
+                    ? "CSV formatida yuklab olish"
+                    : "Скачать в формате CSV"
+                }
+              >
+                CSV
+              </a>
+            </div>
 
             <button
               type="button"

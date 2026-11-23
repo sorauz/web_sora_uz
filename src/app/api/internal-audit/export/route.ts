@@ -7,6 +7,7 @@ import {
   filterAuditItems,
   type AuditFilterPreset,
 } from "@/lib/utils/catalog-audit";
+import { buildAuditXlsx } from "@/lib/utils/catalog-audit-excel";
 
 const VALID_PRESETS = new Set<AuditFilterPreset>([
   "all",
@@ -64,17 +65,34 @@ export async function GET(request: NextRequest) {
     { issue, brand, category, q },
     locale,
   );
-  const csv = buildAuditCsv(filtered, locale);
 
+  const format = searchParams.get("format") || "xlsx";
   const dateTag = new Date().toISOString().slice(0, 10);
   const safeIssue = issue.replace(/[^a-z0-9_-]/gi, "_");
-  const filename = `sora-audit-${safeIssue}-${dateTag}.csv`;
 
-  return new NextResponse(csv, {
+  if (format === "csv") {
+    const csv = buildAuditCsv(filtered, locale);
+    const filename = `sora-audit-${safeIssue}-${dateTag}.csv`;
+
+    return new NextResponse(csv, {
+      status: 200,
+      headers: {
+        ...NO_INDEX_HEADERS,
+        "Content-Type": "text/csv; charset=utf-8",
+        "Content-Disposition": `attachment; filename="${filename}"`,
+      },
+    });
+  }
+
+  const xlsxBuffer = await buildAuditXlsx(filtered, locale);
+  const filename = `sora-audit-${safeIssue}-${dateTag}.xlsx`;
+
+  return new NextResponse(new Uint8Array(xlsxBuffer), {
     status: 200,
     headers: {
       ...NO_INDEX_HEADERS,
-      "Content-Type": "text/csv; charset=utf-8",
+      "Content-Type":
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       "Content-Disposition": `attachment; filename="${filename}"`,
     },
   });

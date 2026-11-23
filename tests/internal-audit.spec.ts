@@ -76,7 +76,7 @@ test.describe("Internal Catalog & Google Merchant Audit Panel", () => {
     expect(body).toContain("Disallow: /api/internal-audit/");
   });
 
-  test("3. Wrong password is rejected and valid password unlocks live dashboard, filtering, and BOM CSV export", async ({
+  test("3. Wrong password is rejected and valid password unlocks live dashboard, filtering, and XLSX/CSV export", async ({
     page,
   }) => {
     await page.goto("/uz/internal-audit");
@@ -110,18 +110,32 @@ test.describe("Internal Catalog & Google Merchant Audit Panel", () => {
     const noPriceCard = page.getByRole("button", { name: /Narxi 0 so‘m/i });
     await noPriceCard.click();
 
-    // Export link reflects active filter and returns 200 CSV with UTF-8 BOM
+    // Export link reflects active filter and returns 200 XLSX (and CSV also supported)
     const exportLink = page.getByRole("link", {
-      name: /Excel \(CSV\) yuklab olish/i,
+      name: /Excel \(\.xlsx\) yuklab olish/i,
     });
     const exportHref = await exportLink.getAttribute("href");
     expect(exportHref).toContain("/api/internal-audit/export");
     expect(exportHref).toContain("issue=no_price");
 
-    const csvRes = await page.request.get(exportHref!);
+    // Test XLSX download
+    const xlsxRes = await page.request.get(exportHref!);
+    expect(xlsxRes.status()).toBe(200);
+    expect(xlsxRes.headers()["content-type"]).toContain(
+      "spreadsheetml.sheet",
+    );
+    expect(xlsxRes.headers()["x-robots-tag"]).toContain("noindex");
+
+    const xlsxBuf = await xlsxRes.body();
+    // ZIP / XLSX magic bytes PK (0x50, 0x4B)
+    expect(xlsxBuf[0]).toBe(0x50);
+    expect(xlsxBuf[1]).toBe(0x4b);
+
+    // Test CSV format option
+    const csvHref = `${exportHref}&format=csv`;
+    const csvRes = await page.request.get(csvHref);
     expect(csvRes.status()).toBe(200);
     expect(csvRes.headers()["content-type"]).toContain("text/csv");
-    expect(csvRes.headers()["x-robots-tag"]).toContain("noindex");
 
     const csvBuf = await csvRes.body();
     // UTF-8 BOM (EF BB BF)
