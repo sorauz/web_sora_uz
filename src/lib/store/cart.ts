@@ -15,6 +15,7 @@ export interface CartItem {
   unit: string;
   unit_uz?: string;
   unit_ru?: string;
+  gtin?: string;
   quantity: number;
 }
 
@@ -53,6 +54,7 @@ export const useCartStore = create<CartStore>()(
                       slug: item.slug || i.slug,
                       unit_uz: item.unit_uz || i.unit_uz,
                       unit_ru: item.unit_ru || i.unit_ru,
+                      gtin: item.gtin || i.gtin,
                     }
                   : i
               ),

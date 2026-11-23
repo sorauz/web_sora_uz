@@ -2,6 +2,7 @@
 
 import { Product, getProductLocalized } from "@/lib/schemas/product";
 import { calculateProductPrice } from "@/lib/utils/price";
+import { getValidGtin } from "@/lib/utils/merchant";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import Image from "next/image";
@@ -72,6 +73,7 @@ export function ProductCard({
       unit: loc.unit,
       unit_uz: product.uz?.unit_uz || loc.unit,
       unit_ru: product.ru?.unit_ru || loc.unit,
+      gtin: getValidGtin(product.barcode),
     });
 
     setAddedAnim(true);

@@ -7,6 +7,7 @@ import { ShoppingCart, Check, Phone, Send } from "lucide-react";
 import { useCartStore } from "@/lib/store/cart";
 import { Product, getProductLocalized } from "@/lib/schemas/product";
 import { calculateProductPrice } from "@/lib/utils/price";
+import { getValidGtin } from "@/lib/utils/merchant";
 import { reachGoal, sendEcommerceEvent } from "@/lib/analytics/yandex";
 
 interface MobileStickyCTAProps {
@@ -43,6 +44,7 @@ export function MobileStickyCTA({ product, locale }: MobileStickyCTAProps) {
         unit: loc.unit,
         unit_uz: product.uz?.unit_uz || loc.unit,
         unit_ru: product.ru?.unit_ru || loc.unit,
+        gtin: getValidGtin(product.barcode),
       },
       1
     );

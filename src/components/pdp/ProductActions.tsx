@@ -30,6 +30,7 @@ import { useCompareStore } from "@/lib/store/compare";
 import { useAuthStore } from "@/lib/store/auth";
 import { Product, getProductLocalized } from "@/lib/schemas/product";
 import { calculateProductPrice } from "@/lib/utils/price";
+import { getValidGtin } from "@/lib/utils/merchant";
 import { reachGoal, sendEcommerceEvent } from "@/lib/analytics/yandex";
 import { ProductAiAssistant } from "@/components/pdp/ProductAiAssistant";
 import {
@@ -113,6 +114,7 @@ export function ProductActions({ product, locale }: ProductActionsProps) {
         unit: loc.unit,
         unit_uz: product.uz?.unit_uz || loc.unit,
         unit_ru: product.ru?.unit_ru || loc.unit,
+        gtin: getValidGtin(product.barcode),
       },
       quantity
     );

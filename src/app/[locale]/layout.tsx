@@ -9,6 +9,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { OrganizationJsonLd } from "@/components/seo/OrganizationJsonLd";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
+import { GoogleMerchantWidget } from "@/components/analytics/GoogleMerchantWidget";
 import { YandexMetrika } from "@/components/analytics/YandexMetrika";
 import NextTopLoader from "nextjs-toploader";
 import "../globals.css";
@@ -151,6 +152,7 @@ export default async function LocaleLayout({
         />
         <OrganizationJsonLd />
         <GoogleAnalytics />
+        <GoogleMerchantWidget />
         <YandexMetrika />
         <NextIntlClientProvider messages={messages}>
           <NuqsAdapter>{children}</NuqsAdapter>

@@ -21,6 +21,7 @@ import { Product, getProductLocalized } from "@/lib/schemas/product";
 import { useCompareStore } from "@/lib/store/compare";
 import { useCartStore } from "@/lib/store/cart";
 import { calculateProductPrice } from "@/lib/utils/price";
+import { getValidGtin } from "@/lib/utils/merchant";
 
 interface CompareViewProps {
   products: Product[];
@@ -154,6 +155,7 @@ export function CompareView({ products, locale }: CompareViewProps) {
       unit: loc.unit,
       unit_uz: product.uz?.unit_uz || loc.unit,
       unit_ru: product.ru?.unit_ru || loc.unit,
+      gtin: getValidGtin(product.barcode),
     });
 
     setAddedIds((prev) => ({ ...prev, [product.id]: true }));

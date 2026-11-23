@@ -7,6 +7,7 @@ import { useCartStore } from "@/lib/store/cart";
 import { OneCOrderDetailResponse } from "@/lib/schemas/order";
 import { getOrderStatusUiMeta } from "@/lib/utils/order-status";
 import { OrderTimeline } from "@/components/orders/OrderTimeline";
+import { GoogleCustomerReviewsOptIn } from "@/components/analytics/GoogleCustomerReviewsOptIn";
 import {
   CheckCircle2,
   Package,
@@ -27,6 +28,11 @@ interface OrderSuccessViewProps {
   locale: "uz" | "ru";
 }
 
+interface StoredOrderItem {
+  id?: string;
+  gtin?: string;
+}
+
 interface StoredOrder {
   orderId: string;
   orderNumber?: string;
@@ -37,6 +43,7 @@ interface StoredOrder {
   serverMessage?: string;
   fullName: string;
   phone: string;
+  email?: string;
   deliveryMethod: string;
   address?: string;
   region?: string;
@@ -44,10 +51,30 @@ interface StoredOrder {
   paymentMethod: string;
   companyName?: string;
   companyInn?: string;
+  items?: StoredOrderItem[];
   subtotal?: number;
   totalAmount1C?: number;
   deliveryFee?: number;
   total: number;
+}
+
+function computeEstimatedDeliveryDate(
+  createdAtIso?: string,
+  deliveryMethod?: string,
+  region?: string,
+): string {
+  const parsed = createdAtIso ? Date.parse(createdAtIso) : Number.NaN;
+  const baseMs = Number.isFinite(parsed) ? parsed : Date.now();
+  const isPickup = deliveryMethod === "pickup";
+  const isTashkent = !region || /toshkent|ташкент|tashkent/i.test(region);
+  // Pickup & Tashkent courier: ~1 day; regional courier: ~3 days
+  const daysToAdd = isPickup || isTashkent ? 1 : 3;
+  // Convert to Asia/Tashkent (UTC+5) calendar date before formatting YYYY-MM-DD
+  const tashkentOffsetMs = 5 * 60 * 60 * 1000;
+  const target = new Date(
+    baseMs + daysToAdd * 24 * 60 * 60 * 1000 + tashkentOffsetMs,
+  );
+  return target.toISOString().slice(0, 10);
 }
 
 function subscribeLastOrder(callback: () => void) {
@@ -149,6 +176,24 @@ export function OrderSuccessView({
       withoutDelivery,
     },
     locale
+  );
+
+  const estimatedDeliveryDate = useMemo(
+    () =>
+      computeEstimatedDeliveryDate(
+        order?.createdAt,
+        order?.deliveryMethod,
+        order?.region,
+      ),
+    [order?.createdAt, order?.deliveryMethod, order?.region],
+  );
+
+  const gcrGtins = useMemo(
+    () =>
+      (order?.items ?? [])
+        .map((item) => item.gtin)
+        .filter((gtin): gtin is string => Boolean(gtin)),
+    [order?.items],
   );
 
   const heroTitle = statusMeta.isCancelled
@@ -444,6 +489,16 @@ export function OrderSuccessView({
           </Link>
         </div>
       </div>
+
+      {order && !statusMeta.isCancelled && (
+        <GoogleCustomerReviewsOptIn
+          orderId={displayOrderNumber}
+          email={order.email}
+          estimatedDeliveryDate={estimatedDeliveryDate}
+          gtins={gcrGtins}
+          locale={locale}
+        />
+      )}
     </div>
   );
 }
