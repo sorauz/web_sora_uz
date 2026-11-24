@@ -273,11 +273,11 @@ export function SearchAutocomplete({
                               {p.price > 0 ? (
                                 <>
                                   <span className="text-sora-600 dark:text-sora-400">
-                                    {p.price.toLocaleString()} {t("currency")}
+                                    {p.price.toLocaleString("ru-RU")} {t("currency")}
                                   </span>
                                   {p.hasDiscount && p.oldPrice && (
                                     <span className="text-[10px] text-slate-400 line-through font-normal">
-                                      {p.oldPrice.toLocaleString()} {t("currency")}
+                                      {p.oldPrice.toLocaleString("ru-RU")} {t("currency")}
                                     </span>
                                   )}
                                 </>

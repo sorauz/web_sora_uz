@@ -250,12 +250,12 @@ export function ProductCard({
           <div className="flex flex-col">
             {oldPrice && oldPrice > price && (
               <span className="text-xs text-slate-400 line-through">
-                {oldPrice.toLocaleString()} {t("currency")}
+                {oldPrice.toLocaleString("ru-RU")} {t("currency")}
               </span>
             )}
             {price > 0 ? (
               <div className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
-                {price.toLocaleString()}{" "}
+                {price.toLocaleString("ru-RU")}{" "}
                 <span className="text-xs font-normal text-slate-500">
                   {t("currency")}
                 </span>

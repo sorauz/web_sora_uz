@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Script from "next/script";
 import { GOOGLE_MERCHANT_ID } from "./GoogleCustomerReviewsOptIn";
@@ -17,6 +17,7 @@ interface MerchantWidgetConfig {
 
 declare global {
   interface Window {
+    __soraMerchantWidgetStarted?: boolean;
     merchantwidget?: {
       start: (config: MerchantWidgetConfig) => void;
     };
@@ -29,23 +30,27 @@ declare global {
  */
 export function GoogleMerchantWidget() {
   const pathname = usePathname();
-  const initializedRef = useRef(false);
   const isHiddenRoute = pathname?.includes("/internal-audit") ?? false;
 
   const startWidget = useCallback(() => {
-    if (initializedRef.current || isHiddenRoute) return;
+    if (isHiddenRoute) return;
+    if (window.__soraMerchantWidgetStarted) return;
     if (!window.merchantwidget?.start) return;
 
-    initializedRef.current = true;
-    window.merchantwidget.start({
-      merchant_id: GOOGLE_MERCHANT_ID,
-      position: "LEFT_BOTTOM",
-      region: "UZ",
-      sideMargin: 16,
-      bottomMargin: 16,
-      mobileSideMargin: 10,
-      mobileBottomMargin: 76,
-    });
+    window.__soraMerchantWidgetStarted = true;
+    try {
+      window.merchantwidget.start({
+        merchant_id: GOOGLE_MERCHANT_ID,
+        position: "LEFT_BOTTOM",
+        region: "UZ",
+        sideMargin: 16,
+        bottomMargin: 16,
+        mobileSideMargin: 10,
+        mobileBottomMargin: 76,
+      });
+    } catch {
+      // Never allow third-party widget initialization errors to crash React tree
+    }
   }, [isHiddenRoute]);
 
   useEffect(() => {

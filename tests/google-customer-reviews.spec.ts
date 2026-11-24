@@ -12,6 +12,7 @@ test.describe("Google Customer Reviews & Store Widget", () => {
     expect(csp).toContain("https://www.gstatic.com");
     expect(csp).toContain("https://www.google.com");
     expect(csp).toContain("https://customersurveys.google.com");
+    expect(csp).toContain("https://yandex.ru");
   });
 
   test("2. Public pages initialize Store Widget with UZ region and skip /internal-audit", async ({
@@ -190,5 +191,60 @@ test.describe("Google Customer Reviews & Store Widget", () => {
     expect(optInConfig.delivery_country).toBe("UZ");
     expect(optInConfig.estimated_delivery_date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     expect(optInConfig.products).toEqual([{ gtin: "6921734902290" }]);
+  });
+
+  test("5. Switching locale on a product page never re-initializes Store Widget or crashes Next.js", async ({
+    page,
+  }) => {
+    const pageErrors: string[] = [];
+    page.on("pageerror", (err) => pageErrors.push(err.message));
+
+    await page.route(
+      "https://www.gstatic.com/shopping/merchant/merchantwidget.js*",
+      async (route) => {
+        await route.fulfill({
+          status: 200,
+          contentType: "application/javascript",
+          body: `
+            window.__testWidgetStartCount = 0;
+            window.merchantwidget = {
+              start: function() {
+                window.__testWidgetStartCount += 1;
+                if (window.__testWidgetStartCount > 1) {
+                  throw new Error("Store widget iFrame already exists, blocking a second render");
+                }
+              }
+            };
+          `,
+        });
+      },
+    );
+
+    await page.goto("/ru/products/deli-7701-bloknot-107x96-mm-300-listov");
+    await page.waitForFunction(
+      () =>
+        (window as unknown as { __testWidgetStartCount?: number })
+          .__testWidgetStartCount === 1,
+      { timeout: 10000 },
+    );
+
+    // Click LanguageSwitcher -> O'zbekcha
+    await page.getByTestId("language-switcher-trigger").click();
+    await page.getByRole("button", { name: "O‘zbekcha" }).click();
+
+    await expect(page).toHaveURL(
+      /\/uz\/products\/deli-7701-107x96-mm-300-listli-bloknot$/,
+      { timeout: 15000 },
+    );
+    await expect(page.locator("h1")).not.toContainText("This page couldn’t load");
+    await expect(page.locator("h1")).toContainText(/Deli 7701/i);
+
+    const startCount = await page.evaluate(
+      () =>
+        (window as unknown as { __testWidgetStartCount?: number })
+          .__testWidgetStartCount,
+    );
+    expect(startCount).toBe(1);
+    expect(pageErrors).toEqual([]);
   });
 });

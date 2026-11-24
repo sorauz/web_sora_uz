@@ -195,7 +195,39 @@ export function LanguageSwitcher() {
     setSwitchingTo(nextLocale);
     const search =
       typeof window !== "undefined" ? window.location.search : "";
-    const targetPath = search ? `${pathname}${search}` : pathname;
+    let targetPath = search ? `${pathname}${search}` : pathname;
+
+    // On localized product/category pages, prefer canonical alternate hreflang URL
+    // to avoid an extra cross-locale server redirect round-trip.
+    if (
+      typeof document !== "undefined" &&
+      (pathname.startsWith("/products/") || pathname.startsWith("/category/"))
+    ) {
+      const altLink = document.querySelector<HTMLLinkElement>(
+        `link[rel="alternate"][hreflang="${nextLocale}"]`,
+      );
+      if (altLink?.href) {
+        try {
+          const altUrl = new URL(altLink.href, window.location.origin);
+          const localePrefix = `/${nextLocale}`;
+          if (altUrl.pathname.startsWith(`${localePrefix}/`)) {
+            const routeWithoutLocale = altUrl.pathname.slice(
+              localePrefix.length,
+            );
+            const expectedSection = pathname.startsWith("/products/")
+              ? "/products/"
+              : "/category/";
+            if (routeWithoutLocale.startsWith(expectedSection)) {
+              targetPath = search
+                ? `${routeWithoutLocale}${search}`
+                : routeWithoutLocale;
+            }
+          }
+        } catch {
+          // Keep default pathname fallback
+        }
+      }
+    }
 
     startTransition(() => {
       router.replace(targetPath, { locale: nextLocale });
