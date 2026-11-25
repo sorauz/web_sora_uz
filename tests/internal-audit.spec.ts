@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import ExcelJS from "exceljs";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -131,6 +132,18 @@ test.describe("Internal Catalog & Google Merchant Audit Panel", () => {
     expect(xlsxBuf[0]).toBe(0x50);
     expect(xlsxBuf[1]).toBe(0x4b);
 
+    // Inspect workbook sheets with ExcelJS
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.load(xlsxBuf as unknown as ArrayBuffer);
+    const sheetNames = workbook.worksheets.map((ws) => ws.name);
+    expect(sheetNames).toContain("Katalog Auditi");
+    expect(sheetNames).toContain("Brendlar Statistikasi");
+    expect(sheetNames).toContain("Kategoriyalar Daraxti");
+    const mainSheet = workbook.getWorksheet("Katalog Auditi");
+    const headerValues = mainSheet?.getRow(1).values as unknown[];
+    expect(headerValues).toContain("O'xshash (soni)");
+    expect(headerValues).toContain("Birga xarid (soni)");
+
     // Test CSV format option
     const csvHref = `${exportHref}&format=csv`;
     const csvRes = await page.request.get(csvHref);
@@ -145,6 +158,61 @@ test.describe("Internal Catalog & Google Merchant Audit Panel", () => {
 
     const csvText = csvBuf.toString("utf8");
     expect(csvText).toContain('"1C_ID","Artikul_SKU","Mahsulot_Nomi_UZ"');
+    expect(csvText).toContain('"Oxshash_Soni","Oxshash_Holati","Birga_Xarid_Soni","Birga_Xarid_Holati"');
+
+    // Reset filter and test relation audit strip (O'xshash mahsulotlar & Bilan birga xarid qilinadi)
+    await noPriceCard.click();
+    await expect(
+      page.getByRole("heading", { name: /O‘xshash mahsulotlar/i }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: /Bilan birga xarid qilinadi/i }),
+    ).toBeVisible();
+
+    await page.getByRole("button", { name: /4 tadan kam/i }).click();
+    const similarExportHref = await exportLink.getAttribute("href");
+    expect(similarExportHref).toContain("similar=lt_4");
+
+    await page.getByRole("button", { name: /12 tadan kam/i }).click();
+    const bothRelExportHref = await exportLink.getAttribute("href");
+    expect(bothRelExportHref).toContain("crossSell=lt_12");
+
+    // Clear filters before checking tabs
+    const clearBtn = page.getByRole("button", {
+      name: /Filtrlarni tozalash/i,
+    });
+    if (await clearBtn.isEnabled()) {
+      await clearBtn.click();
+    }
+
+    // Switch to Brendlar tab and test drilldown
+    await page.getByRole("button", { name: /^Brendlar/i }).click();
+    await expect(
+      page.getByText(/Jami brendlar \(1C \+ katalog\)/i),
+    ).toBeVisible();
+    const firstBrandViewBtn = page
+      .locator("table tbody tr button:not([disabled])")
+      .first();
+    if ((await firstBrandViewBtn.count()) > 0) {
+      await firstBrandViewBtn.click();
+      await expect(
+        page.getByRole("heading", { name: /O‘xshash mahsulotlar/i }),
+      ).toBeVisible();
+    }
+
+    // Switch to Kategoriyalar daraxti tab and test expand/collapse + drilldown
+    await page
+      .getByRole("button", { name: /^Kategoriyalar daraxti/i })
+      .click();
+    await expect(page.getByText(/Asosiy kategoriyalar/i)).toBeVisible();
+    await page.getByRole("button", { name: /Barchasini yoyish/i }).click();
+    const firstCatViewBtn = page
+      .locator("table tbody tr button:has-text(\"Ko'rish\"):not([disabled])")
+      .first();
+    if ((await firstCatViewBtn.count()) > 0) {
+      await firstCatViewBtn.click();
+      await expect(page.getByText(/Bo'lim daraxti:/i)).toBeVisible();
+    }
 
     // Row-level single product sync triggers /api/internal-audit/sync and shows notice
     const firstRowSyncBtn = page

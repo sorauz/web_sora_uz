@@ -26,7 +26,11 @@ import {
   ServerCog,
   Loader2,
   X,
+  FolderTree,
+  Layers,
 } from "lucide-react";
+import { BrandsAnalyticsTab } from "@/components/audit/BrandsAnalyticsTab";
+import { CategoryTreeAnalyticsTab } from "@/components/audit/CategoryTreeAnalyticsTab";
 import {
   SyncControlPanel,
   type SyncCommandPayload,
@@ -35,10 +39,17 @@ import {
 } from "@/components/audit/SyncControlPanel";
 import {
   AUDIT_ISSUE_LABELS,
+  CROSS_SELL_BUCKET_LABELS,
+  SIMILAR_BUCKET_LABELS,
+  UNCATEGORIZED_FILTER_KEY,
+  UNBRANDED_FILTER_KEY,
   filterAuditItems,
+  findCategoryNodeStat,
   type AuditFilterPreset,
   type AuditIssueKey,
   type CatalogAuditReport,
+  type CrossSellCountBucket,
+  type SimilarCountBucket,
 } from "@/lib/utils/catalog-audit";
 
 interface InternalAuditDashboardProps {
@@ -103,12 +114,17 @@ export function InternalAuditDashboard({
   const [issue, setIssue] = useState<AuditFilterPreset>("issues_only");
   const [brand, setBrand] = useState("");
   const [category, setCategory] = useState("");
+  const [categoryNode, setCategoryNode] = useState("");
+  const [similar, setSimilar] = useState<SimilarCountBucket | "all">("all");
+  const [crossSell, setCrossSell] = useState<CrossSellCountBucket | "all">("all");
   const [q, setQ] = useState("");
   const [page, setPage] = useState(1);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-  const [activeTab, setActiveTab] = useState<"audit" | "sync">("audit");
+  const [activeTab, setActiveTab] = useState<
+    "audit" | "brands" | "categories" | "sync"
+  >("audit");
   const [isSyncing, setIsSyncing] = useState(false);
   const [activeSyncCommandId, setActiveSyncCommandId] = useState<string | null>(
     null,
@@ -187,9 +203,44 @@ export function InternalAuditDashboard({
   }
 
   const filteredItems = useMemo(
-    () => filterAuditItems(report.items, { issue, brand, category, q }, locale),
-    [report.items, issue, brand, category, q, locale],
+    () =>
+      filterAuditItems(
+        report.items,
+        {
+          issue,
+          brand,
+          category,
+          categoryNode,
+          categoryTreeStats: report.categoryTreeStats,
+          similar,
+          crossSell,
+          q,
+        },
+        locale,
+      ),
+    [
+      report.items,
+      report.categoryTreeStats,
+      issue,
+      brand,
+      category,
+      categoryNode,
+      similar,
+      crossSell,
+      q,
+      locale,
+    ],
   );
+
+  const selectedCategoryNodeLabel = useMemo(() => {
+    if (!categoryNode) return "";
+    if (categoryNode === UNCATEGORIZED_FILTER_KEY) {
+      return isUz ? "Kategoriyasi ko'rsatilmagan" : "Без категории";
+    }
+    const found = findCategoryNodeStat(report.categoryTreeStats, categoryNode);
+    if (!found) return categoryNode;
+    return isUz ? found.nameUz || found.nameRu : found.nameRu || found.nameUz;
+  }, [categoryNode, report.categoryTreeStats, isUz]);
 
   const totalPages = Math.max(1, Math.ceil(filteredItems.length / PAGE_SIZE));
   const safePage = Math.min(page, totalPages);
@@ -205,10 +256,23 @@ export function InternalAuditDashboard({
     params.set("issue", issue);
     if (brand) params.set("brand", brand);
     if (category) params.set("category", category);
+    if (categoryNode) params.set("categoryNode", categoryNode);
+    if (similar !== "all") params.set("similar", similar);
+    if (crossSell !== "all") params.set("crossSell", crossSell);
     if (q.trim()) params.set("q", q.trim());
     if (accessKeyQuery) params.set("key", accessKeyQuery);
     return `/api/internal-audit/export?${params.toString()}`;
-  }, [locale, issue, brand, category, q, accessKeyQuery]);
+  }, [
+    locale,
+    issue,
+    brand,
+    category,
+    categoryNode,
+    similar,
+    crossSell,
+    q,
+    accessKeyQuery,
+  ]);
 
   const formattedTime = useMemo(() => {
     try {
@@ -227,10 +291,59 @@ export function InternalAuditDashboard({
     setPage(1);
   }
 
+  function selectSimilarFilter(next: SimilarCountBucket) {
+    setSimilar((prev) => {
+      const nextVal = prev === next ? "all" : next;
+      if (nextVal !== "all" && issue === "issues_only") {
+        setIssue("all");
+      }
+      return nextVal;
+    });
+    setPage(1);
+  }
+
+  function selectCrossSellFilter(next: CrossSellCountBucket) {
+    setCrossSell((prev) => {
+      const nextVal = prev === next ? "all" : next;
+      if (nextVal !== "all" && issue === "issues_only") {
+        setIssue("all");
+      }
+      return nextVal;
+    });
+    setPage(1);
+  }
+
+  function handleSelectBrandFromTab(brandKey: string) {
+    setIssue("all");
+    setBrand(brandKey);
+    setCategory("");
+    setCategoryNode("");
+    setSimilar("all");
+    setCrossSell("all");
+    setQ("");
+    setPage(1);
+    setActiveTab("audit");
+  }
+
+  function handleSelectCategoryNodeFromTab(nodeKey: string) {
+    setIssue("all");
+    setBrand("");
+    setCategory("");
+    setCategoryNode(nodeKey);
+    setSimilar("all");
+    setCrossSell("all");
+    setQ("");
+    setPage(1);
+    setActiveTab("audit");
+  }
+
   function resetFilters() {
     setIssue("all");
     setBrand("");
     setCategory("");
+    setCategoryNode("");
+    setSimilar("all");
+    setCrossSell("all");
     setQ("");
     setPage(1);
   }
@@ -257,7 +370,13 @@ export function InternalAuditDashboard({
   }
 
   const hasActiveFilters =
-    issue !== "all" || brand !== "" || category !== "" || q.trim() !== "";
+    issue !== "all" ||
+    brand !== "" ||
+    category !== "" ||
+    categoryNode !== "" ||
+    similar !== "all" ||
+    crossSell !== "all" ||
+    q.trim() !== "";
 
   const kpiCards: Array<{
     key: AuditFilterPreset;
@@ -433,6 +552,40 @@ export function InternalAuditDashboard({
 
           <button
             type="button"
+            onClick={() => setActiveTab("brands")}
+            className={`inline-flex items-center gap-2 border-b-2 px-4 py-2.5 text-sm font-semibold transition-colors whitespace-nowrap cursor-pointer ${
+              activeTab === "brands"
+                ? "border-blue-700 text-blue-800"
+                : "border-transparent text-slate-500 hover:text-slate-800"
+            }`}
+          >
+            <Layers className="w-4 h-4" />
+            <span>{isUz ? "Brendlar" : "Бренды"}</span>
+            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-700">
+              {report.brandStats.filter((b) => !b.isUnbranded).length}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab("categories")}
+            className={`inline-flex items-center gap-2 border-b-2 px-4 py-2.5 text-sm font-semibold transition-colors whitespace-nowrap cursor-pointer ${
+              activeTab === "categories"
+                ? "border-teal-700 text-teal-800"
+                : "border-transparent text-slate-500 hover:text-slate-800"
+            }`}
+          >
+            <FolderTree className="w-4 h-4" />
+            <span>
+              {isUz ? "Kategoriyalar daraxti" : "Дерево категорий"}
+            </span>
+            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-700">
+              {report.categoryTreeStats.length}
+            </span>
+          </button>
+
+          <button
+            type="button"
             onClick={() => setActiveTab("sync")}
             className={`inline-flex items-center gap-2 border-b-2 px-4 py-2.5 text-sm font-semibold transition-colors whitespace-nowrap cursor-pointer ${
               activeTab === "sync"
@@ -456,7 +609,24 @@ export function InternalAuditDashboard({
       </header>
 
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 mt-6 space-y-6">
-        {activeTab === "sync" ? (
+        {activeTab === "brands" ? (
+          <BrandsAnalyticsTab
+            brandStats={report.brandStats}
+            totalCatalog={report.summary.total}
+            unbrandedCount={report.summary.unbrandedCount}
+            locale={locale}
+            onSelectBrand={handleSelectBrandFromTab}
+          />
+        ) : activeTab === "categories" ? (
+          <CategoryTreeAnalyticsTab
+            categoryTreeStats={report.categoryTreeStats}
+            uncategorizedStats={report.uncategorizedStats}
+            totalCatalog={report.summary.total}
+            emptyCategoryCount={report.summary.emptyCategoryCount}
+            locale={locale}
+            onSelectCategoryNode={handleSelectCategoryNodeFromTab}
+          />
+        ) : activeTab === "sync" ? (
           <SyncControlPanel
             locale={locale}
             isSyncing={isSyncing}
@@ -556,6 +726,158 @@ export function InternalAuditDashboard({
           })}
         </section>
 
+        {/* Relation Audit Strips: Similar (4) & Cross-Sell (12) */}
+        <section
+          aria-label={
+            isUz
+              ? "Bog'langan mahsulotlar auditi"
+              : "Аудит связанных товаров"
+          }
+          className="grid grid-cols-1 lg:grid-cols-2 gap-3"
+        >
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs">
+            <div className="flex items-center justify-between gap-2 mb-3">
+              <div>
+                <h2 className="text-sm font-bold text-slate-900">
+                  {isUz ? "O‘xshash mahsulotlar" : "Похожие товары"}
+                </h2>
+                <p className="text-xs text-slate-500">
+                  {isUz
+                    ? "1C tavsiyalari (optimal norma: 4 ta)"
+                    : "Рекомендации 1С (норма: 4 шт.)"}
+                </p>
+              </div>
+              {similar !== "all" && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSimilar("all");
+                    setPage(1);
+                  }}
+                  className="text-xs font-medium text-slate-500 hover:text-slate-900 cursor-pointer"
+                >
+                  {isUz ? "Tozalash" : "Сбросить"}
+                </button>
+              )}
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              {(
+                [
+                  {
+                    key: "lt_4" as const,
+                    count: report.summary.similarLt4,
+                    tone: "border-amber-200 bg-amber-50/70 text-amber-900",
+                    ring: "border-amber-500 ring-2 ring-amber-500/20 bg-amber-50",
+                  },
+                  {
+                    key: "eq_4" as const,
+                    count: report.summary.similarEq4,
+                    tone: "border-emerald-200 bg-emerald-50/70 text-emerald-900",
+                    ring: "border-emerald-600 ring-2 ring-emerald-500/20 bg-emerald-50",
+                  },
+                  {
+                    key: "gt_4" as const,
+                    count: report.summary.similarGt4,
+                    tone: "border-sky-200 bg-sky-50/70 text-sky-900",
+                    ring: "border-sky-600 ring-2 ring-sky-500/20 bg-sky-50",
+                  },
+                ]
+              ).map((b) => {
+                const isActive = similar === b.key;
+                return (
+                  <button
+                    key={b.key}
+                    type="button"
+                    onClick={() => selectSimilarFilter(b.key)}
+                    className={`rounded-xl border px-3 py-2.5 text-left transition-all cursor-pointer ${
+                      isActive ? b.ring : b.tone
+                    }`}
+                  >
+                    <div className="text-lg font-bold leading-tight">
+                      {b.count}
+                    </div>
+                    <div className="text-xs font-semibold mt-0.5">
+                      {SIMILAR_BUCKET_LABELS[b.key][locale]}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs">
+            <div className="flex items-center justify-between gap-2 mb-3">
+              <div>
+                <h2 className="text-sm font-bold text-slate-900">
+                  {isUz
+                    ? "Bilan birga xarid qilinadi"
+                    : "С этим товаром покупают"}
+                </h2>
+                <p className="text-xs text-slate-500">
+                  {isUz
+                    ? "1C hamroh tovarlar (optimal norma: 12 ta)"
+                    : "Сопутствующие товары 1С (норма: 12 шт.)"}
+                </p>
+              </div>
+              {crossSell !== "all" && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCrossSell("all");
+                    setPage(1);
+                  }}
+                  className="text-xs font-medium text-slate-500 hover:text-slate-900 cursor-pointer"
+                >
+                  {isUz ? "Tozalash" : "Сбросить"}
+                </button>
+              )}
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              {(
+                [
+                  {
+                    key: "lt_12" as const,
+                    count: report.summary.crossSellLt12,
+                    tone: "border-amber-200 bg-amber-50/70 text-amber-900",
+                    ring: "border-amber-500 ring-2 ring-amber-500/20 bg-amber-50",
+                  },
+                  {
+                    key: "eq_12" as const,
+                    count: report.summary.crossSellEq12,
+                    tone: "border-emerald-200 bg-emerald-50/70 text-emerald-900",
+                    ring: "border-emerald-600 ring-2 ring-emerald-500/20 bg-emerald-50",
+                  },
+                  {
+                    key: "gt_12" as const,
+                    count: report.summary.crossSellGt12,
+                    tone: "border-sky-200 bg-sky-50/70 text-sky-900",
+                    ring: "border-sky-600 ring-2 ring-sky-500/20 bg-sky-50",
+                  },
+                ]
+              ).map((b) => {
+                const isActive = crossSell === b.key;
+                return (
+                  <button
+                    key={b.key}
+                    type="button"
+                    onClick={() => selectCrossSellFilter(b.key)}
+                    className={`rounded-xl border px-3 py-2.5 text-left transition-all cursor-pointer ${
+                      isActive ? b.ring : b.tone
+                    }`}
+                  >
+                    <div className="text-lg font-bold leading-tight">
+                      {b.count}
+                    </div>
+                    <div className="text-xs font-semibold mt-0.5">
+                      {CROSS_SELL_BUCKET_LABELS[b.key][locale]}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
         {/* Filters */}
         <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-3">
@@ -643,6 +965,12 @@ export function InternalAuditDashboard({
                     {b}
                   </option>
                 ))}
+                {report.summary.unbrandedCount > 0 && (
+                  <option value={UNBRANDED_FILTER_KEY}>
+                    {isUz ? "Brend ko'rsatilmagan" : "Без бренда"} (
+                    {report.summary.unbrandedCount})
+                  </option>
+                )}
               </select>
             </div>
 
@@ -652,6 +980,7 @@ export function InternalAuditDashboard({
                 value={category}
                 onChange={(e) => {
                   setCategory(e.target.value);
+                  setCategoryNode("");
                   setPage(1);
                 }}
                 className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-900 focus:outline-none"
@@ -664,6 +993,12 @@ export function InternalAuditDashboard({
                     {c}
                   </option>
                 ))}
+                {report.summary.uncategorizedCount > 0 && (
+                  <option value={UNCATEGORIZED_FILTER_KEY}>
+                    {isUz ? "Kategoriyasiz" : "Без категории"} (
+                    {report.summary.uncategorizedCount})
+                  </option>
+                )}
               </select>
             </div>
 
@@ -682,6 +1017,29 @@ export function InternalAuditDashboard({
               </button>
             </div>
           </div>
+
+          {selectedCategoryNodeLabel && (
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-teal-200 bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-800">
+                <FolderTree className="w-3.5 h-3.5" />
+                <span>
+                  {isUz ? "Bo'lim daraxti:" : "Раздел дерева:"}{" "}
+                  {selectedCategoryNodeLabel}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCategoryNode("");
+                    setPage(1);
+                  }}
+                  aria-label="Clear category tree filter"
+                  className="ml-0.5 rounded-full p-0.5 hover:bg-teal-100 cursor-pointer"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </span>
+            </div>
+          )}
 
           <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
             <span>
@@ -715,6 +1073,9 @@ export function InternalAuditDashboard({
                   <th className="py-3 px-4">
                     {isUz ? "Shtrix-kod" : "Штрих-код"}
                   </th>
+                  <th className="py-3 px-4">
+                    {isUz ? "O‘xshash / Birga xarid" : "Похожие / С этим"}
+                  </th>
                   <th className="py-3 px-4">{isUz ? "Holati" : "Статус"}</th>
                   <th className="py-3 px-4 text-right">
                     {isUz ? "Sayt" : "Сайт"}
@@ -725,7 +1086,7 @@ export function InternalAuditDashboard({
                 {pagedItems.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={8}
+                      colSpan={9}
                       className="py-12 px-4 text-center text-slate-500"
                     >
                       {isUz
@@ -831,6 +1192,44 @@ export function InternalAuditDashboard({
 
                         <td className="py-3 px-4 whitespace-nowrap font-mono text-xs text-slate-700">
                           {item.barcode || "—"}
+                        </td>
+
+                        <td className="py-3 px-4 whitespace-nowrap">
+                          <div className="flex flex-col gap-1">
+                            <span
+                              className={`inline-flex items-center justify-between gap-1.5 rounded-md border px-2 py-0.5 text-[11px] font-semibold ${
+                                item.similarBucket === "eq_4"
+                                  ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                                  : item.similarBucket === "gt_4"
+                                  ? "border-sky-200 bg-sky-50 text-sky-800"
+                                  : "border-amber-200 bg-amber-50 text-amber-800"
+                              }`}
+                            >
+                              <span>{isUz ? "O‘xshash:" : "Похож:"}</span>
+                              <span>
+                                {item.similarCount} {isUz ? "ta" : "шт."}
+                              </span>
+                            </span>
+                            <span
+                              className={`inline-flex items-center justify-between gap-1.5 rounded-md border px-2 py-0.5 text-[11px] font-semibold ${
+                                item.crossSellBucket === "eq_12"
+                                  ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                                  : item.crossSellBucket === "gt_12"
+                                  ? "border-sky-200 bg-sky-50 text-sky-800"
+                                  : "border-amber-200 bg-amber-50 text-amber-800"
+                              }`}
+                            >
+                              <span>{isUz ? "Birga:" : "С этим:"}</span>
+                              <span>
+                                {item.crossSellCount} {isUz ? "ta" : "шт."}
+                              </span>
+                            </span>
+                            {!item.seoVerified && (
+                              <span className="text-[10px] text-slate-400">
+                                {isUz ? "1C batafsil olinmadi" : "Нет данных 1С"}
+                              </span>
+                            )}
+                          </div>
                         </td>
 
                         <td className="py-3 px-4 min-w-[200px]">

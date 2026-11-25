@@ -75,6 +75,8 @@ export interface ProductSeoDetails {
   short_description_ru: string;
   product_description_ru: string;
   attributes: ProductAttribute[];
+  related_products: SubProductCard[];
+  recommended_products: SubProductCard[];
 }
 
 class SoraApiClient {
@@ -485,6 +487,12 @@ class SoraApiClient {
         const attrs = Array.isArray(raw.attributes)
           ? (raw.attributes as ProductAttribute[])
           : [];
+        const rels = Array.isArray(raw.related_products)
+          ? (raw.related_products as SubProductCard[])
+          : [];
+        const recs = Array.isArray(raw.recommended_products)
+          ? (raw.recommended_products as SubProductCard[])
+          : [];
         return {
           title_uz: typeof uz.title_uz === "string" ? uz.title_uz : "",
           meta_description_uz:
@@ -513,6 +521,22 @@ class SoraApiClient {
               ? ru.product_description_ru
               : "",
           attributes: attrs,
+          related_products: rels.map((r) => ({
+            id: r.id,
+            related_products_id: r.related_products_id,
+            slug_uz: r.slug_uz,
+            slug_ru: r.slug_ru,
+            name_uz: r.name_uz,
+            name_ru: r.name_ru,
+          })),
+          recommended_products: recs.map((rec) => ({
+            id: rec.id,
+            recommended_products_id: rec.recommended_products_id,
+            slug_uz: rec.slug_uz,
+            slug_ru: rec.slug_ru,
+            name_uz: rec.name_uz,
+            name_ru: rec.name_ru,
+          })),
         };
       }
     )
@@ -583,6 +607,8 @@ class SoraApiClient {
             seo.product_description_ru || p.ru.product_description_ru,
         },
         attributes: seo.attributes,
+        related_products: seo.related_products,
+        recommended_products: seo.recommended_products,
       };
     });
 

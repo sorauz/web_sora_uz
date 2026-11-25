@@ -6,6 +6,8 @@ import {
   buildCatalogAuditReport,
   filterAuditItems,
   type AuditFilterPreset,
+  type CrossSellCountBucket,
+  type SimilarCountBucket,
 } from "@/lib/utils/catalog-audit";
 import { buildAuditXlsx } from "@/lib/utils/catalog-audit-excel";
 
@@ -19,6 +21,20 @@ const VALID_PRESETS = new Set<AuditFilterPreset>([
   "invalid_mpn",
   "out_of_stock",
   "missing_seo",
+]);
+
+const VALID_SIMILAR = new Set<SimilarCountBucket | "all">([
+  "all",
+  "lt_4",
+  "eq_4",
+  "gt_4",
+]);
+
+const VALID_CROSS_SELL = new Set<CrossSellCountBucket | "all">([
+  "all",
+  "lt_12",
+  "eq_12",
+  "gt_12",
 ]);
 
 const NO_INDEX_HEADERS = {
@@ -48,21 +64,55 @@ export async function GET(request: NextRequest) {
     ? (rawIssue as AuditFilterPreset)
     : "all";
 
+  const rawSimilar = (searchParams.get("similar") || "all") as
+    | SimilarCountBucket
+    | "all";
+  const similar: SimilarCountBucket | "all" = VALID_SIMILAR.has(rawSimilar)
+    ? rawSimilar
+    : "all";
+
+  const rawCrossSell = (searchParams.get("crossSell") || "all") as
+    | CrossSellCountBucket
+    | "all";
+  const crossSell: CrossSellCountBucket | "all" =
+    VALID_CROSS_SELL.has(rawCrossSell) ? rawCrossSell : "all";
+
   const brand = searchParams.get("brand") || "";
   const category = searchParams.get("category") || "";
+  const categoryNode = searchParams.get("categoryNode") || "";
   const q = searchParams.get("q") || "";
 
-  const { products, isFallback, checkedSeoIds } =
-    await api.getAllProductsWithAuditDetails({ noCache: true });
+  const [{ products, isFallback, checkedSeoIds }, categoriesRes, brandsRes] =
+    await Promise.all([
+      api.getAllProductsWithAuditDetails({ noCache: true }),
+      api.getCategories({ noCache: true }),
+      api.getBrands({ noCache: true }),
+    ]);
+
   const report = buildCatalogAuditReport(
     products,
     isFallback,
     locale,
     checkedSeoIds,
+    {
+      categories: categoriesRes.categories,
+      categoryTree: categoriesRes.tree,
+      brands: brandsRes.data.brands,
+    },
   );
+
   const filtered = filterAuditItems(
     report.items,
-    { issue, brand, category, q },
+    {
+      issue,
+      brand,
+      category,
+      categoryNode,
+      categoryTreeStats: report.categoryTreeStats,
+      similar,
+      crossSell,
+      q,
+    },
     locale,
   );
 
@@ -84,7 +134,11 @@ export async function GET(request: NextRequest) {
     });
   }
 
-  const xlsxBuffer = await buildAuditXlsx(filtered, locale);
+  const xlsxBuffer = await buildAuditXlsx(filtered, locale, {
+    brandStats: report.brandStats,
+    categoryTreeStats: report.categoryTreeStats,
+    uncategorizedStats: report.uncategorizedStats,
+  });
   const filename = `sora-audit-${safeIssue}-${dateTag}.xlsx`;
 
   return new NextResponse(new Uint8Array(xlsxBuffer), {

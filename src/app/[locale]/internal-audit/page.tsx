@@ -68,13 +68,23 @@ export default async function InternalAuditPage({
     return <AuditLoginGate locale={currentLocale} />;
   }
 
-  const { products, isFallback, checkedSeoIds } =
-    await api.getAllProductsWithAuditDetails({ noCache: true });
+  const [{ products, isFallback, checkedSeoIds }, categoriesRes, brandsRes] =
+    await Promise.all([
+      api.getAllProductsWithAuditDetails({ noCache: true }),
+      api.getCategories({ noCache: true }),
+      api.getBrands({ noCache: true }),
+    ]);
+
   const report = buildCatalogAuditReport(
     products,
     isFallback,
     currentLocale,
     checkedSeoIds,
+    {
+      categories: categoriesRes.categories,
+      categoryTree: categoriesRes.tree,
+      brands: brandsRes.data.brands,
+    }
   );
   const validKeyQuery =
     rawKey && verifyAuditAccessKey(rawKey) ? rawKey : undefined;
