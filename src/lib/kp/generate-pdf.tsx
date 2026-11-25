@@ -24,6 +24,15 @@ import {
 
 let fontsRegistered = false;
 
+const PREWARM_ASCII_START = 0x20;
+const PREWARM_ASCII_END = 0x7e;
+const PREWARM_EXTRA_CHARS = "‘’“”«»—–№•·×²→";
+
+interface FontkitGlyphHost {
+  _glyphs?: Record<number, unknown>;
+  glyphForCodePoint?: (cp: number) => unknown;
+}
+
 function ensureRobotoFontsRegistered(): void {
   if (fontsRegistered) return;
   Font.register({
@@ -35,6 +44,39 @@ function ensureRobotoFontsRegistered(): void {
   });
   Font.registerHyphenationCallback((word) => [word]);
   fontsRegistered = true;
+}
+
+/**
+ * Resets and pre-populates Roboto base Latin/ASCII glyph caches before each PDF render.
+ * Prevents a fontkit/pdfkit bug where subsetting Cyrillic composite glyphs in an earlier
+ * RU PDF leaves shared Latin component glyphs cached with `codePoints: []`, which drops
+ * letters and breaks ToUnicode CMaps in subsequent UZ PDFs generated in the same session.
+ */
+async function prepareRobotoGlyphCaches(): Promise<void> {
+  await Promise.all([
+    Font.load({ fontFamily: "Roboto", fontWeight: 400 }),
+    Font.load({ fontFamily: "Roboto", fontWeight: 700 }),
+  ]);
+
+  for (const fontWeight of [400, 700] as const) {
+    const source = Font.getFont({ fontFamily: "Roboto", fontWeight });
+    const host = (source?.data ?? null) as FontkitGlyphHost | null;
+    if (!host?.glyphForCodePoint) continue;
+
+    if (host._glyphs && typeof host._glyphs === "object") {
+      host._glyphs = {};
+    }
+
+    for (let cp = PREWARM_ASCII_START; cp <= PREWARM_ASCII_END; cp++) {
+      host.glyphForCodePoint(cp);
+    }
+    for (const ch of PREWARM_EXTRA_CHARS) {
+      const cp = ch.codePointAt(0);
+      if (cp !== undefined) {
+        host.glyphForCodePoint(cp);
+      }
+    }
+  }
 }
 
 /**
@@ -765,9 +807,10 @@ export async function generateAndDownloadKpPdf(
     }
   }
 
-  const [qrDataUrl, logoDataUrl, ...resolvedImages] = await Promise.all([
+  const [qrDataUrl, logoDataUrl, , ...resolvedImages] = await Promise.all([
     generateKpQrDataUrl(data.publicUrl),
     resolvePdfSafeImageDataUrl(KP_SELLER_INFO.logoPath, 600),
+    prepareRobotoGlyphCaches(),
     ...Array.from(uniqueImgUrls.entries()).map(async ([id, url]) => ({
       id,
       dataUrl: await resolvePdfSafeImageDataUrl(url, 84),

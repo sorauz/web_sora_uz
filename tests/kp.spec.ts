@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import zlib from "node:zlib";
 import ExcelJS from "exceljs";
 import { test, expect } from "@playwright/test";
 import {
@@ -645,5 +646,141 @@ test.describe("Commercial Offer (KP) System — Unit, API & E2E Tests", () => {
     expect(ruAllText).toContain('СП "NEW PRICE"');
     expect(ruAllText).toContain("Директор: GAPPAROV V.");
     expect(ruAllText).not.toContain("Центр офисного");
+  });
+
+  test("10. Downloading RU KP PDF then switching to UZ and downloading UZ KP PDF preserves all Latin glyphs", async ({
+    page,
+  }) => {
+    await page.route("**/api/auth/me", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          authenticated: true,
+          user: {
+            id: "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+            name: "TEST",
+            type: "B2B",
+            phone: "+998907997999",
+            inn: "123123123",
+          },
+        }),
+      });
+    });
+
+    await page.route("**/api/kp/create", async (route) => {
+      await route.fulfill({
+        status: 201,
+        contentType: "application/json",
+        body: JSON.stringify({
+          success: true,
+          order_id: "c3d4e5f6-a1b2-7890-abcd-ef1234567890",
+          order_number: "000068479",
+          status_code: "KP_ACTIVE",
+          is_kp: true,
+          kp_valid_until: "2026-11-28T23:59:59",
+          total_amount: 9584400,
+          public_token: "test-token-ru-uz",
+          public_path: "/uz/kp/test-token-ru-uz",
+        }),
+      });
+    });
+
+    await page.addInitScript(() => {
+      localStorage.setItem(
+        "sora-cart-storage",
+        JSON.stringify({
+          state: {
+            items: [
+              {
+                id: "1",
+                sku: "E1589",
+                name: "Deli E1589 12-raqamli kalkulyator (Yashil)",
+                name_uz: "Deli E1589 12-raqamli kalkulyator (Yashil)",
+                name_ru: "Калькулятор Deli E1589 12-разрядный (Зеленый)",
+                price: 112000,
+                picture: "",
+                unit: "dona",
+                unit_uz: "dona",
+                unit_ru: "шт",
+                quantity: 4,
+              },
+              {
+                id: "2",
+                sku: "E0229",
+                name: "Deli E0229 №10 мини-офис степлер",
+                name_uz: "Deli E0229 №10 мини-офис степлер",
+                name_ru: "Deli E0229 №10 мини-офисный степлер",
+                price: 16500,
+                picture: "",
+                unit: "dona",
+                unit_uz: "dona",
+                unit_ru: "шт",
+                quantity: 1,
+              },
+            ],
+            editingKpOrderId: null,
+          },
+          version: 0,
+        }),
+      );
+    });
+
+    // 1. Download Russian KP PDF first
+    await page.goto("/ru/cart");
+    await page
+      .getByRole("button", { name: /Скачать коммерческое предложение/i })
+      .click();
+    await page
+      .locator('input[placeholder*="Алишер Валиев"]')
+      .fill("Гаппаров Вохиджон");
+    const ruPdfPromise = page.waitForEvent("download", { timeout: 20000 });
+    await page
+      .getByRole("button", { name: /Скачать КП в формате PDF/i })
+      .click();
+    await ruPdfPromise;
+
+    // Close modal & switch language inside same browser tab (no full page reload)
+    await page.keyboard.press("Escape");
+    await page.getByTestId("language-switcher-trigger").click();
+    await page.getByRole("button", { name: "O‘zbekcha" }).click();
+    await page.waitForURL(/\/uz\/cart/, { timeout: 15000 });
+
+    // 2. Download Uzbek KP PDF in the same session
+    await page
+      .getByRole("button", { name: /Tijorat taklifi \(KP\) yuklab olish/i })
+      .click();
+    await page
+      .locator('input[placeholder*="Alisher Valiyev"]')
+      .fill("Гаппаров Вохиджон");
+    const uzPdfPromise = page.waitForEvent("download", { timeout: 20000 });
+    await page
+      .getByRole("button", { name: /PDF Tijorat taklifini yuklab olish/i })
+      .click();
+    const uzDownload = await uzPdfPromise;
+    const uzBytes = fs.readFileSync((await uzDownload.path())!);
+
+    // Decompress FlateDecode streams inside generated PDF and verify zero empty <> ToUnicode entries
+    const pdfLatin1 = uzBytes.toString("latin1");
+    const streamRegex = /stream\r?\n([\s\S]*?)\r?\nendstream/g;
+    let emptyCmapEntries = 0;
+    let cmapStreamsFound = 0;
+    let match: RegExpExecArray | null;
+    while ((match = streamRegex.exec(pdfLatin1)) !== null) {
+      const rawStream = Buffer.from(match[1], "latin1");
+      try {
+        const inflated = zlib.inflateSync(rawStream).toString("utf8");
+        if (inflated.includes("beginbfrange")) {
+          cmapStreamsFound += 1;
+          const matches = inflated.match(/<>/g);
+          if (matches) emptyCmapEntries += matches.length;
+        }
+      } catch {
+        // Skip non-FlateDecode streams (images/uncompressed objects)
+      }
+    }
+
+    expect(cmapStreamsFound).toBeGreaterThanOrEqual(2);
+    expect(emptyCmapEntries).toBe(0);
   });
 });
